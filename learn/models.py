@@ -27,6 +27,11 @@ class Course(models.Model):
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES)
     course_created = models.DateTimeField(auto_now_add=True)
     course_updated = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name="creator")
+
+    def __str__(self):
+        return f"Title: {self.title} Description: {self.descripption} Author: {self.created_by}"
+    
 
 class CourseContent(models.Model):
     """ Course's basic structure and content """
@@ -79,6 +84,7 @@ class Enrollment(models.Model):
     date_enrolled = models.DateTimeField(auto_now_add=True)
 
 class Blog(models.Model):
+    """ Represents a mini blog"""
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name="author")
     content = models.TextField()
     title = models.CharField(max_length=50)
