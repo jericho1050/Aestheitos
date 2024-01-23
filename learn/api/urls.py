@@ -1,9 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import (UserViewSet, UserProgressViewSet, CourseViewSet, 
-                    CourseContentViewSet, CourseCommentsViewSet, EnrollmentViewSet, 
-                    WorkoutsViewSet, CorrectExerciseFormViewSet, WrongExerciseFormViewSet,
-                    BlogViewSet, BlogCommentsViewSet)
+from .views import *
 
 user_router = DefaultRouter()
 user_router.register(r'User', UserViewSet)
