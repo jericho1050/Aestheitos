@@ -4,7 +4,7 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from .models import *
 
@@ -13,7 +13,9 @@ from .models import *
 def index(request):
     pass
 
+
 # register account API
+@csrf_exempt
 def register(request):
 
     if request.method != 'POST':
@@ -34,5 +36,8 @@ def register(request):
     except IntegrityError as e:
         print(e)
         return JsonResponse({"error": "Username already taken"}, status=400)
+    
+
+    return JsonResponse({"Success": "Account Created"}, status=200)
 
 

@@ -32,15 +32,25 @@ export default function SignUp() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const formJSON = Object.fromEntries(data.entries());
 
-    axios.post('/api/User/', formJSON) 
-      .then(response => {
-        console.log(response.data);
+    fetch('http://127.0.0.1:8000/register/', {
+      method: "POST",
+      body: JSON.stringify({
+        firstName: data.get('firstName'),
+        lastName: data.get('lastName'),
+        username: data.get('username'),
+        email: data.get('email'),
+        password: data.get('password')
+
       })
-      .catch(error => {
-        console.error('Error', error);
-      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(response.status)
+      }
+      return response.json();
+    })
+    .then(result => console.log(result)).catch(error => console.error(error))
   
   }
 

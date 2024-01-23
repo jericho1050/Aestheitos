@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "corsheaders",
     "crispy_forms",
     "crispy_bootstrap5",
     "learn",
@@ -42,12 +43,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     "rest_framework",
-    "corsheaders",
 
 
 ]
 
-CORS_ALLOWED_ORIGINS = ['http://localhost:5173']
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+# CORS_ALLOW_ALL_ORIGINS = True
+
+
+
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

@@ -1,8 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from ..models import User, UserProgress, Course, CourseContent, CourseComments, Enrollment, Workouts, CorrectExerciseForm, WrongExerciseForm, Blog, BlogComments
-from .serializers import (UserSerializer, UserProgressSerializer, CourseSerializer, CourseContentSerializer, CourseCommentsSerializer,
-                           EnrollmentSerializer, WorkoutsSerializer, CorrectExerciseFormSerializer, 
-                           WrongExerciseFormSerializer, BlogSerializer, BlogCommentsSerializer)
+from .serializers import *
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -47,3 +45,5 @@ class BlogViewSet(ModelViewSet):
 class BlogCommentsViewSet(ModelViewSet):
     queryset = BlogComments.objects.all()
     serializer_class = BlogCommentsSerializer
+
+
