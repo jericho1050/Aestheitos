@@ -10,7 +10,7 @@ class User(AbstractUser):
 class UserProgress(models.Model):
     """ Represents the progress of a user in a course. """
     progress = models.ForeignKey('User', on_delete=models.CASCADE, related_name="user_progress")
-    course = models.ForeignKey('User', on_delete=models.CASCADE, related_name="course_progress")
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name="course_progress")
     weeks_completed = models.IntegerField(blank=True, null=True)
 
 class Course(models.Model):
@@ -30,7 +30,7 @@ class Course(models.Model):
     created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name="creator")
 
     def __str__(self):
-        return f"Title: {self.title} Description: {self.descripption} Author: {self.created_by}"
+        return f"Title: {self.title} Description: {self.description} Author: {self.created_by}"
     
 
 class CourseContent(models.Model):
@@ -41,10 +41,13 @@ class CourseContent(models.Model):
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name="course_content")
     weeks = models.IntegerField()
 
+    def __str__(self):
+        return f"Overview: {self.overview} Weeks: {self.weeks}"
+
 class CourseComments(models.Model):
     """ Represents a comment on a course. """
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name="comments")
-    comment_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comment_by")
+    comment_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comment_comments")
     comment = models.TextField()
     comment_date = models.DateTimeField(auto_now_add=True)
     parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name="course_parent_comments")
@@ -63,7 +66,7 @@ class Workouts(models.Model):
     exercise = models.CharField(max_length=50)
     intensity = models.CharField(max_length=1, choices=INTENSITY_CHOICES)
     rest_time = models.IntegerField()
-    set = models.IntegerField()
+    sets = models.IntegerField()
     reps = models.IntegerField()
     excertion = models.IntegerField(choices=EXCERTION_CHOICES)
 
@@ -88,6 +91,9 @@ class Blog(models.Model):
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name="author")
     content = models.TextField()
     title = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"Post: {self.title} Author: {self.author}"
 
 class BlogComments(models.Model):
     blog = models.ForeignKey('Blog', on_delete=models.CASCADE, related_name="blog")
