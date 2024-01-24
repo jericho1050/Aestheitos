@@ -172,7 +172,7 @@ class WorkoutsTestCase(TestCase):
             exercise='Test Exercise',
             intensity='L',
             rest_time=60,
-            set=3,
+            sets=3,
             reps=10,
             excertion=5
         )
@@ -182,7 +182,7 @@ class WorkoutsTestCase(TestCase):
         self.assertEqual(self.workout.exercise, 'Test Exercise')
         self.assertEqual(self.workout.intensity, 'L')
         self.assertEqual(self.workout.rest_time, 60)
-        self.assertEqual(self.workout.set, 3)
+        self.assertEqual(self.workout.sets, 3)
         self.assertEqual(self.workout.reps, 10)
         self.assertEqual(self.workout.excertion, 5)
 
@@ -207,7 +207,7 @@ class CorrectExerciseFormTestCase(TestCase):
             exercise='Push Up',
             intensity='M',
             rest_time=90,
-            set=3,
+            sets=3,
             reps=10,
             excertion=5
         )
@@ -233,7 +233,7 @@ class WrongExerciseFormTestCase(TestCase):
             exercise='Push Up',
             intensity='M',
             rest_time=90,
-            set=3,
+            sets=3,
             reps=10,
             excertion=5
         )
