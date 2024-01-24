@@ -4,18 +4,22 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.middleware.csrf import get_token
 from django.urls import reverse
 from .models import *
+
 
 # Create your views here.
 
 def index(request):
     pass
 
+def csrf(request):
+    return JsonResponse({'csrfToken': get_token(request)})
 
 # register account API
-@csrf_exempt
+@ensure_csrf_cookie
 def register(request):
 
     if request.method != 'POST':
