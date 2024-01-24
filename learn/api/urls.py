@@ -2,6 +2,8 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import *
 
+# Routes for our viewset (By convention we use the model's name)
+
 user_router = DefaultRouter()
 user_router.register(r'User', UserViewSet)
 
