@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -11,7 +12,9 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import axios from 'axios';
+import getCsrfToken from './csrftoken';
+
+// import axios from 'axios';
 
 
 function Copyright(props) {
@@ -27,14 +30,18 @@ function Copyright(props) {
   );
 }
 
-
 export default function SignUp() {
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
     fetch('http://127.0.0.1:8000/register/', {
       method: "POST",
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': await getCsrfToken()
+      },
       body: JSON.stringify({
         firstName: data.get('firstName'),
         lastName: data.get('lastName'),
