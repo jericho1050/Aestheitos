@@ -2,6 +2,8 @@ from rest_framework.viewsets import ModelViewSet
 from ..models import User, UserProgress, Course, CourseContent, CourseComments, Enrollment, Workouts, CorrectExerciseForm, WrongExerciseForm, Blog, BlogComments
 from .serializers import *
 
+ # ViewSet for listing or retrieving
+
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer

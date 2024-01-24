@@ -5,9 +5,9 @@ from django.urls import path, include
 
 router = DefaultRouter()
 
-# Same tables / models in the django admin
+# API ROUTES FOR ALL MODELS
 
-router.registry.extend(user_router.registry)
+# router.registry.extend(user_router.registry)
 router.registry.extend(user_progress_router.registry)
 router.registry.extend(course_router.registry)
 router.registry.extend(course_content_router.registry)

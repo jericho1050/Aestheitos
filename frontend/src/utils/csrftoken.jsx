@@ -7,6 +7,7 @@ export default async function getCsrfToken() {
     });
     const data = await response.json();
     _csrfToken = data.csrfToken;
+    console.log(_csrfToken);
   }
   return _csrfToken;
 }
