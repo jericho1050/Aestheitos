@@ -158,7 +158,7 @@ class CourseCommentsTestCase(TestCase):
             CourseComments.objects.get(comment="wow")
 
     def test_comment_replies(self):
-        replies = self.comment.course_parent_comments.all()
+        replies = self.comment.replies.all()
         self.assertIn(self.reply_comment, replies)
 
 
