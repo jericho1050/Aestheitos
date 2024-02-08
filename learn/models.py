@@ -16,6 +16,12 @@ class UserProgress(models.Model):
 class Course(models.Model):
     """ Represents a course in the learning platform. """
 
+    STATUS_CHOICES = [
+        ('P', 'Pending'),
+        ('A', 'Approved'),
+        ('R', 'Rejected'),
+    ]
+
     DIFFICULTY_CHOICES = [
         ('BG', 'Beginner'),
         ('IN', 'Intermediate'),
@@ -28,9 +34,11 @@ class Course(models.Model):
     course_created = models.DateTimeField(auto_now_add=True)
     course_updated = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name="creator")
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='P')
+
 
     def __str__(self):
-        return f"Title: {self.title} Description: {self.description} Author: {self.created_by}"
+        return f"Title: {self.title} Created By: {self.created_by}"
     
 
 class CourseContent(models.Model):
@@ -50,7 +58,7 @@ class CourseComments(models.Model):
     comment_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comment_comments")
     comment = models.TextField()
     comment_date = models.DateTimeField(auto_now_add=True)
-    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name="course_parent_comments")
+    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name="replies")
 
 class Workouts(models.Model):
     """ Represent Workouts in a Course ."""
@@ -61,9 +69,10 @@ class Workouts(models.Model):
         ('H', 'High')
     ]
     EXCERTION_CHOICES = [(i, str(i)) for i in range(1, 11)]
-
+    
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name="workouts")
     exercise = models.CharField(max_length=50)
+    demo = models.URLField()
     intensity = models.CharField(max_length=1, choices=INTENSITY_CHOICES)
     rest_time = models.IntegerField()
     sets = models.IntegerField()

@@ -1,4 +1,5 @@
 from django.test import Client, TestCase
+from django.urls import reverse
 from .models import User, UserProgress, Course, CourseContent, CourseComments, Enrollment, Workouts, CorrectExerciseForm, WrongExerciseForm, Blog, BlogComments
 from datetime import datetime, date
 
