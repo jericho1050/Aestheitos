@@ -2,6 +2,7 @@ from rest_framework.serializers import ModelSerializer
 
 from .models import User, UserProgress, Course, CourseContent, CourseComments, Enrollment, Workouts, CorrectExerciseForm, WrongExerciseForm, Blog, BlogComments
 
+#  In Django, a serializer is a way to convert complex data types, like Django models, into Python native datatypes that can then be easily rendered into JSON, XML, or other content types. This process is called serialization.
 
 class UserSerializer(ModelSerializer):
     class Meta:
@@ -28,11 +29,15 @@ class CourseSerializer(ModelSerializer):
     class Meta:
         model = Course
         fields = '__all__'
+        read_only_fields = ['created_by']
+
 
 class CourseContentSerializer(ModelSerializer):
     class Meta:
         model = CourseContent
         fields = '__all__'
+        read_only_fields = ['course']
+
 
 class CourseCommentsSerializer(ModelSerializer):
     class Meta:
@@ -48,6 +53,7 @@ class WorkoutsSerializer(ModelSerializer):
     class Meta:
         model = Workouts
         fields = '__all__'
+        read_only_fields = ['course']
 
 class CorrectExerciseFormSerializer(ModelSerializer):
     class Meta:

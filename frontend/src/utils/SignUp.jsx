@@ -12,7 +12,6 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import getCsrfToken from './csrftoken';
 
 // import axios from 'axios';
 
@@ -21,7 +20,7 @@ function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
+      <Link color="inherit" href="http://localhost:5173/">
         Aeshteitos
       </Link>{' '}
       {new Date().getFullYear()}
@@ -35,12 +34,11 @@ export default function SignUp() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    fetch('http://127.0.0.1:8000/register/', {
+    fetch('http://127.0.0.1:8000/register', {
       method: "POST",
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': await getCsrfToken()
       },
       body: JSON.stringify({
         firstName: data.get('firstName'),

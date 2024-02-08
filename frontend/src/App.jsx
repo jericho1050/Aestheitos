@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // eslint-disable-next-line no-unused-vars
 import { AppBar } from '@mui/material'
 import { useState, useEffect } from 'react'
@@ -8,7 +9,7 @@ import SignUp from './utils/SignUp'
 function App() {
   return (
     <>
-    <SignUp></SignUp>
+    <ResponsiveAppBar></ResponsiveAppBar>
     </>
   )
 }

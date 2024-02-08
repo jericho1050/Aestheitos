@@ -9,7 +9,15 @@ urlpatterns = [
     path("register", RegisterView.as_view(), name="register"),
     path("login", LoginView.as_view(), name="login"),
     path("user", UserView.as_view(), name="user"),
-    path("logout", LogoutView.as_view(), name="logout")
+    path("logout", LogoutView.as_view(), name="logout"),
+    path("courses/pending", PendingCoursesView.as_view(), name="pending_courses"),
+    path("courses/list", CoursesView.as_view(), name="browse"),
+    path("courses/content/<int:course_id>", CourseContentview.as_view(), name="course_content"),
+    path("courses/workout/<int:course_id>", WorkoutsView.as_view(), name="course_workout"),
+    path("courses/correct_form/<int:workout_id>", CorrectExerciseFormView.as_view(), name="correct_form"),
+    path("courses/wrong_form/<int:workout_id>", WrongExerciseFormView.as_view(), name="wrong_form" ),
+    path("courses/comments/<int:course_id>", CourseCommentsView.as_view(), name="course_comments")
+
 ]
 
 
