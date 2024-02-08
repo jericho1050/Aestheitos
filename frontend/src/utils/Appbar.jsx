@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -13,6 +14,9 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 // eslint-disable-next-line no-unused-vars
 import AdbIcon from '@mui/icons-material/Adb';
+import { useState } from 'react';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+
 
 const pages = ['Courses', 'Blog'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -20,6 +24,7 @@ const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -41,11 +46,12 @@ function ResponsiveAppBar() {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
+          <Avatar alt="logo" src="src/static/images/aestheitoslogo.png" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
           <Typography
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="http://localhost:5173/"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -95,12 +101,11 @@ function ResponsiveAppBar() {
               ))}
             </Menu>
           </Box>
-          {/* <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} /> */}
           <Typography
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="http://localhost:5173/"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -125,7 +130,7 @@ function ResponsiveAppBar() {
               </Button>
             ))}
           </Box>
-
+          { isAuthenticated ? 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -155,6 +160,12 @@ function ResponsiveAppBar() {
               ))}
             </Menu>
           </Box>
+          : <Box sx={{ flexGrow: 0 }}>
+            <Button href="login" variant="contained">
+              Log In
+            </Button>
+          </Box>
+}
         </Toolbar>
       </Container>
     </AppBar>
