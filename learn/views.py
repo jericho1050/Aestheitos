@@ -72,43 +72,6 @@ class LogoutView(APIView):
 
         return response
 
-class CourseList(generics.ListCreateAPIView):
-    """
-    List all courses, or create a new course.
-    """
-
-    serializer_class = CourseSerializer
-
-    def get_queryset(self):
-        # returns all courses with status accepted
-        return Course.objects.filter(status="A")
-    
-    def perform_create(self, serializer):
-        user = authenticate_request(self.request)
-        serializer.save(created_by=user)
-
-
-class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, update or delete a course instance
-    """
-
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
-
-    def perform_update(self, serializer):
-        user = authenticate_request(self.request)
-        if self.get_object().created_by != user:
-            raise AuthenticationFailed("Not allowed to modify!")
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        user = authenticate_request(self.request)
-        if instance.created_by != user:
-            raise AuthenticationFailed("Not allowed to delete!")
-        instance.delete()
-
-
 
 class CoursesView(APIView):
     """Browsable list of courses"""

@@ -14,11 +14,6 @@ urlpatterns = [
     # path('courses', CourseList.as_view(), name='course-list'),
     # path('courses/<int:pk>', CourseList.as_view(), name='course-detail')
 
-
-
-
-
-
     path("courses/list", CoursesView.as_view(), name="browse"),
     path("courses/<int:course_id>/content", CourseContentview.as_view(), name="course_content"),
     path("courses/<int:course_id>/workout", WorkoutsView.as_view(), name="course_workout"),
