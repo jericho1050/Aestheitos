@@ -311,15 +311,30 @@ class WorkoutsView(APIView):
 
         user = authenticate_request(request)
 
+        workout = request.data
+
+
         queryset = Workouts.objects.filter(course=course_id)
-
-
+        existing_workout = None
+        for obj in queryset:
+            if workout["id"] == obj.id:
+                existing_workout = obj
+                break
+        
+        if existing_workout is None:
+            return Response({"message": "Workout not found"}, status=404)
+        
         # retrieve the workout object or instance to delete
-
+        try: 
+            object_workout = Workouts.objects.get(id=existing_workout.id)
+        except Workouts.DoesNotExist:
+            return Response({"message": "no workout found"})     
         
         # validate the request user's ownership i.e if this course belongs to the user (instructor)
         if not valid_ownership(user, course_id):
             raise AuthenticationFailed("Not allowed to delete")
+        
+        object_workout.delete()
         
         return Response({"message": "deleted!"})
 
