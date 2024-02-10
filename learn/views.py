@@ -1,7 +1,9 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework import generics
+
 # from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 # from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -17,7 +19,7 @@ from .helpers import *
 # REFERENCE FOR DRF Class Based functions etc
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/#using-generic-class-based-views
-
+# https://www.django-rest-framework.org/api-guide/generic-views/#generic-views
 
 # API calls (Class based functions)
 
@@ -71,6 +73,7 @@ class LogoutView(APIView):
         response.data = {"message": "success"}
 
         return response
+    
 
 class CourseList(generics.ListCreateAPIView):
     """
@@ -78,11 +81,8 @@ class CourseList(generics.ListCreateAPIView):
     """
 
     serializer_class = CourseSerializer
+    queryset = Course.objects.all()
 
-    def get_queryset(self):
-        # returns all courses with status accepted
-        return Course.objects.filter(status="A")
-    
     def perform_create(self, serializer):
         user = authenticate_request(self.request)
         serializer.save(created_by=user)
@@ -109,137 +109,49 @@ class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.delete()
 
 
+class CourseContentDetail(SnippetLookupMixin, CreateAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView):
+    """
+    Create, retrieve or update a course's content instance
+    """
 
-class CoursesView(APIView):
-    """Browsable list of courses"""
+    # Since the docs for generics have no GET, POST, and PUT for a Concrete View Class, we added a POST method for this class.
 
-    def post(self, request):
-        """POST request creates a newly browsable Course"""
-        user = authenticate_request(request)
+    queryset = CourseContent.objects.all()
+    serializer_class = CourseContentSerializer
 
-        course = request.data
-
-        # deserializing data (i.e convert data into model instance)
-        serializer = CourseSerializer(data=course)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(created_by=user)
-        return Response(serializer.data)
-
-    def get(self, request):
-        """GET request returns all Courses"""
-
-        # query for requestd course
-        queryset = Course.objects.filter(status="A")
-
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = CourseSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def put(self, request):
-        """PUT request Update that particular Course"""
-
-        user = authenticate_request(request)
-
-        updated_course = request.data
-
-        # retrieve the course object or instance
-        try:
-            existing_course = Course.objects.get(id=updated_course["id"])
-        except Course.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
-
-        # validate the request user's ownership i.e if this course belongs to the user (instructor)
-        if user != existing_course.created_by:
-            raise AuthenticationFailed("Not allowed to modify!")
-
-        # deserializing updated data (i.e convert data into model instance)
-        serializer = CourseSerializer(existing_course, data=updated_course)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+    def delete(self, request, *args, **kwargs):
+        return Response({"message": "Delete operation not allowed"}, status=403)
 
 
-class CourseContentview(APIView):
-    """Course's content or material of that particular course"""
+class WorkoutList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    Lists all workouts or create a new workout for a course instance.
+    """
 
-    def get(self, request, course_id):
-        """GET request returns a particular Course's Content"""
+    queryset = Workouts.objects.all()
+    serializer_class = WorkoutsSerializer
 
-        # query for request course's content
-        try:
-            content = CourseContent.objects.get(course=course_id)
-        except CourseContent.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
+    def get_queryset(self):
+        return Workouts.objects.filter(course=self.kwargs["course_id"])
 
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = CourseContentSerializer(content)
+    
+        
 
-        return Response(serializer.data)
+class WorkoutDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a workout instance 
+    """
 
-    def post(self, request, course_id):
-        """POST request creates a particular Course's content"""
+    queryset = Workouts.objects.all()
+    serializer_class = WorkoutsSerializer
 
-        user = authenticate_request(request)
-
-        # retrieve the course object or instance
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
-
-        content = request.data
-
-        # validate the request user's ownership i.e if this course belongs to the user (instructor)
-        if not valid_ownership(user, course_id):
-            raise AuthenticationFailed("Not allowed to post")
-
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = CourseContentSerializer(data=content)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(course=course)
-
-        return Response(serializer.data)
-
-    def put(self, request, course_id):
-        """PUT request Update that particular Course's content"""
-
-        user = authenticate_request(request)
-
-        updated_content = request.data
-
-        # retrieve the course's content object
-        try:
-            existing_content = CourseContent.objects.get(course=course_id)
-        except CourseContent.DoesNotExist:
-            return Response({"erorr": "No Content found"}, status=404)
-
-        # validate the request user's ownership i.e if this course belongs to the user (instructor)
-        if not valid_ownership(user, course_id):
+    def perform_update(self, serializer):
+        user = authenticate_request(self.request)
+        if self.get_object().course.created_by != user:
             raise AuthenticationFailed("Not allowed to modify")
-
-        # deserializing updated data (i.e convert data into model instance)
-        serializer = CourseContentSerializer(existing_content, data=updated_content)
-        serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
 
-    def delete(self, request, course_id):
-        """DELETE request deletes the course itlsef"""
-
-        user = authenticate_request(request)
-
-        # retrieve the requested course object or instance
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
-
-        # validate the request user's ownership i.e if this course belongs to the user (instructor)
-        if not valid_ownership(user, course_id):
-            raise AuthenticationFailed("Not allowed to modify")
-
-        course.delete()
-        return Response({"message": "deleted!"})
+            
 
 
 class WorkoutsView(APIView):
@@ -285,16 +197,16 @@ class WorkoutsView(APIView):
 
         queryset = Workouts.objects.filter(course=course_id)
 
-        # retrieve the requested workout object in queryset and store in a variable (exisitng_workout) 
+        # retrieve the requested workout object in queryset and store in a variable (exisitng_workout)
         existing_workout = None
         for obj in queryset:
             if updated_workout["id"] == obj.id:
                 existing_workout = obj
                 break
-        
+
         if existing_workout is None:
             return Response({"message": "Workout not found"}, status=404)
-        
+
         # validate the request user's ownership i.e if this course belongs to the user (instructor)
         if not valid_ownership(user, course_id):
             raise AuthenticationFailed("Not allowed to modify")
@@ -305,7 +217,6 @@ class WorkoutsView(APIView):
         serializer.save()
         return Response(serializer.data)
 
-
     def delete(self, request, course_id):
         """DELETE request deletes that particular Workout itlsef"""
 
@@ -313,29 +224,28 @@ class WorkoutsView(APIView):
 
         workout = request.data
 
-
         queryset = Workouts.objects.filter(course=course_id)
         existing_workout = None
         for obj in queryset:
             if workout["id"] == obj.id:
                 existing_workout = obj
                 break
-        
+
         if existing_workout is None:
             return Response({"message": "Workout not found"}, status=404)
-        
+
         # retrieve the workout object or instance to delete
-        try: 
+        try:
             object_workout = Workouts.objects.get(id=existing_workout.id)
         except Workouts.DoesNotExist:
-            return Response({"message": "no workout found"})     
-        
+            return Response({"message": "no workout found"})
+
         # validate the request user's ownership i.e if this course belongs to the user (instructor)
         if not valid_ownership(user, course_id):
             raise AuthenticationFailed("Not allowed to delete")
-        
+
         object_workout.delete()
-        
+
         return Response({"message": "deleted!"})
 
 
@@ -541,11 +451,6 @@ class CourseCommentsView(APIView):
 
         def put(self, request, course_id):
             pass
-
-
-
-
-
 
 
 # debugging/tesitng purposes only for jwt token
