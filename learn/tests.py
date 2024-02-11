@@ -358,4 +358,4 @@ class BlogCommentsTestCase(TestCase):
         self.assertIn(self.reply_comment, replies)
 
 
-# CLient Testing starts here
+# Client (REST API) Testing starts here

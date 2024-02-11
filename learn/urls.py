@@ -11,12 +11,18 @@ urlpatterns = [
     path("user", UserView.as_view(), name="user"),
     path("logout", LogoutView.as_view(), name="logout"),
 
-
     path('courses', CourseList.as_view(), name='course-list'),
-    path('course/<int:course_id>', CourseDetail.as_view(), name='course-detail'),
-    path('course-content/<int:course_id>', CourseContentDetail.as_view(), name='CRU-course-content'),
-    path('course/<int:course_id>/workouts', WorkoutList.as_view(), name="course-workouts"),
-    path('course/workout/<int:course_id>', WorkoutDetail.as_view(), name="course-workout")
+    path('course/<int:pk>', CourseDetail.as_view(), name='course-detail'),
+    path('course-content/<int:pk>', CourseContentDetail.as_view(), name='CRU-course-content'),
+    path('course/<int:pk>/workouts', WorkoutList.as_view(), name="course-workout-list"),
+    path('course/workout/<int:pk>', WorkoutDetail.as_view(), name="course-workout-detail"),
+    path('course/workout/<int:pk>/correct-exercises', CorrectExerciseFormList.as_view(), name="correct-exercise-list"),
+    path('course/workout/correct-exercise/<int:pk>', CorrectExerciseFormDetail.as_view(), name="correct-exercise-detail"),
+    path('course/workout/<int:pk>/wrong-exercises', WrongExerciseFormList.as_view(), name="wrong-exercise-list"),
+    path('course/workout/wrong-exercise/<int:pk>', WrongExerciseFormDetail.as_view(), name="wrong-exercise-detail"),
+
+    path('course/<int:pk>/comments', CourseCommentList.as_view(), name="course-comments"),
+    path('course/comment/<int:pk>', CourseCommentDetail.as_view(), name="course-comment"),
     
 
 

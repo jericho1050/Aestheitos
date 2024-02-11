@@ -38,7 +38,7 @@ class Course(models.Model):
 
 
     def __str__(self):
-        return f"Title: {self.title} Created By: {self.created_by}"
+        return f" Course: {self.title}. By {self.created_by}"
     
 
 class CourseContent(models.Model):
@@ -60,6 +60,9 @@ class CourseComments(models.Model):
     comment_date = models.DateTimeField(auto_now_add=True)
     parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name="replies")
 
+    def __str__(self):
+        return f"Date: {self.comment_date}. Comment By: {self.comment_by}"
+
 class Workouts(models.Model):
     """ Represent Workouts in a Course ."""
 
@@ -79,15 +82,25 @@ class Workouts(models.Model):
     reps = models.IntegerField()
     excertion = models.IntegerField(choices=EXCERTION_CHOICES)
 
+    def __str__(self):
+        return f"{self.course} Workout: {self.exercise}"
+
+
 class CorrectExerciseForm(models.Model):
     demo = models.URLField()
     workout = models.ForeignKey('Workouts', on_delete=models.CASCADE, related_name="correct_exercise_form")
     description = models.CharField(max_length=69)
 
+    def __str__(self):
+        return f"{self.workout.course}. Workout: {self.workout.exercise}"
+
 class WrongExerciseForm(models.Model):
     demo = models.URLField()
     workout = models.ForeignKey('Workouts', on_delete=models.CASCADE, related_name="wrong_exercise_form")
     description = models.CharField(max_length=69)
+
+    def __str__(self):
+        return f"{self.workout.course} Workout: {self.workout.exercise}"
 
 class Enrollment(models.Model):
     """ Bridge for a user to enroll a course"""
@@ -102,7 +115,7 @@ class Blog(models.Model):
     title = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"Post: {self.title} Author: {self.author}"
+        return f"{self.title}. By {self.author}"
 
 class BlogComments(models.Model):
     blog = models.ForeignKey('Blog', on_delete=models.CASCADE, related_name="blog")

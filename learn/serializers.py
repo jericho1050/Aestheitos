@@ -43,6 +43,7 @@ class CourseCommentsSerializer(ModelSerializer):
     class Meta:
         model = CourseComments
         fields = '__all__'
+        read_only_fields = ['course', 'comment_by']
 
 class EnrollmentSerializer(ModelSerializer):
     class Meta:
@@ -59,11 +60,13 @@ class CorrectExerciseFormSerializer(ModelSerializer):
     class Meta:
         model = CorrectExerciseForm
         fields = '__all__'
+        read_only_fields = ['workout']
 
 class WrongExerciseFormSerializer(ModelSerializer):
     class Meta:
         model = WrongExerciseForm
         fields = '__all__'
+        read_only_fields = ['workout']
 
 class BlogSerializer(ModelSerializer):
     class Meta:

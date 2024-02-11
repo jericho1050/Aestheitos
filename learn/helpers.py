@@ -2,7 +2,7 @@ import jwt, datetime
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
-from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from .models import User, Course
 from .serializers import *
 
@@ -35,10 +35,10 @@ def authenticate_request(request):
     return user
 
 
-def user_auth_request(request):
+def is_user_authenticated(request):
     """
     Validating token for authentication purposes.
-    we're only checking here if user (non-instructor) is logged in
+    we're only checking here if user is logged in
     """
 
     token = request.COOKIES.get("jwt")
@@ -80,7 +80,7 @@ class CreateAPIMixin():
 
     def post(self, request, *args, **kwargs):       
 
-        course = get_object_or_404(Course, id=self.kwargs['course_id'])
+        course = get_object_or_404(Course, id=self.kwargs['pk'])
         user = authenticate_request(request)
         if not valid_ownership(user, course.id):
             raise AuthenticationFailed("Not allowed to create")
@@ -101,6 +101,17 @@ class UpdateAPIMixin(UpdateModelMixin):
             raise AuthenticationFailed("Not allowed to modify")
         serializer.save()
 
+class DeleteAPIMixin(DestroyModelMixin):
+    """
+    Ovveride existing delete method (Polymorphism),
+    and to reduce repetitive task (we practice the DRY principle here).
+    """
+
+    def perform_destroy(self, instance):
+        user = authenticate_request(self.request)
+        if instance.created_by != user:
+            raise AuthenticationFailed("Not allowed to delete!")
+        instance.delete()
 
 class SnippetLookupMixin():
     """
@@ -109,5 +120,19 @@ class SnippetLookupMixin():
 
     def get_object(self):
         queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, course=self.kwargs["course_id"])
+        obj = get_object_or_404(queryset, course=self.kwargs["pk"])
         return obj
+    
+class CreateExerciseDemoAPIMixin(CreateModelMixin):
+    """
+    Apply this mixin to CorrectExerciseFormList and WrongExerciseFormList View. 
+    This is to override the create method and reduce reptitive code (we practice the DRY principle here).
+    """
+
+    def perform_create(self, serializer):
+        user = authenticate_request(self.request)
+        workout = get_object_or_404(Workouts, id=self.kwargs["pk"])
+        if not valid_ownership(user, workout.course.id):
+            raise AuthenticationFailed("Not allowed to create demo")
+        serializer.save(workout=workout)
+
