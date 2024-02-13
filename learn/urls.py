@@ -13,18 +13,18 @@ urlpatterns = [
 
     path('courses', CourseList.as_view(), name='course-list'),
     path('course/<int:pk>', CourseDetail.as_view(), name='course-detail'),
-    path('course-content/<int:pk>', CourseContentDetail.as_view(), name='CRU-course-content'),
+    path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='CRU-course-content'),
     path('course/<int:pk>/workouts', WorkoutList.as_view(), name="course-workout-list"),
     path('course/workout/<int:pk>', WorkoutDetail.as_view(), name="course-workout-detail"),
     path('course/workout/<int:pk>/correct-exercises', CorrectExerciseFormList.as_view(), name="correct-exercise-list"),
     path('course/workout/correct-exercise/<int:pk>', CorrectExerciseFormDetail.as_view(), name="correct-exercise-detail"),
     path('course/workout/<int:pk>/wrong-exercises', WrongExerciseFormList.as_view(), name="wrong-exercise-list"),
     path('course/workout/wrong-exercise/<int:pk>', WrongExerciseFormDetail.as_view(), name="wrong-exercise-detail"),
-
     path('course/<int:pk>/comments', CourseCommentList.as_view(), name="course-comments"),
     path('course/comment/<int:pk>', CourseCommentDetail.as_view(), name="course-comment"),
-    
-
+    path('course/<int:pk>/enrollments', EnrollmentList.as_view(), name="enrollment-list"),
+    path('course/unenrollment/<int:pk>', UnnrollmentView.as_view(), name="nenrollment"),
+    path('user/enrollments', EnrollmentUserList.as_view(), name="courses-enrolled")
 
 
 

@@ -7,9 +7,13 @@ class User(AbstractUser):
     profile_pic = models.ImageField(upload_to='images/', height_field=None, width_field=None, null=True, blank=True)
     is_instructor = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"( id: {self.pk} ) {self.username}"
+        
+
 class UserProgress(models.Model):
     """ Represents the progress of a user in a course. """
-    progress = models.ForeignKey('User', on_delete=models.CASCADE, related_name="user_progress")
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="user_progress")
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name="course_progress")
     weeks_completed = models.IntegerField(blank=True, null=True)
 
@@ -38,7 +42,7 @@ class Course(models.Model):
 
 
     def __str__(self):
-        return f" Course: {self.title}. By {self.created_by}"
+        return f"( id: {self.id}) Course: {self.title}. By {self.created_by.username}"
     
 
 class CourseContent(models.Model):
@@ -50,7 +54,8 @@ class CourseContent(models.Model):
     weeks = models.IntegerField()
 
     def __str__(self):
-        return f"Overview: {self.overview} Weeks: {self.weeks}"
+        return f"{self.course}"
+
 
 class CourseComments(models.Model):
     """ Represents a comment on a course. """
@@ -107,6 +112,9 @@ class Enrollment(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="enrollee")
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name="enrolled")
     date_enrolled = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"( id: {self.pk} ) {self.user.username} is enrolled to {self.course}"
 
 class Blog(models.Model):
     """ Represents a mini blog"""

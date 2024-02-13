@@ -4,6 +4,26 @@ from .models import User, UserProgress, Course, CourseContent, CourseComments, E
 from datetime import datetime, date
 
 # Create your tests here.
+
+class UserProgressTestCase(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='testuser')
+        self.course = Course.objects.create(
+            title="Testing title",
+            description="Lorem ipsum dolor sit amet. Et illum dolores et numquam aperiam aut totam labore. Est tempora dicta At corrupti tenetur aut optio autem aut maiores distinctio ut sequi accusantium aut provident rerum et natus laudantium.Est nihil vero quo blanditiis doloribus et nesciunt rerum! Est magni accusantium non blanditiis doloribus eum molestias asperiores aut soluta odio id nisi velit!",
+            difficulty='BG',
+            created_by= self.user
+        )
+
+    def test_user_progress_creation(self):
+        """ Testing creating a progress """
+        progress = UserProgress.objects.create(user=self.user, course=self.course)
+        progress.weeks_completed = 3
+        self.assertIsNotNone(progress)
+        self.assertEqual(3, progress.weeks_completed)
+        self.assertFalse(0, progress.weeks_completed)
+                
 class CourseTestCase(TestCase):
 
     def setUp(self):
