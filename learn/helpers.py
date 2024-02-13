@@ -11,7 +11,7 @@ def authenticate_request(request):
     """
     Validating token for authentication purposes.
 
-    Checking if user is an instructor
+    Also Checking if user is an instructor and logged in
     """
 
     token = request.COOKIES.get("jwt")
@@ -35,7 +35,7 @@ def authenticate_request(request):
     return user
 
 
-def is_user_authenticated(request):
+def user_authentication(request):
     """
     Validating token for authentication purposes.
     we're only checking here if user is logged in
@@ -56,7 +56,7 @@ def is_user_authenticated(request):
     return user
 
 
-def valid_ownership(user, course_id):
+def is_valid_ownership(user, course_id):
     """
     we check if this course belongs to the instructor(creator of the course)
     """
@@ -82,7 +82,7 @@ class CreateAPIMixin():
 
         course = get_object_or_404(Course, id=self.kwargs['pk'])
         user = authenticate_request(request)
-        if not valid_ownership(user, course.id):
+        if not is_valid_ownership(user, course.id):
             raise AuthenticationFailed("Not allowed to create")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -93,6 +93,7 @@ class UpdateAPIMixin(UpdateModelMixin):
     """
     Override exisitng update method (Polymorphism), 
     and to reduce repetitive task (we practice the DRY principle here).
+    Apply this mixin for instances that reference to Course instance
     """
     
     def perform_update(self, serializer):
@@ -132,7 +133,6 @@ class CreateExerciseDemoAPIMixin(CreateModelMixin):
     def perform_create(self, serializer):
         user = authenticate_request(self.request)
         workout = get_object_or_404(Workouts, id=self.kwargs["pk"])
-        if not valid_ownership(user, workout.course.id):
+        if not is_valid_ownership(user, workout.course.id):
             raise AuthenticationFailed("Not allowed to create demo")
         serializer.save(workout=workout)
-

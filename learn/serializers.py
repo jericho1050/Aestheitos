@@ -49,6 +49,7 @@ class EnrollmentSerializer(ModelSerializer):
     class Meta:
         model = Enrollment
         fields = '__all__'
+        read_only_fields = ['user', 'course']
 
 class WorkoutsSerializer(ModelSerializer):
     class Meta:
