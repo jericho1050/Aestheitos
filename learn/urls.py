@@ -13,7 +13,7 @@ urlpatterns = [
 
     path('courses', CourseList.as_view(), name='course-list'),
     path('course/<int:pk>', CourseDetail.as_view(), name='course-detail'),
-    path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='CRU-course-content'),
+    path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='course-content'),
     path('course/<int:pk>/workouts', WorkoutList.as_view(), name="course-workout-list"),
     path('course/workout/<int:pk>', WorkoutDetail.as_view(), name="course-workout-detail"),
     path('course/workout/<int:pk>/correct-exercises', CorrectExerciseFormList.as_view(), name="correct-exercise-list"),
@@ -23,19 +23,13 @@ urlpatterns = [
     path('course/<int:pk>/comments', CourseCommentList.as_view(), name="course-comments"),
     path('course/comment/<int:pk>', CourseCommentDetail.as_view(), name="course-comment"),
     path('course/<int:pk>/enrollments', EnrollmentList.as_view(), name="enrollment-list"),
-    path('course/unenrollment/<int:pk>', UnnrollmentView.as_view(), name="nenrollment"),
-    path('user/enrollments', EnrollmentUserList.as_view(), name="courses-enrolled")
+    path('course/unenrollment/<int:pk>', UnnrollmentView.as_view(), name="unenrollment"),
+    path('user/enrollments', EnrollmentUserList.as_view(), name="courses-enrolled"),
+    path('blogs', BlogList.as_view(), name="blog-list"),
+    path('blog/<int:pk>', BlogDetail.as_view(), name="blog-detail"),
+    path('blog/<int:pk>/comments', BlogCommentList.as_view(), name="blog-comments"),
+    path('blog/comment/<int:pk>', BlogCommentDetail.as_view(), name="blog-comment")
 
-
-
-
-
-
-    # path("courses/<int:course_id>/content", CourseContentview.as_view(), name="course_content"),
-    # path("courses/<int:course_id>/workout", WorkoutsView.as_view(), name="course_workout"),
-    # path("workout/<int:workout_id>/correct_form", CorrectExerciseFormView.as_view(), name="correct_form"),
-    # path("workout/<int:workout_id>/wrong_form", WrongExerciseFormView.as_view(), name="wrong_form" ),
-    # path("courses/<int:course_id>/comments", CourseCommentsView.as_view(), name="course_comments")
 
 ]
 

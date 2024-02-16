@@ -7,11 +7,13 @@ from .models import User, Course
 from .serializers import *
 
 
-def authenticate_request(request):
+def instructor_authentication(request):
     """
     Validating token for authentication purposes.
 
-    Also Checking if user is an instructor and logged in
+    Checking if user is an instructor and logged in
+
+    return user instance
     """
 
     token = request.COOKIES.get("jwt")
@@ -39,6 +41,8 @@ def user_authentication(request):
     """
     Validating token for authentication purposes.
     we're only checking here if user is logged in
+
+    return user instance
     """
 
     token = request.COOKIES.get("jwt")
@@ -81,7 +85,7 @@ class CreateAPIMixin():
     def post(self, request, *args, **kwargs):       
 
         course = get_object_or_404(Course, id=self.kwargs['pk'])
-        user = authenticate_request(request)
+        user = instructor_authentication(request)
         if not is_valid_ownership(user, course.id):
             raise AuthenticationFailed("Not allowed to create")
         serializer = self.get_serializer(data=request.data)
@@ -91,13 +95,13 @@ class CreateAPIMixin():
     
 class UpdateAPIMixin(UpdateModelMixin):
     """
+    Apply this mixin for instances that reference to Course instance and requires authentication before updating (i.e CourseContentDetail and WorkoutDetail)
     Override exisitng update method (Polymorphism), 
     and to reduce repetitive task (we practice the DRY principle here).
-    Apply this mixin for instances that reference to Course instance
     """
     
     def perform_update(self, serializer):
-        user = authenticate_request(self.request)
+        user = instructor_authentication(self.request)
         if self.get_object().course.created_by != user:
             raise AuthenticationFailed("Not allowed to modify")
         serializer.save()
@@ -106,10 +110,11 @@ class DeleteAPIMixin(DestroyModelMixin):
     """
     Ovveride existing delete method (Polymorphism),
     and to reduce repetitive task (we practice the DRY principle here).
+    Apply this mixin for instances that requires authentication before deleting (i.e CourseDetail and WorkoutDetail)
     """
 
     def perform_destroy(self, instance):
-        user = authenticate_request(self.request)
+        user = instructor_authentication(self.request)
         if instance.created_by != user:
             raise AuthenticationFailed("Not allowed to delete!")
         instance.delete()
@@ -131,8 +136,36 @@ class CreateExerciseDemoAPIMixin(CreateModelMixin):
     """
 
     def perform_create(self, serializer):
-        user = authenticate_request(self.request)
+        user = instructor_authentication(self.request)
         workout = get_object_or_404(Workouts, id=self.kwargs["pk"])
         if not is_valid_ownership(user, workout.course.id):
             raise AuthenticationFailed("Not allowed to create demo")
         serializer.save(workout=workout)
+
+class UpdateBlogAPIMixin(UpdateModelMixin):
+    """
+    Apply this mixin for blog instances that require authentication before updating (i.e., BlogDetail).
+
+    Override exisitng update method (Polymorphism), 
+    and to make our class's code cleaner
+    """
+    
+    def perform_update(self, serializer):
+        user = instructor_authentication(self.request)
+        if self.get_object().author != user:
+            raise AuthenticationFailed("Not allowed to modify")
+        serializer.save()
+
+class DeleteBlogAPIMixin(DestroyModelMixin):
+    """
+    Apply this mixin for blog instances that require authentication before deleting (i.e., BlogDetail).
+
+    Ovveride existing delete method (Polymorphism),
+    and to make our class's code cleaner
+    """
+
+    def perform_destroy(self, instance):
+        user = instructor_authentication(self.request)
+        if instance.author != user:
+            raise AuthenticationFailed("Not allowed to delete!")
+        instance.delete()

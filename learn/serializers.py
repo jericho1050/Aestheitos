@@ -73,9 +73,11 @@ class BlogSerializer(ModelSerializer):
     class Meta:
         model = Blog
         fields = '__all__'
+        read_only_fields = ['author']
 
 class BlogCommentsSerializer(ModelSerializer):
     class Meta:
         model = BlogComments
         fields = '__all__'
+        read_only_fields =  ['blog', 'comment_by']
 
