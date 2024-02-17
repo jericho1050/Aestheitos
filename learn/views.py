@@ -73,7 +73,7 @@ class LogoutView(APIView):
         response.data = {"message": "success"}
 
         return response
-    
+
 
 class CourseList(generics.ListCreateAPIView):
     """
@@ -84,7 +84,7 @@ class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
 
     def perform_create(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         serializer.save(created_by=user)
 
 
@@ -97,17 +97,19 @@ class CourseDetail(DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CourseSerializer
 
     def perform_update(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
 
-        if 'status' in serializer.validated_data and not user.is_staff:
+        if "status" in serializer.validated_data and not user.is_staff:
             raise AuthenticationFailed("Only staff can change the status")
-        
+
         if self.get_object().created_by != user:
             raise AuthenticationFailed("Not allowed to modify")
         serializer.save()
 
 
-class CourseContentDetail(SnippetLookupMixin, CreateAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView):
+class CourseContentDetail(
+    SnippetLookupMixin, CreateAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
+):
     """
     Create, retrieve or update a course's content instance
     """
@@ -121,7 +123,7 @@ class CourseContentDetail(SnippetLookupMixin, CreateAPIMixin, UpdateAPIMixin, ge
 class WorkoutList(CreateAPIMixin, generics.ListCreateAPIView):
     """
     Lists all workouts or create a new workout for a course instance.
-    """
+    """
 
     queryset = Workouts.objects.all()
     serializer_class = WorkoutsSerializer
@@ -129,14 +131,23 @@ class WorkoutList(CreateAPIMixin, generics.ListCreateAPIView):
     def get_queryset(self):
         return Workouts.objects.filter(course=self.kwargs["pk"])
 
-    
-class WorkoutDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):
+
+class WorkoutDetail(
+    UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """
-    Retrieve, update or delete a workout instance 
+    Retrieve, update or delete a workout instance
     """
 
     queryset = Workouts.objects.all()
     serializer_class = WorkoutsSerializer
+
+    def perform_destroy(self, instance):
+        user = user_authentication(self.request)
+        if instance.course.created_by != user:
+            raise AuthenticationFailed("Not allowed to delete!")
+        instance.delete()
+
 
 class CourseCommentList(generics.ListCreateAPIView):
     """
@@ -148,7 +159,7 @@ class CourseCommentList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return CourseComments.objects.filter(course=self.kwargs["pk"])
-    
+
     def perform_create(self, serializer):
         user = user_authentication(self.request)
         course = get_object_or_404(Course, id=self.kwargs["pk"])
@@ -177,11 +188,12 @@ class CourseCommentDetail(generics.RetrieveUpdateDestroyAPIView):
             raise AuthenticationFailed("Not allowed to delete comment")
         instance.delete()
 
+
 class CorrectExerciseFormList(CreateExerciseDemoAPIMixin, generics.ListCreateAPIView):
     """
     List all correct exercises demos or create a new correct exercise demo for a workout instance
     """
-    
+
     queryset = CorrectExerciseForm.objects.all()
     serializer_class = CorrectExerciseFormSerializer
 
@@ -198,18 +210,19 @@ class CorrectExerciseFormDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CorrectExerciseFormSerializer
 
     def perform_update(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         workout = get_object_or_404(CorrectExerciseForm, id=self.kwargs["pk"]).workout
         if not is_valid_ownership(user, workout.course.id):
             raise AuthenticationFailed("Not allowed to modify demo")
         serializer.save()
 
     def perform_destroy(self, instance):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         workout = get_object_or_404(CorrectExerciseForm, id=self.kwargs["pk"]).workout
         if not is_valid_ownership(user, workout.course.id):
-            raise AuthenticationFailed("Not allowed to delete demo")    
-        instance.delete()    
+            raise AuthenticationFailed("Not allowed to delete demo")
+        instance.delete()
+
 
 class WrongExerciseFormList(CreateExerciseDemoAPIMixin, generics.ListCreateAPIView):
     """
@@ -221,7 +234,8 @@ class WrongExerciseFormList(CreateExerciseDemoAPIMixin, generics.ListCreateAPIVi
 
     def get_queryset(self):
         return WrongExerciseForm.objects.filter(workout=self.kwargs["pk"])
-    
+
+
 class WrongExerciseFormDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update, delete a wrong exercise form instance
@@ -231,18 +245,18 @@ class WrongExerciseFormDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WrongExerciseFormSerializer
 
     def perform_update(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         workout = get_object_or_404(WrongExerciseForm, id=self.kwargs["pk"]).workout
         if not is_valid_ownership(user, workout.course.id):
             raise AuthenticationFailed("Not allowed to modify demo")
         serializer.save()
 
     def perform_destroy(self, instance):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         workout = get_object_or_404(WrongExerciseForm, id=self.kwargs["pk"]).workout
         if not is_valid_ownership(user, workout.course.id):
-            raise AuthenticationFailed("Not allowed to delete demo")    
-        instance.delete()    
+            raise AuthenticationFailed("Not allowed to delete demo")
+        instance.delete()
 
 
 class EnrollmentList(generics.ListCreateAPIView):
@@ -252,10 +266,10 @@ class EnrollmentList(generics.ListCreateAPIView):
 
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
-    
+
     def get_queryset(self):
         return Enrollment.objects.filter(course=self.kwargs["pk"])
-    
+
     # def list(self, request, *args, **kwargs):
     #     queryset = self.filter_queryset(self.get_queryset())
     #     count = queryset.count()
@@ -263,15 +277,19 @@ class EnrollmentList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         user = user_authentication(self.request)
-        if is_valid_ownership(user, self.kwargs['pk']):
-            raise AuthenticationFailed("The Creator of the course is not allowed to enroll in their own")
-        course = get_object_or_404(Course, id=self.kwargs['pk'])
+        if is_valid_ownership(user, self.kwargs["pk"]):
+            raise AuthenticationFailed(
+                "The Creator of the course is not allowed to enroll in their own"
+            )
+        course = get_object_or_404(Course, id=self.kwargs["pk"])
         serializer.save(user=user, course=course)
+
 
 class EnrollmentUserList(generics.ListAPIView):
     """
     List all user's enrollment
     """
+
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
 
@@ -279,20 +297,21 @@ class EnrollmentUserList(generics.ListAPIView):
         user = user_authentication(self.request)
         return Enrollment.objects.filter(user=user)
 
+
 class UnnrollmentView(generics.DestroyAPIView):
     """
     Delete a enrollment instance (Unenrollment)
     """
-    
+
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
-
 
     def perform_destroy(self, instance):
         user = user_authentication(self.request)
         if instance.user != user:
             raise AuthenticationFailed("Not allowed to Unenroll")
         instance.delete()
+
 
 class BlogList(generics.ListCreateAPIView):
     """
@@ -303,16 +322,20 @@ class BlogList(generics.ListCreateAPIView):
     serializer_class = BlogSerializer
 
     def perform_create(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         serializer.save(author=user)
 
-class BlogDetail(UpdateBlogAPIMixin, DeleteBlogAPIMixin, generics.RetrieveUpdateDestroyAPIView):
+
+class BlogDetail(
+    UpdateBlogAPIMixin, DeleteBlogAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """
     Retrieve, update and delete a blog instance
     """
 
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+
 
 class BlogCommentList(generics.ListCreateAPIView):
     """
@@ -323,12 +346,13 @@ class BlogCommentList(generics.ListCreateAPIView):
     serializer_class = BlogCommentsSerializer
 
     def get_queryset(self):
-        return BlogComments.objects.filter(blog=self.kwargs['pk'])
-    
+        return BlogComments.objects.filter(blog=self.kwargs["pk"])
+
     def perform_create(self, serializer):
         user = user_authentication(self.request)
-        blog = get_object_or_404(Blog, id=self.kwargs['pk'])
+        blog = get_object_or_404(Blog, id=self.kwargs["pk"])
         serializer.save(blog=blog, comment_by=user)
+
 
 class BlogCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -340,18 +364,17 @@ class BlogCommentDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         user = user_authentication(self.request)
-        comment = get_object_or_404(BlogComments, id=self.kwargs['pk'])
+        comment = get_object_or_404(BlogComments, id=self.kwargs["pk"])
         if comment.comment_by != user:
             raise AuthenticationFailed("Not allowed to modify comment")
         serializer.save()
 
     def perform_destroy(self, instance):
         user = user_authentication(self.request)
-        comment = get_object_or_404(BlogComments, id=self.kwargs['pk'])
+        comment = get_object_or_404(BlogComments, id=self.kwargs["pk"])
         if comment.comment_by != user:
             raise AuthenticationFailed("Not allowed to delete comment")
         instance.delete()
-
 
 
 # debugging/tesitng purposes only for jwt token
