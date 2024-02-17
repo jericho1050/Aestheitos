@@ -7,40 +7,40 @@ from .models import User, Course
 from .serializers import *
 
 
-def instructor_authentication(request):
-    """
-    Validating token for authentication purposes.
+# def instructor_authentication(request):
+#     """
+#     Validating token for authentication purposes.
 
-    Checking if user is an instructor and logged in
+#     Checking if user is an instructor and logged in
 
-    return user instance
-    """
+#     return user instance
+#     """
 
-    token = request.COOKIES.get("jwt")
+#     token = request.COOKIES.get("jwt")
 
-    if not token:
-        raise AuthenticationFailed("Unauthenticated!")
+#     if not token:
+#         raise AuthenticationFailed("Unauthenticated!")
 
-    try:
-        payload = jwt.decode(token, key="secret", algorithms=["HS256"])
-    except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed("Unauthenticated!")
+#     try:
+#         payload = jwt.decode(token, key="secret", algorithms=["HS256"])
+#     except jwt.ExpiredSignatureError:
+#         raise AuthenticationFailed("Unauthenticated!")
 
-    user = User.objects.filter(id=payload["id"]).first()
+#     user = User.objects.filter(id=payload["id"]).first()
 
-    # check if user is an instructor
-    if not user.is_instructor:
-        raise AuthenticationFailed(
-            "Unauthenticated! non-instructors not allowed to POST/PUT/DELETE"
-        )
+#     # check if user is an instructor
+#     if not user.is_instructor:
+#         raise AuthenticationFailed(
+#             "Unauthenticated! non-instructors not allowed to POST/PUT/DELETE"
+#         )
 
-    return user
+#     return user
 
 
 def user_authentication(request):
     """
     Validating token for authentication purposes.
-    we're only checking here if user is logged in
+    Ensure that the user is logged in.
 
     return user instance
     """
@@ -85,7 +85,7 @@ class CreateAPIMixin():
     def post(self, request, *args, **kwargs):       
 
         course = get_object_or_404(Course, id=self.kwargs['pk'])
-        user = instructor_authentication(request)
+        user = user_authentication(request)
         if not is_valid_ownership(user, course.id):
             raise AuthenticationFailed("Not allowed to create")
         serializer = self.get_serializer(data=request.data)
@@ -101,7 +101,7 @@ class UpdateAPIMixin(UpdateModelMixin):
     """
     
     def perform_update(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         if self.get_object().course.created_by != user:
             raise AuthenticationFailed("Not allowed to modify")
         serializer.save()
@@ -110,18 +110,18 @@ class DeleteAPIMixin(DestroyModelMixin):
     """
     Ovveride existing delete method (Polymorphism),
     and to reduce repetitive task (we practice the DRY principle here).
-    Apply this mixin for instances that requires authentication before deleting (i.e CourseDetail and WorkoutDetail)
+    Apply this mixin for instances that requires authentication before deleting (i.e CourseDetail)
     """
 
     def perform_destroy(self, instance):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         if instance.created_by != user:
             raise AuthenticationFailed("Not allowed to delete!")
         instance.delete()
 
 class SnippetLookupMixin():
     """
-    Apply this mixin to a view that depends on the course_id for retrieving the snippet instance or object.
+    Apply this mixin to a view that depends on the course_id (i.e CourseContentDetail) for retrieving the snippet instance or object.
     """
 
     def get_object(self):
@@ -136,7 +136,7 @@ class CreateExerciseDemoAPIMixin(CreateModelMixin):
     """
 
     def perform_create(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         workout = get_object_or_404(Workouts, id=self.kwargs["pk"])
         if not is_valid_ownership(user, workout.course.id):
             raise AuthenticationFailed("Not allowed to create demo")
@@ -151,7 +151,7 @@ class UpdateBlogAPIMixin(UpdateModelMixin):
     """
     
     def perform_update(self, serializer):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         if self.get_object().author != user:
             raise AuthenticationFailed("Not allowed to modify")
         serializer.save()
@@ -165,7 +165,7 @@ class DeleteBlogAPIMixin(DestroyModelMixin):
     """
 
     def perform_destroy(self, instance):
-        user = instructor_authentication(self.request)
+        user = user_authentication(self.request)
         if instance.author != user:
             raise AuthenticationFailed("Not allowed to delete!")
         instance.delete()
