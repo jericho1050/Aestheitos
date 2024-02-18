@@ -915,7 +915,7 @@ class WorkoutListAPITestCase(APITestCase):
             format="json",
         )
 
-        self.assertEqual(response1.status_code, status.HTTP_200_OK)
+        self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response1.data["exercise"], "Reverse Plank bridge")
         self.assertEqual(
             response1.data["demo"], "https://www.youtube.com/watch?v=tSvmWU-0Zo0&t=663s"

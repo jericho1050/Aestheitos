@@ -7,6 +7,9 @@ from .models import User, Course
 from .serializers import *
 
 
+# Reference for Creating Custom Mixins
+# https://www.django-rest-framework.org/api-guide/generic-views/#creating-custom-mixins
+
 # def instructor_authentication(request):
 #     """
 #     Validating token for authentication purposes.
@@ -76,50 +79,49 @@ def is_valid_ownership(user, course_id):
 
     return True
 
-class CreateAPIMixin():
+
+class CreateAPIMixin(CreateModelMixin):
     """
-    A pre-defined process for a POST request method.
-    This is used to provide a generic view, an additional method (POST) or override exisitng post method (Polymorphism).
+    Apply this mixin for APIView that requires authentication before creating
+    This is to override exisitng create method (Polymorphism).
     """
 
-    def post(self, request, *args, **kwargs):       
+    def perform_create(self, serializer):
+        user = user_authentication(self.request)
 
-        course = get_object_or_404(Course, id=self.kwargs['pk'])
-        user = user_authentication(request)
-        if not is_valid_ownership(user, course.id):
-            raise AuthenticationFailed("Not allowed to create")
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(course=course)
-        return Response(serializer.data)
-    
+        # checking for additional arguements i.e pk so that our method will be flexible/ resuable for different serializers
+        parameters = inspect.signature(serializer.save_with_auth_user).parameters
+        if "pk" in parameters:
+            try:
+                serializer.save_with_auth_user(user, self.kwargs["pk"])
+            except KeyError:
+                serializer.save_with_auth_user(user, None)
+        else:
+            serializer.save_with_auth_user(user)
+
+
 class UpdateAPIMixin(UpdateModelMixin):
     """
-    Apply this mixin for instances that reference to Course instance and requires authentication before updating (i.e CourseContentDetail and WorkoutDetail)
-    Override exisitng update method (Polymorphism), 
-    and to reduce repetitive task (we practice the DRY principle here).
+    Apply this mixin for instances tat requires authentication before updating.
+    Override exisitng update method (Polymorphism).
     """
-    
+
     def perform_update(self, serializer):
         user = user_authentication(self.request)
-        if self.get_object().course.created_by != user:
-            raise AuthenticationFailed("Not allowed to modify")
-        serializer.save()
+        serializer.save_with_auth_user(user, self.kwargs["pk"], update=True)
 
 class DeleteAPIMixin(DestroyModelMixin):
     """
-    Ovveride existing delete method (Polymorphism),
-    and to reduce repetitive task (we practice the DRY principle here).
-    Apply this mixin for instances that requires authentication before deleting (i.e CourseDetail)
+    Apply this mixin for instances that requires authentication before deleting.
+    Ovveride existing delete method (Polymorphism)
     """
 
     def perform_destroy(self, instance):
         user = user_authentication(self.request)
-        if instance.created_by != user:
-            raise AuthenticationFailed("Not allowed to delete!")
-        instance.delete()
+        instance.delete_with_auth_user(user)
 
-class SnippetLookupMixin():
+
+class CourseLookupMixin:
     """
     Apply this mixin to a view that depends on the course_id (i.e CourseContentDetail) for retrieving the snippet instance or object.
     """
@@ -128,44 +130,15 @@ class SnippetLookupMixin():
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, course=self.kwargs["pk"])
         return obj
-    
-class CreateExerciseDemoAPIMixin(CreateModelMixin):
-    """
-    Apply this mixin to CorrectExerciseFormList and WrongExerciseFormList View. 
-    This is to override the create method and reduce reptitive code (we practice the DRY principle here).
-    """
 
-    def perform_create(self, serializer):
-        user = user_authentication(self.request)
-        workout = get_object_or_404(Workouts, id=self.kwargs["pk"])
-        if not is_valid_ownership(user, workout.course.id):
-            raise AuthenticationFailed("Not allowed to create demo")
-        serializer.save(workout=workout)
 
-class UpdateBlogAPIMixin(UpdateModelMixin):
-    """
-    Apply this mixin for blog instances that require authentication before updating (i.e., BlogDetail).
+# class UpdateBlogAPIMixin(UpdateModelMixin):
+#     """
+#     Apply this mixin for blog instances that require authentication before updating (i.e., BlogDetail).
+#     """
 
-    Override exisitng update method (Polymorphism), 
-    and to make our class's code cleaner
-    """
-    
-    def perform_update(self, serializer):
-        user = user_authentication(self.request)
-        if self.get_object().author != user:
-            raise AuthenticationFailed("Not allowed to modify")
-        serializer.save()
-
-class DeleteBlogAPIMixin(DestroyModelMixin):
-    """
-    Apply this mixin for blog instances that require authentication before deleting (i.e., BlogDetail).
-
-    Ovveride existing delete method (Polymorphism),
-    and to make our class's code cleaner
-    """
-
-    def perform_destroy(self, instance):
-        user = user_authentication(self.request)
-        if instance.author != user:
-            raise AuthenticationFailed("Not allowed to delete!")
-        instance.delete()
+#     def perform_update(self, serializer):
+#         user = user_authentication(self.request)
+#         if self.get_object().author != user:
+#             raise AuthenticationFailed("Not allowed to modify")
+#         serializer.save()
