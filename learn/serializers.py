@@ -56,7 +56,8 @@ class CourseContentSerializer(ModelSerializer):
         fields = "__all__"
         read_only_fields = ["course"]
 
-    def save_with_auth_user(self, user, pk):
+    def save_with_auth_user(self, user, pk, update=False):
+
         if self.instance.course.created_by != user:
             raise AuthenticationFailed("Not allowed to modify")
         self.save()
