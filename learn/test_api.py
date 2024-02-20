@@ -1,3 +1,5 @@
+import os
+import glob
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -101,6 +103,11 @@ class CourseListAPITestCase(APITestCase):
         token = response.json()
         self.authenticated_client.force_authenticate(user=user, token=token["jwt"])
         self.unaunthenticated_client.force_authenticate(user=None)
+
+    def tearDown(self):
+        # prevents accumulating picture/image
+        for filename in glob.glob("images/images/picture_*.jpg"):
+            os.remove(filename)
 
     def test_retrieve_course_list(self):
         """
