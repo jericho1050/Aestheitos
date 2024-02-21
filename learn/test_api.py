@@ -1,6 +1,5 @@
 import os
 import glob
-from django.test import Client, TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
@@ -18,7 +17,6 @@ from .models import (
     Blog,
     BlogComments,
 )
-from datetime import datetime, date
 
 # Reference For APIClient testing
 # https://www.django-rest-framework.org/api-guide/testing/#apiclient
@@ -78,20 +76,20 @@ class Login_LogoutAPITestCase(APITestCase):
 
 class CourseListAPITestCase(APITestCase):
     def setUp(self):
-        user = User.objects.create_user(username="testuser", password="secret")
+        self.user = User.objects.create_user(username="testuser", password="secret")
         Course.objects.create(
             title="set up",
             description="nothing",
             difficulty="BG",
             thumbnail="images/images/skillz.jpg",
-            created_by=user,
+            created_by=self.user,
         )
         Course.objects.create(
             title="set up2",
             description="nothing2",
             difficulty="BG",
             thumbnail="images/images/skillz.jpg",
-            created_by=user,
+            created_by=self.user,
         )
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.unaunthenticated_client = APIClient(enforce_csrf_checks=True)
@@ -101,11 +99,11 @@ class CourseListAPITestCase(APITestCase):
             format="json",
         )
         token = response.json()
-        self.authenticated_client.force_authenticate(user=user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
         self.unaunthenticated_client.force_authenticate(user=None)
 
     def tearDown(self):
-        # prevents accumulating picture/image
+        # prevents accumulating picture/image (i.e deletes files that were created by this test case)
         for filename in glob.glob("images/images/picture_*.jpg"):
             os.remove(filename)
 
@@ -144,10 +142,8 @@ class CourseListAPITestCase(APITestCase):
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
         # test invalid thumbnail
-        response = self.authenticated_client.post(
+        response_2 = self.authenticated_client.post(
             reverse("learn:course-list"),
             {
                 "title": "test difficulty repsonse and test thumbnail repsonse",
@@ -157,10 +153,8 @@ class CourseListAPITestCase(APITestCase):
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        # test update instance with unathenticated user
-        response = self.unaunthenticated_client.post(
+        # test create course with an unathenticated user
+        response_3 = self.unaunthenticated_client.post(
             reverse("learn:course-list"),
             {
                 "title": "test no cookie",
@@ -170,13 +164,11 @@ class CourseListAPITestCase(APITestCase):
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
         # reset cursor for file reading of image
         image.seek(0)
 
-        # test update instance with valid fields and authenticated client
-        response = self.authenticated_client.post(
+        # test create course with an authenticated client and valid fields
+        response_4 = self.authenticated_client.post(
             reverse("learn:course-list"),
             {
                 "title": "test ok response",
@@ -186,7 +178,20 @@ class CourseListAPITestCase(APITestCase):
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # test create course with an authyenticated client and invalid fields
+        response_5 = self.authenticated_client.post(
+            reverse("learn:course-list"), {"lols": "lmao", "probaby valdi": "idk"}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_4.status_code, status.HTTP_201_CREATED)
+        self.assertIn("test", response_4.data['title'])
+        self.assertIsNotNone(response_4.data['thumbnail'])
+        self.assertIsNotNone(response_4.data['description'])
+        self.assertEqual(response_4.data['created_by'], self.user.id)
+        self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class CourseDetailAPITestCase(APITestCase):
@@ -731,7 +736,7 @@ class CourseCommentListAPITestCase(APITestCase):
 
     def test_course_create_comment(self):
         """
-        Ensure we can create a comment object
+        Ensure we can create a comment for a course
         """
 
         # test create comment with an authenticated client
@@ -754,11 +759,15 @@ class CourseCommentListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create comment with an authenticated client no.2 and have it reply to authenticated client no.1's comment
+        # test create comment with an authenticated client 2 and have it reply to authenticated client 1's comment
         response_4 = self.authenticated_client_2.post(
             reverse("learn:course-comments", args=[1]),
             {"comment": "testing authenticated client to comment", "parent_comment": 1},
             format="json",
+        )
+
+        response_5 = self.authenticated_client.post(
+            reverse("learn:course-comments", args=[1]),format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -772,6 +781,7 @@ class CourseCommentListAPITestCase(APITestCase):
         self.assertEqual(response_4.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_4.data["comment_by"], self.user_2.id)
         self.assertEqual(response_4.data["parent_comment"], response.data["id"])
+        self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class CourseCommentDetailAPITestCase(APITestCase):
@@ -810,10 +820,10 @@ class CourseCommentDetailAPITestCase(APITestCase):
 
     def test_retrieve_course_comment(self):
         """
-        Ensure we can retrieve a comment instance
+        Ensure we can retrieve a course comment instance
         """
 
-        # test retrieve instance with an authenticated user
+        # test retrieve instance 
         response = self.authenticated_client.get(
             reverse("learn:course-comment", args=[1])
         )
@@ -830,7 +840,7 @@ class CourseCommentDetailAPITestCase(APITestCase):
 
     def test_update_course_comment(self):
         """
-        Ensure we can update a comment instance
+        Ensure we can update a course comment instance
         """
 
         # test update instance with an authenticated user's own comment
@@ -883,7 +893,7 @@ class CourseCommentDetailAPITestCase(APITestCase):
 
     def test_delete_course_comment(self):
         """
-        Ensure we can delete a comment instance
+        Ensure we can delete a course comment instance
         """
 
         # test delete instance with an unauthenticated user that DOESN'T own the comment
