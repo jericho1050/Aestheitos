@@ -185,6 +185,8 @@ class Blog(models.Model):
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="author")
     content = models.TextField()
     title = models.CharField(max_length=50)
+    blog_created = models.DateTimeField(auto_now_add=True)
+    blog_updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f" ( pk: { self.pk } ) Title: {self.title}. By {self.author}"
@@ -197,7 +199,7 @@ class Blog(models.Model):
 
 class BlogComments(models.Model):
     blog = models.ForeignKey("Blog", on_delete=models.CASCADE, related_name="blog")
-    comment = models.TextField(blank=True)
+    comment = models.TextField()
     comment_date = models.DateField(auto_now_add=True)
     comment_by = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="commented_by"

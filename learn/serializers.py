@@ -90,8 +90,13 @@ class EnrollmentSerializer(ModelSerializer):
 
     def save_with_auth_user(self, user, pk):
         course = get_object_or_404(Course, id=pk)
+        enrolled = Enrollment.objects.filter(user=user, course=course)
         if is_valid_ownership(user, course.id):
             raise AuthenticationFailed("Not allowed to enroll in their own course")
+        
+        if enrolled:
+            raise AuthenticationFailed("already enrolled")
+        
         self.save(user=user, course=course)
 
 
