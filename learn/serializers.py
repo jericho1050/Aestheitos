@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 import inspect
 from .models import *
@@ -37,19 +38,41 @@ class UserProgressSerializer(ModelSerializer):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
-        
+
         course = get_object_or_404(Course, id=pk)
-        enrolled =  Enrollment.objects.filter(user=user, course=course)
+        enrolled = Enrollment.objects.filter(user=user, course=course)
         progress = UserProgress.objects.filter(user=user, course=pk)
 
         if not enrolled:
             raise AuthenticationFailed("Not allowed to create")
         if progress:
             raise AuthenticationFailed("already created one")
-        
+
         self.save(user=user, course=course)
 
+
+class CourseRatingSerializer(ModelSerializer):
+    class Meta:
+        model = CourseRating
+        fields = "__all__"
+        read_only_fields = ["user", "course"]
+
+    def save_with_auth_user(self, user, pk, update=False):
+        course = get_object_or_404(Course, id=pk)
+        is_enrolled = Enrollment.objects.filter(user=user, course=course).exists()
+        is_rated = UserProgress.objects.filter(user=user, course=course).exists()
+        if not is_enrolled:
+            raise AuthenticationFailed("not allowed to create")
+        
+        if is_rated:
+            raise AuthenticationFailed("not allowed to create")
+            
+
+        self.save(user=user, course=course)
+
+
 class CourseSerializer(ModelSerializer):
+    average_rating = serializers.SerializerMethodField()
     class Meta:
         model = Course
         fields = "__all__"
@@ -68,6 +91,9 @@ class CourseSerializer(ModelSerializer):
             self.save()
             return
         self.save(created_by=user)
+
+    def get_average_rating(self, obj):
+        return obj.course_rating_average()
 
 
 class CourseContentSerializer(ModelSerializer):
@@ -110,18 +136,14 @@ class EnrollmentSerializer(ModelSerializer):
 
     def save_with_auth_user(self, user, pk):
         course = get_object_or_404(Course, id=pk)
-        enrolled = Enrollment.objects.filter(user=user, course=course)
+        is_enrolled = Enrollment.objects.filter(user=user, course=course).exists()
         if is_valid_ownership(user, course.id):
             raise AuthenticationFailed("Not allowed to enroll in their own course")
-        
-        if enrolled:
+
+        if is_enrolled:
             raise AuthenticationFailed("already enrolled")
-        
+
         self.save(user=user, course=course)
-
-
-
-
 
 
 class WorkoutsSerializer(ModelSerializer):

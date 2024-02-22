@@ -73,7 +73,6 @@ class Login_LogoutAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-
 class CourseListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")

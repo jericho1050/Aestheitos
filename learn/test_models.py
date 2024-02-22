@@ -1,5 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from .models import *
 from datetime import datetime, date
@@ -50,6 +52,24 @@ class CourseRatingTestCase(TestCase):
 
         self.assertIsNotNone(progress)
 
+    def test_invalid_rating(self):
+        rating = CourseRating(user=self.user, course=self.course_2, rating=10)
+
+        with self.assertRaises(ValidationError):
+            rating.full_clean()
+
+    def test_course_rating_without_course(self):
+        with self.assertRaises(IntegrityError):
+            CourseRating.objects.create(user=self.user, rating=1)
+
+    def test_course_rating_average(self):
+        course = self.course_2
+        CourseRating.objects.create(user=self.user, course=course, rating=3)
+        CourseRating.objects.create(user=self.user, course=course, rating=4)
+        CourseRating.objects.create(user=self.user, course=course, rating=5)
+
+        average_rating = course.course_rating_average()
+        self.assertEqual(average_rating, 3.25)  # The average of 1, 3, 4, 5 is 3.25
 
 
 class CourseTestCase(TestCase):
@@ -132,6 +152,19 @@ class CourseTestCase(TestCase):
             Course.objects.get(title="Testing title")
 
 
+    def test_invalid_course(self):
+        course = Course(
+            title="",
+            description="Lorem ipsum dolor sit amet",
+            difficulty="GOOD",
+            created_by=self.user,
+        )
+
+        with self.assertRaises(ValidationError):
+            course.full_clean()
+
+
+
 class CourseContentTestCase(TestCase):
 
     def setUp(self):
@@ -188,6 +221,14 @@ class CourseContentTestCase(TestCase):
         with self.assertRaises(CourseContent.DoesNotExist):
             CourseContent.objects.get(id=self.course.id)
 
+    def test_course_content_without_course(self):
+        with self.assertRaises(IntegrityError):
+            CourseContent.objects.create(
+                lecture="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+                overview="Testing the goal of this program is give you mobility and by end of it you'll be flexible as Yujiro Hanma or Baki Hanma",
+                weeks=18,
+            )
+
 
 class CourseCommentsTestCase(TestCase):
 
@@ -238,6 +279,17 @@ class CourseCommentsTestCase(TestCase):
         replies = self.comment.replies.all()
         self.assertIn(self.reply_comment, replies)
 
+    def test_course_comment_without_course(self):
+        with self.assertRaises(IntegrityError):
+            CourseComments.objects.create(
+                comment_by=self.user, 
+                comment="WOW grape nice material"
+            )
+
+    def test_course_comment_no_comment_field(self):
+        comment = CourseComments.objects.create(course=self.course, comment_by=self.user)
+        with self.assertRaises(ValidationError):
+            comment.full_clean()
 
 class WorkoutsTestCase(TestCase):
 
@@ -278,6 +330,18 @@ class WorkoutsTestCase(TestCase):
         self.assertEqual(choices[1], "1")
         self.assertEqual(choices[10], "10")
 
+    def test_invalid_intensity(self):
+        workout = Workouts(
+            course=self.course,
+            exercise="Test Exercise",
+            intensity="Invalid intensity", 
+            sets=3,
+            reps=10,
+            excertion=5,
+        )
+        with self.assertRaises(ValidationError):
+            workout.full_clean()
+
 
 class CorrectExerciseFormTestCase(TestCase):
     def setUp(self):
@@ -309,6 +373,24 @@ class CorrectExerciseFormTestCase(TestCase):
             self.correct_exercise_form.description, "Scapula position retracted"
         )
 
+    def test_correct_exercise_form_without_workout(self):
+        with self.assertRaises(IntegrityError):
+            CorrectExerciseForm.objects.create(
+                demo="{{URL}}",
+                workout=None,
+                description="Scapula position retracted",
+            )
+
+
+    def test_correct_exercise_form_creation_with_invalid_demo(self):
+        exercise = CorrectExerciseForm.objects.create(
+                demo="invalid_url",
+                workout=self.workout,
+                description="Flared elbow",
+            )
+        with self.assertRaises(ValidationError):
+            exercise.full_clean()
+            
 
 class WrongExerciseFormTestCase(TestCase):
     def setUp(self):
@@ -338,6 +420,23 @@ class WrongExerciseFormTestCase(TestCase):
         self.assertEqual(self.wrong_exercise_form.workout, self.workout)
         self.assertEqual(self.wrong_exercise_form.description, "Flared elbow")
 
+    def test_wrong_exercise_form_without_workout(self):
+        with self.assertRaises(IntegrityError):
+            WrongExerciseForm.objects.create(
+                demo="https://www.youtube.com/watch?v=IODxDxX7oi4",
+                workout=None,
+                description="Scapula position retracted",
+            )
+
+    def test_wrong_exercise_form_creation_with_invalid_demo(self):
+        exercise = WrongExerciseForm.objects.create(
+                demo="invalid_url",
+                workout=self.workout,
+                description="Flared elbow",
+            )
+        with self.assertRaises(ValidationError):
+            exercise.full_clean()
+
 
 class EnrollmentTestCase(TestCase):
     def setUp(self):
@@ -360,6 +459,13 @@ class EnrollmentTestCase(TestCase):
         self.assertIn(self.enrollment, self.user2.enrollee.all())
         self.assertIn(self.enrollment, self.course.enrolled.all())
 
+    def test_enrollment_without_user(self):
+        with self.assertRaises(IntegrityError):
+            Enrollment.objects.create(user=None, course=self.course)
+
+    def test_enrollment_without_course(self):
+        with self.assertRaises(IntegrityError):
+            Enrollment.objects.create(user=self.user2, course=None)
 
 class BlogTestCase(TestCase):
     def setUp(self):
@@ -395,6 +501,15 @@ class BlogTestCase(TestCase):
         new_content = "Updated content"
         self.blog.content = new_content
         self.assertEqual(self.blog.content, new_content)
+
+    def test_blog_creation_with_too_long_title(self):
+        long_title = "a" * 256
+        blog = Blog.objects.create(
+            author=self.user, content="Too long title test", title=long_title
+        )
+        with self.assertRaises(ValidationError):
+            blog.full_clean()
+
 
 
 class BlogCommentsTestCase(TestCase):
@@ -438,3 +553,13 @@ class BlogCommentsTestCase(TestCase):
     def test_comment_replies(self):
         replies = self.comment.blog_parent_comments.all()
         self.assertIn(self.reply_comment, replies)
+
+
+    def test_blog_comment_no_comment_field(self):
+        comment = BlogComments.objects.create(blog=self.blog, comment_by=self.user)
+        with self.assertRaises(ValidationError):
+            comment.full_clean()
+
+    def test_blog_comments_does_not_exist(self):
+        with self.assertRaises(BlogComments.DoesNotExist):
+            BlogComments.objects.get(id=999)
