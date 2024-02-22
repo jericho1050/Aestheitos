@@ -14,6 +14,7 @@ urlpatterns = [
     path("user/courses/progress", UserProgressList.as_view(), name="progress-list"),
     path("user/course/<int:pk>/progress", UserProgressDetail.as_view(), name="progress-detail"),
     path('courses', CourseList.as_view(), name='course-list'),
+    path('course/<int:pk>/rate', CourseRatingView.as_view(), name="course-rating"),
     path('course/<int:pk>', CourseDetail.as_view(), name='course-detail'),
     path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='course-content'),
     path('course/<int:pk>/workouts', WorkoutList.as_view(), name="course-workout-list"),

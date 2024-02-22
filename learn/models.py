@@ -3,6 +3,7 @@ from datetime import date
 from django.contrib.auth.models import AbstractUser
 from rest_framework.exceptions import AuthenticationFailed
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import Avg
 
 
 # Create your models here.
@@ -74,6 +75,11 @@ class Course(models.Model):
         if self.created_by != user:
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
+
+
+    def course_rating_average(self):
+        return self.course_rating.aggregate(Avg('rating'))['rating__avg']
+
 
 
 class CourseContent(models.Model):

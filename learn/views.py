@@ -315,6 +315,13 @@ class BlogCommentDetail(DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateD
     queryset = BlogComments.objects.all()
     serializer_class = BlogCommentsSerializer
 
+class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
+    """
+    Create a new course's rating
+    """
+
+    queryset = CourseRating.objects.all()
+    serializer_class = CourseRatingSerializer
 
 # debugging/tesitng purposes only for jwt token
 class UserView(APIView):

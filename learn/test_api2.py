@@ -22,6 +22,107 @@ from datetime import datetime, date
 # https://www.django-rest-framework.org/api-guide/testing/#apiclient
 
 
+class CourseRatingViewAPITestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="secret")
+        self.user_2 = User.objects.create_user(username="testuser2", password="secret")
+        self.user_3 = User.objects.create_user(username="testuser3", password="secret")
+
+        course = Course.objects.create(
+            title="test rating",
+            description="nothing",
+            difficulty="BG",
+            created_by=self.user_2,
+        )
+
+        Enrollment.objects.create(user=self.user, course=course)
+
+        self.authenticated_client = APIClient(enforce_csrf_checks=True)
+        self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
+        self.authenticated_client_3 = APIClient(enforce_csrf_checks=True)
+
+        self.unaunthenticated_client = APIClient(enforce_csrf_checks=True)
+
+        response = self.authenticated_client.post(
+            reverse("learn:login"),
+            {"username": "testuser", "password": "secret"},
+            format="json",
+        )
+
+        response_2 = self.authenticated_client_2.post(
+            reverse("learn:login"),
+            {"username": "testuser2", "password": "secret"},
+            format="json",
+        )
+
+        response_3 = self.authenticated_client_3.post(
+            reverse("learn:login"),
+            {"username": "testuser3", "password": "secret"},
+            format="json",
+        )
+
+        token = response.json()
+        token_2 = response_2.json()
+        token_3 = response_3.json()
+
+
+        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client_2.force_authenticate(
+            user=self.user_2, token=token_2["jwt"]
+        )
+        self.authenticated_client_3.force_authenticate(
+            user=self.user_3, token=token_3["jwt"]
+        )
+        self.unaunthenticated_client.force_authenticate(user=None)
+
+    def test_create_course_rating(self):
+        """
+        Ensure we can create a course rating
+        """
+
+        # test create course rating with an authenticated client
+        response = self.authenticated_client.post(
+            reverse("learn:course-rating", args=[1]), {"rating": 1}, format="json"
+        )
+
+        # test create course rating with an authenticated client on the same course
+        # response_2 = self.authenticated_client.post(
+        #     reverse("learn:course-rating", args=[1]), {"rating": 2}, format="json"
+        # )
+
+        # test create course rating for a course instance that doesn't exist
+        response_3 = self.authenticated_client.post(
+            reverse("learn:course-rating", args=[6]), {"rating": 1}, format="json"
+        )
+
+        # test create course rating with an empty field
+        response_4 = self.authenticated_client.post(
+            reverse("learn:course-rating", args=[1]), format="json"
+        )
+
+        # test create course rating with an invalid field / data
+        response_5 = self.authenticated_client.post(
+            reverse("learn:course-rating", args=[1]), {"rating": "123"},format="json"
+        )
+
+        # test create course rating with an authenticated client that is NOT enrolled
+        response_6 = self.authenticated_client_3.post(
+            reverse("learn:course-rating", args=[1]), {"rating": 3},format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # TODO
+        # self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
+
+
+
+
+
+
 class EnrollmentListAPITestCase(APITestCase):
 
     def setUp(self):
@@ -196,8 +297,6 @@ class UnenrollmentViewAPITestCase(APITestCase):
         unenrolled_2 = Enrollment.objects.filter(user=self.user_2, course=self.course)
         enrollee = Enrollment.objects.filter(id=1)
 
-
-
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_204_NO_CONTENT)
@@ -205,7 +304,6 @@ class UnenrollmentViewAPITestCase(APITestCase):
         self.assertQuerySetEqual(unenrolled, [])
         self.assertQuerySetEqual(unenrolled_2, [])
         self.assertEqual(len(enrollee), 0)
-
 
 
 class EnrollmentUserListAPITestCase(APITestCase):
@@ -695,16 +793,24 @@ class BlogCommentDetailAPITestCase(APITestCase):
         """
 
         # test delete instance with an unathenticated client
-        response = self.unauthenticated_client.delete(reverse("learn:blog-comment", args=[1]))
+        response = self.unauthenticated_client.delete(
+            reverse("learn:blog-comment", args=[1])
+        )
 
         # test delete instance that doesnt exist
-        response_2 = self.authenticated_client_2.delete(reverse("learn:blog-comment", args=[6]))
+        response_2 = self.authenticated_client_2.delete(
+            reverse("learn:blog-comment", args=[6])
+        )
 
         # test delete instance with an authenticated client != comment_by
-        response_3 = self.authenticated_client.delete(reverse("learn:blog-comment", args=[1]))
+        response_3 = self.authenticated_client.delete(
+            reverse("learn:blog-comment", args=[1])
+        )
 
         # test delete instance with an authenticated client
-        response_4 = self.authenticated_client_2.delete(reverse("learn:blog-comment", args=[1]))
+        response_4 = self.authenticated_client_2.delete(
+            reverse("learn:blog-comment", args=[1])
+        )
 
         comments = BlogComments.objects.all()
 
@@ -713,4 +819,3 @@ class BlogCommentDetailAPITestCase(APITestCase):
         self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_4.status_code, status.HTTP_204_NO_CONTENT)
         self.assertQuerySetEqual(comments, [])
-        
