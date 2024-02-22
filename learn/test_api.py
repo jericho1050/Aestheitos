@@ -244,7 +244,7 @@ class CourseDetailAPITestCase(APITestCase):
         Ensure we can update a course instance
         """
 
-        # test update course with unauthenticated user
+        # test update instance with unauthenticated client
         response = self.unauthenticated_client.put(
             reverse("learn:course-detail", args=[1]),
             {
@@ -256,7 +256,7 @@ class CourseDetailAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # test update course with an authenticated client and invalid fields
+        # test update instance with an authenticated client and invalid fields
         response = self.authenticated_client.put(
             reverse("learn:course-detail", args=[1]),
             {
@@ -268,7 +268,7 @@ class CourseDetailAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # test update course with an authenticated client and invalid course id
+        # test update instance with an invalid course id
         response = self.authenticated_client.put(
             reverse("learn:course-detail", args=[3]),
             {
@@ -280,7 +280,7 @@ class CourseDetailAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        # test update course with an authenticated client and valid fields
+        # test update course with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:course-detail", args=[1]),
             {
@@ -299,18 +299,20 @@ class CourseDetailAPITestCase(APITestCase):
         Ensure we can delete a course instance
         """
 
-        # test delete course with unathenticated client
+        # test delete instance with an unathenticated client
         response = self.unauthenticated_client.delete(
             reverse("learn:course-detail", args=[2])
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # test delete course with authenticated client
-
+        # test delete instance with an authenticated client
         response = self.authenticated_client.delete(
             reverse("learn:course-detail", args=[2])
         )
+
+        courses = Course.objects.filter(id=1)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(courses), 1)
 
 
 class CourseContentDetailAPITestCase(APITestCase):
@@ -357,7 +359,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         self.assertEqual(self.user, self.content.course.created_by)
 
     def test_create_course_content(self):
-        # test create content with authenticated client
+        # test create content with an authenticated client
         response_1 = self.authenticated_client.post(
             reverse("learn:course-content", args=[1]),
             {
@@ -367,7 +369,7 @@ class CourseContentDetailAPITestCase(APITestCase):
             },
             format="json",
         )
-        # test create content with unauthenticated client
+        # test create content with an unauthenticated client
         response_2 = self.unauthenticated_client.post(
             reverse("learn:course-content", args=[1]),
             {
@@ -385,7 +387,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_course_content(self):
-        # test update content with an authenticated client
+        # test update instance with an authenticated client
         response_1 = self.authenticated_client.put(
             reverse("learn:course-content", args=[2]),
             {
@@ -395,6 +397,8 @@ class CourseContentDetailAPITestCase(APITestCase):
             },
             format="json",
         )
+
+        # test update instance with an unanthenticated client
         response_2 = self.unauthenticated_client.put(
             reverse("learn:course-content", args=[2]),
             {
@@ -404,6 +408,8 @@ class CourseContentDetailAPITestCase(APITestCase):
             },
             format="json",
         )
+
+        # test update CourseContent instance that doesn't exist
         response_3 = self.authenticated_client.put(
             reverse("learn:course-content", args=[1]),
             {
@@ -494,7 +500,7 @@ class WorkoutListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create workout with empty fields with an authenticated client
+        # test create workout with an empty field
         response_3 = self.authenticated_client.post(
             reverse("learn:course-workout-list", args=[1]),
             {
@@ -509,7 +515,7 @@ class WorkoutListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create workout with invalid fields with an authenticated client
+        # test create workout with an invalid field
         response_4 = self.authenticated_client.post(
             reverse("learn:course-workout-list", args=[1]),
             {
@@ -620,7 +626,7 @@ class WorkoutDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        # test update instance with an authenticated client and some invalid fields
+        # test update instance with an invalid field
         response_3 = self.authenticated_client.put(
             reverse("learn:course-workout-detail", args=[1]),
             {
@@ -752,7 +758,7 @@ class CourseCommentListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create comment with an authenticated client and invalid key or field
+        # test create comment with an invalid key or field
         response_3 = self.authenticated_client.post(
             reverse("learn:course-comments", args=[1]),
             {"wrongField": "testing authenticated client to comment"},
@@ -766,6 +772,7 @@ class CourseCommentListAPITestCase(APITestCase):
             format="json",
         )
 
+        # test create comment with an empty field / data
         response_5 = self.authenticated_client.post(
             reverse("learn:course-comments", args=[1]),format="json"
         )
@@ -867,14 +874,14 @@ class CourseCommentDetailAPITestCase(APITestCase):
             reverse("learn:course-comment", args=[1]), {}, format="json"
         )
 
-        # test update instance with an authenticated user that DOESN'T own the comment
+        # test update instance with an authenticated client != comment_by
         response_5 = self.authenticated_client_2.put(
             reverse("learn:course-comment", args=[1]),
             {"comment": "modifiying"},
             format="json",
         )
 
-        # test update instance with unathenticated user that DOESN'T own the comment
+        # test update instance with unathenticated client != comment_by
         response_6 = self.unauthenticated_client.put(
             reverse("learn:course-comment", args=[1]),
             {"comment": "modifiying"},
@@ -896,12 +903,12 @@ class CourseCommentDetailAPITestCase(APITestCase):
         Ensure we can delete a course comment instance
         """
 
-        # test delete instance with an unauthenticated user that DOESN'T own the comment
+        # test delete instance with an unauthenticated client != comment_by
         response = self.unauthenticated_client.delete(
             reverse("learn:course-comment", args=[1])
         )
 
-        # test delete instance with an authenticated user that DOESN'T own the comment
+        # test delete instance with an authenticated client != comment_by
         response_2 = self.authenticated_client_2.delete(
             reverse("learn:course-comment", args=[1])
         )
@@ -911,15 +918,18 @@ class CourseCommentDetailAPITestCase(APITestCase):
             reverse("learn:course-comment", args=[5])
         )
 
-        # test delete instance with an authenticated user that DOESN'T own the comment
+        # test delete instance with an authenticated client != comment_by
         response_4 = self.authenticated_client.delete(
             reverse("learn:course-comment", args=[1])
         )
+
+        comments = CourseComments.objects.filter(course=1)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(comments), 0)
 
 
 class CorrectExerciseFormListAPITestCase(APITestCase):
@@ -995,7 +1005,7 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create correct exercise demo with an authenticated client that DOESN'T own the course
+        # test create correct exercise demo with an authenticated client != created_by
         response_2 = self.authenticated_client_2.post(
             reverse("learn:correct-exercise-list", args=[1]),
             {
@@ -1112,7 +1122,7 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        # test update instance with an authenticated client that DOESN'T own the course
+        # test update instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.put(
             reverse("learn:correct-exercise-detail", args=[1]),
             {
@@ -1163,7 +1173,7 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
             reverse("learn:correct-exercise-detail", args=[1])
         )
 
-        # test delete instance with an authenticated client that DOESN'T own the course
+        # test delete instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.delete(
             reverse("learn:correct-exercise-detail", args=[1])
         )
@@ -1257,7 +1267,7 @@ class WrongExerciseFormListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create wrong exercise demo with an authenticated client that DOESN'T own the course
+        # test create wrong exercise demo with an authenticated client != created_by
         response_2 = self.authenticated_client_2.post(
             reverse("learn:wrong-exercise-list", args=[1]),
             {
@@ -1374,7 +1384,7 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        # test update instance with an authenticated client that DOESN'T own the course
+        # test update instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.put(
             reverse("learn:wrong-exercise-detail", args=[1]),
             {
@@ -1425,7 +1435,7 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
             reverse("learn:wrong-exercise-detail", args=[1])
         )
 
-        # test delete instance with an authenticated client that DOESN'T own the course
+        # test delete instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.delete(
             reverse("learn:wrong-exercise-detail", args=[1])
         )

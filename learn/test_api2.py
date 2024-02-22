@@ -131,9 +131,9 @@ class UnenrollmentViewAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         self.user_3 = User.objects.create_user(username="testuser3", password="secret")
 
-        course = Course.objects.create(title="testing", created_by=self.user_2)
-        Enrollment.objects.create(user=self.user, course=course)
-        Enrollment.objects.create(user=self.user_3, course=course)
+        self.course = Course.objects.create(title="testing", created_by=self.user_2)
+        Enrollment.objects.create(user=self.user, course=self.course)
+        Enrollment.objects.create(user=self.user_3, course=self.course)
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
@@ -192,10 +192,20 @@ class UnenrollmentViewAPITestCase(APITestCase):
             reverse("learn:unenrollment", args=[2])
         )
 
+        unenrolled = Enrollment.objects.filter(user=self.user, course=self.course)
+        unenrolled_2 = Enrollment.objects.filter(user=self.user_2, course=self.course)
+        enrollee = Enrollment.objects.filter(id=1)
+
+
+
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response_4.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertQuerySetEqual(unenrolled, [])
+        self.assertQuerySetEqual(unenrolled_2, [])
+        self.assertEqual(len(enrollee), 0)
+
 
 
 class EnrollmentUserListAPITestCase(APITestCase):
@@ -296,12 +306,12 @@ class BlogListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create blog with an authenticated client and inputing invalid data type
+        # test create blog with an invalid data type
         response_2 = self.authenticated_client.post(
             reverse("learn:blog-list"), {"title": 123, "content": 123}, format="json"
         )
 
-        # test create blog with authenticated client and empty field / data
+        # test create blog with an empty field / data
         response_3 = self.authenticated_client.post(
             reverse("learn:blog-list"), format="json"
         )
@@ -383,12 +393,12 @@ class BlogDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        # test update instance with an authenticated client and empty field / data
+        # test update instance with an empty field / data
         response_2 = self.authenticated_client.put(
             reverse("learn:blog-detail", args=[1]), format="json"
         )
 
-        # test update instance with an authenticated client and invalid field
+        # test update instance with an invalid field
         response_3 = self.authenticated_client.put(
             reverse(
                 "learn:blog-detail",
@@ -398,7 +408,7 @@ class BlogDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        # test update instance with an authenticated client that DOESN'T own the blog
+        # test update instance with an authenticated client != author
         response_4 = self.authenticated_client_2.put(
             reverse("learn:blog-detail", args=[1]),
             {"title": "it's my title", "content": "just testing."},
@@ -449,7 +459,7 @@ class BlogDetailAPITestCase(APITestCase):
             reverse("learn:blog-detail", args=[1])
         )
 
-        # test delete instance with authenticated client
+        # test delete instance with an authenticated client
         response_4 = self.authenticated_client.delete(
             reverse("learn:blog-detail", args=[1])
         )
@@ -538,25 +548,25 @@ class BlogCommentListAPITestCase(APITestCase):
             format="json",
         )
 
-        # test create comment with an authenticated client and blog that DOESN'T exists
+        # test create comment with an blog that DOESN'T exists
         response_2 = self.authenticated_client.post(
             reverse("learn:blog-comments", args=[6]),
             {"comment": "comment"},
             format="json",
         )
 
-        # test create comment with an authenticated client and empty field / data
+        # test create comment with an empty field / data
         response_3 = self.authenticated_client.post(
             reverse("learn:blog-comments", args=[1]), format="json"
         )
 
-        # test create comment with an authenticated client and invalid field
+        # test create comment with an invalid field
         response_4 = self.authenticated_client.post(
             reverse("learn:blog-comments", args=[1]),
             {"commnt": "typo here"},
             format="json",
         )
-        # test create comment with an authenticated client and invalid data type
+        # test create comment with an invalid data type
         response_5 = self.authenticated_client.post(
             reverse("learn:blog-comments", args=[1]), {"comments": 123}, format="json"
         )
@@ -648,7 +658,7 @@ class BlogCommentDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        # test update instance with anthenticated client that DOESNT own the comment
+        # test update instance with anthenticated client != comment_by
         response_2 = self.authenticated_client.put(
             reverse("learn:blog-comment", args=[1]),
             {"comment": "modified or not"},
@@ -659,9 +669,16 @@ class BlogCommentDetailAPITestCase(APITestCase):
             reverse("learn:blog-comment", args=[6]), {"comment": "idk"}, format="json"
         )
 
-        # test update instance with an authenticated client and empty field / data
+        # test update instance with an empty field / data
         response_4 = self.authenticated_client_2.put(
             reverse("learn:blog-comment", args=[1]), format="json"
+        )
+
+        # test update instance with an unanthenticated client
+        response_5 = self.unauthenticated_client.put(
+            reverse("learn:blog-comment", args=[1]),
+            {"comment": "trying"},
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -670,6 +687,30 @@ class BlogCommentDetailAPITestCase(APITestCase):
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_5.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_delete_blog_comment(self):
-    #     # TODO
+    def test_delete_blog_comment(self):
+        """
+        Ensure we can delete a blog comment instance
+        """
+
+        # test delete instance with an unathenticated client
+        response = self.unauthenticated_client.delete(reverse("learn:blog-comment", args=[1]))
+
+        # test delete instance that doesnt exist
+        response_2 = self.authenticated_client_2.delete(reverse("learn:blog-comment", args=[6]))
+
+        # test delete instance with an authenticated client != comment_by
+        response_3 = self.authenticated_client.delete(reverse("learn:blog-comment", args=[1]))
+
+        # test delete instance with an authenticated client
+        response_4 = self.authenticated_client_2.delete(reverse("learn:blog-comment", args=[1]))
+
+        comments = BlogComments.objects.all()
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_4.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertQuerySetEqual(comments, [])
+        

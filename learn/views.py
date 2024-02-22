@@ -73,6 +73,37 @@ class LogoutView(APIView):
         response.data = {"message": "success"}
 
         return response
+    
+class UserProgressView(APIView):
+    """
+     Create a new user's progress on a course.
+    """
+
+    def post(self, request, pk):
+        user = user_authentication(request)
+        serializer = UserProgressSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save_with_auth_user(user, pk)
+        return Response(serializer.data)
+    
+class UserProgressList(generics.ListAPIView):
+    """
+    List all a user's progress on a course
+    """
+    serializer_class = UserProgressSerializer
+    queryset = UserProgress.objects.all()
+
+    def get_queryset(self):
+        user = user_authentication(self.request)
+        return UserProgress.objects.filter(user=user)
+
+class UserProgressDetail(CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView):
+    """
+    Retrieve and update a user's progress instance
+    """
+
+    serializer_class = UserProgressSerializer
+    queryset = UserProgress.objects.all()
 
 
 class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
@@ -223,7 +254,7 @@ class EnrollmentList(CreateAPIMixin, generics.ListCreateAPIView):
 
 class EnrollmentUserList(generics.ListAPIView):
     """
-    List all user's enrollment
+    List all a user's enrollment
     """
 
     queryset = Enrollment.objects.all()
