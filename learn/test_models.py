@@ -1,19 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from .models import (
-    User,
-    UserProgress,
-    Course,
-    CourseContent,
-    CourseComments,
-    Enrollment,
-    Workouts,
-    CorrectExerciseForm,
-    WrongExerciseForm,
-    Blog,
-    BlogComments,
-)
+from .models import *
 from datetime import datetime, date
 
 
@@ -28,16 +16,40 @@ class UserProgressTestCase(TestCase):
             difficulty="BG",
             created_by=self.user,
         )
+        self.progress = UserProgress.objects.create(user=self.user, course=self.course, weeks_completed=3)
+
 
     def test_user_progress_creation(self):
-        """
-        Testing creating a progress
-        """
-        progress = UserProgress.objects.create(user=self.user, course=self.course)
-        progress.weeks_completed = 3
+        self.assertIsNotNone(self.progress)
+        self.assertEqual(3, self.progress.weeks_completed)
+        self.assertNotEqual(0, self.progress.weeks_completed)
+
+    def test_user_progress_update(self):
+        self.progress.weeks_completed = 50
+        self.assertEqual(self.progress.weeks_completed, 50)
+
+class CourseRatingTestCase(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username="testuser")
+        self.user_2 = User.objects.create(username="testuser-course")
+        self.course = Course.objects.create(title="test", description="testing", difficulty="AD", created_by=self.user_2)
+        self.course_2 = Course.objects.create(title="test_2", description="testing 2", difficulty="AD", created_by=self.user_2)
+
+        self.rating = CourseRating.objects.create(user=self.user, course=self.course_2, rating=1)
+
+    def test_created_user_progress(self):
+        
+        self.assertEqual(1, self.rating.rating)
+        self.assertEqual(self.rating.user, self.user)
+        self.assertEqual(self.rating.course, self.course_2)
+
+    def test_user_progress_creation(self):
+
+        progress = CourseRating.objects.create(user=self.user, course=self.course_2, rating=5)
+
         self.assertIsNotNone(progress)
-        self.assertEqual(3, progress.weeks_completed)
-        self.assertFalse(0, progress.weeks_completed)
+
 
 
 class CourseTestCase(TestCase):
@@ -52,7 +64,7 @@ class CourseTestCase(TestCase):
             created_by=self.user,
         )
 
-    def test_create_course(self):
+    def test_created_course(self):
         """
         Test creating a course
         """
@@ -138,7 +150,7 @@ class CourseContentTestCase(TestCase):
             weeks=18,
         )
 
-    def test_create_content(self):
+    def test_created_content(self):
         """
         Test when creating a content
         """

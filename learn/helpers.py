@@ -123,7 +123,7 @@ class DeleteAPIMixin(DestroyModelMixin):
 
 class CourseLookupMixin:
     """
-    Apply this mixin to a view that depends on the course_id (i.e CourseContentDetail) for retrieving the snippet instance or object.
+    Apply this mixin to a view that depends on the course_id (i.e CourseContentDetail and UserProgress) for retrieving the snippet instance or object.
     """
 
     def get_object(self):
@@ -132,13 +132,3 @@ class CourseLookupMixin:
         return obj
 
 
-# class UpdateBlogAPIMixin(UpdateModelMixin):
-#     """
-#     Apply this mixin for blog instances that require authentication before updating (i.e., BlogDetail).
-#     """
-
-#     def perform_update(self, serializer):
-#         user = user_authentication(self.request)
-#         if self.get_object().author != user:
-#             raise AuthenticationFailed("Not allowed to modify")
-#         serializer.save()

@@ -10,7 +10,9 @@ urlpatterns = [
     path("login", LoginView.as_view(), name="login"),
     path("user", UserView.as_view(), name="user"),
     path("logout", LogoutView.as_view(), name="logout"),
-
+    path("user/course/<int:pk>/progress-view", UserProgressView.as_view(), name="progress-create"),
+    path("user/courses/progress", UserProgressList.as_view(), name="progress-list"),
+    path("user/course/<int:pk>/progress", UserProgressDetail.as_view(), name="progress-detail"),
     path('courses', CourseList.as_view(), name='course-list'),
     path('course/<int:pk>', CourseDetail.as_view(), name='course-detail'),
     path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='course-content'),

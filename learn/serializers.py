@@ -27,7 +27,27 @@ class UserProgressSerializer(ModelSerializer):
     class Meta:
         model = UserProgress
         fields = "__all__"
+        read_only_fields = ["user", "course"]
 
+    def save_with_auth_user(self, user, pk, update=False):
+
+        if update:
+
+            if user != self.instance.user:
+                raise AuthenticationFailed("Not allowed to modify")
+            self.save()
+            return
+        
+        course = get_object_or_404(Course, id=pk)
+        enrolled =  Enrollment.objects.filter(user=user, course=course)
+        progress = UserProgress.objects.filter(user=user, course=pk)
+
+        if not enrolled:
+            raise AuthenticationFailed("Not allowed to create")
+        if progress:
+            raise AuthenticationFailed("already created one")
+        
+        self.save(user=user, course=course)
 
 class CourseSerializer(ModelSerializer):
     class Meta:

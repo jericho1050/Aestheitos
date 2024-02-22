@@ -2,6 +2,8 @@ from django.db import models
 from datetime import date
 from django.contrib.auth.models import AbstractUser
 from rest_framework.exceptions import AuthenticationFailed
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 
 # Create your models here.
 class User(AbstractUser):
@@ -15,7 +17,9 @@ class User(AbstractUser):
 
 
 class UserProgress(models.Model):
-    """Represents the progress of a user in a course."""
+    """
+    Represents the progress of a user in a course.
+    """
 
     user = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="user_progress"
@@ -23,11 +27,23 @@ class UserProgress(models.Model):
     course = models.ForeignKey(
         "Course", on_delete=models.CASCADE, related_name="course_progress"
     )
-    weeks_completed = models.IntegerField(blank=True, null=True)
+    weeks_completed = models.IntegerField(default=0, blank=True, null=True)
+
+
+class CourseRating(models.Model):
+    """
+    Represents a course's rating
+    """
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="user_ratings")
+    course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name="course_rating")
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
 
 
 class Course(models.Model):
-    """Represents a course in the learning platform."""
+    """
+    Represents a course in the learning platform.
+    """
 
     STATUS_CHOICES = [
         ("P", "Pending"),
@@ -61,7 +77,9 @@ class Course(models.Model):
 
 
 class CourseContent(models.Model):
-    """Course's basic structure and content"""
+    """
+    Represents a Course's content
+    """
 
     lecture = models.URLField()
     overview = models.TextField()
@@ -75,7 +93,9 @@ class CourseContent(models.Model):
 
 
 class CourseComments(models.Model):
-    """Represents a comment on a course."""
+    """
+    Represents a comment on a course.
+    """
 
     course = models.ForeignKey(
         "Course", on_delete=models.CASCADE, related_name="comments"
@@ -137,13 +157,14 @@ class CorrectExerciseForm(models.Model):
 
     def __str__(self):
         return f"( pk: { self.pk } )Course: {self.workout.course.title}. Workout: {self.workout.exercise}"
-        
+
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
 
         if not is_valid_ownership(user, self.workout.course.id):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
+
 
 class WrongExerciseForm(models.Model):
     demo = models.URLField()
@@ -162,8 +183,11 @@ class WrongExerciseForm(models.Model):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
+
 class Enrollment(models.Model):
-    """Bridge for a user to enroll a course"""
+    """
+    Bridge for a user to enroll a course
+    """
 
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="enrollee")
     course = models.ForeignKey(
@@ -179,8 +203,11 @@ class Enrollment(models.Model):
             raise AuthenticationFailed("Not allowed to unenroll")
         self.delete()
 
+
 class Blog(models.Model):
-    """Represents a mini blog"""
+    """
+    Represents a mini blog
+    """
 
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="author")
     content = models.TextField()
@@ -190,7 +217,7 @@ class Blog(models.Model):
 
     def __str__(self):
         return f" ( pk: { self.pk } ) Title: {self.title}. By {self.author}"
-    
+
     def delete_with_auth_user(self, user):
         if self.author != user:
             raise AuthenticationFailed("Not allowed to delete")
@@ -214,7 +241,7 @@ class BlogComments(models.Model):
 
     def __str__(self):
         return f"( pk: { self.pk } ) comment_by: { self.comment_by}"
-    
+
     def delete_with_auth_user(self, user):
         if self.comment_by != user:
             raise AuthenticationFailed("Not allowed to delete")
