@@ -73,6 +73,7 @@ class Login_LogoutAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
 class CourseListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
@@ -186,10 +187,10 @@ class CourseListAPITestCase(APITestCase):
         self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_4.status_code, status.HTTP_201_CREATED)
-        self.assertIn("test", response_4.data['title'])
-        self.assertIsNotNone(response_4.data['thumbnail'])
-        self.assertIsNotNone(response_4.data['description'])
-        self.assertEqual(response_4.data['created_by'], self.user.id)
+        self.assertIn("test", response_4.data["title"])
+        self.assertIsNotNone(response_4.data["thumbnail"])
+        self.assertIsNotNone(response_4.data["description"])
+        self.assertEqual(response_4.data["created_by"], self.user.id)
         self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -773,7 +774,7 @@ class CourseCommentListAPITestCase(APITestCase):
 
         # test create comment with an empty field / data
         response_5 = self.authenticated_client.post(
-            reverse("learn:course-comments", args=[1]),format="json"
+            reverse("learn:course-comments", args=[1]), format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -829,7 +830,7 @@ class CourseCommentDetailAPITestCase(APITestCase):
         Ensure we can retrieve a course comment instance
         """
 
-        # test retrieve instance 
+        # test retrieve instance
         response = self.authenticated_client.get(
             reverse("learn:course-comment", args=[1])
         )

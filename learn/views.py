@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework import generics
+from drf_spectacular.utils import extend_schema
 
 # from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 # from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -21,12 +22,15 @@ from .helpers import *
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/#using-generic-class-based-views
 # https://www.django-rest-framework.org/api-guide/generic-views/#generic-views
 
+# REFERENCE FOR MY documentation tool 
+# https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
+
 # API calls (Class based functions)
 
 
 class RegisterView(APIView):
     """Creates a newly Account"""
-
+    @extend_schema(response=UserSerializer)
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

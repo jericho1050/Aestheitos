@@ -18,8 +18,9 @@ class UserProgressTestCase(TestCase):
             difficulty="BG",
             created_by=self.user,
         )
-        self.progress = UserProgress.objects.create(user=self.user, course=self.course, weeks_completed=3)
-
+        self.progress = UserProgress.objects.create(
+            user=self.user, course=self.course, weeks_completed=3
+        )
 
     def test_user_progress_creation(self):
         self.assertIsNotNone(self.progress)
@@ -30,25 +31,37 @@ class UserProgressTestCase(TestCase):
         self.progress.weeks_completed = 50
         self.assertEqual(self.progress.weeks_completed, 50)
 
+
 class CourseRatingTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username="testuser")
         self.user_2 = User.objects.create(username="testuser-course")
-        self.course = Course.objects.create(title="test", description="testing", difficulty="AD", created_by=self.user_2)
-        self.course_2 = Course.objects.create(title="test_2", description="testing 2", difficulty="AD", created_by=self.user_2)
+        self.course = Course.objects.create(
+            title="test", description="testing", difficulty="AD", created_by=self.user_2
+        )
+        self.course_2 = Course.objects.create(
+            title="test_2",
+            description="testing 2",
+            difficulty="AD",
+            created_by=self.user_2,
+        )
 
-        self.rating = CourseRating.objects.create(user=self.user, course=self.course_2, rating=1)
+        self.rating = CourseRating.objects.create(
+            user=self.user, course=self.course_2, rating=1
+        )
 
     def test_created_user_progress(self):
-        
+
         self.assertEqual(1, self.rating.rating)
         self.assertEqual(self.rating.user, self.user)
         self.assertEqual(self.rating.course, self.course_2)
 
     def test_user_progress_creation(self):
 
-        progress = CourseRating.objects.create(user=self.user, course=self.course_2, rating=5)
+        progress = CourseRating.objects.create(
+            user=self.user, course=self.course_2, rating=5
+        )
 
         self.assertIsNotNone(progress)
 
@@ -151,7 +164,6 @@ class CourseTestCase(TestCase):
         with self.assertRaises(Course.DoesNotExist):
             Course.objects.get(title="Testing title")
 
-
     def test_invalid_course(self):
         course = Course(
             title="",
@@ -162,7 +174,6 @@ class CourseTestCase(TestCase):
 
         with self.assertRaises(ValidationError):
             course.full_clean()
-
 
 
 class CourseContentTestCase(TestCase):
@@ -282,14 +293,16 @@ class CourseCommentsTestCase(TestCase):
     def test_course_comment_without_course(self):
         with self.assertRaises(IntegrityError):
             CourseComments.objects.create(
-                comment_by=self.user, 
-                comment="WOW grape nice material"
+                comment_by=self.user, comment="WOW grape nice material"
             )
 
     def test_course_comment_no_comment_field(self):
-        comment = CourseComments.objects.create(course=self.course, comment_by=self.user)
+        comment = CourseComments.objects.create(
+            course=self.course, comment_by=self.user
+        )
         with self.assertRaises(ValidationError):
             comment.full_clean()
+
 
 class WorkoutsTestCase(TestCase):
 
@@ -334,7 +347,7 @@ class WorkoutsTestCase(TestCase):
         workout = Workouts(
             course=self.course,
             exercise="Test Exercise",
-            intensity="Invalid intensity", 
+            intensity="Invalid intensity",
             sets=3,
             reps=10,
             excertion=5,
@@ -381,16 +394,15 @@ class CorrectExerciseFormTestCase(TestCase):
                 description="Scapula position retracted",
             )
 
-
     def test_correct_exercise_form_creation_with_invalid_demo(self):
         exercise = CorrectExerciseForm.objects.create(
-                demo="invalid_url",
-                workout=self.workout,
-                description="Flared elbow",
-            )
+            demo="invalid_url",
+            workout=self.workout,
+            description="Flared elbow",
+        )
         with self.assertRaises(ValidationError):
             exercise.full_clean()
-            
+
 
 class WrongExerciseFormTestCase(TestCase):
     def setUp(self):
@@ -430,10 +442,10 @@ class WrongExerciseFormTestCase(TestCase):
 
     def test_wrong_exercise_form_creation_with_invalid_demo(self):
         exercise = WrongExerciseForm.objects.create(
-                demo="invalid_url",
-                workout=self.workout,
-                description="Flared elbow",
-            )
+            demo="invalid_url",
+            workout=self.workout,
+            description="Flared elbow",
+        )
         with self.assertRaises(ValidationError):
             exercise.full_clean()
 
@@ -466,6 +478,7 @@ class EnrollmentTestCase(TestCase):
     def test_enrollment_without_course(self):
         with self.assertRaises(IntegrityError):
             Enrollment.objects.create(user=self.user2, course=None)
+
 
 class BlogTestCase(TestCase):
     def setUp(self):
@@ -511,7 +524,6 @@ class BlogTestCase(TestCase):
             blog.full_clean()
 
 
-
 class BlogCommentsTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="testuser")
@@ -553,7 +565,6 @@ class BlogCommentsTestCase(TestCase):
     def test_comment_replies(self):
         replies = self.comment.blog_parent_comments.all()
         self.assertIn(self.reply_comment, replies)
-
 
     def test_blog_comment_no_comment_field(self):
         comment = BlogComments.objects.create(blog=self.blog, comment_by=self.user)
