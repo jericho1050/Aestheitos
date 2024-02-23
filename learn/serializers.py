@@ -60,7 +60,7 @@ class CourseRatingSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
         course = get_object_or_404(Course, id=pk)
         is_enrolled = Enrollment.objects.filter(user=user, course=course).exists()
-        is_rated = UserProgress.objects.filter(user=user, course=course).exists()
+        is_rated = CourseRating.objects.filter(user=user, course=course).exists()
         if not is_enrolled:
             raise AuthenticationFailed("not allowed to create")
         

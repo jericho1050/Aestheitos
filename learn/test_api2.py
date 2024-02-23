@@ -21,6 +21,202 @@ from datetime import datetime, date
 # Reference For APIClient testing
 # https://www.django-rest-framework.org/api-guide/testing/#apiclient
 
+class UserProgressListAPITestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="secret")
+        self.user_2 = User.objects.create_user(username="testuser2", password="secret")
+        course = Course.objects.create(
+            title="test progress",
+            description="nothing",
+            difficulty="BG",
+            created_by=self.user_2,
+        )
+        course_2 = Course.objects.create(
+            title="test progress",
+            description="nothing",
+            difficulty="BG",
+            created_by=self.user_2,
+        )
+
+        Enrollment.objects.create(user=self.user, course=course)
+        Enrollment.objects.create(user=self.user, course=course_2)
+
+        UserProgress.objects.create(user=self.user, course=course, weeks_completed=6)
+        UserProgress.objects.create(user=self.user, course=course_2, weeks_completed=1)
+
+
+
+        self.authenticated_client = APIClient(enforce_csrf_checks=True)
+        self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
+
+        self.unauthenticated_client = APIClient(enforce_csrf_checks=True)
+
+        response = self.authenticated_client.post(reverse("learn:login"), {"username": "testuser", "password": "secret"}, format="json")
+
+        token = response.json()
+
+        self.authenticated_client.force_authenticate(user=self.user, token=token['jwt'])
+        self.unauthenticated_client.force_authenticate(user=None)
+
+    def test_retrieve_user_progress(self):
+        """
+        Ensure we can retrieve all list of user's course progress
+        """
+
+        # test retrieve with an authenticated client
+        response = self.authenticated_client.get(reverse("learn:progress-list"))
+
+        # test retrieve with an unathenticated client
+        response_2 = self.unauthenticated_client.get(reverse("learn:progress-list"))
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]['user'], 1)
+        self.assertEqual(response.data[0]['course'], 1)
+        self.assertEqual(response.data[1]['user'], 1)
+        self.assertEqual(response.data[1]['course'], 2)
+        self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
+
+class UserProgressDetailAPITestCase(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="secret")
+        self.user_2 = User.objects.create_user(username="testuser2", password="secret")
+        self.course = Course.objects.create(
+            title="test progress",
+            description="nothing",
+            difficulty="BG",
+            created_by=self.user_2,
+        )
+        self.course_2 = Course.objects.create(
+            title="test progress",
+            description="nothing",
+            difficulty="BG",
+            created_by=self.user_2,
+        )
+        self.course_3 = Course.objects.create(
+            title="test progress",
+            description="nothing",
+            difficulty="BG",
+            created_by=self.user_2,
+        )
+
+        Enrollment.objects.create(user=self.user, course=self.course)
+        Enrollment.objects.create(user=self.user, course=self.course_2)
+        Enrollment.objects.create(user=self.user, course=self.course_3)
+
+        UserProgress.objects.create(user=self.user, course=self.course_2, weeks_completed=1)
+
+        self.authenticated_client = APIClient(enforce_csrf_checks=True)
+        self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
+        self.unauthenticated_client = APIClient(enforce_csrf_checks=True)
+
+        response = self.authenticated_client.post(reverse("learn:login"), {"username": "testuser", "password": "secret"}, format="json")
+        response_2 = self.authenticated_client_2.post(reverse("learn:login"), {"username": "testuser2", "password": "secret"}, format="json")
+
+        token = response.json()
+        token_2 = response_2.json()
+
+
+        self.authenticated_client.force_authenticate(user=self.user, token=token['jwt'])
+        self.authenticated_client_2.force_authenticate(user=self.user, token=token_2['jwt'])
+        self.unauthenticated_client.force_authenticate(user=None)
+
+
+    
+
+    def test_create_user_progress(self):
+
+        # test create user progress with an authenticated client
+        response = self.authenticated_client.post(reverse("learn:progress-detail", args=[1]), {"weeks_completed": 1}, format="json")
+
+        # test create user progress with an authenticated client on the same course.
+        response_2 = self.authenticated_client.post(reverse("learn:progress-detail", args=[1]), {"weeks_completed": 2}, format="json")
+
+
+        # test create user progress with an invalid data type
+        response_3 = self.authenticated_client.post(reverse("learn:progress-detail", args=[3]), {"weeks_completed": "1"}, format="json")
+
+        # test create user progress with an empty body / field on the same course
+        response_4 = self.authenticated_client.post(reverse("learn:progress-detail", args=[3]), format="json")
+
+        # test create user progress for course that DOESN'T exist
+        response_5 = self.authenticated_client.post(reverse("learn:progress-detail", args=[6]), {"weeks_completed": 2}, fomrat="json")
+
+        # test create user progress with an unauthenticated client
+        response_6 = self.unauthenticated_client.post(reverse("learn:progress-detail", args=[1]), {"weeks_completed": 1}, format="json")
+
+        # test create user progress with authenticated client that isn't enrolled to a course
+        response_7 = self.authenticated_client_2.post(reverse("learn:progress-detail", args=[1]), {"weeks_completed": 1}, format="json")
+
+
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['weeks_completed'], 1)
+        self.assertEqual(response.data['user'], 1)
+        self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_3.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_4.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_5.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_7.status_code, status.HTTP_403_FORBIDDEN)
+
+
+
+    def test_update_user_progress(self):
+        """
+        Ensure we can update a user progress instance
+        """
+        UserProgress.objects.create(user=self.user, course=self.course, weeks_completed=6)
+        UserProgress.objects.create(user=self.user, course=self.course_3, weeks_completed=1)
+
+
+        # test update user progress instance with an authenticated client
+        response = self.authenticated_client.put(reverse("learn:progress-detail", args=[2]), {"weeks_completed": 3}, format="json")
+
+        # test update user progress instance again with an authenticated client
+        response_2 = self.authenticated_client.put(reverse("learn:progress-detail", args=[2]), {"weeks_completed": 6}, format="json")
+
+
+        # test update user progress instance with an invalid data type
+        response_3 = self.authenticated_client.put(reverse("learn:progress-detail", args=[1]), {"weeks_completed": "10"}, format="json")
+
+        # test update user progress instance with an empty body / field on the same course
+        response_4 = self.authenticated_client.put(reverse("learn:progress-detail", args=[1]), format="json")
+
+        # test update user progress instance for course that DOESN'T exist
+        response_5 = self.authenticated_client.put(reverse("learn:progress-detail", args=[6]), {"weeks_completed": 2}, fomrat="json")
+
+        # test update user progress instance with an unauthenticated client
+        response_6 = self.unauthenticated_client.put(reverse("learn:progress-detail", args=[1]), {"weeks_completed": 1}, format="json")
+
+        # test update user progress instance with an authenticated client that isn't enrolled to a course
+        response_7 = self.authenticated_client_2.put(reverse("learn:progress-detail", args=[1]), {"weeks_completed": 1}, format="json")
+
+
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['weeks_completed'], 3)
+        self.assertEqual(response.data['user'], 1)
+        self.assertEqual(response_2.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_3.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_4.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_4.data['weeks_completed'], 10)
+        self.assertEqual(response_5.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_7.status_code, status.HTTP_403_FORBIDDEN)
+
+        
+    
+
+
+
+        
+
+
+
+
+
 
 class CourseRatingViewAPITestCase(APITestCase):
     def setUp(self):
@@ -86,9 +282,9 @@ class CourseRatingViewAPITestCase(APITestCase):
         )
 
         # test create course rating with an authenticated client on the same course
-        # response_2 = self.authenticated_client.post(
-        #     reverse("learn:course-rating", args=[1]), {"rating": 2}, format="json"
-        # )
+        response_2 = self.authenticated_client.post(
+            reverse("learn:course-rating", args=[1]), {"rating": 2}, format="json"
+        )
 
         # test create course rating for a course instance that doesn't exist
         response_3 = self.authenticated_client.post(
@@ -100,7 +296,7 @@ class CourseRatingViewAPITestCase(APITestCase):
             reverse("learn:course-rating", args=[1]), format="json"
         )
 
-        # test create course rating with an invalid field / data
+        # test create course rating with an invalid data type
         response_5 = self.authenticated_client.post(
             reverse("learn:course-rating", args=[1]), {"rating": "123"},format="json"
         )
@@ -110,13 +306,17 @@ class CourseRatingViewAPITestCase(APITestCase):
             reverse("learn:course-rating", args=[1]), {"rating": 3},format="json"
         )
 
+        # test create course rating with unathenticated client
+        response_7 = self.unaunthenticated_client.post(reverse("learn:course-rating", args=[1]), {"rating": 1,}, format="json")
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # TODO
-        # self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_7.status_code, status.HTTP_403_FORBIDDEN)
 
 
 

@@ -73,23 +73,16 @@ class LogoutView(APIView):
         response.data = {"message": "success"}
 
         return response
-    
-class UserProgressView(APIView):
-    """
-     Create a new user's progress on a course.
-    """
 
-    def post(self, request, pk):
-        user = user_authentication(request)
-        serializer = UserProgressSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save_with_auth_user(user, pk)
-        return Response(serializer.data)
-    
+
 class UserProgressList(generics.ListAPIView):
     """
-    List all a user's progress on a course
+    List all user's course progress.
     """
+    # I decided for this class to be ListApiView and move the post/create to be at
+    # UserProgress Detail because it's harder to implement POST here; we have to retrieve users's lists  of each course's progress
+    # and create progress for each instance so our URL path here wouldn't align with our interest
+
     serializer_class = UserProgressSerializer
     queryset = UserProgress.objects.all()
 
@@ -97,13 +90,25 @@ class UserProgressList(generics.ListAPIView):
         user = user_authentication(self.request)
         return UserProgress.objects.filter(user=user)
 
-class UserProgressDetail(CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView):
+
+class UserProgressDetail(
+    CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
+):
     """
     Retrieve and update a user's progress instance
     """
 
     serializer_class = UserProgressSerializer
     queryset = UserProgress.objects.all()
+
+    # added POST method (see explanation in UserProgressList)
+    # create a new user's progress for a course
+    def post(self, request, pk):
+        user = user_authentication(request)
+        serializer = UserProgressSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save_with_auth_user(user, pk)
+        return Response(serializer.data)
 
 
 class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
@@ -231,7 +236,9 @@ class WrongExerciseFormList(CreateAPIMixin, generics.ListCreateAPIView):
         return WrongExerciseForm.objects.filter(workout=self.kwargs["pk"])
 
 
-class WrongExerciseFormDetail(DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView):
+class WrongExerciseFormDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """
     Retrieve, update, delete a wrong exercise form instance
     """
@@ -274,7 +281,6 @@ class UnnrollmentView(DeleteAPIMixin, generics.DestroyAPIView):
     serializer_class = EnrollmentSerializer
 
 
-
 class BlogList(CreateAPIMixin, generics.ListCreateAPIView):
     """
     List all blog or create a new blog
@@ -284,9 +290,7 @@ class BlogList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = BlogSerializer
 
 
-class BlogDetail(
-    UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView
-):
+class BlogDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update and delete a blog instance
     """
@@ -307,13 +311,16 @@ class BlogCommentList(CreateAPIMixin, generics.ListCreateAPIView):
         return BlogComments.objects.filter(blog=self.kwargs["pk"])
 
 
-class BlogCommentDetail(DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView):
+class BlogCommentDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """
     Retrieve, update and delete a comment instance
     """
 
     queryset = BlogComments.objects.all()
     serializer_class = BlogCommentsSerializer
+
 
 class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
     """
@@ -322,6 +329,7 @@ class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
 
     queryset = CourseRating.objects.all()
     serializer_class = CourseRatingSerializer
+
 
 # debugging/tesitng purposes only for jwt token
 class UserView(APIView):
