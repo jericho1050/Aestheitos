@@ -32,8 +32,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "corsheaders",
-    "crispy_forms",
-    "crispy_bootstrap5",
     "learn",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -42,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular"
 
 
 ]
@@ -61,7 +60,6 @@ SESSION_COOKIE_SAMESITE = 'None'
 # PROD SETTINGS
 # CSRF_COOKIE_SECURE = True
 # SESSION_COOKIE_SECURE = True
-
 
 
 MIDDLEWARE = [
@@ -155,16 +153,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
 MEDIA_URL = '/images/'
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
-CRISPY_TEMPLATE_PACK = 'bootstrap5'
+# CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+# CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-# REST_FRAMEWORK = {
-#    'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'rest_framework.authentication.BasicAuthentication',
-#         'rest_framework.authentication.SessionAuthentication',
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#    ),
-#    'DEFAULT_PERMISSION_CLASSES': (
-#         'rest_framework.permissions.IsAdminUser',
-#    ),
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Aestheitos LMS API",
+    "DESCRIPTION": "This is the REST API for the Aestheitos Learning Management System. It provides endpoints for managing and accessing courses, lessons, user profiles, and progress tracking in the field of fitness and calisthenics.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

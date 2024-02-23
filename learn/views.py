@@ -1,8 +1,12 @@
-from rest_framework.viewsets import ModelViewSet
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework import generics
+from drf_spectacular.utils import extend_schema
+
+# from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+# from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .serializers import *
 from .models import *
@@ -15,14 +19,18 @@ from .helpers import *
 
 # REFERENCE FOR DRF Class Based functions etc
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/
+# https://www.django-rest-framework.org/tutorial/3-class-based-views/#using-generic-class-based-views
+# https://www.django-rest-framework.org/api-guide/generic-views/#generic-views
 
+# REFERENCE FOR MY documentation tool 
+# https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
 
 # API calls (Class based functions)
 
 
 class RegisterView(APIView):
     """Creates a newly Account"""
-
+    @extend_schema(responses=UserSerializer)
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -71,332 +79,260 @@ class LogoutView(APIView):
         return response
 
 
-class PendingCoursesView(APIView):
+class UserProgressList(generics.ListAPIView):
+    """
+    List all user's course progress.
+    """
+    # I decided for this class to be ListApiView and move the post/create to be at
+    # UserProgress Detail because it's harder to implement POST here; we have to retrieve users's lists  of each course's progress
+    # and create progress for each instance so our URL path here wouldn't align with our interest
 
-    def get(self, request):
-        """returns all pending Courses with the status P"""
+    serializer_class = UserProgressSerializer
+    queryset = UserProgress.objects.all()
 
-        queryset = Course.objects.filter(status="P")
-
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = CourseSerializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        user = user_authentication(self.request)
+        return UserProgress.objects.filter(user=user)
 
 
-class CoursesView(APIView):
-    """ Browsable list of courses """
+class UserProgressDetail(
+    CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
+):
+    """
+    Retrieve and update a user's progress instance
+    """
 
-    def post(self, request):
-        """ POST request creates a newly browsable Course """
-        user = authenticate_request(request)
+    serializer_class = UserProgressSerializer
+    queryset = UserProgress.objects.all()
 
-        course = request.data
-
-        # deserializing data (i.e convert data into model instance)
-        serializer = CourseSerializer(data=course)
+    # added POST method (see explanation in UserProgressList)
+    # create a new user's progress for a course
+    def post(self, request, pk):
+        user = user_authentication(request)
+        serializer = UserProgressSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(created_by=user)
-        return Response(serializer.data)
-
-    def get(self, request):
-        """ GET request returns all Courses """
-
-        # query for requestd course
-        queryset = Course.objects.filter(status="A")
-
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = CourseSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def put(self, request):
-        """ PUT request Update that particular Course """
-
-        user = authenticate_request(request)
-
-        updated_course = request.data
-
-        # deserializing updated data (i.e convert data into model instance)
-        existing_course = Course.objects.get(id=updated_course["id"])
-        serializer = CourseSerializer(existing_course, data=updated_course)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save_with_auth_user(user, pk)
         return Response(serializer.data)
 
 
-class CourseContentview(APIView):
-    """ Course's content or material of that particular course """
+class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all courses, or create a new course.
+    """
 
-    def get(self, request, course_id):
-        """ GET request returns a particular Course's Content """
-
-        # query for request course's content
-        try:
-            content = CourseContent.objects.get(course=course_id)
-        except CourseContent.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
-
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = CourseContentSerializer(content)
-
-        return Response(serializer.data)
-
-    def post(self, request, course_id):
-        """ POST request creates a particular Course's content """
-
-        authenticate_request(request)
-
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
-
-        content = request.data
-
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = CourseContentSerializer(data=content)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(course=course)
-
-        return Response(serializer.data)
-
-    def put(self, request, course_id):
-        """ PUT request Update that particular Course's content """
-
-        authenticate_request(request)
-
-        updated_content = request.data
-
-        # query or retrieve the course's content
-        try:
-            existing_content = CourseContent.objects.get(course=course_id)
-        except CourseContent.DoesNotExist:
-            return Response({"erorr": "No Content found"}, status=404)
-
-        # deserializing updated data (i.e convert data into model instance)
-        serializer = CourseContentSerializer(existing_content, data=updated_content)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+    serializer_class = CourseSerializer
+    queryset = Course.objects.all()
 
 
-class WorkoutsView(APIView):
-    """ Workouts or Exercises of that particular course """
+class CourseDetail(
+    UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Retrieve, update or delete a course instance
+    """
 
-    def get(self, request, course_id):
-        """ GET request returns a particular Workout and it's description """
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
 
-        # query for requested workout
-        queryset = Workouts.objects.filter(course=course_id)
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = WorkoutsSerializer(queryset, many=True)
-        return Response(serializer.data)
 
-    def post(self, request, course_id):
-        """ POST request creates a particular Workout demo """
+class CourseContentDetail(
+    CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
+):
+    """
+    Create, retrieve or update a course's content instance
+    """
 
-        authenticate_request(request)
+    # Since the docs for generics have no GET, POST, and PUT for a Concrete View Class, we added a POST method for this class.
 
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
+    queryset = CourseContent.objects.all()
+    serializer_class = CourseContentSerializer
 
-        workout = request.data
+    def post(self, request, *args, **kwargs):
 
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = WorkoutsSerializer(data=workout)
+        course = get_object_or_404(Course, id=self.kwargs["pk"])
+        user = user_authentication(request)
+        if not is_valid_ownership(user, course.id):
+            raise AuthenticationFailed("Not allowed to create")
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(course=course)
         return Response(serializer.data)
 
-    def put(self, request, course_id):
-        """ PUT request Update that particular Workout itself """
 
-        authenticate_request(request)
+class WorkoutList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    Lists all workouts or create a new workout for a course instance.
+    """
 
-        updated_workout = request.data
+    queryset = Workouts.objects.all()
+    serializer_class = WorkoutsSerializer
 
-        # retrieve the workout instance
-        try:
-            existing_workout = Workouts.objects.get(course=course_id)
-        except Workouts.DoesNotExist:
-            return Response({"error": "Workout not found"}, status=404)
-
-        # deserializing updated data (i.e convert data into model instance)
-        serializer = WorkoutsSerializer(existing_workout, data=updated_workout)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Workouts.objects.filter(course=self.kwargs["pk"])
 
 
-class CorrectExerciseFormView(APIView):
-    """ The Do's or an Exercise's correct form """
+class WorkoutDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Retrieve, update or delete a workout instance
+    """
 
-    def get(self, request, workout_id):
-        """ GET request returns the correct exercise of that workout """
-
-        # retrieve the workout instance
-        try:
-            workout = Workouts.objects.get(id=workout_id)
-        except Workouts.DoesNotExist:
-            return Response({"erorr": "Workout not found"}, status=404)
-
-        # query for the requested correct exercise form
-        exercise = CorrectExerciseForm.objects.filter(workout=workout)
-
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = CorrectExerciseFormSerializer(exercise, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, workout_id):
-        """ POST request creates a demo and description of the correct exercise """
-
-        authenticate_request(request)
-
-        # retrieve the workout instance
-        try:
-            workout = Workouts.objects.get(id=workout_id)
-        except Workouts.DoesNotExist:
-            return Response({"error": "Workout not found"}, status=404)
-
-        exercise = request.data
-
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = CorrectExerciseFormSerializer(data=exercise)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(workout=workout)
-
-        return Response(serializer.data)
-
-    def put(self, request, workout_id):
-        """ PUT request updates the demo or description of the correct exercise """
-
-        authenticate_request(request)
-
-        update = request.data
-
-        queryset = CorrectExerciseForm.objects.filter(workout=workout_id)
-
-        # retrieve the requested existing exercise obj
-        existing_exercise = None
-        for obj in queryset:
-            if update["id"] == obj.id:
-                existing_exercise = obj
-                break
-
-        if existing_exercise is None:
-            return Response({"error": "Exercise not found"}, status=404)
-
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = CorrectExerciseFormSerializer(existing_exercise, data=update)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-class WrongExerciseFormView(APIView):
-    """ The don'ts or an exercise's wrong form """
-
-    def get(self, request, workout_id):
-        """ GET request returns the wrong exercise of that workout """
-
-        # retrieve the workout instance
-        try:
-            workout = Workouts.objects.get(id=workout_id)
-        except Workouts.DoesNotExist:
-            return Response({"error": "Workout not found"}, status=404)
-        
-        exercise = WrongExerciseForm.objects.filter(workout=workout)
-
-        # serializing model instance (i.e convert model instance into JSON)
-        serializer = WrongExerciseFormSerializer(exercise, many=True)
-        return Response(serializer.data)
-    
-    def post(self, request, workout_id):
-        """ POST request creates a demo and description of the wrong exercise """
-
-        authenticate_request(request)
-
-        # retrieve the workout instance
-        try:
-            workout = Workouts.objects.get(id=workout_id)
-        except Workouts.DoesNotExist:
-            return Response({"error": "Workout not found!"}, status=404)
-        
-        exercise = request.data
-
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = WrongExerciseFormSerializer(data=exercise)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(workout=workout)
-        return Response(serializer.data)
-    
-    def put(self, request, workout_id):
-        """" PUT request updates the demo or description of the wrong exercise """
-
-        authenticate_request(request)
-
-        update = request.data
-
-        queryset = WrongExerciseForm.objects.filter(workout=workout_id)
-
-        # retrieving the requested existing exercise obj
-        existing_exercise = None
-        for obj in queryset:
-            if update['id'] == obj.id:
-                existing_exercise = obj
-                break
-        if existing_exercise is None:
-            return Response({"error": "Exercuse not found!"}, status=404)
-        
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = WrongExerciseFormSerializer(existing_exercise, data=update)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-class CourseCommentsView(APIView):
-    """ Commenting function of a course """
-
-    def get(self, request, course_id):
-        pass
-
-    def post(self, request, course_id):
-
-        user = user_auth_request(request)
-
-        comment = request.data
-        comment['comment_by'] = user.id
-
-        # if it's a reply initialize a variable to it's parent instance
-        try:
-            reply_id = comment['parent_comment']
-            reply = CourseComments.objects.get(id=reply_id)
-        except (KeyError, CourseComments.DoesNotExist):
-            reply = None
-
-        # retrieve the course instance
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            return Response({"error": "No course found!"}, status=404)
-        
-        # deserializing fresh data (i.e convert data into model instance)
-        serializer = CourseCommentsSerializer(data=comment)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(course=course, parent_comment=reply)
-        return Response(serializer.data)
-
-        
+    queryset = Workouts.objects.all()
+    serializer_class = WorkoutsSerializer
 
 
-        
-        
+class CourseCommentList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    Lists all comments or create a new comment for a course instance
+    """
+
+    queryset = CourseComments.objects.all()
+    serializer_class = CourseCommentsSerializer
+
+    def get_queryset(self):
+        return CourseComments.objects.filter(course=self.kwargs["pk"])
 
 
+class CourseCommentDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Retrieve, update or delete a comment instance
+    """
 
-        
+    queryset = CourseComments.objects.all()
+    serializer_class = CourseCommentsSerializer
 
 
+class CorrectExerciseFormList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all correct exercises demos or create a new correct exercise demo for a workout instance
+    """
 
+    queryset = CorrectExerciseForm.objects.all()
+    serializer_class = CorrectExerciseFormSerializer
+
+    def get_queryset(self):
+        return CorrectExerciseForm.objects.filter(workout=self.kwargs["pk"])
+
+
+class CorrectExerciseFormDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Retrieve, update, delete a correct exercise form instance
+    """
+
+    queryset = CorrectExerciseForm.objects.all()
+    serializer_class = CorrectExerciseFormSerializer
+
+
+class WrongExerciseFormList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all wrong exercise demos or create a new wrong exercise demo for a workout instance
+    """
+
+    queryset = WrongExerciseForm.objects.all()
+    serializer_class = WrongExerciseFormSerializer
+
+    def get_queryset(self):
+        return WrongExerciseForm.objects.filter(workout=self.kwargs["pk"])
+
+
+class WrongExerciseFormDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Retrieve, update, delete a wrong exercise form instance
+    """
+
+    queryset = WrongExerciseForm.objects.all()
+    serializer_class = WrongExerciseFormSerializer
+
+
+class EnrollmentList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all course's enrollee or create a new enrollment instance
+    """
+
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
+
+    def get_queryset(self):
+        return Enrollment.objects.filter(course=self.kwargs["pk"])
+
+
+class EnrollmentUserList(generics.ListAPIView):
+    """
+    List all a user's enrollment
+    """
+
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
+
+    def get_queryset(self):
+        user = user_authentication(self.request)
+        return Enrollment.objects.filter(user=user)
+
+
+class UnnrollmentView(DeleteAPIMixin, generics.DestroyAPIView):
+    """
+    Delete a enrollment instance (Unenrollment)
+    """
+
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
+
+
+class BlogList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all blog or create a new blog
+    """
+
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+
+
+class BlogDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update and delete a blog instance
+    """
+
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+
+
+class BlogCommentList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all comments or create a new commnet for a blog instance
+    """
+
+    queryset = BlogComments.objects.all()
+    serializer_class = BlogCommentsSerializer
+
+    def get_queryset(self):
+        return BlogComments.objects.filter(blog=self.kwargs["pk"])
+
+
+class BlogCommentDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Retrieve, update and delete a comment instance
+    """
+
+    queryset = BlogComments.objects.all()
+    serializer_class = BlogCommentsSerializer
+
+
+class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
+    """
+    Create a new course's rating
+    """
+
+    queryset = CourseRating.objects.all()
+    serializer_class = CourseRatingSerializer
 
 
 # debugging/tesitng purposes only for jwt token
@@ -416,38 +352,3 @@ class UserView(APIView):
         user = User.objects.filter(id=payload["id"]).first()
         serializer = UserSerializer(user)
         return Response(serializer.data)
-
-
-# NOT USED BELOW
-
-# def index(request):
-#     pass
-
-# def csrf(request):
-#     return JsonResponse({'csrfToken': get_token(request)})
-
-# # register account API
-# @ensure_csrf_cookie
-# def register(request):
-
-#     if request.method != 'POST':
-#         return JsonResponse({"error": "POST request required."}, status=400)
-
-#     data = json.loads(request.body)
-#     first_name = data.get("firstName")
-#     last_name = data.get("lastName")
-#     username = data.get("username")
-#     email = data.get("email")
-#     password = data.get("password")
-
-#     # Attempt to create new user
-#     try:
-#         user = User.objects.create(first_name=first_name, last_name=last_name, username=username, email=email)
-#         user.set_password(password)
-#         user.save()
-#     except IntegrityError as e:
-#         print(e)
-#         return JsonResponse({"error": "Username already taken"}, status=400)
-
-
-#     return JsonResponse({"Success": "Account Created"}, status=200)

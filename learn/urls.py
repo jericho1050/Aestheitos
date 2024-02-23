@@ -10,52 +10,30 @@ urlpatterns = [
     path("login", LoginView.as_view(), name="login"),
     path("user", UserView.as_view(), name="user"),
     path("logout", LogoutView.as_view(), name="logout"),
-    path("courses/pending", PendingCoursesView.as_view(), name="pending_courses"),
-    path("courses/list", CoursesView.as_view(), name="browse"),
-    path("courses/content/<int:course_id>", CourseContentview.as_view(), name="course_content"),
-    path("courses/workout/<int:course_id>", WorkoutsView.as_view(), name="course_workout"),
-    path("courses/correct_form/<int:workout_id>", CorrectExerciseFormView.as_view(), name="correct_form"),
-    path("courses/wrong_form/<int:workout_id>", WrongExerciseFormView.as_view(), name="wrong_form" ),
-    path("courses/comments/<int:course_id>", CourseCommentsView.as_view(), name="course_comments")
+    path("user/courses/progress", UserProgressList.as_view(), name="progress-list"),
+    path("user/course/<int:pk>/progress", UserProgressDetail.as_view(), name="progress-detail"),
+    path('courses', CourseList.as_view(), name='course-list'),
+    path('course/<int:pk>/rate', CourseRatingView.as_view(), name="course-rating"),
+    path('course/<int:pk>', CourseDetail.as_view(), name='course-detail'),
+    path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='course-content'),
+    path('course/<int:pk>/workouts', WorkoutList.as_view(), name="course-workout-list"),
+    path('course/workout/<int:pk>', WorkoutDetail.as_view(), name="course-workout-detail"),
+    path('course/workout/<int:pk>/correct-exercises', CorrectExerciseFormList.as_view(), name="correct-exercise-list"),
+    path('course/workout/correct-exercise/<int:pk>', CorrectExerciseFormDetail.as_view(), name="correct-exercise-detail"),
+    path('course/workout/<int:pk>/wrong-exercises', WrongExerciseFormList.as_view(), name="wrong-exercise-list"),
+    path('course/workout/wrong-exercise/<int:pk>', WrongExerciseFormDetail.as_view(), name="wrong-exercise-detail"),
+    path('course/<int:pk>/comments', CourseCommentList.as_view(), name="course-comments"),
+    path('course/comment/<int:pk>', CourseCommentDetail.as_view(), name="course-comment"),
+    path('course/<int:pk>/enrollments', EnrollmentList.as_view(), name="enrollment-list"),
+    path('course/unenrollment/<int:pk>', UnnrollmentView.as_view(), name="unenrollment"),
+    path('user/enrollments', EnrollmentUserList.as_view(), name="courses-enrolled"),
+    path('blogs', BlogList.as_view(), name="blog-list"),
+    path('blog/<int:pk>', BlogDetail.as_view(), name="blog-detail"),
+    path('blog/<int:pk>/comments', BlogCommentList.as_view(), name="blog-comments"),
+    path('blog/comment/<int:pk>', BlogCommentDetail.as_view(), name="blog-comment")
+
 
 ]
 
 
-
-
-
-# Routes for our API VIEWSETS (By convention we use the model's name)
-
-# user_router = DefaultRouter()
-# user_router.register(r'User', UserView)
-
-# user_progress_router = DefaultRouter()
-# user_progress_router.register(r'UserProgress', UserProgressView)
-
-# course_router = DefaultRouter()
-# course_router.register(r'Course', CourseView)
-
-# course_content_router = DefaultRouter()
-# course_content_router.register(r'CourseContent', CourseContentView)
-
-# course_comments_router = DefaultRouter()
-# course_comments_router.register(r'CourseComments', CourseCommentsView)
-
-# enrollment_router = DefaultRouter()
-# enrollment_router.register(r'Enrollment', EnrollmentView)
-
-# workouts_router = DefaultRouter()
-# workouts_router.register(r'Workouts', WorkoutsView)
-
-# correct_exercise_form_router = DefaultRouter()
-# correct_exercise_form_router.register(r'CorrectExerciseForm', CorrectExerciseFormView)
-
-# wrong_exercise_form_router = DefaultRouter()
-# wrong_exercise_form_router.register(r'WrongExerciseForm', WrongExerciseFormView)
-
-# blog_router = DefaultRouter()
-# blog_router.register(r'Blog', BlogView)
-
-# blog_comments_router = DefaultRouter()
-# blog_comments_router.register(r'BlogComments', BlogCommentsView)
-
+    
