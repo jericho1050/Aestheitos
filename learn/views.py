@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework import generics
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 # from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 # from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -12,6 +13,7 @@ from .serializers import *
 from .models import *
 import jwt, datetime
 from .helpers import *
+from .custom_serializer import *
 
 
 # REFERENCE FOR Django API Authentication using JWT Tokens
@@ -29,8 +31,10 @@ from .helpers import *
 
 
 class RegisterView(APIView):
-    """Creates a newly Account"""
-    @extend_schema(responses=UserSerializer)
+    """
+    Creates a newly Account
+    """
+    @extend_schema(request=UserSerializer, responses=UserSerializer)
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -39,8 +43,21 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
-    """Log in and User validation then returns a JWT"""
+    """
+    Log in and User validation then returns a JWT
+    """
 
+    @extend_schema(
+        request=LoginCustomSerializer,
+        responses=OpenApiTypes.OBJECT,
+        examples=[
+            OpenApiExample(
+                'Example response',
+                value={'jwt': 'your_token_here'},
+                response_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         username = request.data["username"]
         password = request.data["password"]
@@ -71,6 +88,7 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
 
+    @extend_schema(request=LogoutCustomSerializer, responses={200: OpenApiTypes.NONE})
     def post(self, request):
         response = Response()
         response.delete_cookie("jwt")
@@ -81,7 +99,7 @@ class LogoutView(APIView):
 
 class UserProgressList(generics.ListAPIView):
     """
-    List all user's course progress.
+    List all user's course progress
     """
     # I decided for this class to be ListApiView and move the post/create to be at
     # UserProgress Detail because it's harder to implement POST here; we have to retrieve users's lists  of each course's progress
@@ -99,7 +117,7 @@ class UserProgressDetail(
     CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
 ):
     """
-    Retrieve and update a user's progress instance
+    Retrieve and update a user's course progress instance
     """
 
     serializer_class = UserProgressSerializer
@@ -253,7 +271,7 @@ class WrongExerciseFormDetail(
 
 class EnrollmentList(CreateAPIMixin, generics.ListCreateAPIView):
     """
-    List all course's enrollee or create a new enrollment instance
+    List all course's enrollee or create a new enrollment ( i.e user enrolls a course )
     """
 
     queryset = Enrollment.objects.all()
@@ -336,19 +354,19 @@ class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
 
 
 # debugging/tesitng purposes only for jwt token
-class UserView(APIView):
+# class UserView(APIView):
 
-    def get(self, request):
-        token = request.COOKIES.get("jwt")
+#     def get(self, request):
+#         token = request.COOKIES.get("jwt")
 
-        if not token:
-            raise AuthenticationFailed("Unauthenticated!")
+#         if not token:
+#             raise AuthenticationFailed("Unauthenticated!")
 
-        try:
-            payload = jwt.decode(token, key="secret", algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated!")
+#         try:
+#             payload = jwt.decode(token, key="secret", algorithms=["HS256"])
+#         except jwt.ExpiredSignatureError:
+#             raise AuthenticationFailed("Unauthenticated!")
 
-        user = User.objects.filter(id=payload["id"]).first()
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+#         user = User.objects.filter(id=payload["id"]).first()
+#         serializer = UserSerializer(user)
+#         return Response(serializer.data)
