@@ -254,10 +254,8 @@ class CourseDetailAPITestCase(APITestCase):
             },
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
         # test update instance with an authenticated client and invalid fields
-        response = self.authenticated_client.put(
+        response_2 = self.authenticated_client.put(
             reverse("learn:course-detail", args=[1]),
             {
                 "title": "test changing title",
@@ -266,10 +264,8 @@ class CourseDetailAPITestCase(APITestCase):
             },
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
         # test update instance with an invalid course id
-        response = self.authenticated_client.put(
+        response_3 = self.authenticated_client.put(
             reverse("learn:course-detail", args=[3]),
             {
                 "title": "test changing title",
@@ -278,10 +274,9 @@ class CourseDetailAPITestCase(APITestCase):
             },
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # test update course with an authenticated client
-        response = self.authenticated_client.put(
+        response_4 = self.authenticated_client.put(
             reverse("learn:course-detail", args=[1]),
             {
                 "title": "changing title using put",
@@ -291,8 +286,11 @@ class CourseDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["title"], "changing title using put")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_4.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_4.data["title"], "changing title using put")
 
     def test_delete_course(self):
         """
