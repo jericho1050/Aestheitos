@@ -36,7 +36,7 @@ This is my UML Diagram for my models:
 
 ![UML diagram of my Django model that i've created in lucidchart](/images/images/Capstone.jpeg)
   
-Here's also my rough idea or flowchart for my system:
+Here's also my rough idea or flowchart of how a user might interact with my system:
 
 ![Flowchart of my LMS that i've created in lucidchart](/images/images/APP%20FLOW%20-%20UI%20FLOW.jpeg)
 ![Flowchart of my LMS that i've created in lucidchart](/images/images/APP%20FLOW%20-%20UI%20FLOW-2.jpeg)
