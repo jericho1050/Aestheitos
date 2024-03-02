@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 // eslint-disable-next-line no-unused-vars
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 
 const pages = ['Courses', 'Blog'];
@@ -24,7 +24,6 @@ const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -130,8 +129,7 @@ function ResponsiveAppBar() {
               </Button>
             ))}
           </Box>
-          { isAuthenticated ? 
-          <Box sx={{ flexGrow: 0 }}>
+          {/* <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
@@ -159,11 +157,9 @@ function ResponsiveAppBar() {
                 </MenuItem>
               ))}
             </Menu>
-          </Box>
-          : <Box sx={{ flexGrow: 0 }}>
-            <Button href="login" variant="contained">
-              Log In
-            </Button>
+          </Box> */
+          <Box sx={{ flexGrow: 0 }}>
+            <Link to={`signin`} id="sign-in">Sign in</Link>
           </Box>
 }
         </Toolbar>

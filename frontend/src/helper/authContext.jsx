@@ -1,0 +1,32 @@
+import { createContext, useReducer } from "react";
+
+export const AuthContext = createContext(null);
+export const AuthDispatchContext = createContext(null);
+
+
+// eslint-disable-next-line react-refresh/only-export-components, react/prop-types
+export function AuthProvider({ children }) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [tokens, dispatch] = useReducer(authReducer, []);
+
+    return (
+        <AuthContext.Provider value={tokens}>
+            <AuthDispatchContext.Provider value={dispatch}>
+                { children }
+            </AuthDispatchContext.Provider>
+        </AuthContext.Provider>
+    )
+
+}
+// used to manage the user's authentication state on the client-side,
+// eslint-disable-next-line react-refresh/only-export-components
+export function authReducer(state, action) {
+    switch (action.type) {
+        case 'setToken':
+            return { ...state, token: action.payload }
+        case 'removeToken':
+            // eslint-disable-next-line no-case-declarations, no-unused-vars
+            const { token, ...rest } = state;
+            return rest;
+    }
+}
