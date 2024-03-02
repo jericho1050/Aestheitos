@@ -23,6 +23,7 @@ In my outline i have my own **specifications** for my project, as follows:
 - **Create Course**: Users that are signed should be able to create their own training program or course by visiting the Create page.
 - **Pending Courses**: Admins and staff should be able to visit a Pending page.displays all courses with the status pending
 - **Course Catalog**: Index page, where a list of available courses created by instructors is displayed. Each course must include a title, description, thumbnail, difficulty level, number of enrollees, rating, and posted time. All users can see this.
+- **Search**: :  Allow the user to type a query into the search box for a course.
 - **Course**: Clicking a course should redirect the user to a page where they can view the course’s details.
 - **Edit**: The admins or the authenticated Users should be able to edit their own Courses or Blogs.
 - *optional* **Animation**: Use ReactSpring for the home page implemented it yourself through trial and error
