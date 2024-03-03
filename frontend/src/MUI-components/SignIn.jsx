@@ -2,9 +2,9 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
+// import FormControlLabel from '@mui/material/FormControlLabel';
+// import Checkbox from '@mui/material/Checkbox';
+// import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
@@ -13,14 +13,15 @@ import Container from '@mui/material/Container';
 import Cookies from 'js-cookie';
 import { useContext, useState } from 'react';
 import { AuthDispatchContext } from '../helper/authContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 
 function Copyright(props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Your Website
+            <Link color="inherit" to={`/`}>
+                Aestheitos
             </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
@@ -29,27 +30,25 @@ function Copyright(props) {
 }
 
 export default function SignIn() {
-    const [isValidCredentials, setIsValidCredentials] = useState(0);
+    const [isInvalidCredentials, setIsInvalidCredentials] = useState(0);
     const dispatch = useContext(AuthDispatchContext);
+    const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
+        // when sign in button is click. handles authentication, if valid redirect and set cookie
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const token = await signinAPI(data);
-        console.log(token)
         if (token['invalid']) {
-            setIsValidCredentials(1);
+            setIsInvalidCredentials(1);
+        } else {
+            Cookies.set('jwt', token['jwt'], { expires: 7 })
+            dispatch({
+                type: 'setToken',
+                payload: token['jwt']
+            })
+            navigate("/");
         }
-        Cookies.set('jwt', token['jwt'], { expires: 7 })
-        dispatch({
-            type: 'setToken',
-            payload: token['jwt']
-        })
-
-        // console.log({
-        //   email: data.get('username'),
-        //   password: data.get('password'),
-        // });
     };
 
     return (
@@ -71,7 +70,7 @@ export default function SignIn() {
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                     <TextField
-                        onChange={() => setIsValidCredentials(0)}
+                        onChange={() => setIsInvalidCredentials(0)}
                         margin="normal"
                         required
                         fullWidth
@@ -91,11 +90,11 @@ export default function SignIn() {
                         id="password"
                         autoComplete="current-password"
                     />
-                    <FormControlLabel
+                    {/* <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}
                         label="Remember me"
-                    />
-                    {isValidCredentials === 1 ?
+                    /> */}
+                    {isInvalidCredentials === 1 ?
                         <Typography sx={{
                             color: 'red', fontSize: 'medium'
                             
@@ -114,13 +113,13 @@ export default function SignIn() {
                         Sign In
                     </Button>
                     <Grid container>
-                        <Grid item xs>
+                        {/* <Grid item xs>
                             <Link href="#" variant="body2">
                                 Forgot password?
                             </Link>
-                        </Grid>
+                        </Grid> */}
                         <Grid item>
-                            <Link href="#" variant="body2">
+                            <Link to={"/signup"} variant="body2">
                                 {"Don't have an account? Sign Up"}
                             </Link>
                         </Grid>
@@ -132,12 +131,12 @@ export default function SignIn() {
     );
 }
 
-async function signinAPI(data) {
-    // User login
+function signinAPI(data) {
+    // User login API authentication
 
 
     // route "/login"
-    const response = fetch(`${import.meta.env.VITE_API_URL}login`, {
+    return fetch(`${import.meta.env.VITE_API_URL}login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8'
@@ -148,12 +147,14 @@ async function signinAPI(data) {
         })
     }).then(response => {
         if (!response.ok) {
-            return {"invalid": "incorrect username and password"}
+            if (response.status === 400 || response.status === 403) {
+                return {"invalid": "incorrect username and password"};
+            }
+            throw new Error(response);
         }
         return response.json();
-    })
+    }).catch(err => console.log(err));
 
-    return response;
 
 
 }

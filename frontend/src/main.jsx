@@ -10,6 +10,7 @@ import "./index.css";
 import Root from './routes/root';
 import ErrorPage from './error-page';
 import SignIn from './MUI-components/SignIn';
+import SignUp from './MUI-components/SignUp';
 
 const theme = createTheme({
   palette: {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
     path: "/",
     element: <Root/>,
     errorElement: <ErrorPage />
+  },
+  {
+    path: "/signup",
+    element: <SignUp />
   },
   {
     path: "/signin",
