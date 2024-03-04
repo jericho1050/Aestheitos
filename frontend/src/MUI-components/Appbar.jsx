@@ -16,6 +16,8 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import { AuthContext } from '../helper/authContext';
 
 
 const pages = ['Courses', 'Blog'];
@@ -24,6 +26,18 @@ const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const token = React.useContext(AuthContext);
+
+
+  // TODO  
+  // handle when user refresh page. initiate a GET request to /user route and have the cookie be validate 
+  // for PRESERVATION OF STATE
+  React.useEffect(() => {
+    if (Cookies.get('jwt') === token['jwt']) {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -129,7 +143,8 @@ function ResponsiveAppBar() {
               </Button>
             ))}
           </Box>
-          {/* <Box sx={{ flexGrow: 0 }}>
+          { isAuthenticated ? 
+          <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
@@ -157,11 +172,12 @@ function ResponsiveAppBar() {
                 </MenuItem>
               ))}
             </Menu>
-          </Box> */
+          </Box> 
+          :
           <Box sx={{ flexGrow: 0 }}>
             <Link to={`signin`} id="sign-in">Sign in</Link>
           </Box>
-}
+        }
         </Toolbar>
       </Container>
     </AppBar>

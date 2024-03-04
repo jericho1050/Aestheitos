@@ -13,6 +13,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useNavigate, Link } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import { AuthDispatchContext } from '../helper/authContext';
 // import axios from 'axios';
 
 
@@ -32,16 +34,22 @@ function Copyright(props) {
 export default function SignUp() {
   const navigate = useNavigate();
   const [isInvalid, setIsInvalid] = React.useState(0);
+  const dispatch = React.useContext(AuthDispatchContext);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    const response = await signupAPI(data);
+    const token = await signupAPI(data);
 
-
-    if (response['invalid']) {
+    if (token['invalid']) {
       setIsInvalid(1);
     } else {
+      Cookies.set('jwt', token['jwt'], { expires: 7 });
+      dispatch({
+        type: 'setToken',
+        payload: token['jwt']
+    });
       navigate('/');
     }
 
@@ -166,8 +174,8 @@ function signupAPI(data) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      firstName: data.get('firstName'),
-      lastName: data.get('lastName'),
+      first_name: data.get('firstName'),
+      last_name: data.get('lastName'),
       username: data.get('username'),
       email: data.get('email'),
       password: data.get('password')

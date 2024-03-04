@@ -7,7 +7,7 @@ export const AuthDispatchContext = createContext(null);
 // eslint-disable-next-line react-refresh/only-export-components, react/prop-types
 export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [tokens, dispatch] = useReducer(authReducer, []);
+    const [tokens, dispatch] = useReducer(authReducer, {});
 
     return (
         <AuthContext.Provider value={tokens}>
@@ -23,10 +23,9 @@ export function AuthProvider({ children }) {
 export function authReducer(state, action) {
     switch (action.type) {
         case 'setToken':
-            return { ...state, token: action.payload }
+            return  {"jwt": action.payload}
         case 'removeToken':
             // eslint-disable-next-line no-case-declarations, no-unused-vars
-            const { token, ...rest } = state;
-            return rest;
-    }
+            return {};
+        }
 }

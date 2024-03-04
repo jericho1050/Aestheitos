@@ -42,7 +42,7 @@ export default function SignIn() {
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
-            Cookies.set('jwt', token['jwt'], { expires: 7 })
+            Cookies.set('jwt', token['jwt'], { expires: 7 });
             dispatch({
                 type: 'setToken',
                 payload: token['jwt']

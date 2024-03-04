@@ -9,8 +9,8 @@ import {
 import "./index.css";
 import Root from './routes/root';
 import ErrorPage from './error-page';
-import SignIn from './MUI-components/SignIn';
-import SignUp from './MUI-components/SignUp';
+import SignIn from './routes/SignIn';
+import SignUp from './routes/SignUp';
 
 const theme = createTheme({
   palette: {
