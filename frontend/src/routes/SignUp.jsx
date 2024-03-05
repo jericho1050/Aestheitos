@@ -13,7 +13,6 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useNavigate, Link } from 'react-router-dom';
-import Cookies from 'js-cookie';
 import { AuthDispatchContext } from '../helper/authContext';
 // import axios from 'axios';
 
@@ -40,12 +39,11 @@ export default function SignUp() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    const token = await signupAPI(data);
+    const token = await signUpAPI(data);
 
     if (token['invalid']) {
       setIsInvalid(1);
     } else {
-      Cookies.set('jwt', token['jwt'], { expires: 7 });
       dispatch({
         type: 'setToken',
         payload: token['jwt']
@@ -166,13 +164,14 @@ export default function SignUp() {
   );
 }
 
-
-function signupAPI(data) {
+// sends a POST request to our /signup route 
+function signUpAPI(data) {
   return fetch(`${import.meta.env.VITE_API_URL}register`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify({
       first_name: data.get('firstName'),
       last_name: data.get('lastName'),

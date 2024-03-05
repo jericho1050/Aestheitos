@@ -10,10 +10,10 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import Cookies from 'js-cookie';
 import { useContext, useState } from 'react';
 import { AuthDispatchContext } from '../helper/authContext';
 import { useNavigate, Link } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 
 function Copyright(props) {
@@ -38,11 +38,10 @@ export default function SignIn() {
         // when sign in button is click. handles authentication, if valid redirect and set cookie
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const token = await signinAPI(data);
+        const token = await signInAPI(data);
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
-            Cookies.set('jwt', token['jwt'], { expires: 7 });
             dispatch({
                 type: 'setToken',
                 payload: token['jwt']
@@ -131,9 +130,9 @@ export default function SignIn() {
     );
 }
 
-function signinAPI(data) {
+// sends a POST request to /signin route
+function signInAPI(data) {
     // User login API authentication
-
 
     // route "/login"
     return fetch(`${import.meta.env.VITE_API_URL}login`, {
@@ -141,6 +140,7 @@ function signinAPI(data) {
         headers: {
             'Content-Type': 'application/json;charset=utf-8'
         },
+        credentials: 'include',
         body: JSON.stringify({
             username: data.get('username'),
             password: data.get('password'),
@@ -153,7 +153,7 @@ function signinAPI(data) {
             throw new Error(response);
         }
         return response.json();
-    }).catch(err => console.log(err));
+    }).catch(err => console.error(err));
 
 
 

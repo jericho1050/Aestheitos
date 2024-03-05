@@ -16,28 +16,46 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import { AuthContext } from '../helper/authContext';
-
+import { AuthContext, AuthDispatchContext } from '../helper/authContext';
+import getToken from '../helper/getToken';
 
 const pages = ['Courses', 'Blog'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
+
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const token = React.useContext(AuthContext);
+  const dispatch = React.useContext(AuthDispatchContext);
 
 
-  // TODO  
-  // handle when user refresh page. initiate a GET request to /user route and have the cookie be validate 
+  const settingsHandlers = {
+    'Profile': handleProfile,
+    'Account': handleAccount,
+    'Enrolled': handleEnrolled,
+    'Logout': () => handleLogout(dispatch)
+  }
+
+  // handle cookie when user refreshes page.
   // for PRESERVATION OF STATE
   React.useEffect(() => {
-    if (Cookies.get('jwt') === token['jwt']) {
-      setIsAuthenticated(true);
-    }
-  }, []);
+    (async () => {
+      if (!token['jwt']) {
+        const token = await getToken()
+        dispatch({
+          type: 'setToken',
+          payload: token['jwt']
+        })
+      } else if (token['jwt']) {
+        setIsAuthenticated(!isAuthenticated);
+      } else {
+        setIsAuthenticated(false);
+      }
+    })();
+
+  }, [token['jwt']]);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -55,7 +73,7 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
@@ -143,44 +161,82 @@ function ResponsiveAppBar() {
               </Button>
             ))}
           </Box>
-          { isAuthenticated ? 
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box> 
-          :
-          <Box sx={{ flexGrow: 0 }}>
-            <Link to={`signin`} id="sign-in">Sign in</Link>
-          </Box>
-        }
+          {isAuthenticated ?
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {settings.map((setting) => (
+                  <MenuItem key={setting} onClick={settingsHandlers[setting]}>
+                    <Typography textAlign="center">{setting}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+            :
+            <Box sx={{ flexGrow: 0 }}>
+              <Link to={`signin`} id="sign-in">Sign in</Link>
+            </Box>
+          }
         </Toolbar>
       </Container>
     </AppBar>
   );
 }
 export default ResponsiveAppBar;
+
+function handleProfile() {
+
+}
+
+function handleAccount() {
+
+}
+
+function handleEnrolled() {
+
+}
+
+function handleLogout(dispatch) {
+  signOutAPI();
+  dispatch({
+    type: 'removeToken',
+  })
+
+}
+
+function signOutAPI() {
+  const response = fetch(`${import.meta.env.VITE_API_URL}logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8'
+    },
+    credentials: 'include'
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error(response.status_code)
+    }
+    console.log("okay! logged out")
+  }).catch(err, () => console.error(err));
+
+  return response.json()
+
+}

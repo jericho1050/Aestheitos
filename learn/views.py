@@ -24,7 +24,7 @@ from .custom_serializer import *
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/#using-generic-class-based-views
 # https://www.django-rest-framework.org/api-guide/generic-views/#generic-views
 
-# REFERENCE FOR MY documentation tool 
+# REFERENCE FOR MY documentation tool
 # https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
 
 # API calls (Class based functions)
@@ -34,12 +34,13 @@ class RegisterView(APIView):
     """
     Creates a newly Account
     """
+
     @extend_schema(request=UserSerializer, responses=UserSerializer)
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        user = User.objects.filter(username=serializer.data.get('username')).first()
+        user = User.objects.filter(username=serializer.data.get("username")).first()
 
         if user is None:
             raise AuthenticationFailed("User not found!")
@@ -70,8 +71,8 @@ class LoginView(APIView):
         responses=OpenApiTypes.OBJECT,
         examples=[
             OpenApiExample(
-                'Example response',
-                value={'jwt': 'your_token_here'},
+                "Example response",
+                value={"jwt": "your_token_here"},
                 response_only=True,
             ),
         ],
@@ -98,7 +99,7 @@ class LoginView(APIView):
 
         response = Response()
 
-        response.set_cookie(key="jwt", value=token, httponly=True)
+        response.set_cookie(key="jwt", value=token, httponly=True, secure=False, expires=payload["exp"], samesite='None')
 
         response.data = {"jwt": token}
         return response
@@ -119,6 +120,7 @@ class UserProgressList(generics.ListAPIView):
     """
     List all user's course progress
     """
+
     # I decided for this class to be ListApiView and move the post/create to be at
     # UserProgress Detail because it's harder to implement POST here; we have to retrieve users's lists  of each course's progress
     # and create progress for each instance so our URL path here wouldn't align with our interest
@@ -371,20 +373,12 @@ class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
     serializer_class = CourseRatingSerializer
 
 
-# debugging/tesitng purposes only for jwt token
-# class UserView(APIView):
+# revalidate the user's token and returns it
+class UserView(APIView):
+    """
+    Validates the JWT
+    """
 
-#     def get(self, request):
-#         token = request.COOKIES.get("jwt")
-
-#         if not token:
-#             raise AuthenticationFailed("Unauthenticated!")
-
-#         try:
-#             payload = jwt.decode(token, key="secret", algorithms=["HS256"])
-#         except jwt.ExpiredSignatureError:
-#             raise AuthenticationFailed("Unauthenticated!")
-
-#         user = User.objects.filter(id=payload["id"]).first()
-#         serializer = UserSerializer(user)
-#         return Response(serializer.data)
+    def get(self, request):
+        user_authentication(request)
+        return Response({"jwt": request.COOKIES.get("jwt")})
