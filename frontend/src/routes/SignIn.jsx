@@ -13,7 +13,7 @@ import Container from '@mui/material/Container';
 import { useContext, useState } from 'react';
 import { AuthDispatchContext } from '../helper/authContext';
 import { useNavigate, Link } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import setJWTLocatStorage from '../helper/setTokenLocal';
 
 
 function Copyright(props) {
@@ -42,6 +42,7 @@ export default function SignIn() {
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
+            setJWTLocatStorage(token['jwt']);
             dispatch({
                 type: 'setToken',
                 payload: token['jwt']

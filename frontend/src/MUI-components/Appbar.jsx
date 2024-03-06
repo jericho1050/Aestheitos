@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 // eslint-disable-next-line no-unused-vars
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext, AuthDispatchContext } from '../helper/authContext';
 import getToken from '../helper/getToken';
 
@@ -42,13 +42,10 @@ function ResponsiveAppBar() {
   // for PRESERVATION OF STATE
   React.useEffect(() => {
     (async () => {
-      if (!token['jwt']) {
-        const token = await getToken()
-        dispatch({
-          type: 'setToken',
-          payload: token['jwt']
-        })
-      } else if (token['jwt']) {
+      if(token['jwt']) {
+        setIsAuthenticated(!isAuthenticated);
+      } else if (!token['jwt'] && localStorage.getItem('jwt')) {
+        // in case of refresh let user be authenticated
         setIsAuthenticated(!isAuthenticated);
       } else {
         setIsAuthenticated(false);
@@ -220,7 +217,8 @@ function handleLogout(dispatch) {
   dispatch({
     type: 'removeToken',
   })
-
+  localStorage.removeItem('jwt');
+  
 }
 
 function signOutAPI() {
@@ -234,9 +232,9 @@ function signOutAPI() {
     if (!response.ok) {
       throw new Error(response.status_code)
     }
-    console.log("okay! logged out")
-  }).catch(err, () => console.error(err));
+    return response.json()
+  }).catch(err => console.error(err));
 
-  return response.json()
+  return response
 
 }
