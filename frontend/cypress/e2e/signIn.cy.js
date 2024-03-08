@@ -44,7 +44,7 @@ describe('User Signs In', () => {
         cy.contains('button', 'Sign In').click();
 
         // then assert
-        cy.url().should('include', '/');
+        cy.url().should('include', '/home');
 
     });
 

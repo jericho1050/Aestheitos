@@ -16,10 +16,10 @@ from .helpers import *
 from .custom_serializer import *
 
 
-# REFERENCE FOR Django API Authentication using JWT Tokens
+# REFERENCE FOR Django API Authentication using JWT Tokens by Scalable Scripts
 # https://www.youtube.com/watch?v=PUzgZrS_piQ&list=LL&index=3&t=968s&ab_channel=ScalableScripts
 
-# REFERENCE FOR DRF Class Based functions etc
+# Documentation Source FOR DRF Class Based functions etc
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/#using-generic-class-based-views
 # https://www.django-rest-framework.org/api-guide/generic-views/#generic-views
@@ -27,9 +27,8 @@ from .custom_serializer import *
 # REFERENCE FOR MY documentation tool
 # https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
 
+
 # API calls (Class based functions)
-
-
 class RegisterView(APIView):
     """
     Creates a newly Account
@@ -99,7 +98,7 @@ class LoginView(APIView):
 
         response = Response()
 
-        response.set_cookie(key="jwt", value=token, httponly=True, secure=False, expires=payload["exp"], samesite='None')
+        response.set_cookie(key="jwt", value=token, httponly=True)
 
         response.data = {"jwt": token}
         return response

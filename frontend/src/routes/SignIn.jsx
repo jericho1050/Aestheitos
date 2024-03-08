@@ -13,14 +13,13 @@ import Container from '@mui/material/Container';
 import { useContext, useState } from 'react';
 import { AuthDispatchContext } from '../helper/authContext';
 import { useNavigate, Link } from 'react-router-dom';
-import setJWTLocatStorage from '../helper/setTokenLocal';
 
 
 function Copyright(props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
-            <Link color="inherit" to={`/`}>
+            <Link color="inherit" to={`/home`}>
                 Aestheitos
             </Link>{' '}
             {new Date().getFullYear()}
@@ -34,20 +33,19 @@ export default function SignIn() {
     const dispatch = useContext(AuthDispatchContext);
     const navigate = useNavigate();
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = (event) => {
         // when sign in button is click. handles authentication, if valid redirect and set cookie
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const token = await signInAPI(data);
+        const token = signInAPI(data);
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
-            setJWTLocatStorage(token['jwt']);
             dispatch({
                 type: 'setToken',
                 payload: token['jwt']
             })
-            navigate("/");
+            navigate("/home");
         }
     };
 
@@ -136,10 +134,10 @@ function signInAPI(data) {
     // User login API authentication
 
     // route "/login"
-    return fetch(`${import.meta.env.VITE_API_URL}login`, {
-        method: 'POST',
+    const response = fetch(`${import.meta.env.VITE_API_URL}login`, {
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json;charset=utf-8'
+            'Content-Type': 'application/json'
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -156,6 +154,5 @@ function signInAPI(data) {
         return response.json();
     }).catch(err => console.error(err));
 
-
-
+    return response;
 }

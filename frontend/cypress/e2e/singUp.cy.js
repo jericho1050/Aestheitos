@@ -67,6 +67,6 @@ describe("User Signs up ", () => {
             expect(response.body).to.have.property('jwt');
             
         });
-        cy.url().should('include', "/")
+        cy.url().should('include', "/home")
     })
 });

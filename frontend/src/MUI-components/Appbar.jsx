@@ -17,7 +17,17 @@ import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext, AuthDispatchContext } from '../helper/authContext';
+import SearchIcon from '@mui/icons-material/Search';
 import getToken from '../helper/getToken';
+import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
+import { styled, alpha } from '@mui/material/styles';
+import InputBase from '@mui/material/InputBase';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+
 
 const pages = ['Courses', 'Blog'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -26,9 +36,12 @@ const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [isOpen, setIsOpen] = React.useState(false);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const token = React.useContext(AuthContext);
   const dispatch = React.useContext(AuthDispatchContext);
+  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+
 
 
   const settingsHandlers = {
@@ -42,10 +55,7 @@ function ResponsiveAppBar() {
   // for PRESERVATION OF STATE
   React.useEffect(() => {
     (async () => {
-      if(token['jwt']) {
-        setIsAuthenticated(!isAuthenticated);
-      } else if (!token['jwt'] && localStorage.getItem('jwt')) {
-        // in case of refresh let user be authenticated
+      if (token['jwt']) {
         setIsAuthenticated(!isAuthenticated);
       } else {
         setIsAuthenticated(false);
@@ -60,7 +70,11 @@ function ResponsiveAppBar() {
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
+  const handleClickSearch = () => {
 
+    setIsOpen(true);
+  };
+  
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
@@ -68,6 +82,34 @@ function ResponsiveAppBar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+
+
+  function handleProfile() {
+
+  }
+
+  function handleAccount() {
+
+  }
+
+  function handleEnrolled() {
+
+  }
+
+
+  function handleLogout(dispatch) {
+    signOutAPI();
+    dispatch({
+      type: 'removeToken',
+    })
+    localStorage.removeItem('jwt');
+
+  }
 
   return (
     <AppBar position="fixed">
@@ -79,7 +121,7 @@ function ResponsiveAppBar() {
             variant="h6"
             noWrap
             component="a"
-            href="http://localhost:5173/"
+            href="http://localhost:5173/home"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -130,12 +172,13 @@ function ResponsiveAppBar() {
             </Menu>
           </Box>
           <Typography
-            variant="h5"
+            variant="h6"
             noWrap
             component="a"
-            href="http://localhost:5173/"
+            href="http://localhost:5173/home"
             sx={{
-              mr: 2,
+              ml: 4,
+              mr: 0,
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
               fontFamily: 'monospace',
@@ -160,11 +203,74 @@ function ResponsiveAppBar() {
           </Box>
           {isAuthenticated ?
             <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-                </IconButton>
-              </Tooltip>
+              <Grid direction="row-reverse" container spacing={2}>
+                <Grid item xs>
+                  <Tooltip data-cy="Tool tip" title="Open settings">
+                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                      <Avatar data-cy="Avatar" alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
+                {isSmallScreen ?
+                  <>
+
+                    <Grid item xs md>
+                      <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
+                        <SearchIcon />
+                      </IconButton>
+                    </Grid>
+                    <Dialog
+                      fullWidth={true}
+                      maxWidth="md"
+                      open={isOpen}
+                      onClose={handleClose}
+                      PaperProps={{
+                        component: 'form',
+                        onSubmit: (event) => {
+                          event.preventDefault();
+                          const formData = new FormData(event.currentTarget);
+                          const formJson = Object.fromEntries(formData.entries());
+                          const email = formJson.email;
+                          console.log(email);
+                          handleClose();
+                        },
+                      }}
+                    >
+                      <DialogTitle>Search for Courses</DialogTitle>
+                      <DialogContent>
+                        {/* <DialogContentText>
+                          Search Available Courses
+                        </DialogContentText> */}
+                        <Search>
+                          <SearchIconWrapper>
+                            <SearchIcon />
+                          </SearchIconWrapper>
+                          <StyledInputBase
+                            placeholder="Search…"
+                            inputProps={{ 'aria-label': 'search' }}
+                          />
+                        </Search>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleClose}>Cancel</Button>
+                        <Button type="submit">Search</Button>
+                      </DialogActions>
+                    </Dialog>
+                  </>
+                  :
+                  <Grid item xs md>
+                    <Search>
+                      <SearchIconWrapper>
+                        <SearchIcon />
+                      </SearchIconWrapper>
+                      <StyledInputBase
+                        placeholder="Search…"
+                        inputProps={{ 'aria-label': 'search' }}
+                      />
+                    </Search>
+                  </Grid>
+                }
+              </Grid>
               <Menu
                 sx={{ mt: '45px' }}
                 id="menu-appbar"
@@ -190,7 +296,10 @@ function ResponsiveAppBar() {
             </Box>
             :
             <Box sx={{ flexGrow: 0 }}>
-              <Link to={`signin`} id="sign-in">Sign in</Link>
+              <IconButton size="large" aria-label="search" color="inherit">
+                <SearchIcon />
+              </IconButton>
+              <Link to={`/signin`} id="sign-in">Sign in</Link>
             </Box>
           }
         </Toolbar>
@@ -200,26 +309,48 @@ function ResponsiveAppBar() {
 }
 export default ResponsiveAppBar;
 
-function handleProfile() {
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
 
-}
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
 
-function handleAccount() {
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  width: '100%',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
+}));
 
-}
-
-function handleEnrolled() {
-
-}
-
-function handleLogout(dispatch) {
-  signOutAPI();
-  dispatch({
-    type: 'removeToken',
-  })
-  localStorage.removeItem('jwt');
-  
-}
 
 function signOutAPI() {
   const response = fetch(`${import.meta.env.VITE_API_URL}logout`, {

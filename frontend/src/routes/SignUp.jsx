@@ -48,7 +48,7 @@ export default function SignUp() {
         type: 'setToken',
         payload: token['jwt']
     });
-      navigate('/');
+      navigate('/home');
     }
 
   }

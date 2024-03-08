@@ -29,9 +29,15 @@ const theme = createTheme({
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Root/>,
-    errorElement: <ErrorPage />
+    path: "/home",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    // children: [
+    //   {
+    //     path:"",
+    //     element: <Home/>
+    //   }
+    // ]
   },
   {
     path: "/signup",
@@ -39,7 +45,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/signin",
-    element: <SignIn/>
+    element: <SignIn />
   }
 ])
 
@@ -47,7 +53,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <AuthProvider>
-        <RouterProvider router={router}/>
+        <RouterProvider router={router} />
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
