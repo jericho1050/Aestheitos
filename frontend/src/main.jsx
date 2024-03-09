@@ -11,6 +11,7 @@ import Root from './routes/root';
 import ErrorPage from './error-page';
 import SignIn from './routes/SignIn';
 import SignUp from './routes/SignUp';
+import Home from './routes/Home';
 
 const theme = createTheme({
   palette: {
@@ -32,12 +33,12 @@ const router = createBrowserRouter([
     path: "/home",
     element: <Root />,
     errorElement: <ErrorPage />,
-    // children: [
-    //   {
-    //     path:"",
-    //     element: <Home/>
-    //   }
-    // ]
+    children: [
+      {
+        path:"",
+        element: <Home/>
+      }
+    ]
   },
   {
     path: "/signup",

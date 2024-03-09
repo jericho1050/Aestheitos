@@ -372,12 +372,13 @@ class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
     serializer_class = CourseRatingSerializer
 
 
-# revalidate the user's token and returns it
+# revalidate the user's token and returns it.
 class UserView(APIView):
     """
     Validates the JWT
     """
 
     def get(self, request):
+        
         user_authentication(request)
         return Response({"jwt": request.COOKIES.get("jwt")})

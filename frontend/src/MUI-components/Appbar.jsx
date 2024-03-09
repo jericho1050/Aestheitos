@@ -51,17 +51,32 @@ function ResponsiveAppBar() {
     'Logout': () => handleLogout(dispatch)
   }
 
-  // handle cookie when user refreshes page.
+  // handle jwt in state  when user refreshes page.
   // for PRESERVATION OF STATE
   React.useEffect(() => {
+    // token is initialized to null when page loads, so this will run after a refresh.
     (async () => {
+      const response = await validateJWTToken();
+
+      if (response['jwt']){
+        dispatch({
+          type: 'setToken',
+          payload: response['jwt']
+        })
+      } 
+
+    })();
+  }, [!token]);
+
+
+
+  React.useEffect(() => {
+
       if (token['jwt']) {
         setIsAuthenticated(!isAuthenticated);
       } else {
         setIsAuthenticated(false);
       }
-    })();
-
   }, [token['jwt']]);
 
   const handleOpenNavMenu = (event) => {
@@ -74,7 +89,7 @@ function ResponsiveAppBar() {
 
     setIsOpen(true);
   };
-  
+
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
@@ -107,15 +122,14 @@ function ResponsiveAppBar() {
     dispatch({
       type: 'removeToken',
     })
-    localStorage.removeItem('jwt');
 
   }
 
   return (
+    <>   
     <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
           <Avatar alt="logo" src="src/static/images/aestheitoslogo.png" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
           <Typography
             variant="h6"
@@ -203,7 +217,7 @@ function ResponsiveAppBar() {
           </Box>
           {isAuthenticated ?
             <Box sx={{ flexGrow: 0 }}>
-              <Grid direction="row-reverse" container spacing={2}>
+              <Grid direction="row-reverse" container alignItems={'center'} spacing={2}>
                 <Grid item xs>
                   <Tooltip data-cy="Tool tip" title="Open settings">
                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -213,7 +227,6 @@ function ResponsiveAppBar() {
                 </Grid>
                 {isSmallScreen ?
                   <>
-
                     <Grid item xs md>
                       <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
                         <SearchIcon />
@@ -296,15 +309,77 @@ function ResponsiveAppBar() {
             </Box>
             :
             <Box sx={{ flexGrow: 0 }}>
-              <IconButton size="large" aria-label="search" color="inherit">
-                <SearchIcon />
-              </IconButton>
-              <Link to={`/signin`} id="sign-in">Sign in</Link>
+              <Grid container spacing={{ sm:1, md: 2}} alignItems={'center'}>
+              {isSmallScreen ?
+                  <>
+                    <Grid item xs md>
+                      <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
+                        <SearchIcon />
+                      </IconButton>
+                    </Grid>
+                    <Dialog
+                      fullWidth={true}
+                      maxWidth="md"
+                      open={isOpen}
+                      onClose={handleClose}
+                      PaperProps={{
+                        component: 'form',
+                        onSubmit: (event) => {
+                          event.preventDefault();
+                          const formData = new FormData(event.currentTarget);
+                          const formJson = Object.fromEntries(formData.entries());
+                          const email = formJson.email;
+                          console.log(email);
+                          handleClose();
+                        },
+                      }}
+                    >
+                      <DialogTitle>Search for Courses</DialogTitle>
+                      <DialogContent>
+                        {/* <DialogContentText>
+                          Search Available Courses
+                        </DialogContentText> */}
+                        <Search>
+                          <SearchIconWrapper>
+                            <SearchIcon />
+                          </SearchIconWrapper>
+                          <StyledInputBase
+                            placeholder="Search…"
+                            inputProps={{ 'aria-label': 'search' }}
+                          />
+                        </Search>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleClose}>Cancel</Button>
+                        <Button type="submit">Search</Button>
+                      </DialogActions>
+                    </Dialog>
+                  </>
+                  :
+                  <Grid item xs md>
+                    <Search>
+                      <SearchIconWrapper>
+                        <SearchIcon />
+                      </SearchIconWrapper>
+                      <StyledInputBase
+                        placeholder="Search…"
+                        inputProps={{ 'aria-label': 'search' }}
+                      />
+                    </Search>
+                  </Grid>
+                }
+              <Grid item xs={"auto"} md>
+                <Link to={`/signin`} id="sign-in">Sign in</Link>
+              </Grid>
+            </Grid>
             </Box>
           }
         </Toolbar>
       </Container>
     </AppBar>
+   
+     <Toolbar />
+    </>
   );
 }
 export default ResponsiveAppBar;
@@ -353,6 +428,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 
 function signOutAPI() {
+  // ask the backend server to delete the httpOnly jwt cookie
   const response = fetch(`${import.meta.env.VITE_API_URL}logout`, {
     method: 'POST',
     headers: {
@@ -368,4 +444,22 @@ function signOutAPI() {
 
   return response
 
+}
+
+async function validateJWTToken() {
+  
+  // GET request 
+  // ask the server to check the jwt cookie for validation and authentication purposes
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}user`, { headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('An error occurred:', error);
+    return null;
+  }
 }

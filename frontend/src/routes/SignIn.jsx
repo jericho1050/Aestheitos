@@ -33,11 +33,11 @@ export default function SignIn() {
     const dispatch = useContext(AuthDispatchContext);
     const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         // when sign in button is click. handles authentication, if valid redirect and set cookie
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const token = signInAPI(data);
+        const token = await signInAPI(data);
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
