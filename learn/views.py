@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework import generics
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
@@ -16,8 +17,11 @@ from .helpers import *
 from .custom_serializer import *
 
 
-# REFERENCE FOR Django API Authentication using JWT Tokens by Scalable Scripts
+# REFERENCE FOR Django API Authentication using JWT Tokens by Scalable Scripts (thought i use DRF's simple jwt instead)
 # https://www.youtube.com/watch?v=PUzgZrS_piQ&list=LL&index=3&t=968s&ab_channel=ScalableScripts
+
+# Documentation reference also for Simple JWT 
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html
 
 # Documentation Source FOR DRF Class Based functions etc
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/
@@ -26,6 +30,8 @@ from .custom_serializer import *
 
 # REFERENCE FOR MY documentation tool
 # https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
+
+
 
 
 # API calls (Class based functions)
@@ -58,55 +64,31 @@ class RegisterView(APIView):
 
         response.data = {"jwt": token}
         return response
-
-
-class LoginView(APIView):
+    
+class LoginView(TokenObtainPairView):
     """
-    Log in and User validation then returns a JWT
+    Authentication of the User and returns an access and refresh token
     """
-
-    @extend_schema(
-        request=LoginCustomSerializer,
-        responses=OpenApiTypes.OBJECT,
-        examples=[
-            OpenApiExample(
-                "Example response",
-                value={"jwt": "your_token_here"},
-                response_only=True,
-            ),
-        ],
-    )
-    def post(self, request):
-        username = request.data["username"]
-        password = request.data["password"]
-
-        user = User.objects.filter(username=username).first()
-
-        if user is None:
-            raise AuthenticationFailed("User not found!")
-
-        if not user.check_password(password):
-            raise AuthenticationFailed("Incorrect password!")
-
-        payload = {
-            "id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(weeks=1),
-            "iat": datetime.datetime.utcnow(),
-        }
-
-        token = jwt.encode(payload, "secret", algorithm="HS256")
-
-        response = Response()
-
-        response.set_cookie(key="jwt", value=token, httponly=True)
-
-        response.data = {"jwt": token}
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        response.set_cookie(key="refresh", value=response.data['refresh'], httponly=True)
+        response.set_cookie(key="access", value=response.data['access'], httponly=True)
         return response
+    
 
+class MyTokenRefreshView(TokenRefreshView):
+    """
+    Refreshes the access token and returns a new one
+    """
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        response.set_cookie(key="access", value=response.data['access'], httponly=True)
+        return response
+    
 
 class LogoutView(APIView):
 
-    @extend_schema(request=LogoutCustomSerializer, responses={200: OpenApiTypes.NONE})
     def post(self, request):
         response = Response()
         response.delete_cookie("jwt")
@@ -372,13 +354,60 @@ class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
     serializer_class = CourseRatingSerializer
 
 
-# revalidate the user's token and returns it.
 class UserView(APIView):
     """
-    Validates the JWT
+    Verfies the access token and returns it
     """
 
     def get(self, request):
         
         user_authentication(request)
-        return Response({"jwt": request.COOKIES.get("jwt")})
+        return Response({"access": request.COOKIES.get("access")})
+
+
+
+
+
+# Not used anymore
+# class LoginView(APIView):
+#     """
+#     Log in and User validation then returns a JWT
+#     """
+
+#     @extend_schema(
+#         request=LoginCustomSerializer,
+#         responses=OpenApiTypes.OBJECT,
+#         examples=[
+#             OpenApiExample(
+#                 "Example response",
+#                 value={"jwt": "your_token_here"},
+#                 response_only=True,
+#             ),
+#         ],
+#     )
+#     def post(self, request):
+#         username = request.data["username"]
+#         password = request.data["password"]
+
+#         user = User.objects.filter(username=username).first()
+
+#         if user is None:
+#             raise AuthenticationFailed("User not found!")
+
+#         if not user.check_password(password):
+#             raise AuthenticationFailed("Incorrect password!")
+
+#         payload = {
+#             "id": user.id,
+#             "exp": datetime.datetime.utcnow() + datetime.timedelta(weeks=1),
+#             "iat": datetime.datetime.utcnow(),
+#         }
+
+#         token = jwt.encode(payload, "secret", algorithm="HS256")
+
+#         response = Response()
+
+#         response.set_cookie(key="jwt", value=token, httponly=True)
+
+#         response.data = {"jwt": token}
+#         return response

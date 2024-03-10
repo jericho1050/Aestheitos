@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from .models import User, Course
 from .serializers import *
+from Aestheitos import settings
 
-
-# Reference for Creating Custom Mixins
+# Documentation for Creating Custom Mixins
 # https://www.django-rest-framework.org/api-guide/generic-views/#creating-custom-mixins
 
 # def instructor_authentication(request):
@@ -48,17 +48,17 @@ def user_authentication(request):
     return user instance
     """
 
-    token = request.COOKIES.get("jwt")
+    token = request.COOKIES.get("access")
 
     if not token:
         raise AuthenticationFailed("Unauthenticated!")
 
     try:
-        payload = jwt.decode(token, key="secret", algorithms=["HS256"])
+        payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
         raise AuthenticationFailed("Unauthenticated!")
 
-    user = User.objects.filter(id=payload["id"]).first()
+    user = User.objects.filter(id=payload["user_id"]).first()
 
     return user
 
