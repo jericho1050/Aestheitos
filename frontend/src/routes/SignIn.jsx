@@ -43,7 +43,8 @@ export default function SignIn() {
         } else {
             dispatch({
                 type: 'setToken',
-                payload: token['jwt']
+                access: token['access'],
+                refresh: token['refresh']
             })
             navigate("/home");
         }
@@ -146,7 +147,7 @@ function signInAPI(data) {
         })
     }).then(response => {
         if (!response.ok) {
-            if (response.status === 400 || response.status === 403) {
+            if (response.status === 400 || response.status === 401) {
                 return {"invalid": "incorrect username and password"};
             }
             throw new Error(response);

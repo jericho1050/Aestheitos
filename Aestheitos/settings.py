@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -169,4 +171,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "This is the REST API for the Aestheitos Learning Management System. It provides endpoints for managing and accessing courses, lessons, user profiles, and progress tracking in the field of fitness and calisthenics.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
 }

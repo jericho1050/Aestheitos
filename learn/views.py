@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework import generics
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
@@ -37,10 +38,9 @@ from .custom_serializer import *
 # API calls (Class based functions)
 class RegisterView(APIView):
     """
-    Creates a newly Account
+    Creates a newly Account and return an access and refresh token
     """
 
-    @extend_schema(request=UserSerializer, responses=UserSerializer)
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -49,26 +49,24 @@ class RegisterView(APIView):
 
         if user is None:
             raise AuthenticationFailed("User not found!")
-
-        payload = {
-            "id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(weeks=1),
-            "iat": datetime.datetime.utcnow(),
-        }
-
-        token = jwt.encode(payload, "secret", algorithm="HS256")
-
+        
+        token = RefreshToken.for_user(user)
+        print(token)
         response = Response()
-
-        response.set_cookie(key="jwt", value=token, httponly=True)
-
-        response.data = {"jwt": token}
+        response.data = {
+            'refresh': str(token),
+            'access': str(token.access_token),
+        }
         return response
+
+        
+
     
 class LoginView(TokenObtainPairView):
     """
     Authentication of the User and returns an access and refresh token
     """
+    @extend_schema(request=LoginCustomSerializer, responses=LoginCustomSerializer)
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         response.set_cookie(key="refresh", value=response.data['refresh'], httponly=True)
@@ -88,12 +86,14 @@ class MyTokenRefreshView(TokenRefreshView):
     
 
 class LogoutView(APIView):
-
+    """
+    Delete cookie in client's browser
+    """
     def post(self, request):
         response = Response()
-        response.delete_cookie("jwt")
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
         response.data = {"message": "success"}
-
         return response
 
 
@@ -356,13 +356,19 @@ class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
 
 class UserView(APIView):
     """
-    Verfies the access token and returns it
+    Verfies the access/refresh token and returns it
     """
-
     def get(self, request):
         
         user_authentication(request)
-        return Response({"access": request.COOKIES.get("access")})
+        response = Response()
+        access = request.COOKIES.get("access")
+        refresh = request.COOKIES.get("refresh")
+        response.data = {
+            "refresh": refresh,
+            "access": access
+        }
+        return response
 
 
 

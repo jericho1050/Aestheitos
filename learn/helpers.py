@@ -57,6 +57,8 @@ def user_authentication(request):
         payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
         raise AuthenticationFailed("Unauthenticated!")
+    except jwt.InvalidTokenError:
+        raise AuthenticationFailed("Invalid token!")
 
     user = User.objects.filter(id=payload["user_id"]).first()
 

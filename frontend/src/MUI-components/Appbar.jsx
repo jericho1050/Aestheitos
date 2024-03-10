@@ -16,9 +16,8 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext, AuthDispatchContext } from '../helper/authContext';
+import { AccessTokenExpContext, AuthContext, AuthDispatchContext, CurrentTimeContext } from '../helper/authContext';
 import SearchIcon from '@mui/icons-material/Search';
-import getToken from '../helper/getToken';
 import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
@@ -27,6 +26,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import validateJWTToken from '../helper/verifySignature';
+import { jwtDecode } from 'jwt-decode';
+import refreshAccessToken from '../helper/refreshAccessToken';
 
 
 const pages = ['Courses', 'Blog'];
@@ -40,9 +42,9 @@ function ResponsiveAppBar() {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const token = React.useContext(AuthContext);
   const dispatch = React.useContext(AuthDispatchContext);
+  const accessTokenExp = React.useContext(AccessTokenExpContext)
+  const currentTime = React.useContext(CurrentTimeContext)
   const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
-
-
 
   const settingsHandlers = {
     'Profile': handleProfile,
@@ -58,26 +60,54 @@ function ResponsiveAppBar() {
     (async () => {
       const response = await validateJWTToken();
 
-      if (response['jwt']){
+      if (response['access'] && response['refresh']) {
         dispatch({
           type: 'setToken',
-          payload: response['jwt']
+          access: response['access'],
+          refresh: response['refresh']
         })
-      } 
+      }
+    })(); // calls the nameless async fn
+  }, []);
 
-    })();
-  }, [!token]);
+  // refreshing the access token when it expires, use refresh token
+  // persist user authentication == true
+  React.useEffect(() => {
+    const hasToken = token['access'] !== null;
+    console.log(hasToken);
 
+    (async () => {
+
+      if (hasToken) {
+        console.log(`current time: ${currentTime}`);
+        console.log(`expiration: ${accessTokenExp.exp}`);
+        if (currentTime > accessTokenExp.exp) {
+          console.log("expires!");
+          const accessToken = await refreshAccessToken(token['refresh'])
+          console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
+          dispatch({
+            type: 'setToken',
+            access: accessToken,
+            refresh: token['refresh']
+          })
+          setIsAuthenticated(true);
+        }
+      }
+
+    })(); // calls the nameless async fn
+
+  }, [currentTime]);
 
 
   React.useEffect(() => {
+    const hasToken = token['access'] !== null;
+    if (hasToken) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, [token['access']]);
 
-      if (token['jwt']) {
-        setIsAuthenticated(!isAuthenticated);
-      } else {
-        setIsAuthenticated(false);
-      }
-  }, [token['jwt']]);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -102,8 +132,6 @@ function ResponsiveAppBar() {
     setIsOpen(false);
   };
 
-
-
   function handleProfile() {
 
   }
@@ -122,263 +150,264 @@ function ResponsiveAppBar() {
     dispatch({
       type: 'removeToken',
     })
+    window.location.reload()
 
   }
 
   return (
-    <>   
-    <AppBar position="fixed">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Avatar alt="logo" src="src/static/images/aestheitoslogo.png" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="http://localhost:5173/home"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Aestheitos
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
+    <>
+      <AppBar position="fixed">
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <Avatar alt="logo" src="src/static/images/aestheitoslogo.png" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="http://localhost:5173/home"
               sx={{
-                display: { xs: 'block', md: 'none' },
+                mr: 2,
+                display: { xs: 'none', md: 'flex' },
+                fontFamily: 'monospace',
+                fontWeight: 700,
+                letterSpacing: '.3rem',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="http://localhost:5173/home"
-            sx={{
-              ml: 4,
-              mr: 0,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Aestheitos
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+              Aestheitos
+            </Typography>
+
+            <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
               >
-                {page}
-              </Button>
-            ))}
-          </Box>
-          {isAuthenticated ?
-            <Box sx={{ flexGrow: 0 }}>
-              <Grid direction="row-reverse" container alignItems={'center'} spacing={2}>
-                <Grid item xs>
-                  <Tooltip data-cy="Tool tip" title="Open settings">
-                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                      <Avatar data-cy="Avatar" alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-                {isSmallScreen ?
-                  <>
-                    <Grid item xs md>
-                      <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
-                        <SearchIcon />
-                      </IconButton>
-                    </Grid>
-                    <Dialog
-                      fullWidth={true}
-                      maxWidth="md"
-                      open={isOpen}
-                      onClose={handleClose}
-                      PaperProps={{
-                        component: 'form',
-                        onSubmit: (event) => {
-                          event.preventDefault();
-                          const formData = new FormData(event.currentTarget);
-                          const formJson = Object.fromEntries(formData.entries());
-                          const email = formJson.email;
-                          console.log(email);
-                          handleClose();
-                        },
-                      }}
-                    >
-                      <DialogTitle>Search for Courses</DialogTitle>
-                      <DialogContent>
-                        {/* <DialogContentText>
-                          Search Available Courses
-                        </DialogContentText> */}
-                        <Search>
-                          <SearchIconWrapper>
-                            <SearchIcon />
-                          </SearchIconWrapper>
-                          <StyledInputBase
-                            placeholder="Search…"
-                            inputProps={{ 'aria-label': 'search' }}
-                          />
-                        </Search>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button type="submit">Search</Button>
-                      </DialogActions>
-                    </Dialog>
-                  </>
-                  :
-                  <Grid item xs md>
-                    <Search>
-                      <SearchIconWrapper>
-                        <SearchIcon />
-                      </SearchIconWrapper>
-                      <StyledInputBase
-                        placeholder="Search…"
-                        inputProps={{ 'aria-label': 'search' }}
-                      />
-                    </Search>
-                  </Grid>
-                }
-              </Grid>
+                <MenuIcon />
+              </IconButton>
               <Menu
-                sx={{ mt: '45px' }}
                 id="menu-appbar"
-                anchorEl={anchorElUser}
+                anchorEl={anchorElNav}
                 anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: 'bottom',
+                  horizontal: 'left',
                 }}
                 keepMounted
                 transformOrigin={{
                   vertical: 'top',
-                  horizontal: 'right',
+                  horizontal: 'left',
                 }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{
+                  display: { xs: 'block', md: 'none' },
+                }}
               >
-                {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={settingsHandlers[setting]}>
-                    <Typography textAlign="center">{setting}</Typography>
+                {pages.map((page) => (
+                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center">{page}</Typography>
                   </MenuItem>
                 ))}
               </Menu>
             </Box>
-            :
-            <Box sx={{ flexGrow: 0 }}>
-              <Grid container spacing={{ sm:1, md: 2}} alignItems={'center'}>
-              {isSmallScreen ?
-                  <>
-                    <Grid item xs md>
-                      <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
-                        <SearchIcon />
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="http://localhost:5173/home"
+              sx={{
+                ml: 4,
+                mr: 0,
+                display: { xs: 'flex', md: 'none' },
+                flexGrow: 1,
+                fontFamily: 'monospace',
+                fontWeight: 700,
+                letterSpacing: '.3rem',
+                color: 'inherit',
+                textDecoration: 'none',
+              }}
+            >
+              Aestheitos
+            </Typography>
+            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+              {pages.map((page) => (
+                <Button
+                  key={page}
+                  onClick={handleCloseNavMenu}
+                  sx={{ my: 2, color: 'white', display: 'block' }}
+                >
+                  {page}
+                </Button>
+              ))}
+            </Box>
+            {isAuthenticated ?
+              <Box sx={{ flexGrow: 0 }}>
+                <Grid direction="row-reverse" container alignItems={'center'} spacing={2}>
+                  <Grid item xs>
+                    <Tooltip data-cy="Tool tip" title="Open settings">
+                      <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                        <Avatar data-cy="Avatar" alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
                       </IconButton>
-                    </Grid>
-                    <Dialog
-                      fullWidth={true}
-                      maxWidth="md"
-                      open={isOpen}
-                      onClose={handleClose}
-                      PaperProps={{
-                        component: 'form',
-                        onSubmit: (event) => {
-                          event.preventDefault();
-                          const formData = new FormData(event.currentTarget);
-                          const formJson = Object.fromEntries(formData.entries());
-                          const email = formJson.email;
-                          console.log(email);
-                          handleClose();
-                        },
-                      }}
-                    >
-                      <DialogTitle>Search for Courses</DialogTitle>
-                      <DialogContent>
-                        {/* <DialogContentText>
+                    </Tooltip>
+                  </Grid>
+                  {isSmallScreen ?
+                    <>
+                      <Grid item xs md>
+                        <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
+                          <SearchIcon />
+                        </IconButton>
+                      </Grid>
+                      <Dialog
+                        fullWidth={true}
+                        maxWidth="md"
+                        open={isOpen}
+                        onClose={handleClose}
+                        PaperProps={{
+                          component: 'form',
+                          onSubmit: (event) => {
+                            event.preventDefault();
+                            const formData = new FormData(event.currentTarget);
+                            const formJson = Object.fromEntries(formData.entries());
+                            const email = formJson.email;
+                            console.log(email);
+                            handleClose();
+                          },
+                        }}
+                      >
+                        <DialogTitle>Search for Courses</DialogTitle>
+                        <DialogContent>
+                          {/* <DialogContentText>
                           Search Available Courses
                         </DialogContentText> */}
-                        <Search>
-                          <SearchIconWrapper>
-                            <SearchIcon />
-                          </SearchIconWrapper>
-                          <StyledInputBase
-                            placeholder="Search…"
-                            inputProps={{ 'aria-label': 'search' }}
-                          />
-                        </Search>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button type="submit">Search</Button>
-                      </DialogActions>
-                    </Dialog>
-                  </>
-                  :
-                  <Grid item xs md>
-                    <Search>
-                      <SearchIconWrapper>
-                        <SearchIcon />
-                      </SearchIconWrapper>
-                      <StyledInputBase
-                        placeholder="Search…"
-                        inputProps={{ 'aria-label': 'search' }}
-                      />
-                    </Search>
+                          <Search>
+                            <SearchIconWrapper>
+                              <SearchIcon />
+                            </SearchIconWrapper>
+                            <StyledInputBase
+                              placeholder="Search…"
+                              inputProps={{ 'aria-label': 'search' }}
+                            />
+                          </Search>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose}>Cancel</Button>
+                          <Button type="submit">Search</Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                    :
+                    <Grid item xs md>
+                      <Search>
+                        <SearchIconWrapper>
+                          <SearchIcon />
+                        </SearchIconWrapper>
+                        <StyledInputBase
+                          placeholder="Search…"
+                          inputProps={{ 'aria-label': 'search' }}
+                        />
+                      </Search>
+                    </Grid>
+                  }
+                </Grid>
+                <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  {settings.map((setting) => (
+                    <MenuItem key={setting} onClick={settingsHandlers[setting]}>
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Box>
+              :
+              <Box sx={{ flexGrow: 0 }}>
+                <Grid container spacing={{ sm: 1, md: 2 }} alignItems={'center'}>
+                  {isSmallScreen ?
+                    <>
+                      <Grid item xs md>
+                        <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
+                          <SearchIcon />
+                        </IconButton>
+                      </Grid>
+                      <Dialog
+                        fullWidth={true}
+                        maxWidth="md"
+                        open={isOpen}
+                        onClose={handleClose}
+                        PaperProps={{
+                          component: 'form',
+                          onSubmit: (event) => {
+                            event.preventDefault();
+                            const formData = new FormData(event.currentTarget);
+                            const formJson = Object.fromEntries(formData.entries());
+                            const email = formJson.email;
+                            console.log(email);
+                            handleClose();
+                          },
+                        }}
+                      >
+                        <DialogTitle>Search for Courses</DialogTitle>
+                        <DialogContent>
+                          {/* <DialogContentText>
+                          Search Available Courses
+                        </DialogContentText> */}
+                          <Search>
+                            <SearchIconWrapper>
+                              <SearchIcon />
+                            </SearchIconWrapper>
+                            <StyledInputBase
+                              placeholder="Search…"
+                              inputProps={{ 'aria-label': 'search' }}
+                            />
+                          </Search>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose}>Cancel</Button>
+                          <Button type="submit">Search</Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                    :
+                    <Grid item xs md>
+                      <Search>
+                        <SearchIconWrapper>
+                          <SearchIcon />
+                        </SearchIconWrapper>
+                        <StyledInputBase
+                          placeholder="Search…"
+                          inputProps={{ 'aria-label': 'search' }}
+                        />
+                      </Search>
+                    </Grid>
+                  }
+                  <Grid item xs={"auto"} md>
+                    <Link to={`/signin`} id="sign-in">Sign in</Link>
                   </Grid>
-                }
-              <Grid item xs={"auto"} md>
-                <Link to={`/signin`} id="sign-in">Sign in</Link>
-              </Grid>
-            </Grid>
-            </Box>
-          }
-        </Toolbar>
-      </Container>
-    </AppBar>
-   
-     <Toolbar />
+                </Grid>
+              </Box>
+            }
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      <Toolbar />
     </>
   );
 }
@@ -446,20 +475,3 @@ function signOutAPI() {
 
 }
 
-async function validateJWTToken() {
-  
-  // GET request 
-  // ask the server to check the jwt cookie for validation and authentication purposes
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}user`, { headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('An error occurred:', error);
-    return null;
-  }
-}

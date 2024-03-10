@@ -46,7 +46,7 @@ export default function SignUp() {
     } else {
       dispatch({
         type: 'setToken',
-        payload: token['jwt']
+        payload: token['access']
     });
       navigate('/home');
     }
