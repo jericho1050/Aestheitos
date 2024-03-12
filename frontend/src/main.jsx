@@ -7,11 +7,12 @@ import {
   RouterProvider
 } from "react-router-dom";
 import "./index.css";
+import "./divider.css"
 import Root from './routes/root';
 import ErrorPage from './error-page';
 import SignIn from './routes/SignIn';
 import SignUp from './routes/SignUp';
-import Home from './routes/Home';
+import CourseList from './routes/Home';
 
 const theme = createTheme({
   palette: {
@@ -35,8 +36,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path:"",
-        element: <Home/>
+        index: true, element: <CourseList/>
       }
     ]
   },
