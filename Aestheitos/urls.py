@@ -19,11 +19,16 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from rest_framework_simplejwt.views import TokenVerifyView
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("learn.urls")),
-    # path("api/", include("Aestheitos.api.urls")),
+    
+    path('api/token/verify', TokenVerifyView.as_view(), name='token_verify'),
+
+    # DOCUMENTATION TOOL 
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/schema/swagger-ui", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/schema/redoc", SpectacularRedocView.as_view(url_name="schema"), name="redoc")

@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,22 +42,25 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "drf_spectacular"
-
+    "drf_spectacular",
+    'rest_framework_simplejwt',
 
 ]
 
-CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
 CORS_ORIGIN_WHITELIST = ["http://localhost:5173"]
-CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+# CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+]
+# CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
+# CSRF_COOKIE_HTTPONLY = True
+# CSRF_COOKIE_SECURE = False
+# SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'None'
+CORS_ALLOW_CREDENTIALS = True
+
 
 # PROD SETTINGS
 # CSRF_COOKIE_SECURE = True
@@ -157,7 +162,8 @@ MEDIA_URL = '/images/'
 # CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
 }
 
 SPECTACULAR_SETTINGS = {
@@ -165,4 +171,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "This is the REST API for the Aestheitos Learning Management System. It provides endpoints for managing and accessing courses, lessons, user profiles, and progress tracking in the field of fitness and calisthenics.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
 }
