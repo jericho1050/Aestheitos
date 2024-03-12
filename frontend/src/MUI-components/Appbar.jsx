@@ -74,17 +74,17 @@ function ResponsiveAppBar() {
   // persist user authentication == true
   React.useEffect(() => {
     const hasToken = token['access'] !== null;
-    console.log(hasToken);
+    // console.log(hasToken);
 
     (async () => {
 
       if (hasToken) {
-        console.log(`current time: ${currentTime}`);
-        console.log(`expiration: ${accessTokenExp.exp}`);
+        // console.log(`current time: ${currentTime}`);
+        // console.log(`expiration: ${accessTokenExp.exp}`);
         if (currentTime > accessTokenExp.exp) {
           console.log("expires!");
           const accessToken = await refreshAccessToken(token['refresh'])
-          console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
+          // console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
           dispatch({
             type: 'setToken',
             access: accessToken,
@@ -145,9 +145,9 @@ function ResponsiveAppBar() {
   }
 
 
-  function handleLogout(dispatch) {
-    signOutAPI();
-    dispatch({
+  async function handleLogout(dispatch) {
+    await signOutAPI();
+    await dispatch({
       type: 'removeToken',
     })
     window.location.reload()
@@ -273,7 +273,7 @@ function ResponsiveAppBar() {
                             const formData = new FormData(event.currentTarget);
                             const formJson = Object.fromEntries(formData.entries());
                             const email = formJson.email;
-                            console.log(email);
+                            // console.log(email);
                             handleClose();
                           },
                         }}
@@ -338,7 +338,7 @@ function ResponsiveAppBar() {
               </Box>
               :
               <Box sx={{ flexGrow: 0 }}>
-                <Grid container spacing={{ sm: 1, md: 2 }} alignItems={'center'}>
+                <Grid container spacing={{ xs: 0, sm: 1, md: 2 }} alignItems={'center'}>
                   {isSmallScreen ?
                     <>
                       <Grid item xs md>
@@ -358,7 +358,7 @@ function ResponsiveAppBar() {
                             const formData = new FormData(event.currentTarget);
                             const formJson = Object.fromEntries(formData.entries());
                             const email = formJson.email;
-                            console.log(email);
+                            // console.log(email);
                             handleClose();
                           },
                         }}
@@ -397,7 +397,7 @@ function ResponsiveAppBar() {
                       </Search>
                     </Grid>
                   }
-                  <Grid item xs={"auto"} md>
+                  <Grid item xs md>
                     <Link to={`/signin`} id="sign-in">Sign in</Link>
                   </Grid>
                 </Grid>
