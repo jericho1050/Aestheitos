@@ -92,7 +92,7 @@ class CourseSerializer(ModelSerializer):
             return
         self.save(created_by=user)
 
-    def get_average_rating(self, obj):
+    def get_average_rating(self, obj) -> float:
         return obj.course_rating_average()
 
 

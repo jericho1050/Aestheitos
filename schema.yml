@@ -114,173 +114,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /blog/{id}/comments:
-    get:
-      operationId: blog_comments_list
-      description: List all comments or create a new commnet for a blog instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - blog
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/BlogComments'
-          description: ''
-    post:
-      operationId: blog_comments_create
-      description: List all comments or create a new commnet for a blog instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - blog
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BlogComments'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/BlogComments'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/BlogComments'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlogComments'
-          description: ''
-  /blog/comment/{id}:
-    get:
-      operationId: blog_comment_retrieve
-      description: Retrieve, update and delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - blog
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlogComments'
-          description: ''
-    put:
-      operationId: blog_comment_update
-      description: Retrieve, update and delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - blog
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BlogComments'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/BlogComments'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/BlogComments'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlogComments'
-          description: ''
-    patch:
-      operationId: blog_comment_partial_update
-      description: Retrieve, update and delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - blog
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedBlogComments'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedBlogComments'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedBlogComments'
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlogComments'
-          description: ''
-    delete:
-      operationId: blog_comment_destroy
-      description: Retrieve, update and delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - blog
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
   /blogs:
     get:
       operationId: blogs_list
@@ -327,6 +160,509 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Blog'
+          description: ''
+  /comment/{id}/blog:
+    get:
+      operationId: comment_blog_retrieve
+      description: Retrieve, update and delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogComments'
+          description: ''
+    put:
+      operationId: comment_blog_update
+      description: Retrieve, update and delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogComments'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlogComments'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlogComments'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogComments'
+          description: ''
+    patch:
+      operationId: comment_blog_partial_update
+      description: Retrieve, update and delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBlogComments'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBlogComments'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBlogComments'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogComments'
+          description: ''
+    delete:
+      operationId: comment_blog_destroy
+      description: Retrieve, update and delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /comment/{id}/course:
+    get:
+      operationId: comment_course_retrieve
+      description: Retrieve, update or delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseComments'
+          description: ''
+    put:
+      operationId: comment_course_update
+      description: Retrieve, update or delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseComments'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseComments'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseComments'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseComments'
+          description: ''
+    patch:
+      operationId: comment_course_partial_update
+      description: Retrieve, update or delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseComments'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseComments'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseComments'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseComments'
+          description: ''
+    delete:
+      operationId: comment_course_destroy
+      description: Retrieve, update or delete a comment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comment
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /comments/blog/{id}:
+    get:
+      operationId: comments_blog_list
+      description: List all comments or create a new commnet for a blog instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comments
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlogComments'
+          description: ''
+    post:
+      operationId: comments_blog_create
+      description: List all comments or create a new commnet for a blog instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogComments'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlogComments'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlogComments'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogComments'
+          description: ''
+  /comments/course/{id}:
+    get:
+      operationId: comments_course_list
+      description: Lists all comments or create a new comment for a course instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comments
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseComments'
+          description: ''
+    post:
+      operationId: comments_course_create
+      description: Lists all comments or create a new comment for a course instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseComments'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseComments'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseComments'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseComments'
+          description: ''
+  /correct-exercise/{id}/course/workout:
+    get:
+      operationId: correct_exercise_course_workout_retrieve
+      description: Retrieve, update, delete a correct exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - correct-exercise
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectExerciseForm'
+          description: ''
+    put:
+      operationId: correct_exercise_course_workout_update
+      description: Retrieve, update, delete a correct exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - correct-exercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorrectExerciseForm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CorrectExerciseForm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CorrectExerciseForm'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectExerciseForm'
+          description: ''
+    patch:
+      operationId: correct_exercise_course_workout_partial_update
+      description: Retrieve, update, delete a correct exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - correct-exercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCorrectExerciseForm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCorrectExerciseForm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCorrectExerciseForm'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectExerciseForm'
+          description: ''
+    delete:
+      operationId: correct_exercise_course_workout_destroy
+      description: Retrieve, update, delete a correct exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - correct-exercise
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /correct-exercises/course/workout/{id}:
+    get:
+      operationId: correct_exercises_course_workout_list
+      description: List all correct exercises demos or create a new correct exercise
+        demo for a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - correct-exercises
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CorrectExerciseForm'
+          description: ''
+    post:
+      operationId: correct_exercises_course_workout_create
+      description: List all correct exercises demos or create a new correct exercise
+        demo for a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - correct-exercises
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorrectExerciseForm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CorrectExerciseForm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CorrectExerciseForm'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectExerciseForm'
           description: ''
   /course/{id}:
     get:
@@ -436,65 +772,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /course/{id}/comments:
-    get:
-      operationId: course_comments_list
-      description: Lists all comments or create a new comment for a course instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CourseComments'
-          description: ''
-    post:
-      operationId: course_comments_create
-      description: Lists all comments or create a new comment for a course instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CourseComments'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CourseComments'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/CourseComments'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseComments'
-          description: ''
   /course/{id}/course-content:
     get:
       operationId: course_course_content_retrieve
@@ -619,64 +896,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/CourseContent'
           description: ''
-  /course/{id}/enrollments:
-    get:
-      operationId: course_enrollments_list
-      description: List all course's enrollee or create a new enrollment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Enrollment'
-          description: ''
-    post:
-      operationId: course_enrollments_create
-      description: List all course's enrollee or create a new enrollment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Enrollment'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Enrollment'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Enrollment'
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Enrollment'
-          description: ''
   /course/{id}/rate:
     post:
       operationId: course_rate_create
@@ -712,638 +931,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/CourseRating'
           description: ''
-  /course/{id}/workouts:
-    get:
-      operationId: course_workouts_list
-      description: Lists all workouts or create a new workout for a course instance.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Workouts'
-          description: ''
-    post:
-      operationId: course_workouts_create
-      description: Lists all workouts or create a new workout for a course instance.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Workouts'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Workouts'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Workouts'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Workouts'
-          description: ''
-  /course/comment/{id}:
-    get:
-      operationId: course_comment_retrieve
-      description: Retrieve, update or delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseComments'
-          description: ''
-    put:
-      operationId: course_comment_update
-      description: Retrieve, update or delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CourseComments'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CourseComments'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/CourseComments'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseComments'
-          description: ''
-    patch:
-      operationId: course_comment_partial_update
-      description: Retrieve, update or delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedCourseComments'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedCourseComments'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedCourseComments'
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseComments'
-          description: ''
-    delete:
-      operationId: course_comment_destroy
-      description: Retrieve, update or delete a comment instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
-  /course/unenrollment/{id}:
-    delete:
-      operationId: course_unenrollment_destroy
-      description: Delete a enrollment instance (Unenrollment)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
-  /course/workout/{id}:
-    get:
-      operationId: course_workout_retrieve
-      description: Retrieve, update or delete a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Workouts'
-          description: ''
-    put:
-      operationId: course_workout_update
-      description: Retrieve, update or delete a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Workouts'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Workouts'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Workouts'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Workouts'
-          description: ''
-    patch:
-      operationId: course_workout_partial_update
-      description: Retrieve, update or delete a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedWorkouts'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedWorkouts'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedWorkouts'
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Workouts'
-          description: ''
-    delete:
-      operationId: course_workout_destroy
-      description: Retrieve, update or delete a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
-  /course/workout/{id}/correct-exercises:
-    get:
-      operationId: course_workout_correct_exercises_list
-      description: List all correct exercises demos or create a new correct exercise
-        demo for a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CorrectExerciseForm'
-          description: ''
-    post:
-      operationId: course_workout_correct_exercises_create
-      description: List all correct exercises demos or create a new correct exercise
-        demo for a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CorrectExerciseForm'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CorrectExerciseForm'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/CorrectExerciseForm'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CorrectExerciseForm'
-          description: ''
-  /course/workout/{id}/wrong-exercises:
-    get:
-      operationId: course_workout_wrong_exercises_list
-      description: List all wrong exercise demos or create a new wrong exercise demo
-        for a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/WrongExerciseForm'
-          description: ''
-    post:
-      operationId: course_workout_wrong_exercises_create
-      description: List all wrong exercise demos or create a new wrong exercise demo
-        for a workout instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WrongExerciseForm'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/WrongExerciseForm'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/WrongExerciseForm'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WrongExerciseForm'
-          description: ''
-  /course/workout/correct-exercise/{id}:
-    get:
-      operationId: course_workout_correct_exercise_retrieve
-      description: Retrieve, update, delete a correct exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CorrectExerciseForm'
-          description: ''
-    put:
-      operationId: course_workout_correct_exercise_update
-      description: Retrieve, update, delete a correct exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CorrectExerciseForm'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CorrectExerciseForm'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/CorrectExerciseForm'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CorrectExerciseForm'
-          description: ''
-    patch:
-      operationId: course_workout_correct_exercise_partial_update
-      description: Retrieve, update, delete a correct exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedCorrectExerciseForm'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedCorrectExerciseForm'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedCorrectExerciseForm'
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CorrectExerciseForm'
-          description: ''
-    delete:
-      operationId: course_workout_correct_exercise_destroy
-      description: Retrieve, update, delete a correct exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
-  /course/workout/wrong-exercise/{id}:
-    get:
-      operationId: course_workout_wrong_exercise_retrieve
-      description: Retrieve, update, delete a wrong exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WrongExerciseForm'
-          description: ''
-    put:
-      operationId: course_workout_wrong_exercise_update
-      description: Retrieve, update, delete a wrong exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WrongExerciseForm'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/WrongExerciseForm'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/WrongExerciseForm'
-        required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WrongExerciseForm'
-          description: ''
-    patch:
-      operationId: course_workout_wrong_exercise_partial_update
-      description: Retrieve, update, delete a wrong exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedWrongExerciseForm'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedWrongExerciseForm'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedWrongExerciseForm'
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WrongExerciseForm'
-          description: ''
-    delete:
-      operationId: course_workout_wrong_exercise_destroy
-      description: Retrieve, update, delete a wrong exercise form instance
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - course
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
   /courses:
     get:
       operationId: courses_list
@@ -1391,19 +978,129 @@ paths:
               schema:
                 $ref: '#/components/schemas/Course'
           description: ''
-  /login:
-    post:
-      operationId: login_create
-      description: Log in and User validation then returns a JWT
+  /enrollment/course/{id}:
+    get:
+      operationId: enrollment_course_list
+      description: List all course's enrollee or create a new enrollment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-      - login
+      - enrollment
       security:
       - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Enrollment'
+          description: ''
+    post:
+      operationId: enrollment_course_create
+      description: List all course's enrollee or create a new enrollment instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - enrollment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+          description: ''
+  /enrollment/unenrollment/{id}:
+    delete:
+      operationId: enrollment_unenrollment_destroy
+      description: Delete a enrollment instance (Unenrollment)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - enrollment
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
           description: No response body
+  /login:
+    post:
+      operationId: login_create
+      description: Log in and User validation then returns a JWT
+      parameters:
+      - in: query
+        name: password
+        schema:
+          type: string
+        description: Password
+      - in: query
+        name: username
+        schema:
+          type: string
+        description: Username
+      tags:
+      - login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginCustom'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginCustom'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginCustom'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                ExampleResponse:
+                  value:
+                    jwt: your_token_here
+                  summary: Example response
+          description: ''
   /logout:
     post:
       operationId: logout_create
@@ -1415,32 +1112,39 @@ paths:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema: null
+          description: ''
   /register:
     post:
       operationId: register_create
       description: Creates a newly Account
       tags:
       - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
       security:
       - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
         '200':
-          description: No response body
-  /user:
-    get:
-      operationId: user_retrieve
-      tags:
-      - user
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
   /user/course/{id}/progress:
     get:
       operationId: user_course_progress_retrieve
@@ -1601,6 +1305,342 @@ paths:
                 items:
                   $ref: '#/components/schemas/Enrollment'
           description: ''
+  /workout/{id}/course:
+    get:
+      operationId: workout_course_retrieve
+      description: Retrieve, update or delete a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workout
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workouts'
+          description: ''
+    put:
+      operationId: workout_course_update
+      description: Retrieve, update or delete a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workouts'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Workouts'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Workouts'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workouts'
+          description: ''
+    patch:
+      operationId: workout_course_partial_update
+      description: Retrieve, update or delete a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkouts'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkouts'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkouts'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workouts'
+          description: ''
+    delete:
+      operationId: workout_course_destroy
+      description: Retrieve, update or delete a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workout
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /workouts/course/{id}:
+    get:
+      operationId: workouts_course_list
+      description: Lists all workouts or create a new workout for a course instance.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workouts
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workouts'
+          description: ''
+    post:
+      operationId: workouts_course_create
+      description: Lists all workouts or create a new workout for a course instance.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workouts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workouts'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Workouts'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Workouts'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workouts'
+          description: ''
+  /wrong-exercise/{id}/course/workout:
+    get:
+      operationId: wrong_exercise_course_workout_retrieve
+      description: Retrieve, update, delete a wrong exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - wrong-exercise
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrongExerciseForm'
+          description: ''
+    put:
+      operationId: wrong_exercise_course_workout_update
+      description: Retrieve, update, delete a wrong exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - wrong-exercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WrongExerciseForm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WrongExerciseForm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WrongExerciseForm'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrongExerciseForm'
+          description: ''
+    patch:
+      operationId: wrong_exercise_course_workout_partial_update
+      description: Retrieve, update, delete a wrong exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - wrong-exercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWrongExerciseForm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWrongExerciseForm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWrongExerciseForm'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrongExerciseForm'
+          description: ''
+    delete:
+      operationId: wrong_exercise_course_workout_destroy
+      description: Retrieve, update, delete a wrong exercise form instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - wrong-exercise
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /wrong-exercises/course/workout/{id}:
+    get:
+      operationId: wrong_exercises_course_workout_list
+      description: List all wrong exercise demos or create a new wrong exercise demo
+        for a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - wrong-exercises
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WrongExerciseForm'
+          description: ''
+    post:
+      operationId: wrong_exercises_course_workout_create
+      description: List all wrong exercise demos or create a new wrong exercise demo
+        for a workout instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - wrong-exercises
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WrongExerciseForm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WrongExerciseForm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WrongExerciseForm'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrongExerciseForm'
+          description: ''
 components:
   schemas:
     BlankEnum:
@@ -1690,7 +1730,8 @@ components:
           type: integer
           readOnly: true
         average_rating:
-          type: string
+          type: number
+          format: double
           readOnly: true
         title:
           type: string
@@ -1864,6 +1905,21 @@ components:
         * `L` - Low
         * `M` - Medium
         * `H` - High
+    LoginCustom:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          maxLength: 128
+      required:
+      - password
+      - username
     NullEnum:
       enum:
       - null
@@ -1933,7 +1989,8 @@ components:
           type: integer
           readOnly: true
         average_rating:
-          type: string
+          type: number
+          format: double
           readOnly: true
         title:
           type: string
@@ -2091,6 +2148,75 @@ components:
         * `P` - Pending
         * `A` - Approved
         * `R` - Rejected
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+        profile_pic:
+          type: string
+          format: uri
+          nullable: true
+        is_instructor:
+          type: boolean
+        groups:
+          type: array
+          items:
+            type: integer
+          description: The groups this user belongs to. A user will get all permissions
+            granted to each of their groups.
+        user_permissions:
+          type: array
+          items:
+            type: integer
+          description: Specific permissions for this user.
+      required:
+      - id
+      - password
+      - username
     UserProgress:
       type: object
       properties:

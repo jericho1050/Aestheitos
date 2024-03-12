@@ -3,7 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework import generics
-from drf_spectacular.utils import extend_schema
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 # from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 # from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -12,77 +15,93 @@ from .serializers import *
 from .models import *
 import jwt, datetime
 from .helpers import *
+from .custom_serializer import *
 
 
-# REFERENCE FOR Django API Authentication using JWT Tokens
+# REFERENCE FOR Django API Authentication using JWT Tokens by Scalable Scripts (thought i use DRF's simple jwt instead)
 # https://www.youtube.com/watch?v=PUzgZrS_piQ&list=LL&index=3&t=968s&ab_channel=ScalableScripts
 
-# REFERENCE FOR DRF Class Based functions etc
+# Documentation reference also for Simple JWT 
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html
+
+# Documentation Source FOR DRF Class Based functions etc
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/
 # https://www.django-rest-framework.org/tutorial/3-class-based-views/#using-generic-class-based-views
 # https://www.django-rest-framework.org/api-guide/generic-views/#generic-views
 
-# REFERENCE FOR MY documentation tool 
+# REFERENCE FOR MY documentation tool
 # https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
 
+
+
+
 # API calls (Class based functions)
-
-
 class RegisterView(APIView):
-    """Creates a newly Account"""
-    @extend_schema(responses=UserSerializer)
+    """
+    Creates a newly Account and return an access and refresh token
+    """
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
-
-
-class LoginView(APIView):
-    """Log in and User validation then returns a JWT"""
-
-    def post(self, request):
-        username = request.data["username"]
-        password = request.data["password"]
-
-        user = User.objects.filter(username=username).first()
+        user = User.objects.filter(username=serializer.data.get("username")).first()
 
         if user is None:
             raise AuthenticationFailed("User not found!")
-
-        if not user.check_password(password):
-            raise AuthenticationFailed("Incorrect password!")
-
-        payload = {
-            "id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(weeks=1),
-            "iat": datetime.datetime.utcnow(),
-        }
-
-        token = jwt.encode(payload, "secret", algorithm="HS256")
-
+        
+        token = RefreshToken.for_user(user)
+        print(token)
         response = Response()
-
-        response.set_cookie(key="jwt", value=token, httponly=True)
-
-        response.data = {"jwt": token}
+        response.data = {
+            'refresh': str(token),
+            'access': str(token.access_token),
+        }
         return response
 
+        
+
+    
+class LoginView(TokenObtainPairView):
+    """
+    Authentication of the User and returns an access and refresh token
+    """
+    @extend_schema(request=LoginCustomSerializer, responses=LoginCustomSerializer)
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        response.set_cookie(key="refresh", value=response.data['refresh'], httponly=True)
+        response.set_cookie(key="access", value=response.data['access'], httponly=True)
+        return response
+    
+
+class MyTokenRefreshView(TokenRefreshView):
+    """
+    Refreshes the access token and returns a new one
+    """
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        response.set_cookie(key="access", value=response.data['access'], httponly=True)
+        return response
+    
 
 class LogoutView(APIView):
-
+    """
+    Delete cookie in client's browser
+    """
     def post(self, request):
         response = Response()
-        response.delete_cookie("jwt")
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
         response.data = {"message": "success"}
-
         return response
 
 
 class UserProgressList(generics.ListAPIView):
     """
-    List all user's course progress.
+    List all user's course progress
     """
+
     # I decided for this class to be ListApiView and move the post/create to be at
     # UserProgress Detail because it's harder to implement POST here; we have to retrieve users's lists  of each course's progress
     # and create progress for each instance so our URL path here wouldn't align with our interest
@@ -99,7 +118,7 @@ class UserProgressDetail(
     CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
 ):
     """
-    Retrieve and update a user's progress instance
+    Retrieve and update a user's course progress instance
     """
 
     serializer_class = UserProgressSerializer
@@ -253,7 +272,7 @@ class WrongExerciseFormDetail(
 
 class EnrollmentList(CreateAPIMixin, generics.ListCreateAPIView):
     """
-    List all course's enrollee or create a new enrollment instance
+    List all course's enrollee or create a new enrollment ( i.e user enrolls a course )
     """
 
     queryset = Enrollment.objects.all()
@@ -335,20 +354,66 @@ class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
     serializer_class = CourseRatingSerializer
 
 
-# debugging/tesitng purposes only for jwt token
 class UserView(APIView):
-
+    """
+    Verfies the access/refresh token and returns it
+    """
     def get(self, request):
-        token = request.COOKIES.get("jwt")
+        
+        user_authentication(request)
+        response = Response()
+        access = request.COOKIES.get("access")
+        refresh = request.COOKIES.get("refresh")
+        response.data = {
+            "refresh": refresh,
+            "access": access
+        }
+        return response
 
-        if not token:
-            raise AuthenticationFailed("Unauthenticated!")
 
-        try:
-            payload = jwt.decode(token, key="secret", algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated!")
 
-        user = User.objects.filter(id=payload["id"]).first()
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+
+
+# Not used anymore
+# class LoginView(APIView):
+#     """
+#     Log in and User validation then returns a JWT
+#     """
+
+#     @extend_schema(
+#         request=LoginCustomSerializer,
+#         responses=OpenApiTypes.OBJECT,
+#         examples=[
+#             OpenApiExample(
+#                 "Example response",
+#                 value={"jwt": "your_token_here"},
+#                 response_only=True,
+#             ),
+#         ],
+#     )
+#     def post(self, request):
+#         username = request.data["username"]
+#         password = request.data["password"]
+
+#         user = User.objects.filter(username=username).first()
+
+#         if user is None:
+#             raise AuthenticationFailed("User not found!")
+
+#         if not user.check_password(password):
+#             raise AuthenticationFailed("Incorrect password!")
+
+#         payload = {
+#             "id": user.id,
+#             "exp": datetime.datetime.utcnow() + datetime.timedelta(weeks=1),
+#             "iat": datetime.datetime.utcnow(),
+#         }
+
+#         token = jwt.encode(payload, "secret", algorithm="HS256")
+
+#         response = Response()
+
+#         response.set_cookie(key="jwt", value=token, httponly=True)
+
+#         response.data = {"jwt": token}
+#         return response

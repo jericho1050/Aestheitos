@@ -58,7 +58,7 @@ class UserProgressListAPITestCase(APITestCase):
 
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.unauthenticated_client.force_authenticate(user=None)
 
     def test_retrieve_user_progress(self):
@@ -131,9 +131,9 @@ class UserProgressDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user, token=token_2["jwt"]
+            user=self.user, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -309,12 +309,12 @@ class CourseRatingViewAPITestCase(APITestCase):
         token_2 = response_2.json()
         token_3 = response_3.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.authenticated_client_3.force_authenticate(
-            user=self.user_3, token=token_3["jwt"]
+            user=self.user_3, token=token_3["access"]
         )
         self.unaunthenticated_client.force_authenticate(user=None)
 
@@ -407,12 +407,12 @@ class EnrollmentListAPITestCase(APITestCase):
         token_2 = response_2.json()
         token_3 = response_3.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.authenticated_client_3.force_authenticate(
-            user=self.user_3, token=token_3["jwt"]
+            user=self.user_3, token=token_3["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -510,12 +510,12 @@ class UnenrollmentViewAPITestCase(APITestCase):
         token_2 = response_2.json()
         token_3 = response_3.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.authenticated_client_3.force_authenticate(
-            user=self.user_3, token=token_3["jwt"]
+            user=self.user_3, token=token_3["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -577,7 +577,7 @@ class EnrollmentUserListAPITestCase(APITestCase):
 
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
 
     def test_retrieve_user_enrolled_courses(self):
         """
@@ -623,9 +623,9 @@ class BlogListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user, token=token_2["jwt"]
+            user=self.user, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -711,9 +711,9 @@ class BlogDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user, token=token_2["jwt"]
+            user=self.user, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -854,9 +854,9 @@ class BlogCommentListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user, token=token_2["jwt"]
+            user=self.user, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -969,9 +969,9 @@ class BlogCommentDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user, token=token_2["jwt"]
+            user=self.user, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 

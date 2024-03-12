@@ -61,8 +61,8 @@ class Login_LogoutAPITestCase(APITestCase):
             format="json",
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
-        self.assertEqual(response2.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIsNotNone(response1.data["jwt"])
+        self.assertEqual(response2.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIsNotNone(response1.data["access"])
 
     def test_logout(self):
         client = APIClient()
@@ -99,7 +99,7 @@ class CourseListAPITestCase(APITestCase):
             format="json",
         )
         token = response.json()
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.unaunthenticated_client.force_authenticate(user=None)
 
     def tearDown(self):
@@ -223,7 +223,7 @@ class CourseDetailAPITestCase(APITestCase):
         )
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=user, token=token["access"])
         self.unauthenticated_client.force_authenticate(user=None)
 
     def test_retrieve_course(self):
@@ -254,10 +254,8 @@ class CourseDetailAPITestCase(APITestCase):
             },
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
         # test update instance with an authenticated client and invalid fields
-        response = self.authenticated_client.put(
+        response_2 = self.authenticated_client.put(
             reverse("learn:course-detail", args=[1]),
             {
                 "title": "test changing title",
@@ -266,10 +264,8 @@ class CourseDetailAPITestCase(APITestCase):
             },
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
         # test update instance with an invalid course id
-        response = self.authenticated_client.put(
+        response_3 = self.authenticated_client.put(
             reverse("learn:course-detail", args=[3]),
             {
                 "title": "test changing title",
@@ -278,10 +274,9 @@ class CourseDetailAPITestCase(APITestCase):
             },
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # test update course with an authenticated client
-        response = self.authenticated_client.put(
+        response_4 = self.authenticated_client.put(
             reverse("learn:course-detail", args=[1]),
             {
                 "title": "changing title using put",
@@ -291,8 +286,11 @@ class CourseDetailAPITestCase(APITestCase):
             format="json",
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["title"], "changing title using put")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_4.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_4.data["title"], "changing title using put")
 
     def test_delete_course(self):
         """
@@ -345,7 +343,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         )
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
 
     def test_retrieve_course_content(self):
         client = APIClient(enforce_csrf_checks=True)
@@ -452,7 +450,7 @@ class WorkoutListAPITestCase(APITestCase):
         )
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.unauthenticated_client.force_authenticate(user=None)
 
     def test_retrieve_workout_list(self):
@@ -571,7 +569,7 @@ class WorkoutDetailAPITestCase(APITestCase):
         )
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.unauthenticated_client.force_authenticate(user=None)
 
     def test_retrieve_workout(self):
@@ -708,9 +706,9 @@ class CourseCommentListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client_2.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.unathenticated_client.force_authenticate(user=None)
 
@@ -819,9 +817,9 @@ class CourseCommentDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -972,9 +970,9 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -1085,9 +1083,9 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -1234,9 +1232,9 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
@@ -1347,9 +1345,9 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["jwt"])
+        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
         self.authenticated_client.force_authenticate(
-            user=self.user_2, token=token_2["jwt"]
+            user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
 
