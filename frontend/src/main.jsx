@@ -12,7 +12,7 @@ import Root from './routes/root';
 import ErrorPage from './error-page';
 import SignIn from './routes/SignIn';
 import SignUp from './routes/SignUp';
-import CourseList from './routes/Home';
+import {Home as CourseList} from './routes/Home';
 
 const theme = createTheme({
   palette: {
