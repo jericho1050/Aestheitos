@@ -40,7 +40,7 @@ function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isOpen, setIsOpen] = React.useState(false);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const token = React.useContext(AuthContext);
+  const token = React.useContext(AuthContext); // access token and refresh token
   const dispatch = React.useContext(AuthDispatchContext);
   const accessTokenExp = React.useContext(AccessTokenExpContext)
   const currentTime = React.useContext(CurrentTimeContext)

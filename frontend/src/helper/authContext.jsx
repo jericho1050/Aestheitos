@@ -32,7 +32,6 @@ export function AuthProvider({ children }) {
                     <CurrentTimeContext.Provider value={currentTime}>
                     {children}
                     </CurrentTimeContext.Provider>
-        
                 </AccessTokenExpContext.Provider>
             </AuthDispatchContext.Provider>
         </AuthContext.Provider>
