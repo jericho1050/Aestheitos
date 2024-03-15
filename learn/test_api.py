@@ -6,16 +6,13 @@ from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 from .models import (
     User,
-    UserProgress,
     Course,
     CourseContent,
     CourseComments,
-    Enrollment,
     Workouts,
     CorrectExerciseForm,
     WrongExerciseForm,
-    Blog,
-    BlogComments,
+
 )
 
 # Reference For APIClient testing

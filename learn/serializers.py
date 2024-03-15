@@ -63,16 +63,16 @@ class CourseRatingSerializer(ModelSerializer):
         is_rated = CourseRating.objects.filter(user=user, course=course).exists()
         if not is_enrolled:
             raise AuthenticationFailed("not allowed to create")
-        
+
         if is_rated:
             raise AuthenticationFailed("not allowed to create")
-            
 
         self.save(user=user, course=course)
 
 
 class CourseSerializer(ModelSerializer):
     average_rating = serializers.SerializerMethodField()
+
     class Meta:
         model = Course
         fields = "__all__"
@@ -109,6 +109,45 @@ class CourseContentSerializer(ModelSerializer):
         self.save()
 
 
+class SectionSerializer(ModelSerializer):
+    class Meta:
+        model = Section
+        fields = "__all__"
+        read_only_fields = ["course"]
+
+    def save_with_auth_user(self, user, pk, update=False):
+        if update:
+            if not is_valid_ownership(user, pk):
+                raise AuthenticationFailed("Not allowed to modify")
+            self.save()
+            return
+        
+        course = get_object_or_404(Course, id=pk)
+        if not is_valid_ownership(user, course.id):
+            raise AuthenticationFailed("Not allowed to create")
+        self.save(course=course)
+
+
+class SectionItemSerializer(ModelSerializer):
+    class Meta:
+        model = SectionItem
+        fields = "__all__"
+        read_only_fields = ["section"]
+
+    def save_with_auth_user(self, user, pk, update=False):
+        if update:
+            if not is_valid_ownership(user, self.instance.section.course.id):
+                raise AuthenticationFailed("Not allowed to modify")
+            self.save()
+            return
+        
+        section = get_object_or_404(Section, id=pk)
+        if not is_valid_ownership(user, section.course.id):
+            raise AuthenticationFailed("Not allowed to create")
+        self.save(section=section)
+        
+
+
 class CourseCommentsSerializer(ModelSerializer):
     class Meta:
         model = CourseComments
@@ -116,14 +155,11 @@ class CourseCommentsSerializer(ModelSerializer):
         read_only_fields = ["course", "comment_by"]
 
     def save_with_auth_user(self, user, pk, update=False):
-
         if update:
-
             if self.instance.comment_by != user:
                 raise AuthenticationFailed("Not allowed to modify comment")
             self.save()
             return
-
         course = get_object_or_404(Course, id=pk)
         self.save(course=course, comment_by=user)
 

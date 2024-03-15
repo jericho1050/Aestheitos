@@ -57,7 +57,7 @@ class Course(models.Model):
         ("IN", "Intermediate"),
         ("AD", "Advanced"),
     ]
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     description = models.TextField()
     thumbnail = models.ImageField(upload_to="images/", null=True, blank=True)
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES)
@@ -84,7 +84,7 @@ class Course(models.Model):
 
 class CourseContent(models.Model):
     """
-    Represents a Course's content
+    Represents a course's overview content
     """
 
     lecture = models.URLField()
@@ -96,6 +96,35 @@ class CourseContent(models.Model):
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.course.title}"
+    
+class Section(models.Model): 
+    """
+    Represents a section item
+    """
+
+    course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name="sections")
+    title = models.CharField(max_length=200)
+
+    def delete_with_auth_user(self, user):
+        if self.course.created_by != user:
+            raise AuthenticationFailed("Not allowed to delete")
+        
+
+
+class SectionItem(models.Model):
+    """
+    Represents a section's items
+    """
+
+    section = models.ForeignKey("Section", on_delete=models.CASCADE, related_name="contents")
+    lecture = models.URLField()
+    overview = models.TextField()
+
+    def delete_with_auth_user(self, user):
+        from .helpers import is_valid_ownership
+
+        if not is_valid_ownership(user, self.section.course.id):
+            raise AuthenticationFailed("Not allowed to delete")
 
 
 class CourseComments(models.Model):
@@ -125,15 +154,21 @@ class CourseComments(models.Model):
 
 
 class Workouts(models.Model):
-    """Represent Workouts in a Course ."""
+    """
+    Represent Workouts in a course or in a section
+    """
 
     INTENSITY_CHOICES = [("L", "Low"), ("M", "Medium"), ("H", "High")]
     EXCERTION_CHOICES = [(i, str(i)) for i in range(1, 11)]
 
-    course = models.ForeignKey(
-        "Course", on_delete=models.CASCADE, related_name="workouts"
+
+    section = models.ForeignKey(
+        "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
-    exercise = models.CharField(max_length=50)
+    course = models.ForeignKey(
+        "Course", on_delete=models.CASCADE, related_name="course_workouts"
+    )
+    exercise = models.CharField(max_length=100)
     demo = models.URLField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True
@@ -159,7 +194,7 @@ class CorrectExerciseForm(models.Model):
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="correct_exercise_form"
     )
-    description = models.CharField(max_length=69)
+    description = models.CharField(max_length=100)
 
     def __str__(self):
         return f"( pk: { self.pk } )Course: {self.workout.course.title}. Workout: {self.workout.exercise}"
@@ -177,7 +212,7 @@ class WrongExerciseForm(models.Model):
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="wrong_exercise_form"
     )
-    description = models.CharField(max_length=69)
+    description = models.CharField(max_length=100)
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.workout.course.title} Workout: {self.workout.exercise}"
@@ -217,7 +252,7 @@ class Blog(models.Model):
 
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="author")
     content = models.TextField()
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=200)
     blog_created = models.DateTimeField(auto_now_add=True)
     blog_updated = models.DateTimeField(auto_now_add=True)
 

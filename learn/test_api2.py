@@ -7,12 +7,7 @@ from .models import (
     User,
     UserProgress,
     Course,
-    CourseContent,
-    CourseComments,
     Enrollment,
-    Workouts,
-    CorrectExerciseForm,
-    WrongExerciseForm,
     Blog,
     BlogComments,
 )

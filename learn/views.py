@@ -21,7 +21,7 @@ from .custom_serializer import *
 # REFERENCE FOR Django API Authentication using JWT Tokens by Scalable Scripts (thought i use DRF's simple jwt instead)
 # https://www.youtube.com/watch?v=PUzgZrS_piQ&list=LL&index=3&t=968s&ab_channel=ScalableScripts
 
-# Documentation reference also for Simple JWT 
+# Documentation reference also for Simple JWT
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html
 
 # Documentation Source FOR DRF Class Based functions etc
@@ -31,8 +31,6 @@ from .custom_serializer import *
 
 # REFERENCE FOR MY documentation tool
 # https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
-
-
 
 
 # API calls (Class based functions)
@@ -49,30 +47,31 @@ class RegisterView(APIView):
 
         if user is None:
             raise AuthenticationFailed("User not found!")
-        
+
         token = RefreshToken.for_user(user)
         print(token)
         response = Response()
         response.data = {
-            'refresh': str(token),
-            'access': str(token.access_token),
+            "refresh": str(token),
+            "access": str(token.access_token),
         }
         return response
 
-        
 
-    
 class LoginView(TokenObtainPairView):
     """
     Authentication of the User and returns an access and refresh token
     """
+
     @extend_schema(request=LoginCustomSerializer, responses=LoginCustomSerializer)
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        response.set_cookie(key="refresh", value=response.data['refresh'], httponly=True)
-        response.set_cookie(key="access", value=response.data['access'], httponly=True)
+        response.set_cookie(
+            key="refresh", value=response.data["refresh"], httponly=True
+        )
+        response.set_cookie(key="access", value=response.data["access"], httponly=True)
         return response
-    
+
 
 class MyTokenRefreshView(TokenRefreshView):
     """
@@ -81,14 +80,15 @@ class MyTokenRefreshView(TokenRefreshView):
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        response.set_cookie(key="access", value=response.data['access'], httponly=True)
+        response.set_cookie(key="access", value=response.data["access"], httponly=True)
         return response
-    
+
 
 class LogoutView(APIView):
     """
     Delete cookie in client's browser
     """
+
     def post(self, request):
         response = Response()
         response.delete_cookie("access")
@@ -176,6 +176,48 @@ class CourseContentDetail(
         serializer.is_valid(raise_exception=True)
         serializer.save(course=course)
         return Response(serializer.data)
+
+
+class SectionList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all sections or create a new section
+    """
+
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer
+
+    def get_queryset(self):
+        return Section.objects.filter(course=self.kwargs["pk"])
+
+
+class SectionDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Retrieve, update or delete a section instance
+    """
+
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer
+
+
+class SectionItemList(CreateAPIMixin, generics.ListCreateAPIView):
+    """
+    List all section items or create a new section item for a section instance
+    """
+
+    queryset = SectionItem.objects.all()
+    serializer_class = SectionItemSerializer
+
+    def get_queryset(self):
+        return SectionItem.objects.filter(section=self.kwargs["pk"])
+    
+class SectionItemDetail(DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a section item instance
+    """
+    queryset = SectionItem.objects.all()
+    serializer_class = SectionItemSerializer
 
 
 class WorkoutList(CreateAPIMixin, generics.ListCreateAPIView):
@@ -358,20 +400,15 @@ class UserView(APIView):
     """
     Verfies the access/refresh token and returns it
     """
+
     def get(self, request):
-        
+
         user_authentication(request)
         response = Response()
         access = request.COOKIES.get("access")
         refresh = request.COOKIES.get("refresh")
-        response.data = {
-            "refresh": refresh,
-            "access": access
-        }
+        response.data = {"refresh": refresh, "access": access}
         return response
-
-
-
 
 
 # Not used anymore
