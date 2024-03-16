@@ -303,6 +303,63 @@ class CourseCommentsTestCase(TestCase):
         with self.assertRaises(ValidationError):
             comment.full_clean()
 
+class SectionTestCase(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username="testuser")
+        self.user2 = User.objects.create(username="testuser123")
+        self.course = Course.objects.create(title="testing", created_by=self.user)
+        self.section = Section.objects.create(course=self.course, title="week 6")
+
+    def test_section_creation(self):
+
+        self.assertEqual(self.section.course, self.course)
+        self.assertEqual(self.section.title, "week 6")
+        self.assertEqual(self.section.course.created_by, self.user)
+        self.assertNotEqual(self.section.course.created_by, self.user2)
+
+    def test_section_without_course_reference(self):
+
+        with self.assertRaises(IntegrityError):
+            Section.objects.create(title="forgot ops")
+
+    def test_section_without_title(self):
+        section = Section.objects.create(course=self.course)
+        with self.assertRaises(ValidationError):
+            section.full_clean()
+        
+
+
+
+class SectionItemTestCase(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username="testme")
+        self.course = Course.objects.create(created_by=self.user, title="testing sectionItem")
+        self.section = Section.objects.create(course=self.course, title="week 12")
+        self.section_item = SectionItem.objects.create(section=self.section, lecture="https://www.youtube.com")
+        self.workout = Workouts.objects.create(
+            section_item=self.section_item,
+            exercise="Test Exercise",
+            intensity="L",
+            rest_time=60,
+            sets=3,
+            reps=10,
+            excertion=5,
+        )
+        self.workout_2 = Workouts.objects.create(
+            section_item=self.section_item,
+            exercise="Test Exercise number 2",
+            intensity="L",
+            rest_time=60,
+            sets=3,
+            reps=10,
+            excertion=5,
+        )
+
+    def test_section_item_creation(self):
+
+        self.assertEqual(self.section_item.section, self.section)
 
 class WorkoutsTestCase(TestCase):
 
@@ -310,8 +367,10 @@ class WorkoutsTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        section = Section.objects.create(course=self.course, title="week 123")
+        self.section_item = SectionItem.objects.create(section=section , overview="after doing this go do this")
         self.workout = Workouts.objects.create(
-            course=self.course,
+            section_item=self.section_item,
             exercise="Test Exercise",
             intensity="L",
             rest_time=60,
@@ -324,7 +383,7 @@ class WorkoutsTestCase(TestCase):
         """
         Ensure we can create a new workout object
         """
-        self.assertEqual(self.workout.course, self.course)
+        self.assertEqual(self.workout.section_item, self.section_item)
         self.assertEqual(self.workout.exercise, "Test Exercise")
         self.assertEqual(self.workout.intensity, "L")
         self.assertEqual(self.workout.rest_time, 60)
@@ -345,7 +404,6 @@ class WorkoutsTestCase(TestCase):
 
     def test_invalid_intensity(self):
         workout = Workouts(
-            course=self.course,
             exercise="Test Exercise",
             intensity="Invalid intensity",
             sets=3,
@@ -361,8 +419,10 @@ class CorrectExerciseFormTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        section = Section.objects.create(title="week 6", course=self.course)
+        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com")
         self.workout = Workouts.objects.create(
-            course=self.course,
+            section_item=section_item,
             exercise="Push Up",
             intensity="M",
             rest_time=90,
@@ -409,8 +469,10 @@ class WrongExerciseFormTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        section = Section.objects.create(course=self.course, title="week 10")
+        section_item = SectionItem.objects.create(section=section, overview="after doing a set rest 100000 minutes")
         self.workout = Workouts.objects.create(
-            course=self.course,
+            section_item=section_item,
             exercise="Push Up",
             intensity="M",
             rest_time=90,

@@ -117,8 +117,8 @@ class SectionItem(models.Model):
     """
 
     section = models.ForeignKey("Section", on_delete=models.CASCADE, related_name="contents")
-    lecture = models.URLField()
-    overview = models.TextField()
+    lecture = models.URLField(blank=True, null=True)
+    overview = models.TextField(blank=True, null=True)
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
@@ -162,11 +162,8 @@ class Workouts(models.Model):
     EXCERTION_CHOICES = [(i, str(i)) for i in range(1, 11)]
 
 
-    section = models.ForeignKey(
+    section_item = models.ForeignKey(
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
-    )
-    course = models.ForeignKey(
-        "Course", on_delete=models.CASCADE, related_name="course_workouts"
     )
     exercise = models.CharField(max_length=100)
     demo = models.URLField()
@@ -180,11 +177,12 @@ class Workouts(models.Model):
 
     def __str__(self):
         return (
-            f"( pk: { self.pk } ) Course: {self.course.title} Workout: {self.exercise}"
+            f"( pk: { self.pk } ) Course: {self.section_item.section.course.title} Workout: {self.exercise}"
         )
 
     def delete_with_auth_user(self, user):
-        if self.course.created_by != user:
+        from .helpers import is_valid_ownership
+        if not is_valid_ownership(user, self.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
@@ -197,12 +195,12 @@ class CorrectExerciseForm(models.Model):
     description = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"( pk: { self.pk } )Course: {self.workout.course.title}. Workout: {self.workout.exercise}"
+        return f"( pk: { self.pk } )Course: {self.workout.section_item.section.course.title}. Workout: {self.workout.exercise}"
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
 
-        if not is_valid_ownership(user, self.workout.course.id):
+        if not is_valid_ownership(user, self.workout.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
@@ -215,12 +213,12 @@ class WrongExerciseForm(models.Model):
     description = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"( pk: { self.pk } ) Course: {self.workout.course.title} Workout: {self.workout.exercise}"
+        return f"( pk: { self.pk } ) Course: {self.workout.section_item.section.course.title} Workout: {self.workout.exercise}"
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
 
-        if not is_valid_ownership(user, self.workout.course.id):
+        if not is_valid_ownership(user, self.workout.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 

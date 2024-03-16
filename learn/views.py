@@ -229,7 +229,7 @@ class WorkoutList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = WorkoutsSerializer
 
     def get_queryset(self):
-        return Workouts.objects.filter(course=self.kwargs["pk"])
+        return Workouts.objects.filter(section_item=self.kwargs["pk"])
 
 
 class WorkoutDetail(

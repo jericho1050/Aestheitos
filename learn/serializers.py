@@ -186,20 +186,20 @@ class WorkoutsSerializer(ModelSerializer):
     class Meta:
         model = Workouts
         fields = "__all__"
-        read_only_fields = ["course"]
+        read_only_fields = ["section_item"]
 
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
-            if self.instance.course.created_by != user:
+            if not is_valid_ownership(user, self.instance.section_item.section.course.id):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
 
-        course = get_object_or_404(Course, id=pk)
-        if course.created_by != user:
+        section_item = get_object_or_404(SectionItem, id=pk)
+        if not is_valid_ownership(user, section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to create")
-        self.save(course=course)
+        self.save(section_item=section_item)
 
 
 class CorrectExerciseFormSerializer(ModelSerializer):
@@ -211,13 +211,13 @@ class CorrectExerciseFormSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
-            if not is_valid_ownership(user, self.instance.workout.course.id):
+            if not is_valid_ownership(user, self.instance.workout.section_item.section.course.id):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
 
         workout = get_object_or_404(Workouts, id=pk)
-        if not is_valid_ownership(user, workout.course.id):
+        if not is_valid_ownership(user, workout.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to create")
         self.save(workout=workout)
 
@@ -231,13 +231,13 @@ class WrongExerciseFormSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
-            if not is_valid_ownership(user, self.instance.workout.course.id):
+            if not is_valid_ownership(user, self.instance.workout.section_item.section.course.id):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
 
         workout = get_object_or_404(Workouts, id=pk)
-        if not is_valid_ownership(user, workout.course.id):
+        if not is_valid_ownership(user, workout.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to create")
         self.save(workout=workout)
 

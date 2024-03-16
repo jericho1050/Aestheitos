@@ -12,7 +12,8 @@ from .models import (
     Workouts,
     CorrectExerciseForm,
     WrongExerciseForm,
-
+    Section,
+    SectionItem
 )
 
 # Reference For APIClient testing
@@ -426,10 +427,12 @@ class CourseContentDetailAPITestCase(APITestCase):
 class WorkoutListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
-
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        self.section = Section.objects.create(course=self.course, title="testing")
+        self.section_item = SectionItem.objects.create(section=self.section, overview="go to this and that and that ")
+
         self.workout = Workouts.objects.create(
-            course=self.course,
+            section_item=self.section_item,
             exercise="Test Exercse",
             intensity="L",
             rest_time=60,
@@ -547,8 +550,10 @@ class WorkoutDetailAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        self.section = Section.objects.create(title="Testing section", course=self.course)
+        self.section_item = SectionItem.objects.create(section=self.section, lecture="https://www.youtube.com")
         self.workout = Workouts.objects.create(
-            course=self.course,
+            section_item = self.section_item,
             exercise="Test Exercse",
             intensity="L",
             rest_time=60,
@@ -650,7 +655,7 @@ class WorkoutDetailAPITestCase(APITestCase):
             "sets": 3,
             "reps": 60,
             "excertion": 8,
-            "course": 1,
+            "section_item": 1,
         }
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response_1.data, dict)
@@ -933,8 +938,10 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
+        section  = Section.objects.create(title="week 5", course=course)
+        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com")
         workout = Workouts.objects.create(
-            course=course,
+            section_item=section_item,
             exercise="Regular dips",
             demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
         )
@@ -1046,8 +1053,10 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
+        section = Section.objects.create(course=course, title="idk just section testing")
+        section_item = SectionItem.objects.create(section=section, overview="nothing just go on after this set go on")
         workout = Workouts.objects.create(
-            course=course,
+            section_item=section_item,
             exercise="Regular dips",
             demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
         )
@@ -1195,8 +1204,10 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
+        section = Section.objects.create(course=course, title="WEEK 4")
+        section_item = SectionItem.objects.create(section=section, overview="GO ON GO GO GO GO GO")
         workout = Workouts.objects.create(
-            course=course,
+            section_item=section_item,
             exercise="Regular dips",
             demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
         )
@@ -1308,8 +1319,10 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
+        section = Section.objects.create(title="week 60", course=course)
+        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com/watchme")
         workout = Workouts.objects.create(
-            course=course,
+            section_item=section_item,
             exercise="Regular dips",
             demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
         )

@@ -30,8 +30,8 @@ urlpatterns = [
     path('section-item/<int:pk>/section', SectionItemDetail.as_view(), name="section-item-detail"),
 
     # workouts
-    path('workouts/course/<int:pk>', WorkoutList.as_view(), name="course-workout-list"),
-    path('workout/<int:pk>/course', WorkoutDetail.as_view(), name="course-workout-detail"),
+    path('workouts/section-item/<int:pk>', WorkoutList.as_view(), name="course-workout-list"),
+    path('workout/<int:pk>/section-item', WorkoutDetail.as_view(), name="course-workout-detail"),
     path('correct-exercises/course/workout/<int:pk>', CorrectExerciseFormList.as_view(), name="correct-exercise-list"),
     path('correct-exercise/<int:pk>/course/workout', CorrectExerciseFormDetail.as_view(), name="correct-exercise-detail"),
     path('wrong-exercises/course/workout/<int:pk>', WrongExerciseFormList.as_view(), name="wrong-exercise-list"),
