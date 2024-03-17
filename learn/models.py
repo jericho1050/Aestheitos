@@ -97,6 +97,8 @@ class CourseContent(models.Model):
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.course.title}"
     
+    
+    
 class Section(models.Model): 
     """
     Represents a section item
@@ -108,6 +110,7 @@ class Section(models.Model):
     def delete_with_auth_user(self, user):
         if self.course.created_by != user:
             raise AuthenticationFailed("Not allowed to delete")
+        self.delete()
         
 
 
@@ -125,6 +128,7 @@ class SectionItem(models.Model):
 
         if not is_valid_ownership(user, self.section.course.id):
             raise AuthenticationFailed("Not allowed to delete")
+        self.delete()
 
 
 class CourseComments(models.Model):
