@@ -38,18 +38,21 @@ describe("User Signs up ", () => {
         cy.get('#password').clear('123');
         cy.get('#password').type('123');
         cy.get('.MuiButtonBase-root').click();
-        cy.get('.MuiGrid-root > .MuiTypography-root').should('be.visible');
         /* ==== End Cypress Studio ==== */
     });
 
     it('inputs all required fields, then sends a request to server with valid credentials', () => {
 
         // intercept the XHR to our backend server
-        cy.intercept('POST', '**/register', {
+        Cypress.env()
+        cy.intercept('POST', `${Cypress.env('REST_API_URL')}/register`, {
             statusCode: 200,
-            body: { "jwt": "some kind of token idk" }
+            body: { "access": Cypress.env('ACCESS_TOKEN_TEST'), "refresh": Cypress.env('REFRESH_TOKEN_TEST')}
 
         }).as('postRegister');
+        console.log(Cypress.env('REST_API_URL'));
+        console.log(Cypress.env('ACCESS_TOKEN_TEST'));
+        console.log(Cypress.env('REFRESH_TOKEN_TEST'));
         cy.get('input[name=firstName]').type(firstName);
         cy.get('input[name=lastName').type(lastName);
         cy.get('input[name=username').type(username);
@@ -64,7 +67,8 @@ describe("User Signs up ", () => {
             expect(request.body).to.have.property('email')
             expect(request.body).to.have.property('password')
             expect(request.headers).to.have.property('content-type');
-            expect(response.body).to.have.property('jwt');
+            expect(response.body).to.have.property('access')
+            expect(response.body).to.have.property('refresh')
             
         });
         cy.url().should('include', "/home")

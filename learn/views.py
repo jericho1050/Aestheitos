@@ -49,7 +49,7 @@ class RegisterView(APIView):
             raise AuthenticationFailed("User not found!")
 
         token = RefreshToken.for_user(user)
-        print(token)
+        # print(token)
         response = Response()
         response.data = {
             "refresh": str(token),

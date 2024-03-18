@@ -1,6 +1,11 @@
 import Chance from "chance";
 const chance = new Chance();
 
+
+// NOTICE !
+// Please change the ENVIROMENT VARIABLE in root directory TO 127.0.0.1 for Server Responses
+// Localhost causes a CORS error 
+
 describe('User Signs In', () => {
     const username = chance.first();
     const password = '123'
@@ -24,8 +29,16 @@ describe('User Signs In', () => {
     // get me the password form and type the password
     cy.get('input[name=password]').type(password);
 
+    // stub a response to POST login
+    // cy.intercept('POST', `${Cypress.env('VITE_API_URL')}login`, {
+    //     statusCode: 401,
+    //     body: {'invalid': 'incorrect username and password'},
+    // }).as('postLogin');
+
     // when sign in button is clicked
     cy.contains('button', 'Sign In').click();
+
+    // cy.wait('@postLogin');
 
     // then assert
     cy.contains('p', 'Invalid Username and Password').should('be.visible')
