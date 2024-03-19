@@ -251,13 +251,15 @@ class SectionItemListAPITestCase(APITestCase):
         self.section = Section.objects.create(title="test week 5", course=self.course)
         self.section_item = SectionItem.objects.create(
             section=self.section,
-            overview="testing just testing just testing",
+            description="testing just testing just testing",
             lecture="https://www.youtube.com/testing",
+            title="testing item lol"
         )
         self.section_item_2 = SectionItem.objects.create(
             section=self.section,
-            overview="testing just another test lmao",
+            description="testing just another test lmao",
             lecture="https://www.youtube/com/wwatchthistest",
+            title="testing item 2"
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -298,8 +300,10 @@ class SectionItemListAPITestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("testing", response.data[0]["overview"])
-        self.assertIn("testing", response.data[1]["overview"])
+        self.assertIn("testing", response.data[0]["description"])
+        self.assertIn("testing", response.data[1]["description"])
+        self.assertIn("testing", response.data[0]["title"])
+        self.assertIn("testing", response.data[1]["title"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
         self.assertListEqual(response_2.data, [])
 
@@ -311,21 +315,21 @@ class SectionItemListAPITestCase(APITestCase):
         # test create section item with an authenticated client
         response = self.authenticated_client.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://www.youtube.com/readme", "overview": "go move here"},
+            {"lecture": "https://www.youtube.com/readme", "description": "go move here", "title": "nothing just test title for a section item"},
             format="json",
         )
 
         # test create section item with an authenticated client and section that doesn't exist
         response_2 = self.authenticated_client.post(
             reverse("learn:section-item-list", args=[6]),
-            {"lecture": "https://facebook.com/lmao", "overview": "noope"},
+            {"lecture": "https://facebook.com/lmao", "description": "noope", "title": "nothing just test title for a section item"},
             format="json",
         )
 
         # test create section item with an authenticated client != course's created by
         response_3 = self.authenticated_client_2.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://youtube.com/nothing", "overview": "lol"},
+            {"lecture": "https://youtube.com/nothing", "description": "lol", "title": "nothing just test title for a section item"},
             format="json",
         )
 
@@ -337,27 +341,27 @@ class SectionItemListAPITestCase(APITestCase):
         # test create section item with missing field
         response_5 = self.authenticated_client.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://youtube.com/stillokay"},
+            {"lecture": "https://youtube.com/stillokay", },
             format="json",
         )
 
         response_6 = self.unauthenticated_client.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://youtube.com/nope", "overview": "still error"},
+            {"lecture": "https://youtube.com/nope", "description": "still error", "title": "nothing just test title for a section item"},
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn("youtube", response.data["lecture"])
-        self.assertIn("go", response.data["overview"])
+        self.assertIn("go", response.data["description"])
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
+        self.assertNotEqual(
             response_4.status_code, status.HTTP_201_CREATED
-        )  # i think i allowedd it to be null and blank
+        ) 
         self.assertEqual(
-            response_5.status_code, status.HTTP_201_CREATED
-        )  # i think i allowedd it to be null and blank
+            response_5.status_code, status.HTTP_400_BAD_REQUEST
+        )  
         self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -370,13 +374,15 @@ class SectionItemDetailAPITestCase(APITestCase):
         self.section = Section.objects.create(title="test week 100", course=self.course)
         self.section_item = SectionItem.objects.create(
             section=self.section,
-            overview="testing just testing just testing",
+            description="testing just testing just testing",
             lecture="https://www.youtube.com/testing",
+            title="testing section item title"
         )
         self.section_item_2 = SectionItem.objects.create(
             section=self.section,
-            overview="testing just another test lmao",
+            description="testing just another test lmao",
             lecture="https://www.youtube/com/metest",
+            title="testing section item 2 title"
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -425,11 +431,13 @@ class SectionItemDetailAPITestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("testing", response.data["overview"])
+        self.assertIn("testing", response.data["description"])
         self.assertIn("youtube", response.data["lecture"])
+        self.assertIn("testing", response.data["title"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
-        self.assertIn("testing", response.data["overview"])
-        self.assertIn("youtube", response.data["lecture"])
+        self.assertIn("testing", response_2.data["description"])
+        self.assertIn("youtube", response_2.data["lecture"])
+        self.assertIn("testing", response.data["title"])
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_section_item(self):
@@ -440,21 +448,21 @@ class SectionItemDetailAPITestCase(APITestCase):
         # test update section item instance with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:section-item-detail", args=[1]),
-            {"overview": "new testing", "lecture": "https://youtube.com/calisthenics"},
+            {"description": "new testing", "lecture": "https://youtube.com/calisthenics", "title": "nothing just test title for a section item"},
             format="json",
         )
 
         # test update section item instance with authenticated  client
         response_2 = self.authenticated_client.put(
             reverse("learn:section-item-detail", args=[2]),
-            {"overview": "new testing 2", "lecture": "https://instagram.com/video"},
+            {"description": "new testing 2", "lecture": "https://instagram.com/video", "title": "nothing just test title for a section item"},
             format="json",
         )
 
         # test update section item instance that doesn't exist with auth client
         response_3 = self.authenticated_client.put(
             reverse("learn:section-item-detail", args=[6]),
-            {"overview": "new testing this put", "lecture": "https://youtube.com/calime"}, format="json"
+            {"description": "new testing this put", "lecture": "https://youtube.com/calime", "title": "nothing just test title for a section item"}, format="json"
         )
 
         # test update section item instance wtih an empty field and auth client
@@ -466,28 +474,29 @@ class SectionItemDetailAPITestCase(APITestCase):
 
         # test update section item instance with an authenticated client != course's created by
         response_5 = self.authenticated_client_2.put(
-            reverse("learn:section-item-detail", args=[2]), {"overview": "something new ", "lecture": "https://udemy.com/lolno"}, format="json"
+            reverse("learn:section-item-detail", args=[2]), {"description": "something new ", "lecture": "https://udemy.com/lolno", "title": "nothing just test title for a section item"}, format="json"
         )
 
 
         # test update section item instance with an empty field and auth client 2 -> forbidden anyway
         response_6 = self.authenticated_client_2.put(
-            reverse("learn:section-item-detail", args=[1]), {}, format="json"
+            reverse("learn:section-item-detail", args=[1]), {"title": "nothing just test title for a section item"}, format="json"
         )
 
         # test update section item instance with an unauthenticated client
         response_7 = self.unauthenticated_client.put(
-            reverse("learn:section-item-detail", args=[1]), {"overview": "trying to change it ", "lecture": "https://idk.com/anymore"}, format="json"
+            reverse("learn:section-item-detail", args=[1]), {"description": "trying to change it ", "lecture": "https://idk.com/anymore", "title": "nothing just test title for a section item"}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('new testing', response.data['overview'])
+        self.assertIn('new testing', response.data['description'])
         self.assertIn('calisthenics', response.data['lecture'])
+        self.assertIn('nothing', response.data['title'])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
-        self.assertIn('2', response_2.data['overview'])
+        self.assertIn('2', response_2.data['description'])
         self.assertIn('instagram', response_2.data['lecture'])
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response_4.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_5.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_7.status_code, status.HTTP_403_FORBIDDEN)

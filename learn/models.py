@@ -121,7 +121,8 @@ class SectionItem(models.Model):
 
     section = models.ForeignKey("Section", on_delete=models.CASCADE, related_name="contents")
     lecture = models.URLField(blank=True, null=True)
-    overview = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    title = models.CharField(max_length=200)
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
