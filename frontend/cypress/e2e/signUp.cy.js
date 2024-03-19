@@ -1,6 +1,10 @@
 import Chance from "chance";
 const chance = new Chance();
 
+
+// in .env root directory
+// # VITE_API_URL="http://127.0.0.1:8000/" # Please use this for E2E testing as localhost causes some CORS errors during testing.
+
 describe("User Signs up ", () => {
     const firstName = chance.first();
     const lastName = chance.last();
