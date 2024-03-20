@@ -170,7 +170,7 @@ class Workouts(models.Model):
     section_item = models.ForeignKey(
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
-    exercise = models.CharField(max_length=100)
+    exercise = models.CharField(max_length=200)
     demo = models.URLField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True

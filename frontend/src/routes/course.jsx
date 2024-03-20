@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Container, Grid, Paper, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, Grid, Paper, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as React from 'react';
@@ -11,10 +11,13 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import DescriptionIcon from '@mui/icons-material/Description';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import ClearIcon from '@mui/icons-material/Clear';
+import CheckIcon from '@mui/icons-material/Check';
+import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
+
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
-
 
 // mock data 
 // temporary for now 
@@ -35,15 +38,26 @@ const course = {
     created_by: 'testuser'
 }
 const courseContent = {
-    lecture: "https://youtube.com/embed/CXMZxgNnnv8",
+    // lecture: "https://youtube.com/embed/CXMZxgNnnv8",
+    lecture: 'https://www.youtube.com/embed/LxKHX2fumJw',
     overview: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum felis rhoncus. Duis vestibulum, mi eu porta sodales, magna mauris bibendum lacus, id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed lorem libero. Donec cursus dictum leo a feugiat. Mauris non felis vitae mi fermentum blandit. Sed placerat, nunc et accumsan gravida, leo ipsum venenatis nulla, non gravida nisl ex et felis. Proin quis gravida orci, at aliquam enim. Curabitur eget mi nisl. Donec mattis dui tellus, non congue lacus suscipit et. Nullam sit amet ultricies massa. Nullam rutrum ullamcorper lacus. Fusce dictum interdum ligula vel pellentesque.
 
     Phasellus luctus lorem sed sapien pharetra, ac laoreet arcu sollicitudin. Morbi viverra rhoncus bibendum. In tellus nisi, varius sed ligula sit amet, ultricies laoreet magna. Donec maximus a augue nec vestibulum. Donec accumsan odio at porta rutrum. Nulla a blandit mi. Sed tortor justo, imperdiet in maximus sed, sagittis at eros. Nunc id sagittis mauris, porta malesuada mi. Vivamus ut nisl mollis, egestas odio at, ornare massa. Proin dictum, augue vel fermentum egestas, arcu elit fermentum lorem, nec consectetur mi massa ac mauris. Sed sollicitudin eleifend ullamcorper. Duis commodo lorem eu finibus ultricies. Pellentesque cursus risus eget volutpat lacinia. Nulla vitae est at massa vehicula bibendum.`,
     weeks: 12,
 }
-const workouts = {
+const workouts1 = {
     intesity: "H",
-    exercise: "pushup",
+    exercise: "Pull up",
+    demo: "https://www.youtube.com/embed/IZMKe61144w",
+    rest_time: 2,
+    sets: 3,
+    reps: 10,
+    excertion: 8,
+}
+
+const workouts2 = {
+    intesity: "H",
+    exercise: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur    description: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
     demo: "https://youtube.com/embed/IODxDxX7oi4",
     rest_time: 2,
     sets: 3,
@@ -51,11 +65,11 @@ const workouts = {
     excertion: 8,
 }
 const correctForm = {
-    demo: 'https://www.youtube.com/watch?v=IODxDxX7oi4',
+    demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
     description: "scapula retracted"
 }
 const wrongForm = {
-    demo: 'https://www.youtube.com/watch?v=IODxDxX7oi4',
+    demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
     description: "scapula not moving"
 }
 
@@ -63,15 +77,196 @@ const section1 = {
     title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 }
 const sectionItem1 = {
-    lecture: "https://www.youtube.com/watch?v=ua2rJJwZ4nc",
+    lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
     description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-    title: "TESTING Description"
+    title: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. "
 }
 
 const sectionItem2 = {
-    lecture: "https://www.youtube.com/watch?v=ua2rJJwZ4nc",
+    lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
     description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
     title: "Workout Routine"
+}
+
+
+// responsible for the 'workout' demo card
+function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
+    const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
+
+    const handleClickOpen = () => {
+        setisOpenCorrect(true);
+    };
+
+    return (
+        open &&
+        <>
+            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: 345, maxHeight: 645, height: '100%' }}>
+                <CardMedia
+                    component="iframe"
+                    sx={{ aspectRatio: 16 / 9, }}
+                    src={workout.demo}
+                    alt="workout demo"
+                    allowFullScreen
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+                />
+                <CardContent>
+                    <ThemeProvider theme={theme}>
+                        <Typography maxHeight={{xs:200, sm: 300}} overflow={'auto'} gutterBottom variant="h5" component="div">
+                            {workout.exercise}
+                        </Typography>
+                    </ThemeProvider>
+                </CardContent>
+                <CardActions sx={{ marginTop: 'auto' }}>
+                    <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
+                        <Grid item xs={4} sm={4}>
+                            <Button onClick={handleClickOpen} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
+                            <CorrectFormDialog correctForm={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                        </Grid>
+                        <Grid item xs={4} sm={4}>
+                            <Button startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
+                        </Grid>
+                        <Grid item >
+                            <Button>Edit</Button>
+                        </Grid>
+                    </Grid>
+                </CardActions>
+            </Card>
+        </>
+    );
+}
+
+function ResponsiveDialog({ children }) {
+    const [open, setOpen] = React.useState(false);
+    const theme2 = useTheme();
+    const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    return (
+        <React.Fragment>
+            <ThemeProvider theme={theme} >
+                {/* <YouTubeIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></YouTubeIcon> */}
+                <DescriptionIcon theme={theme2} sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
+                <Typography variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
+                    {children}
+                </Typography>
+            </ThemeProvider>
+
+            <Dialog
+                fullScreen={fullScreen}
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="responsive-dialog-title"
+                fullWidth={true}
+                maxWidth={'md'}
+            >
+                <Grid container justifyContent={'center'}>
+                    <Grid item>
+                        <DialogTitle id="responsive-dialog-title">
+                            {"Workout Routine"}
+                        </DialogTitle>
+                        <DialogContent>
+                            <Grid  justifyContent={'center'} item container spacing={3}>
+                                <Grid item sm>
+                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}> </VideoMediaCard>
+                                </Grid>
+                                <Grid item sm>
+                                    <VideoMediaCard workout={workouts2} correctForm={correctForm} wrongForm={wrongForm} open={open}>
+                                    </VideoMediaCard>
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                    </Grid>
+                </Grid>
+
+                <DialogActions>
+                    <Button autoFocus onClick={handleClose}>
+                        Close
+                    </Button>
+                    {/* <Button onClick={handleClose} autoFocus>
+                        Agree
+                    </Button> */}
+                </DialogActions>
+            </Dialog>
+        </React.Fragment>
+    );
+}
+
+
+function ControlledAccordions({ section, sectionItem }) {
+    const [expanded, setExpanded] = React.useState(false);
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    }
+    return (
+        <div>
+            <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+                <AccordionSummary
+                    expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Button sx={{ paddingLeft: 2 }} startIcon={<EditIcon />} size="small" />
+                        <ExpandMoreIcon />
+                    </Box>}
+                    aria-controls="panel1bh-content"
+                    id="panel1bh-header"
+                    sx={{ padding: '3%' }}
+                >
+
+                    <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
+                        {section.title}
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ paddingLeft: '5%' }}
+                >
+
+                    <ResponsiveDialog>
+                        {sectionItem.title}
+                    </ResponsiveDialog>
+                </AccordionDetails>
+                <AccordionDetails sx={{ paddingLeft: '5%' }}
+                >
+                    <ResponsiveDialog>
+                        {sectionItem.title}
+                    </ResponsiveDialog>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
+                <AccordionSummary
+                    expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Button sx={{ paddingLeft: 2 }} startIcon={<EditIcon />} size="small" />
+                        <ExpandMoreIcon />
+                    </Box>}
+                    aria-controls="panel1bh-content"
+                    id="panel1bh-header"
+                    sx={{ padding: '3%' }}
+                >
+                    <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
+                        {section.title}
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ paddingLeft: '5%' }}>
+
+                    <ResponsiveDialog>
+                        {sectionItem.title}
+                    </ResponsiveDialog>
+                </AccordionDetails>
+                <AccordionDetails sx={{ paddingLeft: '5%' }}
+                >
+                    <ResponsiveDialog>
+                        {sectionItem.title}
+                    </ResponsiveDialog>
+                </AccordionDetails>
+            </Accordion>
+        </div>
+    );
+
+
 }
 
 export default function Course() {
@@ -178,126 +373,10 @@ export default function Course() {
                         </ThemeProvider>
                     </Grid>
                     <Grid item>
-                        <ControlledAccordions></ControlledAccordions>
+                        <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
                     </Grid>
                 </Grid>
             </Box>
         </>
     )
-}
-
-
-function ResponsiveDialog({ children }) {
-    const [open, setOpen] = React.useState(false);
-    const theme2 = useTheme();
-    const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    return (
-        <React.Fragment>
-            <ThemeProvider theme={theme} >
-                {/* <YouTubeIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></YouTubeIcon> */}
-                <DescriptionIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></DescriptionIcon>
-                <Typography variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
-                    {children}
-                </Typography>
-            </ThemeProvider>
-
-            <Dialog
-                fullScreen={fullScreen}
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="responsive-dialog-title"
-            >
-                <DialogTitle id="responsive-dialog-title">
-                    {"Use Google's location service?"}
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Let Google help apps determine location. This means sending anonymous
-                        location data to Google, even when no apps are running.
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button autoFocus onClick={handleClose}>
-                        Disagree
-                    </Button>
-                    <Button onClick={handleClose} autoFocus>
-                        Agree
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </React.Fragment>
-    );
-}
-
-
-function ControlledAccordions() {
-    const [expanded, setExpanded] = React.useState(false);
-
-    const handleChange = (panel) => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
-    }
-    return (
-        <div>
-            <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1bh-content"
-                    id="panel1bh-header"
-                    sx={{ padding: '3%' }}
-                >
-                    <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
-                        {section1.title}
-                    </Typography>
-                </AccordionSummary>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}
-                >
-
-                    <ResponsiveDialog>
-                        {sectionItem1.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}
-                >
-                    <ResponsiveDialog>
-                        {sectionItem2.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-            </Accordion>
-            <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1bh-content"
-                    id="panel1bh-header"
-                    sx={{ padding: '3%' }}
-                >
-                    <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
-                        {section1.title}
-                    </Typography>
-                </AccordionSummary>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}>
-
-                    <ResponsiveDialog>
-                        {sectionItem1.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}
-                >
-                    <ResponsiveDialog>
-                        {sectionItem2.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-            </Accordion>
-        </div>
-    );
-
-
 }
