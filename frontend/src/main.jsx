@@ -32,7 +32,7 @@ const theme = createTheme({
 
 const router = createBrowserRouter([
   {
-    path: "/home",
+    path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [

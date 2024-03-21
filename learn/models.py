@@ -121,7 +121,8 @@ class SectionItem(models.Model):
 
     section = models.ForeignKey("Section", on_delete=models.CASCADE, related_name="contents")
     lecture = models.URLField(blank=True, null=True)
-    overview = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    title = models.CharField(max_length=200)
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
@@ -169,7 +170,7 @@ class Workouts(models.Model):
     section_item = models.ForeignKey(
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
-    exercise = models.CharField(max_length=100)
+    exercise = models.CharField(max_length=200)
     demo = models.URLField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True

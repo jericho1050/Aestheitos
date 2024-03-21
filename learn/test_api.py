@@ -429,7 +429,7 @@ class WorkoutListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
         self.section = Section.objects.create(course=self.course, title="testing")
-        self.section_item = SectionItem.objects.create(section=self.section, overview="go to this and that and that ")
+        self.section_item = SectionItem.objects.create(section=self.section, description="go to this and that and that ")
 
         self.workout = Workouts.objects.create(
             section_item=self.section_item,
@@ -1054,7 +1054,7 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
         section = Section.objects.create(course=course, title="idk just section testing")
-        section_item = SectionItem.objects.create(section=section, overview="nothing just go on after this set go on")
+        section_item = SectionItem.objects.create(section=section, description="nothing just go on after this set go on")
         workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Regular dips",
@@ -1205,7 +1205,7 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
         section = Section.objects.create(course=course, title="WEEK 4")
-        section_item = SectionItem.objects.create(section=section, overview="GO ON GO GO GO GO GO")
+        section_item = SectionItem.objects.create(section=section, description="GO ON GO GO GO GO GO")
         workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Regular dips",
