@@ -164,7 +164,7 @@ function ResponsiveAppBar() {
               variant="h6"
               noWrap
               component="a"
-              href="http://localhost:5173/home"
+              href="http://localhost:5173/"
               sx={{
                 mr: 2,
                 display: { xs: 'none', md: 'flex' },
@@ -218,7 +218,7 @@ function ResponsiveAppBar() {
               variant="h6"
               noWrap
               component="a"
-              href="http://localhost:5173/home"
+              href="http://localhost:5173/"
               sx={{
                 ml: 4,
                 mr: 0,

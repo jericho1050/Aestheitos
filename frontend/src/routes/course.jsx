@@ -14,6 +14,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
+import WrongFormDialog from "../MUI-components/WrongFormDialog";
 
 
 let theme = createTheme()
@@ -47,7 +48,7 @@ const courseContent = {
 }
 const workouts1 = {
     intesity: "H",
-    exercise: "Pull up",
+    exercise: " quis, ",
     demo: "https://www.youtube.com/embed/IZMKe61144w",
     rest_time: 2,
     sets: 3,
@@ -66,10 +67,10 @@ const workouts2 = {
 }
 const correctForm = {
     demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
-    description: "scapula retracted"
+    description: "Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum."
 }
 const wrongForm = {
-    demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
+    demo: 'https://www.youtube.com/embed/yQEx9OC2C3E',
     description: "scapula not moving"
 }
 
@@ -92,41 +93,49 @@ const sectionItem2 = {
 // responsible for the 'workout' demo card
 function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
+    const [isOpenWrong, setisOpenWrong] = React.useState(false);
 
-    const handleClickOpen = () => {
-        setisOpenCorrect(true);
+    const handleClickOpen = (btn) => {
+        if (btn === 'correct'){
+            setisOpenCorrect(true);
+        } else {
+            setisOpenWrong(true);
+        }
     };
+    
 
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: 345, maxHeight: 645, height: '100%' }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth:{xs: 500, sm: 400}, maxHeight:{xs: 700, md: 645}, height: '100%' }}>
                 <CardMedia
                     component="iframe"
-                    sx={{ aspectRatio: 16 / 9, }}
+                    sx={{ aspectRatio: 16 / 9}}
                     src={workout.demo}
                     alt="workout demo"
                     allowFullScreen
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+                    
                 />
                 <CardContent>
                     <ThemeProvider theme={theme}>
-                        <Typography maxHeight={{xs:200, sm: 300}} overflow={'auto'} gutterBottom variant="h5" component="div">
+                        <Typography maxHeight={{xs:200, sm: 250}} height={{xs:200, sm: 250}} width={{xs: 420, sm: 'inherit'}} overflow={'auto'} gutterBottom variant="h5" component="div">
                             {workout.exercise}
                         </Typography>
                     </ThemeProvider>
                 </CardContent>
                 <CardActions sx={{ marginTop: 'auto' }}>
-                    <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
+                    <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }}spacing={2}>
                         <Grid item xs={4} sm={4}>
-                            <Button onClick={handleClickOpen} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
+                            <Button onClick={()=> handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
                             <CorrectFormDialog correctForm={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
-                            <Button startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
+                            <Button onClick={()=> handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
+                            <WrongFormDialog wrongForm={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                         <Grid item >
-                            <Button>Edit</Button>
+                            <Button startIcon={<EditIcon />}>Edit</Button>
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -153,7 +162,7 @@ function ResponsiveDialog({ children }) {
             <ThemeProvider theme={theme} >
                 {/* <YouTubeIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></YouTubeIcon> */}
                 <DescriptionIcon theme={theme2} sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
-                <Typography variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
+                <Typography align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
                     {children}
                 </Typography>
             </ThemeProvider>
@@ -166,18 +175,22 @@ function ResponsiveDialog({ children }) {
                 fullWidth={true}
                 maxWidth={'md'}
             >
-                <Grid container justifyContent={'center'}>
-                    <Grid item>
+                <Grid container>
+                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2}} marginRight={{ md: 2}}>
                         <DialogTitle id="responsive-dialog-title">
                             {"Workout Routine"}
                         </DialogTitle>
                         <DialogContent>
-                            <Grid  justifyContent={'center'} item container spacing={3}>
-                                <Grid item sm>
+                            <Grid  justifyContent={{xs:'center', sm:'flex-start'}} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+                                <Grid item sm={6}>
                                     <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}> </VideoMediaCard>
                                 </Grid>
-                                <Grid item sm>
+                                <Grid item sm={6}>
                                     <VideoMediaCard workout={workouts2} correctForm={correctForm} wrongForm={wrongForm} open={open}>
+                                    </VideoMediaCard>
+                                </Grid>
+                                <Grid item sm={6}>
+                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}>
                                     </VideoMediaCard>
                                 </Grid>
                             </Grid>
@@ -275,7 +288,7 @@ export default function Course() {
     return (
         <>
             <br></br>
-            <Box sx={{ marginLeft: '2%', marginRight: '2%' }}>
+            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
                 <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
                     <Grid item>
                         <Button>

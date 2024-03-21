@@ -19,7 +19,7 @@ function Copyright(props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
-            <Link color="inherit" to={`/home`}>
+            <Link color="inherit" to={`/`}>
                 Aestheitos
             </Link>{' '}
             {new Date().getFullYear()}
@@ -47,7 +47,7 @@ export default function SignIn() {
                 access: token['access'],
                 refresh: token['refresh']
             })
-            navigate("/home");
+            navigate("/");
         }
     };
 

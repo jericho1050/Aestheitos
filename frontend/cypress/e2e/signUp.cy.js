@@ -71,6 +71,6 @@ describe("User Signs up ", () => {
             expect(response.body).to.have.property('refresh')
             
         });
-        cy.url().should('include', "/home")
+        cy.url().should('include', "/")
     })
 });
