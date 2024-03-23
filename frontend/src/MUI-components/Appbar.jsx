@@ -29,7 +29,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import validateJWTToken from '../helper/verifySignature';
 import { jwtDecode } from 'jwt-decode';
 import refreshAccessToken from '../helper/refreshAccessToken';
-
+import logo from '../static/images/aestheitoslogo.png';
 
 const pages = ['Courses', 'Blog'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -159,7 +159,7 @@ function ResponsiveAppBar() {
       <AppBar position="fixed">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <Avatar alt="logo" src="src/static/images/aestheitoslogo.png" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
+            <Avatar alt="logo" src={logo} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
             <Typography
               variant="h6"
               noWrap
