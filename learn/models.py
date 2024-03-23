@@ -61,12 +61,13 @@ class Course(models.Model):
     description = models.TextField()
     thumbnail = models.ImageField(upload_to="images/", null=True, blank=True)
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES)
-    course_created = models.DateTimeField(auto_now_add=True)
-    course_updated = models.DateTimeField(auto_now_add=True)
+    course_created = models.DateField(auto_now_add=True)
+    course_updated = models.DateField(auto_now=True)
     created_by = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="creator"
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)   
 
     def __str__(self):
         return f"( id: {self.id}) Course: {self.title}. By {self.created_by.username}"

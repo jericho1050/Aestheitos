@@ -36,6 +36,7 @@ const course = {
     // thumbnail: 'https://i.imgur.com/K6NLbi4.gif',
     // thumbnail: 'https://i.imgur.com/bC5G14n.gif',
     courseCreated: '10/20/2024',
+    courseUpdated: '10/25/2024',
     created_by: 'testuser'
 }
 const courseContent = {
@@ -319,8 +320,20 @@ export default function Course() {
                                 </Grid>
                             </Grid>
                             <Grid container justifyContent={'flex-start'} alignItems={"flex-end"} mt={4}>
-                                <Grid item padding={2}>
-                                    <small>Created on: {course.courseCreated}</small>
+                                <Grid item container padding={2} justifyContent={'space-between'}>
+                                    <Grid item>
+                                        <Typography fontSize="small" variant="small" color={'text.secondary'}>
+                                            Created on: {course.courseCreated}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Typography fontSize="small" variant="small" color={'text.secondary'}>
+                                            Last updated: {course.courseUpdated}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid paddingLeft={2} paddingBottom={2} item variant="small" fontSize={'small'}>
+                                    Rating: 3.5
                                 </Grid>
                             </Grid>
                         </Paper>

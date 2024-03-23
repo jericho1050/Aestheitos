@@ -10,9 +10,9 @@ import "./index.css";
 import "./divider.css"
 import Root from './routes/root';
 import ErrorPage from './error-page';
-import SignIn from './routes/SignIn';
-import SignUp from './routes/SignUp';
-import { Home as CourseList } from './routes/Home';
+import SignIn from './routes/signin';
+import SignUp from './routes/signup';
+import { Index } from './routes/index';
 import Course from './routes/course';
 
 const theme = createTheme({
@@ -37,7 +37,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        index: true, element: <CourseList/>
+        index: true, element: <Index />
       },
       {
         path:"courses/:courseId",

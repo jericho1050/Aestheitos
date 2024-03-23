@@ -127,11 +127,8 @@ class CourseTestCase(TestCase):
         """
         course = Course.objects.get(id=self.course.id)
 
-        self.assertAlmostEqual(
-            course.course_created.timestamp(),
-            course.course_updated.timestamp(),
-            delta=1,
-        )
+        self.assertEqual(course.course_created, course.course_updated)
+
 
         # Update the course
         course.difficulty = "IN"
@@ -139,7 +136,7 @@ class CourseTestCase(TestCase):
 
         course.refresh_from_db()
 
-        self.assertGreater(course.course_updated, course.course_created)
+        self.assertGreaterEqual(course.course_updated, course.course_created)
 
     def test_update_course(self):
         """Test updating a course"""

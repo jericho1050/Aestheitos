@@ -1,11 +1,33 @@
 import { Box, Container, Grid, ThemeProvider, Typography, createTheme, responsiveFontSizes, useMediaQuery } from "@mui/material";
 import { useSpring, animated } from "@react-spring/web";
 import { useState } from "react";
+import CourseCard from "../components/CourseCard";
+import pic from "../static/images/test.jpg"
+import pic2 from "../static/images/what.jpg"
+
 
 
 // basis for this animation Mysterious Text 
 // https://codesandbox.io/p/sandbox/mysterious-text-animation-with-react-spring-vhj66
 // By imhuyqn
+
+const text = {
+    title: `Lizards are a widespread group of squamate reptiles, with over 6,000
+    species, ranging across all continents except Antarctica               Lizards are a widespread group of squamate reptiles, with over 6,000
+    species, ranging across all continents except Antarctica               Lizards are a widespread group of squamate reptiles, with over 6,000
+    species, ranging across all continents except Antarctica  TESTINGG AGAIN AGAIN IAGINAOIGASDF WTF WITSAOIFDSKLAFMLKSMLKAS HWTMWTWANTATATTSA WTHF SSRIESTWE SWWHERE TIS THIS AGAIN MA NAG NAWM IASNG AMT PO TA`
+}
+
+const text2 = {
+    title: `              Lizards are a widespread group of squamate reptiles, with over 6,000
+    species, ranging across all continents except Antarctica `
+}
+
+const test3 = {
+    description: `           Lizards are a widespread group of squamate reptiles, with over 6,000
+    species, ranging across all continents except Antarctica TANGI NA WTF            Lizards are a widespread group of squamate reptiles, with over 6,000
+    species, ranging across all continents except Antarctica TANGI NA WTF `
+}
 
 const MysteriousText = ({ children, ...props }) => {
     const matches = useMediaQuery(theme => theme.breakpoints.up('md'))
@@ -21,7 +43,7 @@ const MysteriousText = ({ children, ...props }) => {
         </Typography>
     );
 };
-export function Home() {
+export function Index() {
     const [animationFinished, setAnimationFinished] = useState(false);
 
     let theme = createTheme();
@@ -56,7 +78,7 @@ export function Home() {
                     <div className="divider"></div>
                 </Grid>
             </Grid>
-            <Grid container justifyContent={'center'}>
+            <Grid container justifyContent={'center'} marginBottom={4}>
                 <Grid item paddingTop={'10vh'}>
                     <ThemeProvider theme={theme}>
                         <Typography variant={'h3'} sx={{ fontWeight: 'bold' }}>
@@ -65,6 +87,18 @@ export function Home() {
                     </ThemeProvider>
                 </Grid>
             </Grid>
+            <Grid container justifyContent={'center'} spacing={3}>
+                <Grid item >
+                    <CourseCard thumbnail={pic} title={text.title} description={test3.description}/>
+                </Grid>
+                <Grid item>
+                    <CourseCard thumbnail={pic2} title={text2.title} description={test3.description}/>
+                </Grid>
+                <Grid item>
+                    <CourseCard thumbnail={pic2} title={text2.title} description={test3.description}/>
+                </Grid>
+            </Grid>
+            
         </Box>
 
     </>)
