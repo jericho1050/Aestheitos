@@ -87,18 +87,22 @@ export function Index() {
                     </ThemeProvider>
                 </Grid>
             </Grid>
-            <Grid container justifyContent={'center'} spacing={3}>
-                <Grid item >
+            <Box marginLeft={'3vw'} marginRight={'3vw'}>
+            <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{xs: 4, sm: 8, md: 12}} columnSpacing={{xs: 2, md: 3}}>
+                <Grid item xs={4} sm={4} md={3}>
                     <CourseCard thumbnail={pic} title={text.title} description={test3.description}/>
                 </Grid>
-                <Grid item>
+                <Grid item xs={4} sm={4} md={3}>
                     <CourseCard thumbnail={pic2} title={text2.title} description={test3.description}/>
                 </Grid>
-                <Grid item>
+                <Grid item xs={4} sm={4} md={3}>
+                    <CourseCard thumbnail={pic2} title={text2.title} description={test3.description}/>
+                </Grid>
+                <Grid item xs={4} sm={4} md={3}>
                     <CourseCard thumbnail={pic2} title={text2.title} description={test3.description}/>
                 </Grid>
             </Grid>
-            
+            </Box>
         </Box>
 
     </>)
