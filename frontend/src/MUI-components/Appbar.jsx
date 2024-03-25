@@ -29,7 +29,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import validateJWTToken from '../helper/verifySignature';
 import { jwtDecode } from 'jwt-decode';
 import refreshAccessToken from '../helper/refreshAccessToken';
-
+import logo from '../static/images/aestheitoslogo.png';
 
 const pages = ['Courses', 'Blog'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -40,7 +40,7 @@ function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isOpen, setIsOpen] = React.useState(false);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const token = React.useContext(AuthContext);
+  const token = React.useContext(AuthContext); // access token and refresh token
   const dispatch = React.useContext(AuthDispatchContext);
   const accessTokenExp = React.useContext(AccessTokenExpContext)
   const currentTime = React.useContext(CurrentTimeContext)
@@ -74,17 +74,17 @@ function ResponsiveAppBar() {
   // persist user authentication == true
   React.useEffect(() => {
     const hasToken = token['access'] !== null;
-    console.log(hasToken);
+    // console.log(hasToken);
 
     (async () => {
 
       if (hasToken) {
-        console.log(`current time: ${currentTime}`);
-        console.log(`expiration: ${accessTokenExp.exp}`);
+        // console.log(`current time: ${currentTime}`);
+        // console.log(`expiration: ${accessTokenExp.exp}`);
         if (currentTime > accessTokenExp.exp) {
           console.log("expires!");
           const accessToken = await refreshAccessToken(token['refresh'])
-          console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
+          // console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
           dispatch({
             type: 'setToken',
             access: accessToken,
@@ -145,9 +145,9 @@ function ResponsiveAppBar() {
   }
 
 
-  function handleLogout(dispatch) {
-    signOutAPI();
-    dispatch({
+  async function handleLogout(dispatch) {
+    await signOutAPI();
+    await dispatch({
       type: 'removeToken',
     })
     window.location.reload()
@@ -159,12 +159,12 @@ function ResponsiveAppBar() {
       <AppBar position="fixed">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <Avatar alt="logo" src="src/static/images/aestheitoslogo.png" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
+            <Avatar alt="logo" src={logo} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
             <Typography
               variant="h6"
               noWrap
               component="a"
-              href="http://localhost:5173/home"
+              href="http://localhost:5173/"
               sx={{
                 mr: 2,
                 display: { xs: 'none', md: 'flex' },
@@ -218,7 +218,7 @@ function ResponsiveAppBar() {
               variant="h6"
               noWrap
               component="a"
-              href="http://localhost:5173/home"
+              href="http://localhost:5173/"
               sx={{
                 ml: 4,
                 mr: 0,
@@ -273,7 +273,7 @@ function ResponsiveAppBar() {
                             const formData = new FormData(event.currentTarget);
                             const formJson = Object.fromEntries(formData.entries());
                             const email = formJson.email;
-                            console.log(email);
+                            // console.log(email);
                             handleClose();
                           },
                         }}
@@ -338,7 +338,7 @@ function ResponsiveAppBar() {
               </Box>
               :
               <Box sx={{ flexGrow: 0 }}>
-                <Grid container spacing={{ sm: 1, md: 2 }} alignItems={'center'}>
+                <Grid container spacing={{ xs: 0, sm: 1, md: 2 }} alignItems={'center'}>
                   {isSmallScreen ?
                     <>
                       <Grid item xs md>
@@ -358,7 +358,7 @@ function ResponsiveAppBar() {
                             const formData = new FormData(event.currentTarget);
                             const formJson = Object.fromEntries(formData.entries());
                             const email = formJson.email;
-                            console.log(email);
+                            // console.log(email);
                             handleClose();
                           },
                         }}
@@ -397,7 +397,7 @@ function ResponsiveAppBar() {
                       </Search>
                     </Grid>
                   }
-                  <Grid item xs={"auto"} md>
+                  <Grid item xs md>
                     <Link to={`/signin`} id="sign-in">Sign in</Link>
                   </Grid>
                 </Grid>
