@@ -19,7 +19,7 @@ function Copyright(props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
-            <Link color="inherit" to={`/home`}>
+            <Link color="inherit" to={`/`}>
                 Aestheitos
             </Link>{' '}
             {new Date().getFullYear()}
@@ -38,6 +38,7 @@ export default function SignIn() {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const token = await signInAPI(data);
+        console.log(token)
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
@@ -46,7 +47,7 @@ export default function SignIn() {
                 access: token['access'],
                 refresh: token['refresh']
             })
-            navigate("/home");
+            navigate("/");
         }
     };
 
@@ -80,6 +81,7 @@ export default function SignIn() {
                         autoFocus
                     />
                     <TextField
+                        onChange={() => setIsInvalidCredentials(0)}
                         margin="normal"
                         required
                         fullWidth
@@ -96,7 +98,7 @@ export default function SignIn() {
                     {isInvalidCredentials === 1 ?
                         <Typography sx={{
                             color: 'red', fontSize: 'medium'
-                            
+
                         }}>
                             Invalid Username and Password!
                         </Typography> :
@@ -148,7 +150,7 @@ function signInAPI(data) {
     }).then(response => {
         if (!response.ok) {
             if (response.status === 400 || response.status === 401) {
-                return {"invalid": "incorrect username and password"};
+                return { "invalid": "incorrect username and password" };
             }
             throw new Error(response);
         }

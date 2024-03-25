@@ -29,7 +29,7 @@ Cypress.Commands.add('login', (username, password) => {
     cy.get('input[name=username]').type('test');
     cy.get('input[name=password').type('123');
     cy.contains('button', 'Sign In').click();
-    cy.url().should('include','http://localhost:5173/home');
+    cy.url().should('include','http://localhost:5173/');
 })
 
 

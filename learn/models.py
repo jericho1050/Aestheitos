@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from rest_framework.exceptions import AuthenticationFailed
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Avg
+from django.utils import timezone
 
 
 # Create your models here.
@@ -14,7 +15,10 @@ class User(AbstractUser):
     is_instructor = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"( id: {self.pk} ) {self.username}"
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return self.username
 
 
 class UserProgress(models.Model):
@@ -57,16 +61,17 @@ class Course(models.Model):
         ("IN", "Intermediate"),
         ("AD", "Advanced"),
     ]
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     description = models.TextField()
     thumbnail = models.ImageField(upload_to="images/", null=True, blank=True)
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES)
-    course_created = models.DateTimeField(auto_now_add=True)
-    course_updated = models.DateTimeField(auto_now_add=True)
+    course_created = models.DateField(null=True, blank=True)
+    course_updated = models.DateField(auto_now=True)
     created_by = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="creator"
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)   
 
     def __str__(self):
         return f"( id: {self.id}) Course: {self.title}. By {self.created_by.username}"
@@ -76,15 +81,22 @@ class Course(models.Model):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
-
     def course_rating_average(self):
         return self.course_rating.aggregate(Avg('rating'))['rating__avg']
+    
+    def enrollee_count(self):
+        return self.enrolled.count()
+    
+    def save(self, *args, **kwargs):
+        if self.pk is None: 
+            self.course_created = timezone.now().date()
+        super().save(*args, **kwargs)
 
 
 
 class CourseContent(models.Model):
     """
-    Represents a Course's content
+    Represents a course's overview content
     """
 
     lecture = models.URLField()
@@ -96,6 +108,40 @@ class CourseContent(models.Model):
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.course.title}"
+    
+    
+    
+class Section(models.Model): 
+    """
+    Represents a section item
+    """
+
+    course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name="sections")
+    title = models.CharField(max_length=200)
+
+    def delete_with_auth_user(self, user):
+        if self.course.created_by != user:
+            raise AuthenticationFailed("Not allowed to delete")
+        self.delete()
+        
+
+
+class SectionItem(models.Model):
+    """
+    Represents a section's items
+    """
+
+    section = models.ForeignKey("Section", on_delete=models.CASCADE, related_name="contents")
+    lecture = models.URLField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    title = models.CharField(max_length=200)
+
+    def delete_with_auth_user(self, user):
+        from .helpers import is_valid_ownership
+
+        if not is_valid_ownership(user, self.section.course.id):
+            raise AuthenticationFailed("Not allowed to delete")
+        self.delete()
 
 
 class CourseComments(models.Model):
@@ -125,15 +171,18 @@ class CourseComments(models.Model):
 
 
 class Workouts(models.Model):
-    """Represent Workouts in a Course ."""
+    """
+    Represent Workouts in a course or in a section
+    """
 
     INTENSITY_CHOICES = [("L", "Low"), ("M", "Medium"), ("H", "High")]
     EXCERTION_CHOICES = [(i, str(i)) for i in range(1, 11)]
 
-    course = models.ForeignKey(
-        "Course", on_delete=models.CASCADE, related_name="workouts"
+
+    section_item = models.ForeignKey(
+        "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
-    exercise = models.CharField(max_length=50)
+    exercise = models.CharField(max_length=200)
     demo = models.URLField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True
@@ -145,11 +194,12 @@ class Workouts(models.Model):
 
     def __str__(self):
         return (
-            f"( pk: { self.pk } ) Course: {self.course.title} Workout: {self.exercise}"
+            f"( pk: { self.pk } ) Course: {self.section_item.section.course.title} Workout: {self.exercise}"
         )
 
     def delete_with_auth_user(self, user):
-        if self.course.created_by != user:
+        from .helpers import is_valid_ownership
+        if not is_valid_ownership(user, self.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
@@ -159,15 +209,15 @@ class CorrectExerciseForm(models.Model):
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="correct_exercise_form"
     )
-    description = models.CharField(max_length=69)
+    description = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"( pk: { self.pk } )Course: {self.workout.course.title}. Workout: {self.workout.exercise}"
+        return f"( pk: { self.pk } )Course: {self.workout.section_item.section.course.title}. Workout: {self.workout.exercise}"
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
 
-        if not is_valid_ownership(user, self.workout.course.id):
+        if not is_valid_ownership(user, self.workout.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
@@ -177,15 +227,15 @@ class WrongExerciseForm(models.Model):
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="wrong_exercise_form"
     )
-    description = models.CharField(max_length=69)
+    description = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"( pk: { self.pk } ) Course: {self.workout.course.title} Workout: {self.workout.exercise}"
+        return f"( pk: { self.pk } ) Course: {self.workout.section_item.section.course.title} Workout: {self.workout.exercise}"
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
 
-        if not is_valid_ownership(user, self.workout.course.id):
+        if not is_valid_ownership(user, self.workout.section_item.section.course.id):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
@@ -217,7 +267,7 @@ class Blog(models.Model):
 
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="author")
     content = models.TextField()
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=200)
     blog_created = models.DateTimeField(auto_now_add=True)
     blog_updated = models.DateTimeField(auto_now_add=True)
 
