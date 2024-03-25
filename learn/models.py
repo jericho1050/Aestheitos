@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from rest_framework.exceptions import AuthenticationFailed
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Avg
+from django.utils import timezone
 
 
 # Create your models here.
@@ -14,7 +15,10 @@ class User(AbstractUser):
     is_instructor = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"( id: {self.pk} ) {self.username}"
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return self.username
 
 
 class UserProgress(models.Model):
@@ -61,7 +65,7 @@ class Course(models.Model):
     description = models.TextField()
     thumbnail = models.ImageField(upload_to="images/", null=True, blank=True)
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES)
-    course_created = models.DateField(auto_now_add=True)
+    course_created = models.DateField(null=True, blank=True)
     course_updated = models.DateField(auto_now=True)
     created_by = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="creator"
@@ -77,9 +81,16 @@ class Course(models.Model):
             raise AuthenticationFailed("Not allowed to delete")
         self.delete()
 
-
     def course_rating_average(self):
         return self.course_rating.aggregate(Avg('rating'))['rating__avg']
+    
+    def enrollee_count(self):
+        return self.enrolled.count()
+    
+    def save(self, *args, **kwargs):
+        if self.pk is None: 
+            self.course_created = timezone.now().date()
+        super().save(*args, **kwargs)
 
 
 

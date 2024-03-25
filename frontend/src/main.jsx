@@ -12,8 +12,9 @@ import Root from './routes/root';
 import ErrorPage from './error-page';
 import SignIn from './routes/signin';
 import SignUp from './routes/signup';
-import { Index } from './routes/index';
+import { Index, loader as indexLoader } from './routes/index';
 import Course from './routes/course';
+
 
 const theme = createTheme({
   palette: {
@@ -37,11 +38,12 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        index: true, element: <Index />
+        index: true, element: <Index />,
+        loader: indexLoader,
       },
       {
-        path:"courses/:courseId",
-        element: <Course/>
+        path: "courses/:courseId",
+        element: <Course />
       },
     ],
   },

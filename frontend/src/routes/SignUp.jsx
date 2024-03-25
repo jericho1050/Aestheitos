@@ -37,6 +37,19 @@ export default function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Get form elements
+    const form = event.currentTarget;
+    const inputs = form.elements;
+
+    // Check if all required fields are filled
+    for (let i = 0; i < inputs.length; i++) {
+      if (inputs[i].required && !inputs[i].value) {
+        alert('Please fill all required fields');
+        return;
+      }
+    }
+
     const data = new FormData(event.currentTarget);
 
     const token = await signUpAPI(data);
@@ -49,7 +62,7 @@ export default function SignUp() {
         access: token['access'],
         refresh: token['refresh']
     });
-      navigate('/home');
+      navigate('/');
     }
 
   }

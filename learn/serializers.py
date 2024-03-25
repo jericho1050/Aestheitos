@@ -72,6 +72,10 @@ class CourseRatingSerializer(ModelSerializer):
 
 class CourseSerializer(ModelSerializer):
     average_rating = serializers.SerializerMethodField()
+    created_by_name = serializers.StringRelatedField(source='created_by', read_only=True)
+    difficulty_display = serializers.SerializerMethodField()
+    enrollee_count = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Course
@@ -94,6 +98,12 @@ class CourseSerializer(ModelSerializer):
 
     def get_average_rating(self, obj) -> float:
         return obj.course_rating_average()
+    
+    def get_difficulty_display(self, obj):
+        return obj.get_difficulty_display()
+    
+    def get_enrollee_count(self, obj):
+        return obj.enrollee_count()
 
 
 class CourseContentSerializer(ModelSerializer):

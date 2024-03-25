@@ -10,7 +10,7 @@ theme = responsiveFontSizes(theme);
 
 
 
-export default function CourseCard({thumbnail, title, description}) {
+export default function CourseCard(props) {
   return (
     <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: {xs: 500, sm: 400}, maxHeight: 645, height: '100%' }}>
       <ThemeProvider theme={theme}>
@@ -19,17 +19,17 @@ export default function CourseCard({thumbnail, title, description}) {
     <CardMedia
                 component="img"
                 sx={{ aspectRatio: 16 / 9, }}
-                src={thumbnail}
+                src={props.thumbnail}
                 alt="workout demo"
             />
 
         <CardContent>
         <Typography align='justify' gutterBottom variant='h5'>
-            {truncateText(title, 39)} {/* Replace 2nd argument with the maximum number of words you want */}
+            {truncateText(props.title, 29)} {/* Replace 2nd argument with the maximum number of words you want */}
         </Typography>
 
         <Typography variant='body2' color={"text.secondary"}>
-          Description: {truncateText(description, 20)}
+          Description: {truncateText(props.description, 20)}
         </Typography>
        
        
@@ -39,29 +39,29 @@ export default function CourseCard({thumbnail, title, description}) {
             <Grid item container justifyContent={'space-between'}>
               <Grid item>
                 <Typography noWrap fontSize="small" fontWeight="bold" variant='small' color="text.secondary">
-                  DR. INSTRUCTOR 
+                 {props.created_by_name}
                 </Typography>
               </Grid>
               <Grid item>
               <Typography noWrap variant='small' color="text.secondary">
-                  INTERMEDIATE
+                {props.difficulty_display}
               </Typography>
             </Grid>
             </Grid>
             <Grid item container justifyContent={'space-between'}>
               <Grid item>
-                <Typography nowrap variant='small' color="text.secondary">
-                    10 enrollees
+                <Typography noWrap variant='small' color="text.secondary">
+                    {props.enrollee_count === 0 ? 'No enrollees' : `${props.enrollee_count} enrolled` } 
                 </Typography>
               </Grid>
               <Grid item>
-                <Typography nowrap variant='small' color="text.secondary">
-                Created on 2022-03-01
+                <Typography noWrap fontSize="x-small" variant='small' color="text.secondary">
+                Created on {props.course_created}
                 </Typography>
               </Grid>
             </Grid>
             <Grid item>
-              <Typography fontWeight="bolder" fontSize="large" variant='button'>P400</Typography>
+              <Typography fontWeight="bolder" fontSize="large" variant='button'>P{props.price}</Typography>
             </Grid>
             
           </Grid>
