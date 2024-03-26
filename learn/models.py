@@ -183,7 +183,7 @@ class Workouts(models.Model):
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
     exercise = models.CharField(max_length=200)
-    demo = models.URLField()
+    demo = models.ImageField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True
     )
@@ -205,7 +205,7 @@ class Workouts(models.Model):
 
 
 class CorrectExerciseForm(models.Model):
-    demo = models.URLField()
+    demo = models.ImageField()
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="correct_exercise_form"
     )
@@ -223,7 +223,7 @@ class CorrectExerciseForm(models.Model):
 
 
 class WrongExerciseForm(models.Model):
-    demo = models.URLField()
+    demo = models.ImageField()
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="wrong_exercise_form"
     )

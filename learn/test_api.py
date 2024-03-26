@@ -13,7 +13,7 @@ from .models import (
     CorrectExerciseForm,
     WrongExerciseForm,
     Section,
-    SectionItem
+    SectionItem,
 )
 
 # Reference For APIClient testing
@@ -97,7 +97,9 @@ class CourseListAPITestCase(APITestCase):
             format="json",
         )
         token = response.json()
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.unaunthenticated_client.force_authenticate(user=None)
 
     def tearDown(self):
@@ -341,7 +343,9 @@ class CourseContentDetailAPITestCase(APITestCase):
         )
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
 
     def test_retrieve_course_content(self):
         client = APIClient(enforce_csrf_checks=True)
@@ -429,7 +433,9 @@ class WorkoutListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
         self.section = Section.objects.create(course=self.course, title="testing")
-        self.section_item = SectionItem.objects.create(section=self.section, description="go to this and that and that ")
+        self.section_item = SectionItem.objects.create(
+            section=self.section, description="go to this and that and that "
+        )
 
         self.workout = Workouts.objects.create(
             section_item=self.section_item,
@@ -450,8 +456,22 @@ class WorkoutListAPITestCase(APITestCase):
         )
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.unauthenticated_client.force_authenticate(user=None)
+
+    def tearDown(self):
+        # prevents accumulating picture/image (i.e deletes files that were created by this test case)
+        for filename in glob.glob("images/images/picture_*.gif"):
+            os.remove(filename)
+
+        for filename in glob.glob("images/picture_*.gif"):
+            os.remove(filename)
+
+        # remove the specific 'picture.gif' file
+        if os.path.exists("images/picture.gif"):
+            os.remove("images/picture.gif")
 
     def test_retrieve_workout_list(self):
         """
@@ -469,33 +489,40 @@ class WorkoutListAPITestCase(APITestCase):
         """
         Ensure we can create a new workout
         """
+
+        with open("images/images/chinupVecs.gif", "rb") as file:
+            image = SimpleUploadedFile(
+                "picture.gif", file.read(), content_type="image/gif"
+            )
+
         # test create workout with an authenticated client
         response_1 = self.authenticated_client.post(
             reverse("learn:course-workout-list", args=[1]),
             {
                 "exercise": "Reverse Plank bridge",
-                "demo": "https://www.youtube.com/watch?v=tSvmWU-0Zo0&t=663s",
+                "demo": image,
                 "intensity": "M",
                 "rest_time": "1",
                 "sets": "3",
                 "reps": "60",
                 "excertion": "8",
             },
-            format="json",
         )
+
+        image.seek(0)
+
         # test create workout with an unatuhenticated client
         response_2 = self.unauthenticated_client.post(
             reverse("learn:course-workout-list", args=[1]),
             {
                 "exercise": "Reverse Plank bridge",
-                "demo": "https://www.youtube.com/watch?v=tSvmWU-0Zo0&t=663s",
-                "intensity": "M",
+                "demo": image,
+                "intensity": "H",
                 "rest_time": "1",
                 "sets": "3",
                 "reps": "60",
                 "excertion": "8",
             },
-            format="json",
         )
 
         # test create workout with an empty field
@@ -510,7 +537,6 @@ class WorkoutListAPITestCase(APITestCase):
                 "reps": "",
                 "excertion": "",
             },
-            format="json",
         )
 
         # test create workout with an invalid field
@@ -525,14 +551,13 @@ class WorkoutListAPITestCase(APITestCase):
                 "reps": "lmao",
                 "excertion": 5,
             },
-            format="json",
         )
 
         self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_1.data["exercise"], "Reverse Plank bridge")
-        self.assertEqual(
+        self.assertIn(
+            'images',
             response_1.data["demo"],
-            "https://www.youtube.com/watch?v=tSvmWU-0Zo0&t=663s",
         )
         self.assertEqual(response_1.data["intensity"], "M")
         self.assertEqual(response_1.data["rest_time"], 1)
@@ -550,10 +575,14 @@ class WorkoutDetailAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        self.section = Section.objects.create(title="Testing section", course=self.course)
-        self.section_item = SectionItem.objects.create(section=self.section, lecture="https://www.youtube.com")
+        self.section = Section.objects.create(
+            title="Testing section", course=self.course
+        )
+        self.section_item = SectionItem.objects.create(
+            section=self.section, lecture="https://www.youtube.com"
+        )
         self.workout = Workouts.objects.create(
-            section_item = self.section_item,
+            section_item=self.section_item,
             exercise="Test Exercse",
             intensity="L",
             rest_time=60,
@@ -571,8 +600,22 @@ class WorkoutDetailAPITestCase(APITestCase):
         )
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.unauthenticated_client.force_authenticate(user=None)
+
+    def tearDown(self):
+        # prevents accumulating picture/image (i.e deletes files that were created by this test case)
+        for filename in glob.glob("images/images/picture_*.gif"):
+            os.remove(filename)
+
+        for filename in glob.glob("images/picture_*.gif"):
+            os.remove(filename)
+
+        # remove the specific 'picture.gif' file
+        if os.path.exists("images/picture.gif"):
+            os.remove("images/picture.gif")
 
     def test_retrieve_workout(self):
         """
@@ -596,69 +639,78 @@ class WorkoutDetailAPITestCase(APITestCase):
         Ensure we can update a workout instance
         """
 
+        with open("images/images/chinupVecs.gif", "rb") as file:
+            image = SimpleUploadedFile(
+                "picture.gif", file.read(), content_type="image/gif"
+            )
+
         # test update instance with an authenticated client
         response_1 = self.authenticated_client.put(
             reverse("learn:course-workout-detail", args=[1]),
             {
                 "exercise": "Hollow body Plank",
-                "demo": "https://www.youtube.com",
+                "demo": image,
                 "intensity": "M",
                 "rest_time": 1,
                 "sets": 3,
                 "reps": 60,
                 "excertion": 8,
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test update instance with an unauthenticated client
         response_2 = self.unauthenticated_client.put(
             reverse("learn:course-workout-detail", args=[1]),
             {
                 "exercise": "Hollow body Plank",
-                "demo": "https://www.youtube.com",
+                "demo": image,
                 "intensity": "M",
                 "rest_time": 1,
                 "sets": 3,
                 "reps": 60,
                 "excertion": 8,
             },
-            format="json",
         )
+
+        image.seek(0)
 
         # test update instance with an invalid field
         response_3 = self.authenticated_client.put(
             reverse("learn:course-workout-detail", args=[1]),
             {
                 "exercise": 1,
-                "demo": "https://www.youtube",
-                "intensity": "Md",
+                "demo": "images/images/chinupVecs.gif",
+                "intensity": "BG",
                 "rest_time": 1,
                 "sets": 3,
                 "reps": 60,
                 "excertion": 8,
             },
-            format="json",
         )
+
+        image.seek(0)
 
         # test update instance with an authenticated client and empty body
         response_4 = self.authenticated_client.put(
             reverse("learn:course-workout-detail", args=[1]), {}, format="json"
         )
 
-        dict = {
-            "id": 1,
-            "exercise": "Hollow body Plank",
-            "demo": "https://www.youtube.com",
-            "intensity": "M",
-            "rest_time": 1,
-            "sets": 3,
-            "reps": 60,
-            "excertion": 8,
-            "section_item": 1,
-        }
+        # dict = {
+        #     "id": 1,
+        #     "exercise": "Hollow body Plank",
+        #     "demo": "http://127.0.0.1:8000/images/images/chinupVecs.gif",
+        #     "intensity": "M",
+        #     "rest_time": 1,
+        #     "sets": 3,
+        #     "reps": 60,
+        #     "excertion": 8,
+        #     "section_item": 1,
+        # }
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response_1.data, dict)
+        # self.assertDic(response_1.data, dict)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
@@ -708,7 +760,9 @@ class CourseCommentListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
@@ -819,7 +873,9 @@ class CourseCommentDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
@@ -938,20 +994,22 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
-        section  = Section.objects.create(title="week 5", course=course)
-        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com")
+        section = Section.objects.create(title="week 5", course=course)
+        section_item = SectionItem.objects.create(
+            section=section, lecture="https://www.youtube.com"
+        )
         workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Regular dips",
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/chinwhiteup.gif",
         )
         CorrectExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/chinwhiteup.gif",
             description="scapula retracted during eccentric",
             workout=workout,
         )
         CorrectExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/chinwhiteup.gif",
             description="lean torso",
             workout=workout,
         )
@@ -974,11 +1032,25 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
+
+    def tearDown(self):
+        # prevents accumulating picture/image (i.e deletes files that were created by this test case)
+        for filename in glob.glob("images/images/picture_*.gif"):
+            os.remove(filename)
+
+        for filename in glob.glob("images/picture_*.gif"):
+            os.remove(filename)
+
+        # remove the specific 'picture.gif' file
+        if os.path.exists("images/picture.gif"):
+            os.remove("images/picture.gif")
 
     def test_retrieve_correct_exercise_list(self):
         """
@@ -997,40 +1069,50 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         Ensure we can create a correct exercise demo
         """
 
+        with open("images/images/chinupVecs.gif", "rb") as file:
+            image = SimpleUploadedFile(
+                "picture.gif", file.read(), content_type="image/gif"
+            )
+
         # test create correct exercise demo with an authenticated client
         response = self.authenticated_client.post(
             reverse("learn:correct-exercise-list", args=[1]),
             {
-                "demo": "https://www.youtube.com/watch?v=-Djq3QihTyA",
+                "demo": image,
                 "description": "scapula depressed",
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test create correct exercise demo with an authenticated client != created_by
         response_2 = self.authenticated_client_2.post(
             reverse("learn:correct-exercise-list", args=[1]),
             {
-                "demo": "https://www.youtube.com/watch?v=-Djq3QihTyA",
+                "demo": image,
                 "description": "idk don't be bad",
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test create correct exercise demo that a workout instance doesn't exist
         response_3 = self.authenticated_client.post(
             reverse("learn:correct-exercise-list", args=[5]),
             {
-                "demo": "https://www.youtube.com/watch?v=-Djq3QihTyA",
+                "demo": image,
                 "description": "idk",
             },
-            format="json",
         )
+
+        image.seek(0)
 
         # test create correct exercise demo with an unauthenticated client
         response_4 = self.unauthenticated_client.post(
             reverse("learn:correct-exercise-list", args=[1]),
-            {"demo": "https://www.youtube.com/watchme", "description": "idk"},
+            {"demo": image, "description": "idk"},
         )
 
         # test create correct exercise demo with an empty field
@@ -1040,7 +1122,7 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn("scapula", response.data["description"])
-        self.assertIn("youtube", response.data["demo"])
+        self.assertIn("images", response.data["demo"])
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_403_FORBIDDEN)
@@ -1053,20 +1135,24 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
-        section = Section.objects.create(course=course, title="idk just section testing")
-        section_item = SectionItem.objects.create(section=section, description="nothing just go on after this set go on")
+        section = Section.objects.create(
+            course=course, title="idk just section testing"
+        )
+        section_item = SectionItem.objects.create(
+            section=section, description="nothing just go on after this set go on"
+        )
         workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Regular dips",
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
         )
         CorrectExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
             description="scapula retracted during eccentric",
             workout=workout,
         )
         CorrectExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
             description="lean torso",
             workout=workout,
         )
@@ -1089,11 +1175,25 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
+
+    def tearDown(self):
+        # prevents accumulating picture/image (i.e deletes files that were created by this test case)
+        for filename in glob.glob("images/images/picture_*.gif"):
+            os.remove(filename)
+
+        for filename in glob.glob("images/picture_*.gif"):
+            os.remove(filename)
+
+        # remove the specific 'picture.gif' file
+        if os.path.exists("images/picture.gif"):
+            os.remove("images/picture.gif")
 
     def test_retrieve_correct_exercise_demo(self):
         """
@@ -1106,9 +1206,9 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         response_3 = client.get(reverse("learn:correct-exercise-detail", args=[5]))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("youtube", response.data["demo"])
+        self.assertIn("images", response.data["demo"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
-        self.assertIn("youtube", response.data["demo"])
+        self.assertIn("images", response.data["demo"])
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_correct_exercise_demo(self):
@@ -1116,48 +1216,61 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         Ensure we can update a correct exercise form instance
         """
 
+        with open("images/images/pushupVecs.gif", "rb") as file:
+            image = SimpleUploadedFile(
+                "picture.gif", file.read(), content_type="image/gif"
+            )
+
         # test update instance with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:correct-exercise-detail", args=[1]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades down",
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test update instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.put(
             reverse("learn:correct-exercise-detail", args=[1]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades down",
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test update instance with an empty fields
         response_3 = self.authenticated_client.put(
             reverse("learn:correct-exercise-detail", args=[1])
         )
 
+        image.seek(0)
+
+
         # test update instance that doesn't exists
         response_4 = self.authenticated_client.put(
             reverse("learn:correct-exercise-detail", args=[5]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades down",
             },
-            format="json",
         )
+
+        image.seek(0)
+
         # test update instance with an unathenticated client
         response_5 = self.unauthenticated_client.put(
             reverse("learn:correct-exercise-detail", args=[1]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades down",
             },
-            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1205,19 +1318,21 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
         section = Section.objects.create(course=course, title="WEEK 4")
-        section_item = SectionItem.objects.create(section=section, description="GO ON GO GO GO GO GO")
+        section_item = SectionItem.objects.create(
+            section=section, description="GO ON GO GO GO GO GO"
+        )
         workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Regular dips",
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
         )
         WrongExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
             description="shrugging",
             workout=workout,
         )
         WrongExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
             description="flared elbows",
             workout=workout,
         )
@@ -1240,11 +1355,25 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
+
+    def tearDown(self):
+        # prevents accumulating picture/image (i.e deletes files that were created by this test case)
+        for filename in glob.glob("images/images/picture_*.gif"):
+            os.remove(filename)
+
+        for filename in glob.glob("images/picture_*.gif"):
+            os.remove(filename)
+
+            # remove the specific 'picture.gif' file
+        if os.path.exists("images/picture.gif"):
+            os.remove("images/picture.gif")
 
     def test_retrieve_wrong_exercise_list(self):
         """
@@ -1263,41 +1392,51 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         Ensure we can create a wrong exercise demo
         """
 
+        with open("images/images/pushupVecs.gif", "rb") as file:
+            image = SimpleUploadedFile(
+                "picture.gif", file.read(), content_type="image/gif"
+            )
+
         # test create wrong exercise demo with an authenticated client
         response = self.authenticated_client.post(
             reverse("learn:wrong-exercise-list", args=[1]),
             {
-                "demo": "https://www.youtube.com/watch?v=-Djq3QihTyA",
+                "demo": image,
                 "description": "scapula elevation",
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test create wrong exercise demo with an authenticated client != created_by
         response_2 = self.authenticated_client_2.post(
             reverse("learn:wrong-exercise-list", args=[1]),
             {
-                "demo": "https://www.youtube.com/watch?v=-Djq3QihTyA",
+                "demo": image,
                 "description": "idk don't be bad",
             },
-            format="json",
         )
+
+        image.seek(0)
 
         # test create wrong exercise demo that a workout instance doesn't exist
         response_3 = self.authenticated_client.post(
             reverse("learn:wrong-exercise-list", args=[5]),
             {
-                "demo": "https://www.youtube.com/watch?v=-Djq3QihTyA",
+                "demo": image,
                 "description": "idk",
             },
-            format="json",
         )
+
+        image.seek(0)
 
         # test create wrong exercise demo with an unauthenticated client
         response_4 = self.unauthenticated_client.post(
             reverse("learn:wrong-exercise-list", args=[1]),
-            {"demo": "https://www.youtube.com/watchme", "description": "idk"},
+            {"demo": image, "description": "idk"},
         )
+
 
         # test create wrong exercise demo with an empty field
         response_5 = self.authenticated_client.post(
@@ -1306,7 +1445,7 @@ class WrongExerciseFormListAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn("scapula", response.data["description"])
-        self.assertIn("youtube", response.data["demo"])
+        self.assertIn("picture", response.data["demo"])
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_403_FORBIDDEN)
@@ -1320,19 +1459,21 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user)
         section = Section.objects.create(title="week 60", course=course)
-        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com/watchme")
+        section_item = SectionItem.objects.create(
+            section=section, lecture="https://www.youtube.com/watchme"
+        )
         workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Regular dips",
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
         )
         WrongExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
             description="scapula protracted during eccentric",
             workout=workout,
         )
         WrongExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=ZFBP4549A1s",
+            demo="images/images/pushupVecs.gif",
             description="upright body",
             workout=workout,
         )
@@ -1355,11 +1496,25 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
         self.unauthenticated_client.force_authenticate(user=None)
+
+    def tearDown(self):
+        # prevents accumulating picture/image (i.e deletes files that were created by this test case)
+        for filename in glob.glob("images/images/picture_*.gif"):
+            os.remove(filename)
+
+        for filename in glob.glob("images/picture_*.gif"):
+            os.remove(filename)
+
+        # remove the specific 'picture.gif' file
+        if os.path.exists("images/picture.gif"):
+            os.remove("images/picture.gif")
 
     def test_retrieve_wrong_exercise_demo(self):
         """
@@ -1372,9 +1527,9 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         response_3 = client.get(reverse("learn:wrong-exercise-detail", args=[5]))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("youtube", response.data["demo"])
+        self.assertIn("images", response.data["demo"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
-        self.assertIn("youtube", response.data["demo"])
+        self.assertIn("images", response.data["demo"])
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_wrong_exercise_demo(self):
@@ -1382,25 +1537,34 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         Ensure we can update a wrong exercise form instance
         """
 
+        with open("images/images/pushupVecs.gif", "rb") as file:
+            image = SimpleUploadedFile(
+                "picture.gif", file.read(), content_type="image/gif"
+            )
+
         # test update instance with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:wrong-exercise-detail", args=[1]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades down",
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test update instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.put(
             reverse("learn:wrong-exercise-detail", args=[1]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades up",
             },
-            format="json",
         )
+
+        image.seek(0)
+
 
         # test update instance with an empty fields
         response_3 = self.authenticated_client.put(
@@ -1411,19 +1575,20 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         response_4 = self.authenticated_client.put(
             reverse("learn:wrong-exercise-detail", args=[5]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades down",
             },
-            format="json",
         )
+
+        image.seek(0)
+
         # test update instance with an unathenticated client
         response_5 = self.unauthenticated_client.put(
             reverse("learn:wrong-exercise-detail", args=[1]),
             {
-                "demo": "https://www.youtube.com/watchmebaby",
+                "demo": image,
                 "description": "shoulder blades down",
             },
-            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

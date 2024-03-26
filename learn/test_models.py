@@ -429,7 +429,7 @@ class CorrectExerciseFormTestCase(TestCase):
             excertion=5,
         )
         self.correct_exercise_form = CorrectExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=IODxDxX7oi4",
+            demo="images/images/chinwhiteup.gif",
             workout=self.workout,
             description="Scapula position retracted",
         )
@@ -437,7 +437,7 @@ class CorrectExerciseFormTestCase(TestCase):
     def test_correct_exercise_form_creation(self):
         self.assertEqual(
             self.correct_exercise_form.demo,
-            "https://www.youtube.com/watch?v=IODxDxX7oi4",
+            "images/images/chinwhiteup.gif",
         )
         self.assertEqual(self.correct_exercise_form.workout, self.workout)
         self.assertEqual(
@@ -454,7 +454,7 @@ class CorrectExerciseFormTestCase(TestCase):
 
     def test_correct_exercise_form_creation_with_invalid_demo(self):
         exercise = CorrectExerciseForm.objects.create(
-            demo="invalid_url",
+            demo="",
             workout=self.workout,
             description="Flared elbow",
         )
@@ -479,7 +479,7 @@ class WrongExerciseFormTestCase(TestCase):
             excertion=5,
         )
         self.wrong_exercise_form = WrongExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=VJsayRzxq-U&t=113s",
+            demo="images/images/chinwhiteup.gif",
             workout=self.workout,
             description="Flared elbow",
         )
@@ -487,7 +487,7 @@ class WrongExerciseFormTestCase(TestCase):
     def test_wrong_exercise_form_creation(self):
         self.assertEqual(
             self.wrong_exercise_form.demo,
-            "https://www.youtube.com/watch?v=VJsayRzxq-U&t=113s",
+            "images/images/chinwhiteup.gif",
         )
         self.assertEqual(self.wrong_exercise_form.workout, self.workout)
         self.assertEqual(self.wrong_exercise_form.description, "Flared elbow")
@@ -495,14 +495,14 @@ class WrongExerciseFormTestCase(TestCase):
     def test_wrong_exercise_form_without_workout(self):
         with self.assertRaises(IntegrityError):
             WrongExerciseForm.objects.create(
-                demo="https://www.youtube.com/watch?v=IODxDxX7oi4",
+                demo="images/images/chinupVecs.gif",
                 workout=None,
                 description="Scapula position retracted",
             )
 
     def test_wrong_exercise_form_creation_with_invalid_demo(self):
         exercise = WrongExerciseForm.objects.create(
-            demo="invalid_url",
+            demo="",
             workout=self.workout,
             description="Flared elbow",
         )
