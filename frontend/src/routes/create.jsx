@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, FormControl, Grid, InputAdornment, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as React from 'react';
@@ -22,6 +22,7 @@ import PublishIcon from '@mui/icons-material/Publish';
 import PropTypes from 'prop-types';
 import { IMaskInput } from 'react-imask';
 import { NumericFormat } from 'react-number-format';
+import { AccountCircle } from "@mui/icons-material";
 
 
 let theme = createTheme()
@@ -291,60 +292,60 @@ function ControlledAccordions({ section, sectionItem }) {
 
 function FormattedInputs() {
     const [values, setValues] = React.useState({
-      numberformat: '0',
+        numberformat: '0',
     });
-  
+
     const handleChange = (event) => {
-      setValues({
-        ...values,
-        [event.target.name]: event.target.value,
-      });
+        setValues({
+            ...values,
+            [event.target.name]: event.target.value,
+        });
     };
-  
+
     return (
         <TextField
-          label="Course Price"
-          value={values.numberformat}
-          onChange={handleChange}
-          name="price"
-          id="formatted-numberformat-input"
-          InputProps={{
-            inputComponent: NumericFormatCustom,
-          }}
-          variant="standard"
-          sx={{marginTop: 3}}
+            label="Course Price"
+            value={values.numberformat}
+            onChange={handleChange}
+            name="price"
+            id="formatted-numberformat-input"
+            InputProps={{
+                inputComponent: NumericFormatCustom,
+            }}
+            variant="standard"
+            sx={{ marginTop: 3 }}
         />
     );
-  }
+}
 
 const NumericFormatCustom = React.forwardRef(
     function NumericFormatCustom(props, ref) {
-      const { onChange, ...other } = props;
-  
-      return (
-        <NumericFormat
-          {...other}
-          getInputRef={ref}
-          onValueChange={(values) => {
-            onChange({
-              target: {
-                name: props.name,
-                value: values.value,
-              },
-            });
-          }}
-          thousandSeparator
-          valueIsNumericString
-          prefix="$"
-        />
-      );
+        const { onChange, ...other } = props;
+
+        return (
+            <NumericFormat
+                {...other}
+                getInputRef={ref}
+                onValueChange={(values) => {
+                    onChange({
+                        target: {
+                            name: props.name,
+                            value: values.value,
+                        },
+                    });
+                }}
+                thousandSeparator
+                valueIsNumericString
+                prefix="$"
+            />
+        );
     },
-  );
-  
-  NumericFormatCustom.propTypes = {
+);
+
+NumericFormatCustom.propTypes = {
     name: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
-  };
+};
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -422,7 +423,7 @@ export default function CreateCourse() {
                                 <Grid item container justifyContent={'center'}>
                                     <Grid item>
                                         <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                            <img src={selectedImage} className="course-thumbnail" style={{ objectFit: selectedImage == image ? 'fill' : 'cover' }} />
+                                            <img src={selectedImage} className="course-thumbnail" style={{ objectFit: selectedImage == image ? 'fill' : 'cover' , border: '1px dashed black'}} />
                                         </Container>
                                     </Grid>
                                 </Grid>
@@ -524,11 +525,26 @@ export default function CreateCourse() {
                                 <Typography sx={{ textAlign: 'center' }} variant="h4">
                                     lecture for the entire course
                                 </Typography>
+                                <Typography sx={{ display: 'block', textAlign: 'center' }} variant="small">
+                                    Put your youtube video link here
+                                </Typography>
                             </ThemeProvider>
-                            <br />
-                            <Box className="course-lecture-container" component={'div'}>
-                                <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
-                            </Box>
+                        </Grid>
+                        <br />
+
+                        <Grid item container> 
+                        <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
+                            {/* course lecture input */}
+                            <TextField InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <YouTubeIcon />
+                                    </InputAdornment>
+
+                                )
+                            }} fullWidth={true} id="lecture-url" label="e.g https://www.youtube.com/watch?v=SOMEID" type="url" />
+                            {/* <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe> */}
+                        </Box>
                         </Grid>
                         <br />
                         <Grid item>
@@ -549,8 +565,9 @@ export default function CreateCourse() {
 }
 
 
-
-
-
-
-
+// just par
+function getEmbedUrl(youtubeUrl) {
+    var videoId = youtubeUrl.split('v=')[1];
+    var embedUrl = "https://www.youtube.com/embed/" + videoId;
+    return embedUrl;
+}
