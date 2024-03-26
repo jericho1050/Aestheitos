@@ -16,7 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AccessTokenExpContext, AuthContext, AuthDispatchContext, CurrentTimeContext } from '../helper/authContext';
+import { AccessTokenExpContext, AuthContext, AuthDispatchContext, CurrentTimeContext, IsAuthenticatedContext, setIsAuthenticatedContext } from '../helper/authContext';
 import SearchIcon from '@mui/icons-material/Search';
 import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
@@ -31,7 +31,7 @@ import { jwtDecode } from 'jwt-decode';
 import refreshAccessToken from '../helper/refreshAccessToken';
 import logo from '../static/images/aestheitoslogo.png';
 
-const pages = ['Courses', 'Blog'];
+const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
 
 
@@ -39,18 +39,28 @@ function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isOpen, setIsOpen] = React.useState(false);
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const token = React.useContext(AuthContext); // access token and refresh token
   const dispatch = React.useContext(AuthDispatchContext);
   const accessTokenExp = React.useContext(AccessTokenExpContext)
   const currentTime = React.useContext(CurrentTimeContext)
   const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+  const isAuthenticated = React.useContext(IsAuthenticatedContext); // boolean state value; it checks if the user is authenticated.
+  const setIsAuthenticated = React.useContext(setIsAuthenticatedContext); // a state setter function to update isAuthenticated variable.
+  const navigate = useNavigate();
 
+  // attach event listener to  each setting
   const settingsHandlers = {
     'Profile': handleProfile,
     'Account': handleAccount,
     'Enrolled': handleEnrolled,
     'Logout': () => handleLogout(dispatch)
+  }
+
+  // attach event listener to each page in navbar
+  const pageHandlers = {
+    'Courses': handleCourses,
+    'Blogs': handleBlogs,
+    'Create': handleCreate
   }
 
   // handle jwt in state  when user refreshes page.
@@ -116,7 +126,6 @@ function ResponsiveAppBar() {
     setAnchorElUser(event.currentTarget);
   };
   const handleClickSearch = () => {
-
     setIsOpen(true);
   };
 
@@ -132,6 +141,7 @@ function ResponsiveAppBar() {
     setIsOpen(false);
   };
 
+  // settings handlers
   function handleProfile() {
 
   }
@@ -141,7 +151,19 @@ function ResponsiveAppBar() {
   }
 
   function handleEnrolled() {
+  }
 
+  // pages handlers
+  function handleCourses() {
+
+  }
+
+  function handleBlogs() {
+
+  }
+
+  function handleCreate() {
+    navigate('/course/create')
   }
 
 
@@ -208,7 +230,7 @@ function ResponsiveAppBar() {
                 }}
               >
                 {pages.map((page) => (
-                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                  <MenuItem key={page} onClick={pageHandlers[page]}>
                     <Typography textAlign="center">{page}</Typography>
                   </MenuItem>
                 ))}
@@ -237,7 +259,7 @@ function ResponsiveAppBar() {
               {pages.map((page) => (
                 <Button
                   key={page}
-                  onClick={handleCloseNavMenu}
+                  onClick={pageHandlers[page]}
                   sx={{ my: 2, color: 'white', display: 'block' }}
                 >
                   {page}

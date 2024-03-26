@@ -14,6 +14,7 @@ import SignIn from './routes/signin';
 import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
 import Course from './routes/course';
+import CreateCourse from './routes/create';
 
 
 const theme = createTheme({
@@ -38,13 +39,19 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        index: true, element: <Index />,
+        index: true,
+        element: <Index />,
         loader: indexLoader,
       },
       {
         path: "courses/:courseId",
         element: <Course />
       },
+      {
+        path: "course/create",
+        element: <CreateCourse />
+
+      }
     ],
   },
   {

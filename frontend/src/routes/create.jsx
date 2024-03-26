@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, Grid, Paper, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as React from 'react';
@@ -11,11 +11,17 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import DescriptionIcon from '@mui/icons-material/Description';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
 import WrongFormDialog from "../MUI-components/WrongFormDialog";
+import image from '../static/images/noimg.png'
+import { styled } from '@mui/material/styles';
+import PublishIcon from '@mui/icons-material/Publish';
+import PropTypes from 'prop-types';
+import { IMaskInput } from 'react-imask';
+import { NumericFormat } from 'react-number-format';
 
 
 let theme = createTheme()
@@ -281,135 +287,270 @@ function ControlledAccordions({ section, sectionItem }) {
         </div>
     );
 
-
 }
 
-export default function Course() {
+function FormattedInputs() {
+    const [values, setValues] = React.useState({
+      numberformat: '0',
+    });
+  
+    const handleChange = (event) => {
+      setValues({
+        ...values,
+        [event.target.name]: event.target.value,
+      });
+    };
+  
+    return (
+        <TextField
+          label="Course Price"
+          value={values.numberformat}
+          onChange={handleChange}
+          name="price"
+          id="formatted-numberformat-input"
+          InputProps={{
+            inputComponent: NumericFormatCustom,
+          }}
+          variant="standard"
+          sx={{marginTop: 3}}
+        />
+    );
+  }
 
+const NumericFormatCustom = React.forwardRef(
+    function NumericFormatCustom(props, ref) {
+      const { onChange, ...other } = props;
+  
+      return (
+        <NumericFormat
+          {...other}
+          getInputRef={ref}
+          onValueChange={(values) => {
+            onChange({
+              target: {
+                name: props.name,
+                value: values.value,
+              },
+            });
+          }}
+          thousandSeparator
+          valueIsNumericString
+          prefix="$"
+        />
+      );
+    },
+  );
+  
+  NumericFormatCustom.propTypes = {
+    name: PropTypes.string.isRequired,
+    onChange: PropTypes.func.isRequired,
+  };
+
+
+const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+});
+
+
+function InputFileUpload({ onChange }) {
+    return (
+        <Button
+            component="label"
+            role={undefined}
+            variant="contained"
+            tabIndex={-1}
+            startIcon={<CloudUploadIcon />}
+        >
+            Upload Image
+            <VisuallyHiddenInput type="file" accept="image/*" onChange={onChange} name="thumbnail" />
+        </Button>
+    );
+}
+
+export default function CreateCourse() {
+
+    const [selectedImage, setSelectedImage] = React.useState(image);
+    const [difficulty, setDifficulty] = React.useState('');
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            setSelectedImage(reader.result);
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function handleChange(e) {
+        setDifficulty(e.target.value);
+    }
+
+    function handleSubmit(e) {
+
+    }
 
     return (
         <>
+
             <br></br>
             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
-                <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
-                    <Grid item>
-                        <Button>
-                            <EditIcon sx={{ marginRight: 1 }} />
-                            Edit
-                        </Button>
+                <Box component="form" onSubmit={handleSubmit} noValidate>
+                    <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
+                        <Grid item>
+                            <Button type="submit" variant="outlined">
+                                <PublishIcon sx={{ marginRight: 1 }} />
+                                SUBMIT FOR REVIEW
+                            </Button>
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
-                    {/* Paper starts here */}
-                    <Grid item xs md={'auto'}>
-                        <Paper elevation={4}>
-                            <Grid item container justifyContent={'center'}>
-                                <Grid item>
-                                    <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                        <img src={course.thumbnail} className="course-thumbnail" />
-                                    </Container>
-                                </Grid>
-                            </Grid>
-                            <Grid item container wrap="nowrap" mt={1} alignItems={'center'} direction="column" spacing={4}>
-                                <Grid item xs>
-                                    <Typography sx={{ maxWidth: { md: 250, xs: 300, sm: 400 } }} noWrap>Instructor: {user.firstName} {user.lastName} yawayadfadsfgadsgfadsfgdfagadgfadsfadsfadsfadsfadsfadsadsfadsfadsfads</Typography>
-                                </Grid>
-                                <Grid item xs>
-                                    <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                                        <AttachMoneyIcon fontSize="large" />
-                                        <Typography fontWeight="bolder" sx={{fontSize: '2em'}} variant='button'>69</Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid item>
-                                    <Button variant="contained">
-                                        Enroll now!
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                            <Grid container justifyContent={'flex-start'} alignItems={"flex-end"} mt={4}>
-                                <Grid item container padding={2} justifyContent={'space-between'}>
+                    <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
+                        {/* Paper starts here */}
+                        <Grid item xs md={'auto'}>
+                            <Paper elevation={4}>
+                                <Grid item container justifyContent={'center'}>
                                     <Grid item>
-                                        <Typography fontSize="small" variant="small" color={'text.secondary'}>
-                                            Created on: {course.courseCreated}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography fontSize="small" variant="small" color={'text.secondary'}>
-                                            Last updated: {course.courseUpdated}
-                                        </Typography>
+                                        <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
+                                            <img src={selectedImage} className="course-thumbnail" style={{ objectFit: selectedImage == image ? 'fill' : 'cover' }} />
+                                        </Container>
                                     </Grid>
                                 </Grid>
-                                <Grid paddingLeft={2} paddingBottom={2} item variant="small" fontSize={'small'}>
-                                    Rating: {course.average_rating}
+                                <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={4}>
+                                    <Grid item>
+                                        {/* Uploading  image file button  here */}
+                                        <InputFileUpload onChange={handleImageUpload} />
+                                    </Grid>
+                                    <Grid item xs paddingBottom={4}>
+                                        {/* Select menu form */}
+                                        <FormControl required fullWidth sx={{ minWidth: 150 }}>
+                                            <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                id="demo-simple-select"
+                                                value={difficulty}
+                                                label="Difficulty"
+                                                onChange={handleChange}
+                                                name="difficulty"
+                                            >
+                                                <MenuItem value={'BG'}>Beginner</MenuItem>
+                                                <MenuItem value={'IN'}>Intermediate</MenuItem>
+                                                <MenuItem value={'AD'}>Advanced</MenuItem>
+                                            </Select>
+                                            <FormattedInputs />
+                                        </FormControl>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                    {/* Paper ends here */}
-                    {/* title  & description starts here */}
-                    <Grid item xs={12} sm={12} md lg>
-                        <Grid item container wrap="nowrap" direction="column">
-                            <Grid item xs>
-                                <ThemeProvider theme={theme}>
-                                    <Typography fontWeight="bold" variant="h2">
-                                        {course.title}
-                                    </Typography>
-                                </ThemeProvider>
-                            </Grid>
-                            <Grid item xs>
-                                <ThemeProvider theme={theme} >
+                            </Paper>
+                        </Grid>
+                        {/* Paper ends here */}
+                        {/* title  & description starts here */}
+                        <Grid item xs={12} sm={12} md lg>
+                            <Grid item container wrap="nowrap" direction="column">
+                                <Grid item xs>
+                                    {/* Course title input */}
+                                    <TextField
+                                        helperText=" "
+                                        id="demo-helper-text-aligned-no-helper"
+                                        label="Your Course's Title"
+                                        fullWidth={true}
+                                        minRows={5}
+                                        maxRows={5}
+                                        multiline
+                                        required
+                                        inputProps={{ maxLength: 200 }}
+                                        autoFocus
+                                        name="title"
 
-                                    <Typography align="justify" variant="body1">
-                                        {course.description}
-                                    </Typography>
-
-                                </ThemeProvider>
+                                    />
+                                </Grid>
+                                <Grid item xs>
+                                    {/* course description input */}
+                                    <TextField
+                                        helperText=" "
+                                        id="demo-helper-text-aligned-no-helper"
+                                        label="Your Course's Description"
+                                        fullWidth={true}
+                                        minRows={15}
+                                        maxRows={15}
+                                        multiline
+                                        required
+                                        inputProps={{ maxLength: 200 }}
+                                        autoFocus
+                                        name="description"
+                                    />
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
-                {/* title  & description ends here */}
-                <br></br>
-                <hr></hr>
-                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                    <Grid item>
-                        <ThemeProvider theme={theme} >
-                            <Typography variant="h3">
-                                Overview
-                            </Typography>
-                        </ThemeProvider>
-                    </Grid>
-                    <Grid item>
-                        <ThemeProvider theme={theme}>
-                            <Typography align="justify" variant="body2">
-                                {courseContent.overview}
-                            </Typography>
-                        </ThemeProvider>
-                    </Grid>
-                    <Grid item>
-                        <ThemeProvider theme={theme}>
-                            <Typography sx={{ textAlign: 'center' }} variant="h4">
-                                lecture for the entire course
-                            </Typography>
-                        </ThemeProvider>
+                    {/* title  & description ends here */}
+                    <br></br>
+                    <hr></hr>
+                    <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                        <Grid item>
+                            <ThemeProvider theme={theme} >
+                                <Typography variant="h3">
+                                    Overview
+                                </Typography>
+                            </ThemeProvider>
+                        </Grid>
+                        <Grid item container>
+                            {/* course overview input */}
+                            <TextField
+                                helperText=" "
+                                id="demo-helper-text-aligned-no-helper"
+                                label="Your Course's Overview"
+                                fullWidth={true}
+                                minRows={10}
+                                maxRows={10}
+                                multiline
+                                required
+                                inputProps={{ maxLength: 200 }}
+                                name="overview"
+                            />
+                        </Grid>
+                        <Grid item>
+                            <ThemeProvider theme={theme}>
+                                <Typography sx={{ textAlign: 'center' }} variant="h4">
+                                    lecture for the entire course
+                                </Typography>
+                            </ThemeProvider>
+                            <br />
+                            <Box className="course-lecture-container" component={'div'}>
+                                <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
+                            </Box>
+                        </Grid>
                         <br />
-                        <Box className="course-lecture-container" component={'div'}>
-                            <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
-                        </Box>
+                        <Grid item>
+                            <ThemeProvider theme={theme}>
+                                <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                    Course content
+                                </Typography>
+                            </ThemeProvider>
+                        </Grid>
+                        <Grid item>
+                            <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
+                        </Grid>
                     </Grid>
-                    <br />
-                    <Grid item>
-                        <ThemeProvider theme={theme}>
-                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                Course content
-                            </Typography>
-                        </ThemeProvider>
-                    </Grid>
-                    <Grid item>
-                        <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
-                    </Grid>
-                </Grid>
+                </Box>
             </Box>
         </>
     )
 }
+
+
+
+
+
+
+
