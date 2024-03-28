@@ -306,19 +306,19 @@ class SectionTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
         self.user2 = User.objects.create(username="testuser123")
         self.course = Course.objects.create(title="testing", created_by=self.user)
-        self.section = Section.objects.create(course=self.course, title="week 6")
+        self.section = Section.objects.create(course=self.course, heading="week 6")
 
     def test_section_creation(self):
 
         self.assertEqual(self.section.course, self.course)
-        self.assertEqual(self.section.title, "week 6")
+        self.assertEqual(self.section.heading, "week 6")
         self.assertEqual(self.section.course.created_by, self.user)
         self.assertNotEqual(self.section.course.created_by, self.user2)
 
     def test_section_without_course_reference(self):
 
         with self.assertRaises(IntegrityError):
-            Section.objects.create(title="forgot ops")
+            Section.objects.create(heading="forgot ops")
 
     def test_section_without_title(self):
         section = Section.objects.create(course=self.course)
@@ -333,8 +333,8 @@ class SectionItemTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="testme")
         self.course = Course.objects.create(created_by=self.user, title="testing sectionItem")
-        self.section = Section.objects.create(course=self.course, title="week 12")
-        self.section_item = SectionItem.objects.create(section=self.section, lecture="https://www.youtube.com", title="test instance's section item title")
+        self.section = Section.objects.create(course=self.course, heading="week 12")
+        self.section_item = SectionItem.objects.create(section=self.section, lecture="https://www.youtube.com", heading="test instance's section item heading")
         self.workout = Workouts.objects.create(
             section_item=self.section_item,
             exercise="Test Exercise",
@@ -357,7 +357,7 @@ class SectionItemTestCase(TestCase):
     def test_section_item_creation(self):
 
         self.assertEqual(self.section_item.section, self.section)
-        self.assertIn("test", self.section_item.title)
+        self.assertIn("test", self.section_item.heading)
 
 class WorkoutsTestCase(TestCase):
 
@@ -365,8 +365,8 @@ class WorkoutsTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        section = Section.objects.create(course=self.course, title="week 123")
-        self.section_item = SectionItem.objects.create(section=section , description="after doing this go do this", title="test instance's section item title")
+        section = Section.objects.create(course=self.course, heading="week 123")
+        self.section_item = SectionItem.objects.create(section=section , description="after doing this go do this", heading="test instance's section item heading")
         self.workout = Workouts.objects.create(
             section_item=self.section_item,
             exercise="Test Exercise",
@@ -417,8 +417,8 @@ class CorrectExerciseFormTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        section = Section.objects.create(title="week 6", course=self.course)
-        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com", title="test instance's section item title")
+        section = Section.objects.create(heading="week 6", course=self.course)
+        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com", heading="test instance's section item heading")
         self.workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Push Up",
@@ -467,8 +467,8 @@ class WrongExerciseFormTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        section = Section.objects.create(course=self.course, title="week 10")
-        section_item = SectionItem.objects.create(section=section, description="after doing a set rest 100000 minutes", title="test instance's section item title")
+        section = Section.objects.create(course=self.course, heading="week 10")
+        section_item = SectionItem.objects.create(section=section, description="after doing a set rest 100000 minutes", heading="test instance's section item heading")
         self.workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Push Up",

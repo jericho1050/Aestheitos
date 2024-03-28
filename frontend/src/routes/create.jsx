@@ -19,42 +19,20 @@ import WrongFormDialog from "../MUI-components/WrongFormDialog";
 import image from '../static/images/noimg.png'
 import { styled } from '@mui/material/styles';
 import PublishIcon from '@mui/icons-material/Publish';
-import PropTypes from 'prop-types';
-import { IMaskInput } from 'react-imask';
-import { NumericFormat } from 'react-number-format';
-import { AccountCircle } from "@mui/icons-material";
-
+import { useImmer } from "use-immer";
+import DeleteIcon from '@mui/icons-material/Delete';
+import getEmbedUrl from '../helper/getEmbedUrl';
+import FormattedInputs from "../components/FormattedInput";
+import AddAccordion from "../components/AddAccordion";
+import InputFileUpload from "../components/InputFileUpload";
+import Section from "../components/Section";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
 // mock data 
 // temporary for now 
-const user = {
-    firstName: 'test user',
-    lastName: 'isUser'
-}
-const course = {
-    title: "test course test course test course test course test course test course test coursetest ",
-    description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac tortor sed risus pellentesque efficitur. Cras et nulla mauris. Nulla auctor vel nisl vitae iaculis. Suspendisse laoreet cursus elit. Curabitur maximus ultricies orci. Fusce consectetur sollicitudin purus, in dignissim neque condimentum in. Mauris mattis dapibus quam, at rhoncus sapien viverra in. Maecenas mollis erat risus, ac sagittis leo pharetra ultricies. In pellentesque rhoncus tortor, at tristique nisl consequat in. Praesent ipsum eros, egestas gravida efficitur sed, suscipit sed dui.
 
-    Aliquam arcu arcu, pellentesque a nunc rhoncus, imperdiet interdum ipsum. Proin euismod risus ut velit dignissim ornare. Fusce eu nisi sit amet quam placerat egestas eu non urna. Sed at diam ut libero cursus blandit. Integer in lectus ac est laoreet ultrices. Nunc iaculis vel dolor placerat consectetur. Aliquam tellus enim, pretium eu ipsum sit amet, finibus mollis nibh. Donec et lacinia ligula. Sed feugiat nulla lectus, quis dictum neque hendrerit nec. In tempor congue malesuada. Nunc sodales nulla ut massa pellentesque, at lobortis quam pellentesque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam erat volutpat. Sed ullamcorper pharetra velit nec ullamcorper. Fusce pulvinar purus eu interdum viverra. Suspendisse aliquam tellus eget arcu dignissim, sed tempus ante consectetur.`,
-    // thumbnail: 'https://i.imgur.com/B5wZm19.jpeg',
-    thumbnail: 'https://i.imgur.com/e3mMEwA.gif',
-    // thumbnail: 'https://i.imgur.com/K6NLbi4.gif',
-    // thumbnail: 'https://i.imgur.com/bC5G14n.gif',
-    courseCreated: '10/20/2024',
-    courseUpdated: '10/25/2024',
-    created_by: 'testuser'
-}
-const courseContent = {
-    // lecture: "https://youtube.com/embed/CXMZxgNnnv8",
-    lecture: 'https://www.youtube.com/embed/LxKHX2fumJw',
-    overview: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum felis rhoncus. Duis vestibulum, mi eu porta sodales, magna mauris bibendum lacus, id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed lorem libero. Donec cursus dictum leo a feugiat. Mauris non felis vitae mi fermentum blandit. Sed placerat, nunc et accumsan gravida, leo ipsum venenatis nulla, non gravida nisl ex et felis. Proin quis gravida orci, at aliquam enim. Curabitur eget mi nisl. Donec mattis dui tellus, non congue lacus suscipit et. Nullam sit amet ultricies massa. Nullam rutrum ullamcorper lacus. Fusce dictum interdum ligula vel pellentesque.
-
-    Phasellus luctus lorem sed sapien pharetra, ac laoreet arcu sollicitudin. Morbi viverra rhoncus bibendum. In tellus nisi, varius sed ligula sit amet, ultricies laoreet magna. Donec maximus a augue nec vestibulum. Donec accumsan odio at porta rutrum. Nulla a blandit mi. Sed tortor justo, imperdiet in maximus sed, sagittis at eros. Nunc id sagittis mauris, porta malesuada mi. Vivamus ut nisl mollis, egestas odio at, ornare massa. Proin dictum, augue vel fermentum egestas, arcu elit fermentum lorem, nec consectetur mi massa ac mauris. Sed sollicitudin eleifend ullamcorper. Duis commodo lorem eu finibus ultricies. Pellentesque cursus risus eget volutpat lacinia. Nulla vitae est at massa vehicula bibendum.`,
-    weeks: 12,
-}
 const workouts1 = {
     intesity: "H",
     exercise: " quis, ",
@@ -84,20 +62,33 @@ const wrongForm = {
 }
 
 const section1 = {
-    title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+    heading: "Your Own Heading Here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
 }
 const sectionItem1 = {
     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
-    description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-    title: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. "
+    description: " Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
+    heading: "Your own item header here: Lorem ipsum dolor sit amet, consectetuer adipiscing elit.Lorem ipsum dolor sit amet. "
 }
 
 const sectionItem2 = {
     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
     description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-    title: "Workout Routine"
+    heading: "Workout Routine"
 }
 
+let nextId = 1;
+let nextItemId = 2;
+const initialData = [{
+    id: 0,
+    heading: section1.heading,
+    items: [{
+        id: 0,
+        heading: sectionItem1.heading
+    }, {
+        id: 1,
+        heading: sectionItem2.heading
+    }]
+}]
 
 // responsible for the 'workout' demo card
 function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
@@ -153,7 +144,7 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
     );
 }
 
-function ResponsiveDialog({ children }) {
+export function ResponsiveDialog({ children }) {
     const [open, setOpen] = React.useState(false);
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
@@ -221,165 +212,78 @@ function ResponsiveDialog({ children }) {
 }
 
 
+
 function ControlledAccordions({ section, sectionItem }) {
     const [expanded, setExpanded] = React.useState(false);
+    const [accordions, updateAccordions] = useImmer(initialData)
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
+
+
+    function handleAddAccordionDetail(heading, accordionId) {
+        // adds a new accordion detail (sectionItem)
+        updateAccordions(draft => {
+            const accordion = draft.find(accordion => accordion.id === accordionId);
+            accordion.items.push({
+                id: nextItemId++,
+                heading: heading
+            });
+
+        })
+    }
+
+    function handleAddAccordion(heading) {
+        // adds  a new accordion  (section)
+        updateAccordions(draft => {
+            draft.push({
+                id: nextId++,
+                heading: heading,
+                items: [sectionItem.heading]
+            })
+        })
+    }
+
+    function handleEditAccordion(nextAccordion) {
+        // edits accordion's heading
+        updateAccordions(draft => {
+            return draft.map(accordion => {
+                if (accordion.id === nextAccordion.id) {
+                    return nextAccordion;
+                } else {
+                    return accordion;
+                }
+            })
+        })
+    }
+
+    function handleDeleteAccordion(accordionId) {
+        updateAccordions(draft => {
+            return draft.filter(a => a.id !== accordionId)
+        })
+    }
     return (
-        <div>
-            <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-                <AccordionSummary
-                    expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <Button sx={{ paddingLeft: 2 }} startIcon={<EditIcon />} size="small" />
-                        <ExpandMoreIcon />
-                    </Box>}
-                    aria-controls="panel1bh-content"
-                    id="panel1bh-header"
-                    sx={{ padding: '3%' }}
-                >
-
-                    <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
-                        {section.title}
-                    </Typography>
-                </AccordionSummary>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}
-                >
-
-                    <ResponsiveDialog>
-                        {sectionItem.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}
-                >
-                    <ResponsiveDialog>
-                        {sectionItem.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-            </Accordion>
-            <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-                <AccordionSummary
-                    expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <Button sx={{ paddingLeft: 2 }} startIcon={<EditIcon />} size="small" />
-                        <ExpandMoreIcon />
-                    </Box>}
-                    aria-controls="panel1bh-content"
-                    id="panel1bh-header"
-                    sx={{ padding: '3%' }}
-                >
-                    <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
-                        {section.title}
-                    </Typography>
-                </AccordionSummary>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}>
-
-                    <ResponsiveDialog>
-                        {sectionItem.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-                <AccordionDetails sx={{ paddingLeft: '5%' }}
-                >
-                    <ResponsiveDialog>
-                        {sectionItem.title}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-            </Accordion>
-        </div>
+        <>
+            {/* Adds a new Accordion / Section  */}
+            <AddAccordion onAddAccordion={handleAddAccordion} />
+            {
+                accordions.map(accordion => (
+                    <Section onDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionDetail={handleAddAccordionDetail} />
+                ))
+            }
+        </>
     );
 
 }
 
-function FormattedInputs() {
-    const [values, setValues] = React.useState({
-        numberformat: '0',
-    });
-
-    const handleChange = (event) => {
-        setValues({
-            ...values,
-            [event.target.name]: event.target.value,
-        });
-    };
-
-    return (
-        <TextField
-            label="Course Price"
-            value={values.numberformat}
-            onChange={handleChange}
-            name="price"
-            id="formatted-numberformat-input"
-            InputProps={{
-                inputComponent: NumericFormatCustom,
-            }}
-            variant="standard"
-            sx={{ marginTop: 3 }}
-        />
-    );
-}
-
-const NumericFormatCustom = React.forwardRef(
-    function NumericFormatCustom(props, ref) {
-        const { onChange, ...other } = props;
-
-        return (
-            <NumericFormat
-                {...other}
-                getInputRef={ref}
-                onValueChange={(values) => {
-                    onChange({
-                        target: {
-                            name: props.name,
-                            value: values.value,
-                        },
-                    });
-                }}
-                thousandSeparator
-                valueIsNumericString
-                prefix="$"
-            />
-        );
-    },
-);
-
-NumericFormatCustom.propTypes = {
-    name: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired,
-};
-
-
-const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1,
-});
-
-
-function InputFileUpload({ onChange }) {
-    return (
-        <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-        >
-            Upload Image
-            <VisuallyHiddenInput type="file" accept="image/*" onChange={onChange} name="thumbnail" />
-        </Button>
-    );
-}
 
 export default function CreateCourse() {
 
     const [selectedImage, setSelectedImage] = React.useState(image);
     const [difficulty, setDifficulty] = React.useState('');
+    const [url, setUrl] = React.useState(null);
+
 
     function handleImageUpload(event) {
         const file = event.target.files[0];
@@ -410,7 +314,7 @@ export default function CreateCourse() {
                 <Box component="form" onSubmit={handleSubmit} noValidate>
                     <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
                         <Grid item>
-                            <Button type="submit" variant="outlined">
+                            <Button variant="outlined">
                                 <PublishIcon sx={{ marginRight: 1 }} />
                                 SUBMIT FOR REVIEW
                             </Button>
@@ -423,7 +327,7 @@ export default function CreateCourse() {
                                 <Grid item container justifyContent={'center'}>
                                     <Grid item>
                                         <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                            <img src={selectedImage} className="course-thumbnail" style={{ objectFit: selectedImage == image ? 'fill' : 'cover' , border: '1px dashed black'}} />
+                                            <img src={selectedImage} className="course-thumbnail" style={{ objectFit: selectedImage == image ? 'fill' : 'cover', border: '1px dashed black' }} />
                                         </Container>
                                     </Grid>
                                 </Grid>
@@ -532,19 +436,33 @@ export default function CreateCourse() {
                         </Grid>
                         <br />
 
-                        <Grid item container> 
-                        <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
-                            {/* course lecture input */}
-                            <TextField InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <YouTubeIcon />
-                                    </InputAdornment>
+                        <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
+                            <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
+                                {/* course lecture input */}
+                                <TextField onChange={e => setUrl(e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <YouTubeIcon />
+                                            </InputAdornment>
 
-                                )
-                            }} fullWidth={true} id="lecture-url" label="e.g https://www.youtube.com/watch?v=SOMEID" type="url" />
-                            {/* <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe> */}
-                        </Box>
+                                        )
+                                    }} fullWidth={true} id="lecture-url" label="e.g https://www.youtube.com/watch?v=SOMEID" type="url" />
+                            </Box>
+                            <Grid item>
+                                {getEmbedUrl(url) ?
+                                    <Box mt={4} className="course-lecture-container" component={'div'}>
+
+                                        <iframe className="course-lecture" src={getEmbedUrl(url)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
+                                    </Box>
+                                    :
+                                    <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                        <Typography variant="body" align={'center'}>
+                                            Your video will show up here
+                                        </Typography>
+                                    </Box>
+                                }
+                            </Grid>
                         </Grid>
                         <br />
                         <Grid item>
@@ -554,7 +472,7 @@ export default function CreateCourse() {
                                 </Typography>
                             </ThemeProvider>
                         </Grid>
-                        <Grid item>
+                        <Grid item width={{ xs: '100%', md: '69%' }}>
                             <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
                         </Grid>
                     </Grid>
@@ -565,9 +483,55 @@ export default function CreateCourse() {
 }
 
 
-// just par
-function getEmbedUrl(youtubeUrl) {
-    var videoId = youtubeUrl.split('v=')[1];
-    var embedUrl = "https://www.youtube.com/embed/" + videoId;
-    return embedUrl;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const course = {
+//     title: "test course test course test course test course test course test course test coursetest ",
+//     description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac tortor sed risus pellentesque efficitur. Cras et nulla mauris. Nulla auctor vel nisl vitae iaculis. Suspendisse laoreet cursus elit. Curabitur maximus ultricies orci. Fusce consectetur sollicitudin purus, in dignissim neque condimentum in. Mauris mattis dapibus quam, at rhoncus sapien viverra in. Maecenas mollis erat risus, ac sagittis leo pharetra ultricies. In pellentesque rhoncus tortor, at tristique nisl consequat in. Praesent ipsum eros, egestas gravida efficitur sed, suscipit sed dui.
+
+//     Aliquam arcu arcu, pellentesque a nunc rhoncus, imperdiet interdum ipsum. Proin euismod risus ut velit dignissim ornare. Fusce eu nisi sit amet quam placerat egestas eu non urna. Sed at diam ut libero cursus blandit. Integer in lectus ac est laoreet ultrices. Nunc iaculis vel dolor placerat consectetur. Aliquam tellus enim, pretium eu ipsum sit amet, finibus mollis nibh. Donec et lacinia ligula. Sed feugiat nulla lectus, quis dictum neque hendrerit nec. In tempor congue malesuada. Nunc sodales nulla ut massa pellentesque, at lobortis quam pellentesque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam erat volutpat. Sed ullamcorper pharetra velit nec ullamcorper. Fusce pulvinar purus eu interdum viverra. Suspendisse aliquam tellus eget arcu dignissim, sed tempus ante consectetur.`,
+//     // thumbnail: 'https://i.imgur.com/B5wZm19.jpeg',
+//     thumbnail: 'https://i.imgur.com/e3mMEwA.gif',
+//     // thumbnail: 'https://i.imgur.com/K6NLbi4.gif',
+//     // thumbnail: 'https://i.imgur.com/bC5G14n.gif',
+//     courseCreated: '10/20/2024',
+//     courseUpdated: '10/25/2024',
+//     created_by: 'testuser'
+// }
+// const courseContent = {
+//     // lecture: "https://youtube.com/embed/CXMZxgNnnv8",
+//     lecture: 'https://www.youtube.com/embed/LxKHX2fumJw',
+//     overview: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum felis rhoncus. Duis vestibulum, mi eu porta sodales, magna mauris bibendum lacus, id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed lorem libero. Donec cursus dictum leo a feugiat. Mauris non felis vitae mi fermentum blandit. Sed placerat, nunc et accumsan gravida, leo ipsum venenatis nulla, non gravida nisl ex et felis. Proin quis gravida orci, at aliquam enim. Curabitur eget mi nisl. Donec mattis dui tellus, non congue lacus suscipit et. Nullam sit amet ultricies massa. Nullam rutrum ullamcorper lacus. Fusce dictum interdum ligula vel pellentesque.
+
+//     Phasellus luctus lorem sed sapien pharetra, ac laoreet arcu sollicitudin. Morbi viverra rhoncus bibendum. In tellus nisi, varius sed ligula sit amet, ultricies laoreet magna. Donec maximus a augue nec vestibulum. Donec accumsan odio at porta rutrum. Nulla a blandit mi. Sed tortor justo, imperdiet in maximus sed, sagittis at eros. Nunc id sagittis mauris, porta malesuada mi. Vivamus ut nisl mollis, egestas odio at, ornare massa. Proin dictum, augue vel fermentum egestas, arcu elit fermentum lorem, nec consectetur mi massa ac mauris. Sed sollicitudin eleifend ullamcorper. Duis commodo lorem eu finibus ultricies. Pellentesque cursus risus eget volutpat lacinia. Nulla vitae est at massa vehicula bibendum.`,
+//     weeks: 12,
+// }

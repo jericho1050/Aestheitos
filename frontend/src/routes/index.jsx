@@ -81,12 +81,15 @@ export function Index() {
             </Grid>
             <Box marginLeft={'3vw'} marginRight={'3vw'}>
                 <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
-                    {/* Load lists of Courses              */}
+                    {/* Load lists of Courses that are approved only */}
                     {courses.map(course => {
+                        
                         return (
+                        course.status === 'A' ?  
                         <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
                             <CourseCard  {...course} />
                         </Grid>
+                        : null
                     )}
 
                     )}
