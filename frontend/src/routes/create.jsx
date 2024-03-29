@@ -26,6 +26,8 @@ import FormattedInputs from "../components/FormattedInput";
 import AddAccordion from "../components/AddAccordion";
 import InputFileUpload from "../components/InputFileUpload";
 import Section from "../components/Section";
+import AddIcon from '@mui/icons-material/Add';
+import demoGif from "../static/images/chinupVecs.gif"
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -33,14 +35,10 @@ theme = responsiveFontSizes(theme)
 // mock data 
 // temporary for now 
 
-const workouts1 = {
+const initialWorkout = {
     intesity: "H",
-    exercise: " quis, ",
-    demo: "https://www.youtube.com/embed/IZMKe61144w",
-    rest_time: 2,
-    sets: 3,
-    reps: 10,
-    excertion: 8,
+    exercise: "Your Description here ",
+    demo: demoGif, // change the component to img not video
 }
 
 const workouts2 = {
@@ -61,6 +59,7 @@ const wrongForm = {
     description: "scapula not moving"
 }
 
+// For initial Data below this line
 const section1 = {
     heading: "Your Own Heading Here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
 }
@@ -69,7 +68,6 @@ const sectionItem1 = {
     description: " Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
     heading: "Your own item header here: Lorem ipsum dolor sit amet, consectetuer adipiscing elit.Lorem ipsum dolor sit amet. "
 }
-
 const sectionItem2 = {
     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
     description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
@@ -91,9 +89,13 @@ const initialData = [{
 }]
 
 // responsible for the 'workout' demo card
-function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
+function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
+    const [selectedImage, setSelectedImage] = React.useState(initialWorkout.demo);
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
 
     const handleClickOpen = (btn) => {
         if (btn === 'correct') {
@@ -103,26 +105,50 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
         }
     };
 
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            setSelectedImage(reader.result);
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+
 
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%' }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, width: { xs: 350, sm: '100%' }, maxHeight: { xs: 700, md: 645 }, height: '100%' , borderTop: `4px solid ${theme.palette.secondary.main}` }}>
                 <CardMedia
-                    component="iframe"
+                    component="img"
                     sx={{ aspectRatio: 16 / 9 }}
-                    src={workout.demo}
+                    src={selectedImage ? selectedImage : initialWorkout.src}
                     alt="workout demo"
                     allowFullScreen
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
-
                 />
+                <InputFileUpload name="demo" onChange={handleImageUpload} text="GIF File" />
                 <CardContent>
-                    <ThemeProvider theme={theme}>
-                        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 420, sm: 'inherit' }} overflow={'auto'} gutterBottom variant="h5" component="div">
-                            {workout.exercise}
-                        </Typography>
-                    </ThemeProvider>
+                    <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+                        {/* workout description textarea input */}
+                        <TextField
+                            helperText=" "
+                            id="demo-helper-text-aligned-no-helper"
+                            label="Your Workout's Description"
+                            fullWidth={true}
+                            minRows={isSmallScreen ? 7 : 10}
+                            maxRows={isSmallScreen ? 7 : 10}
+                            multiline
+                            required
+                            autoFocus
+                            name="exercise"
+                        />
+                    </Box>
                 </CardContent>
                 <CardActions sx={{ marginTop: 'auto' }}>
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
@@ -135,7 +161,7 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
                             <WrongFormDialog wrongForm={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                         <Grid item >
-                            <Button startIcon={<EditIcon />}>Edit</Button>
+                            {/* <Button startIcon={<EditIcon />}>Edit</Button> */}
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -143,6 +169,7 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
         </>
     );
 }
+// TODO 
 
 export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
@@ -156,9 +183,10 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
         accordionItemHeadingContent = (
             <>
                 <Grid item xs={10} lg={11}>
+                    {/* AccordtionDetail edit input form */}
                     <TextField
                         id="standard-multiline-flexible"
-                        label="Multiline"
+                        label="Accordiong Item Heading"
                         multiline
                         maxRows={4}
                         variant="standard"
@@ -230,17 +258,16 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                             {"Workout Routine"}
                         </DialogTitle>
                         <DialogContent>
+
                             <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
                                 <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}> </VideoMediaCard>
+                                    <WorkoutMediaCard workout={initialWorkout} correctForm={correctForm} wrongForm={wrongForm} open={open}> </WorkoutMediaCard>
                                 </Grid>
                                 <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts2} correctForm={correctForm} wrongForm={wrongForm} open={open}>
-                                    </VideoMediaCard>
-                                </Grid>
-                                <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}>
-                                    </VideoMediaCard>
+                                    {/* add WorkoutMediaCard / Workout button */}
+                                    <Button sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 250, sm: '100%', md: 391 } }}>
+                                        <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </DialogContent>
@@ -347,6 +374,9 @@ export default function CreateCourse() {
     const [difficulty, setDifficulty] = React.useState('');
     const [url, setUrl] = React.useState(null);
 
+    const theme2 = useTheme();
+    const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+
 
     function handleImageUpload(event) {
         const file = event.target.files[0];
@@ -397,7 +427,7 @@ export default function CreateCourse() {
                                 <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={4}>
                                     <Grid item>
                                         {/* Uploading  image file button  here */}
-                                        <InputFileUpload onChange={handleImageUpload} />
+                                        <InputFileUpload name="thumbnail" text="Image" onChange={handleImageUpload} />
                                     </Grid>
                                     <Grid item xs paddingBottom={4}>
                                         {/* Select menu form */}
@@ -426,7 +456,7 @@ export default function CreateCourse() {
                         <Grid item xs={12} sm={12} md lg>
                             <Grid item container wrap="nowrap" direction="column">
                                 <Grid item xs>
-                                    {/* Course title input */}
+                                    {/* Course title textarea input */}
                                     <TextField
                                         helperText=" "
                                         id="demo-helper-text-aligned-no-helper"
@@ -439,21 +469,19 @@ export default function CreateCourse() {
                                         inputProps={{ maxLength: 200 }}
                                         autoFocus
                                         name="title"
-
                                     />
                                 </Grid>
                                 <Grid item xs>
-                                    {/* course description input */}
+                                    {/* course description textarea input */}
                                     <TextField
                                         helperText=" "
                                         id="demo-helper-text-aligned-no-helper"
                                         label="Your Course's Description"
                                         fullWidth={true}
-                                        minRows={15}
-                                        maxRows={15}
+                                        minRows={isSmallScreen ? 10 : 20}
+                                        maxRows={isSmallScreen ? 10 : 20}
                                         multiline
                                         required
-                                        inputProps={{ maxLength: 200 }}
                                         autoFocus
                                         name="description"
                                     />
@@ -473,7 +501,7 @@ export default function CreateCourse() {
                             </ThemeProvider>
                         </Grid>
                         <Grid item container>
-                            {/* course overview input */}
+                            {/* course overview textarea input */}
                             <TextField
                                 helperText=" "
                                 id="demo-helper-text-aligned-no-helper"
@@ -483,7 +511,6 @@ export default function CreateCourse() {
                                 maxRows={10}
                                 multiline
                                 required
-                                inputProps={{ maxLength: 200 }}
                                 name="overview"
                             />
                         </Grid>
@@ -501,7 +528,7 @@ export default function CreateCourse() {
 
                         <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
                             <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
-                                {/* course lecture input */}
+                                {/* course lecture textarea input */}
                                 <TextField onChange={e => setUrl(e.target.value)}
                                     InputProps={{
                                         startAdornment: (
@@ -510,7 +537,13 @@ export default function CreateCourse() {
                                             </InputAdornment>
 
                                         )
-                                    }} fullWidth={true} id="lecture-url" label="e.g https://www.youtube.com/watch?v=SOMEID" type="url" />
+                                    }}
+                                    fullWidth={true}
+                                    id="lecture-url"
+                                    label="e.g https://www.youtube.com/watch?v=SOMEID"
+                                    type="url"
+                                    name="lecture"
+                                />
                             </Box>
                             <Grid item>
                                 {getEmbedUrl(url) ?

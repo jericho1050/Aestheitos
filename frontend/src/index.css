@@ -113,3 +113,7 @@ html {
   aspect-ratio: 16 / 9;
   width: 100% !important;
 }
+
+.course-card:hover {
+  border-bottom: 6px solid #FFC55C;
+}

@@ -4,7 +4,7 @@ import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 
 
-const headingDefault = 'Add an item: Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor'
+const headingDefault = 'Add an item: Lorem ipsum dolor sit amet, consectetuer adipiscing elit.'
 
 export default function AddAccordionItem({ accordionId, onAddAccordionItem }) {
     // This component represents the input field for adding a section / accordion
@@ -23,6 +23,7 @@ export default function AddAccordionItem({ accordionId, onAddAccordionItem }) {
                         multiline
                         fullWidth
                         onChange={e => setHeading(e.target.value)}
+                        name="heading"
                     />
                 </Grid>
                 <Grid item xs={2} lg={1}>

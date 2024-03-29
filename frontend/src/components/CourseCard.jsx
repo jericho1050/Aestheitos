@@ -15,7 +15,7 @@ export default function CourseCard(props) {
     <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: 645, height: '100%' }}>
       <ThemeProvider theme={theme}>
 
-        <CardActionArea sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+        <CardActionArea className="course-card" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
           <CardMedia
             component="img"
             sx={{ aspectRatio: 16 / 9 }}

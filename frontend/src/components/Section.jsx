@@ -14,9 +14,10 @@ export default function Section({ onDeleteItem, onChangeItem, onDelete, onChange
     if (isEditing) {
         accordionHeadingContent = (
             <>
+                {/* Accordtion heading edit, Textarea input form */}
                 <TextField
                     id="standard-multiline-flexible"
-                    label="Multiline"
+                    label="Accordion Heading"
                     multiline
                     maxRows={4}
                     variant="standard"
