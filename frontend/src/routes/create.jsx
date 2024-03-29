@@ -144,14 +144,66 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
     );
 }
 
-export function ResponsiveDialog({ children }) {
+export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(false);
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+    let accordionItemHeadingContent;
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    if (isEditing) {
+        // show input form when edit btn is clicked
+        accordionItemHeadingContent = (
+            <>
+                <Grid item xs={10} lg={11}>
+                    <TextField
+                        id="standard-multiline-flexible"
+                        label="Multiline"
+                        multiline
+                        maxRows={4}
+                        variant="standard"
+                        value={accordionItem.heading}
+                        fullWidth
+                        onChange={e => onChange({
+                            ...accordionItem,
+                            heading: e.target.value
+                        },
+                            accordionId
+                        )}
+                    />
+                </Grid>
+                <Grid item xs={2} lg={1}>
+                    <Button onClick={() => setIsEditing(false)}>
+                        Save
+                    </Button>
+                </Grid>
+
+
+            </>
+        )
+    } else {
+        const handleClickOpen = () => {
+            setOpen(true);
+        };
+
+        // show content when not in edit mode
+        accordionItemHeadingContent = (
+            <>
+                <Grid item xs={10} lg={11}>
+                    <ThemeProvider theme={theme} >
+                        <DescriptionIcon theme={theme2} sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
+                        <Typography align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
+                            {children}
+                        </Typography>
+                    </ThemeProvider>
+                </Grid>
+                <Grid item xs={2} lg={1}>
+                    <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
+                    <Button onClick={() => onDelete(accordionId, accordionItem.id)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
+                </Grid>
+            </>
+        )
+    }
 
     const handleClose = () => {
         setOpen(false);
@@ -159,13 +211,10 @@ export function ResponsiveDialog({ children }) {
 
     return (
         <React.Fragment>
-            <ThemeProvider theme={theme} >
-                {/* <YouTubeIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></YouTubeIcon> */}
-                <DescriptionIcon theme={theme2} sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
-                <Typography align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
-                    {children}
-                </Typography>
-            </ThemeProvider>
+            <Grid container alignItems={'center'}>
+                {accordionItemHeadingContent}
+            </Grid>
+
 
             <Dialog
                 fullScreen={fullScreen}
@@ -197,7 +246,6 @@ export function ResponsiveDialog({ children }) {
                         </DialogContent>
                     </Grid>
                 </Grid>
-
                 <DialogActions>
                     <Button autoFocus onClick={handleClose}>
                         Close
@@ -213,7 +261,7 @@ export function ResponsiveDialog({ children }) {
 
 
 
-function ControlledAccordions({ section, sectionItem }) {
+function ControlledAccordions() {
     const [expanded, setExpanded] = React.useState(false);
     const [accordions, updateAccordions] = useImmer(initialData)
 
@@ -222,8 +270,8 @@ function ControlledAccordions({ section, sectionItem }) {
     }
 
 
-    function handleAddAccordionDetail(heading, accordionId) {
-        // adds a new accordion detail (sectionItem)
+    function handleAddAccordionItem(heading, accordionId) {
+        // adds a new accordion item (sectionItem)
         updateAccordions(draft => {
             const accordion = draft.find(accordion => accordion.id === accordionId);
             accordion.items.push({
@@ -234,13 +282,33 @@ function ControlledAccordions({ section, sectionItem }) {
         })
     }
 
+    function handleEditAccordionItem(nextAccordionItem, accordionId) {
+        // edits an accordion item's heading (sectionItem)
+        updateAccordions(draft => {
+            const accordion = draft.find(accordion => accordion.id === accordionId);
+            const accordionItemIndex = accordion.items.findIndex(item => item.id === nextAccordionItem.id);
+            accordion.items[accordionItemIndex] = nextAccordionItem;
+        });
+    }
+
+    function handleDeleteAccordionItem(accordionId, accordionItemId) {
+        updateAccordions(draft => {
+            const accordionIndex = draft.findIndex(accordion => accordion.id === accordionId)
+            const accordionItemIndex = draft[accordionIndex].items.findIndex(a => a.id === accordionItemId); // find the item's index to remove
+            draft[accordionIndex].items.splice(accordionItemIndex, 1)
+        })
+    }
+
     function handleAddAccordion(heading) {
         // adds  a new accordion  (section)
         updateAccordions(draft => {
             draft.push({
                 id: nextId++,
                 heading: heading,
-                items: [sectionItem.heading]
+                items: [{
+                    id: nextItemId++,
+                    heading: sectionItem1.heading
+                }]
             })
         })
     }
@@ -248,13 +316,8 @@ function ControlledAccordions({ section, sectionItem }) {
     function handleEditAccordion(nextAccordion) {
         // edits accordion's heading
         updateAccordions(draft => {
-            return draft.map(accordion => {
-                if (accordion.id === nextAccordion.id) {
-                    return nextAccordion;
-                } else {
-                    return accordion;
-                }
-            })
+            const accordionIndex = draft.findIndex(accordion => accordion.id === nextAccordion.id);
+            draft[accordionIndex] = nextAccordion;
         })
     }
 
@@ -269,7 +332,7 @@ function ControlledAccordions({ section, sectionItem }) {
             <AddAccordion onAddAccordion={handleAddAccordion} />
             {
                 accordions.map(accordion => (
-                    <Section onDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionDetail={handleAddAccordionDetail} />
+                    <Section key={accordion.id} onDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
                 ))
             }
         </>

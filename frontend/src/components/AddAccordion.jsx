@@ -12,18 +12,18 @@ export default function AddAccordion({ onAddAccordion }) {
     return (
         <Box component="div" mb={4}>
             <Grid container alignItems={'center'} spacing={3}>
-                <Grid item xs={10} md={11}>
+                <Grid item xs={10} sm={11}>
                     <TextField
                         id="outlined-textarea"
-                        label="Add Accordion"
-                        defaultValue={headingDefault}
+                        label="Add Accordion / Section"
+                        value={heading}
                         placeholder="Summary or Section's Heading"
                         multiline
                         fullWidth
                         onChange={e => setHeading(e.target.value)}
                     />
                 </Grid>
-                <Grid item xs={2} md={1}>
+                <Grid item xs={2} sm={1}>
                     <Fab onClick={() => {
                         setHeading('');
                         onAddAccordion(heading);
