@@ -1,4 +1,4 @@
-import { Box, Grid, TextField } from "@mui/material";
+import { Box, Grid, IconButton, TextField } from "@mui/material";
 import { useState } from "react";
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
@@ -25,12 +25,12 @@ export default function AddAccordion({ onAddAccordion }) {
                     />
                 </Grid>
                 <Grid item xs={2} sm={1}>
-                    <Fab onClick={() => {
+                    <IconButton sx={{border: '1px solid #1976D2'}} onClick={() => {
                         setHeading('');
                         onAddAccordion(heading);
                     }} color="primary" aria-label="add">
                         <AddIcon />
-                    </Fab>
+                    </IconButton>
                 </Grid>
             </Grid>
         </Box>

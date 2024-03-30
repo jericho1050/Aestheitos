@@ -4,10 +4,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddAccordionDetail from "../components/AddAccordionDetail";
 import { ResponsiveDialog } from "../routes/create";
 import { useState } from "react";
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 
 export default function Section({ onDeleteItem, onChangeItem, onDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
+    const [parent, enableAnimations] = useAutoAnimate()
+
     let accordionHeadingContent;
 
 
@@ -59,10 +62,11 @@ export default function Section({ onDeleteItem, onChangeItem, onDelete, onChange
             <AccordionDetails >
                 <AddAccordionDetail onAddAccordionItem={handleAddAccordionItem} accordionId={accordion.id} />
             </AccordionDetails>
+            <ul ref={parent}>
             {accordion.items ? accordion.items.map((item) => (
 
                 <AccordionDetails
-                    key={item.id} sx={{ paddingLeft: '5%' }}>
+                    key={item.id} sx={{ paddingLeft: '2%' }}>
                     <ResponsiveDialog onDelete={onDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
                         {item.heading}
                     </ResponsiveDialog>
@@ -71,6 +75,7 @@ export default function Section({ onDeleteItem, onChangeItem, onDelete, onChange
                 null
 
             }
+            </ul>
 
         </Accordion>
     )

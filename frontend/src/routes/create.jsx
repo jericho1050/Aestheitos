@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, FormControl, Grid, InputAdornment, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, Fab, FormControl, Grid, Grow, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as React from 'react';
@@ -18,7 +18,7 @@ import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
 import WrongFormDialog from "../MUI-components/WrongFormDialog";
 import image from '../static/images/noimg.png'
 import { styled } from '@mui/material/styles';
-import PublishIcon from '@mui/icons-material/Publish';
+import SendIcon from '@mui/icons-material/Send';
 import { useImmer } from "use-immer";
 import DeleteIcon from '@mui/icons-material/Delete';
 import getEmbedUrl from '../helper/getEmbedUrl';
@@ -27,37 +27,43 @@ import AddAccordion from "../components/AddAccordion";
 import InputFileUpload from "../components/InputFileUpload";
 import Section from "../components/Section";
 import AddIcon from '@mui/icons-material/Add';
-import demoGif from "../static/images/chinupVecs.gif"
+import demoGif from "../static/images/chinupVecs.gif";
+import demoGif2 from '../static/images/pushupVecs.gif';
+import { Send } from "@mui/icons-material";
+import { TransitionGroup } from "react-transition-group";
+import Collapse from '@mui/material/Collapse';
+
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-// mock data 
-// temporary for now 
-
-const initialWorkout = {
-    intesity: "H",
-    exercise: "Your Description here ",
-    demo: demoGif, // change the component to img not video
-}
-
-const workouts2 = {
-    intesity: "H",
-    exercise: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur    description: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-    demo: "https://youtube.com/embed/IODxDxX7oi4",
-    rest_time: 2,
-    sets: 3,
-    reps: 10,
-    excertion: 8,
-}
+// Initial data for workouts state in ResponsiveDialog
 const correctForm = {
-    demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
+    demo: demoGif2,
     description: "Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum."
 }
 const wrongForm = {
-    demo: 'https://www.youtube.com/embed/yQEx9OC2C3E',
+    demo: demoGif2,
     description: "scapula not moving"
 }
+let nextWorkoutId = 1;
+let nextCorrectFormId = 1;
+let nextWrongFormId = 1;
+const initialWorkout = {
+    id: 0,
+    exercise: "Your Description here ",
+    demo: demoGif,
+    correctForm: {
+        id: 0,
+        ...correctForm
+    },
+    wrongForm: {
+        id: 0,
+        ...wrongForm
+    }
+}
+
+
 
 // For initial Data below this line
 const section1 = {
@@ -74,7 +80,7 @@ const sectionItem2 = {
     heading: "Workout Routine"
 }
 
-let nextId = 1;
+let nextAccordionId = 1;
 let nextItemId = 2;
 const initialData = [{
     id: 0,
@@ -88,8 +94,7 @@ const initialData = [{
     }]
 }]
 
-// responsible for the 'workout' demo card
-function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
+function WorkoutMediaCard({ onDelete, workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
     const [selectedImage, setSelectedImage] = React.useState(initialWorkout.demo);
@@ -123,7 +128,7 @@ function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, width: { xs: 350, sm: '100%' }, maxHeight: { xs: 700, md: 645 }, height: '100%' , borderTop: `4px solid ${theme.palette.secondary.main}` }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, width: { xs: 350, sm: '100%' }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
@@ -154,14 +159,14 @@ function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <CorrectFormDialog correctForm={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                            <CorrectFormDialog correctForm={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <WrongFormDialog wrongForm={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
+                            <WrongFormDialog wrongForm={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                         <Grid item >
-                            {/* <Button startIcon={<EditIcon />}>Edit</Button> */}
+                            <Button onClick={() => onDelete(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -169,14 +174,42 @@ function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
         </>
     );
 }
-// TODO 
 
 export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
+    const [workouts, updateWorkouts] = useImmer([initialWorkout]);
+
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
+
+    function handleAddWorkoutCard() {
+        updateWorkouts(draft => {
+            draft.push(
+                {
+                    id: nextWorkoutId++,
+                    ...initialWorkout,
+                    correctForm: {
+                        id: nextCorrectFormId++,
+                        ...initialWorkout.correctForm
+                    },
+                    wrongform: {
+                        id: nextWrongFormId++,
+                        ...initialWorkout.wrongForm,
+                    }
+                }
+            )
+
+        })
+    }
+
+    function handleDeleteWorkoutCard(workoutId) {
+        updateWorkouts(draft => {
+            const index = draft.findIndex(w => w.id === workoutId)
+            draft.splice(index, 1);
+        })
+    }
 
     if (isEditing) {
         // show input form when edit btn is clicked
@@ -260,12 +293,17 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                         <DialogContent>
 
                             <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                <Grid item sm={6}>
-                                    <WorkoutMediaCard workout={initialWorkout} correctForm={correctForm} wrongForm={wrongForm} open={open}> </WorkoutMediaCard>
-                                </Grid>
+                                {workouts.map(workout => (
+
+                                    <Grid key={workout.id} item sm={6}>
+                                        <WorkoutMediaCard onDelete={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                    </Grid>
+
+                                ))}
+
                                 <Grid item sm={6}>
                                     {/* add WorkoutMediaCard / Workout button */}
-                                    <Button sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 250, sm: '100%', md: 391 } }}>
+                                    <Button onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                         <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                     </Button>
                                 </Grid>
@@ -330,7 +368,7 @@ function ControlledAccordions() {
         // adds  a new accordion  (section)
         updateAccordions(draft => {
             draft.push({
-                id: nextId++,
+                id: nextAccordionId++,
                 heading: heading,
                 items: [{
                     id: nextItemId++,
@@ -357,11 +395,17 @@ function ControlledAccordions() {
         <>
             {/* Adds a new Accordion / Section  */}
             <AddAccordion onAddAccordion={handleAddAccordion} />
-            {
-                accordions.map(accordion => (
-                    <Section key={accordion.id} onDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
-                ))
-            }
+            <TransitionGroup>
+                {
+                    accordions.map(accordion => (
+                        <Collapse key={accordion.id}>
+                            <Section onDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                        </Collapse>
+
+                    ))
+                }
+
+            </TransitionGroup>
         </>
     );
 
@@ -402,17 +446,10 @@ export default function CreateCourse() {
     return (
         <>
 
+
             <br></br>
             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
                 <Box component="form" onSubmit={handleSubmit} noValidate>
-                    <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
-                        <Grid item>
-                            <Button variant="outlined">
-                                <PublishIcon sx={{ marginRight: 1 }} />
-                                SUBMIT FOR REVIEW
-                            </Button>
-                        </Grid>
-                    </Grid>
                     <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                         {/* Paper starts here */}
                         <Grid item xs md={'auto'}>
@@ -571,7 +608,16 @@ export default function CreateCourse() {
                         <Grid item width={{ xs: '100%', md: '69%' }}>
                             <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
                         </Grid>
+                        <Grid item container justifyContent={'flex-end'}>
+                            <Grid item>
+                            <Button startIcon={<SendIcon />} variant="contained" color="primary">
+                                Submit
+                            </Button>
+                            </Grid>
+
+                        </Grid>
                     </Grid>
+
                 </Box>
             </Box>
         </>
@@ -603,11 +649,15 @@ export default function CreateCourse() {
 
 
 
-
-
-
-
-
+// const workouts2 = {
+//     intesity: "H",
+//     exercise: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur    description: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
+//     demo: "https://youtube.com/embed/IODxDxX7oi4",
+//     rest_time: 2,
+//     sets: 3,
+//     reps: 10,
+//     excertion: 8,
+// }
 
 
 // const course = {

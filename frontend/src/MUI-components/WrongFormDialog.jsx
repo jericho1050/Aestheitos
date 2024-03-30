@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
+import AddIcon from '@mui/icons-material/Add';
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -16,7 +17,7 @@ const wrongForm2 = {
     description: "scapula not moving"
 }
 
-function VideoMediaCardWrongForm({ wrongForm, open }) {
+function WorkoutMediaCardWrongForm({ wrongForm, open }) {
     return (
         open &&
         <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: 645, height: '100%' }}>
@@ -76,16 +77,15 @@ export default function WrongFormDialog({ wrongForm, open, setOpen }) {
                         <DialogContent>
                             <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container spacing={3} columns={12}>
                                 <Grid item sm={6}>
-                                    <VideoMediaCardWrongForm wrongForm={wrongForm} open={open}> </VideoMediaCardWrongForm>
+                                    <WorkoutMediaCardWrongForm wrongForm={wrongForm} open={open}> </WorkoutMediaCardWrongForm>
                                 </Grid>
                                 <Grid item sm={6}>
-                                    <VideoMediaCardWrongForm wrongForm={wrongForm} open={open}>
-                                    </VideoMediaCardWrongForm>
+                                    {/* add WorkoutMediaCard / Workout button ( for wrongForm exercise ) */}
+                                    <Button sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                        <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
+                                    </Button>
                                 </Grid>
-                                <Grid item sm={6}>
-                                    <VideoMediaCardWrongForm wrongForm={wrongForm2} open={open}>
-                                    </VideoMediaCardWrongForm>
-                                </Grid>
+
                             </Grid>
                         </DialogContent>
                     </Grid>
@@ -103,3 +103,20 @@ export default function WrongFormDialog({ wrongForm, open, setOpen }) {
         </React.Fragment>
     );
 }
+
+
+
+
+
+
+
+
+
+{/* <Grid item sm={6}>
+<VideoMediaCardWrongForm wrongForm={wrongForm} open={open}>
+</VideoMediaCardWrongForm>
+</Grid>
+<Grid item sm={6}>
+<VideoMediaCardWrongForm wrongForm={wrongForm2} open={open}>
+</VideoMediaCardWrongForm>
+</Grid> */}

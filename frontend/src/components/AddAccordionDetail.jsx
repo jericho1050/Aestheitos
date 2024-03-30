@@ -1,4 +1,4 @@
-import { Box, Grid, TextField } from "@mui/material";
+import { Box, Grid, IconButton, TextField } from "@mui/material";
 import { useState } from "react";
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
@@ -12,7 +12,7 @@ export default function AddAccordionItem({ accordionId, onAddAccordionItem }) {
     const [heading, setHeading] = useState(headingDefault);
 
     return (
-        <Box component="div" mb={4}>
+        <Box pl={4} mr={0} component="div" mb={4}>
             <Grid container alignItems={'center'} spacing={3}>
                 <Grid item xs={10} lg={11}>
                     <TextField
@@ -27,12 +27,12 @@ export default function AddAccordionItem({ accordionId, onAddAccordionItem }) {
                     />
                 </Grid>
                 <Grid item xs={2} lg={1}>
-                    <Fab onClick={() => {
+                    <IconButton onClick={() => {
                         setHeading('');
                         onAddAccordionItem(heading, accordionId);
                     }} size="medium" color="primary" aria-label="add">
                         <AddIcon />
-                    </Fab>
+                    </IconButton>
                 </Grid>
             </Grid>
         </Box>

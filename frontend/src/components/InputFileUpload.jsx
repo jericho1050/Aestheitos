@@ -20,7 +20,7 @@ export default function InputFileUpload({ name, text, onChange }) {
         <Button
             component="label"
             role={undefined}
-            variant="contained"
+            variant="outlined"
             tabIndex={-1}
             startIcon={<CloudUploadIcon />}
         >
