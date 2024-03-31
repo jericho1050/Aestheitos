@@ -99,7 +99,7 @@ class CourseContent(models.Model):
     Represents a course's overview content
     """
 
-    lecture = models.URLField()
+    preview = models.URLField()
     overview = models.TextField()
     course = models.ForeignKey(
         "Course", on_delete=models.CASCADE, related_name="course_content"
@@ -182,7 +182,7 @@ class Workouts(models.Model):
     section_item = models.ForeignKey(
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
-    exercise = models.CharField(max_length=400)
+    exercise = models.CharField(max_length=400) # this is suppose to be description but im too lazy to change the field for my test cases too
     demo = models.ImageField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True

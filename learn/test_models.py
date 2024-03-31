@@ -185,7 +185,7 @@ class CourseContentTestCase(TestCase):
             created_by=self.user,
         )
         CourseContent.objects.create(
-            lecture="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
             overview="Testing the goal of this program is give you mobility and by end of it you'll be flexible as Yujiro Hanma or Baki Hanma",
             course=self.course,
             weeks=18,
@@ -199,7 +199,7 @@ class CourseContentTestCase(TestCase):
         course = CourseContent.objects.get(id=self.course.id)
         self.assertEqual(course.course, self.course)
         self.assertEqual(
-            course.lecture, "https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s"
+            course.preview, "https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s"
         )
         self.assertEqual(
             course.overview,
@@ -212,12 +212,12 @@ class CourseContentTestCase(TestCase):
         Tests when updating a content
         """
         course = CourseContent.objects.get(id=self.course.id)
-        course.lecture = "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
+        course.preview = "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
         course.overview = "Mobility exercise"
         course.weeks = 8
         self.assertEqual(course.course, self.course)
         self.assertEqual(
-            course.lecture, "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
+            course.preview, "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
         )
         self.assertEqual(course.overview, "Mobility exercise")
         self.assertEqual(course.weeks, 8)
@@ -232,7 +232,7 @@ class CourseContentTestCase(TestCase):
     def test_course_content_without_course(self):
         with self.assertRaises(IntegrityError):
             CourseContent.objects.create(
-                lecture="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+                preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
                 overview="Testing the goal of this program is give you mobility and by end of it you'll be flexible as Yujiro Hanma or Baki Hanma",
                 weeks=18,
             )

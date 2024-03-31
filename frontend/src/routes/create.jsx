@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, Fab, FormControl, Grid, Grow, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, Fab, FormControl, Grid, Grow, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as React from 'react';
@@ -32,6 +32,7 @@ import demoGif2 from '../static/images/pushupVecs.gif';
 import { Send } from "@mui/icons-material";
 import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 
 let theme = createTheme()
@@ -49,7 +50,7 @@ const wrongForm = {
 let nextWorkoutId = 1;
 let nextCorrectFormId = 1;
 let nextWrongFormId = 1;
-const initialWorkout = {
+const initialWorkoutData = {
     id: 0,
     exercise: "Your Description here ",
     demo: demoGif,
@@ -62,7 +63,6 @@ const initialWorkout = {
         ...wrongForm
     }
 }
-
 
 
 // For initial Data below this line
@@ -82,7 +82,7 @@ const sectionItem2 = {
 
 let nextAccordionId = 1;
 let nextItemId = 2;
-const initialData = [{
+const initialSectionData = [{
     id: 0,
     heading: section1.heading,
     items: [{
@@ -94,10 +94,10 @@ const initialData = [{
     }]
 }]
 
-function WorkoutMediaCard({ onDelete, workout, open }) {
+function WorkoutMediaCard({ onChange, onDelete, workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
-    const [selectedImage, setSelectedImage] = React.useState(initialWorkout.demo);
+    const [selectedImage, setSelectedImage] = React.useState(initialWorkoutData.demo);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -124,7 +124,6 @@ function WorkoutMediaCard({ onDelete, workout, open }) {
     }
 
 
-
     return (
         open &&
         <>
@@ -132,7 +131,7 @@ function WorkoutMediaCard({ onDelete, workout, open }) {
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
-                    src={selectedImage ? selectedImage : initialWorkout.src}
+                    src={selectedImage ? selectedImage : workout.src}
                     alt="workout demo"
                     allowFullScreen
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
@@ -152,6 +151,11 @@ function WorkoutMediaCard({ onDelete, workout, open }) {
                             required
                             autoFocus
                             name="exercise"
+                            value={workout.exercise}
+                            onChange={e => {
+                                onChange(e, workout.id)
+                            }}
+                            
                         />
                     </Box>
                 </CardContent>
@@ -178,25 +182,37 @@ function WorkoutMediaCard({ onDelete, workout, open }) {
 export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
-    const [workouts, updateWorkouts] = useImmer([initialWorkout]);
+    const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
+    const [parent, enableAnimations] = useAutoAnimate();
+    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true)
 
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
+
+
+    function handleWorkoutDescriptionChange(e, workoutId) {
+        updateWorkouts(draft => {
+            const workout = draft.find(w => w.id === workoutId);
+            workout.exercise = e.target.value;
+
+        })
+
+    }
 
     function handleAddWorkoutCard() {
         updateWorkouts(draft => {
             draft.push(
                 {
                     id: nextWorkoutId++,
-                    ...initialWorkout,
+                    ...initialWorkoutData,
                     correctForm: {
                         id: nextCorrectFormId++,
-                        ...initialWorkout.correctForm
+                        ...initialWorkoutData.correctForm
                     },
                     wrongform: {
                         id: nextWrongFormId++,
-                        ...initialWorkout.wrongForm,
+                        ...initialWorkoutData.wrongForm,
                     }
                 }
             )
@@ -285,29 +301,78 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                 fullWidth={true}
                 maxWidth={'md'}
             >
+
                 <Grid container>
                     <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
                         <DialogTitle id="responsive-dialog-title">
-                            {"Workout Routine"}
+                            <ButtonGroup
+                                disableElevation
+                                aria-label="button group"
+                            >
+                                <Button onClick={() => setIsWorkoutRoutine(true)} variant={isWorkoutRoutine ? 'contained' : 'outlined'}>Workout Routine</Button>
+                                <Button onClick={() => setIsWorkoutRoutine(false)} variant={isWorkoutRoutine ? 'outlined' : 'contained'}>Video Lecture</Button>
+                            </ButtonGroup>
                         </DialogTitle>
+                    </Grid>
+                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
                         <DialogContent>
-
-                            <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+                            {
+                                isWorkoutRoutine ?
+                            <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
                                 {workouts.map(workout => (
-
                                     <Grid key={workout.id} item sm={6}>
-                                        <WorkoutMediaCard onDelete={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                        <WorkoutMediaCard onChange={handleWorkoutDescriptionChange} onDelete={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
                                     </Grid>
-
                                 ))}
-
                                 <Grid item sm={6}>
                                     {/* add WorkoutMediaCard / Workout button */}
                                     <Button onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                         <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                     </Button>
                                 </Grid>
-                            </Grid>
+                            </Grid> :
+
+                           <Grid justifyContent={{xs: 'center', sm: 'flex-start'}} item container>
+                            {/* TODO */}
+                            {/* ALLOW USER TO BE ABLE TO INPUT YOUTUBE VIDEO AND DESCRIPTION (OPTIONAL) */}
+                            {/* <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
+                                course lecture textarea input
+                                <TextField onChange={e => setCourseContent({
+                                    ...courseContent,
+                                    preview: e.target.value
+                                })}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <YouTubeIcon />
+                                            </InputAdornment>
+
+                                        )
+                                    }}
+                                    fullWidth={true}
+                                    id="lecture-url"
+                                    label="e.g https://www.youtube.com/watch?v=SOMEID"
+                                    type="url"
+                                    name="lecture"
+                                />
+                            </Box>
+                            <Grid item>http://localhost:5173/src/static/images/bgH.jpg
+                                {getEmbedUrl(courseContent.preview) ?
+                                    <Box mt={4} className="course-lecture-container" component={'div'}>
+                                        <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
+                                    </Box>
+                                    :
+                                    <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                        <Typography variant="body" align={'center'}>
+                                            Your video will show up here
+                                        </Typography>
+                                    </Box>
+                                }
+                            </Grid> */}
+                           </Grid>
+
+
+}
                         </DialogContent>
                     </Grid>
                 </Grid>
@@ -328,7 +393,7 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
 
 function ControlledAccordions() {
     const [expanded, setExpanded] = React.useState(false);
-    const [accordions, updateAccordions] = useImmer(initialData)
+    const [accordions, updateAccordions] = useImmer(initialSectionData)
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
@@ -414,9 +479,19 @@ function ControlledAccordions() {
 
 export default function CreateCourse() {
 
-    const [selectedImage, setSelectedImage] = React.useState(image);
-    const [difficulty, setDifficulty] = React.useState('');
-    const [url, setUrl] = React.useState(null);
+    const [course, setCourse] = React.useState({
+        title: '',
+        thumbnail: image,
+        difficulty: '',
+        description: '',
+        price: 0,
+    });
+    const [courseContent, setCourseContent] = React.useState({
+        preview: '',
+        overview: '',
+        weeks: 0,
+
+    })
 
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
@@ -427,16 +502,17 @@ export default function CreateCourse() {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-            setSelectedImage(reader.result);
+            
+            setCourse({
+                ...course,
+                thumbnail: reader.result
+            })
         };
 
         if (file) {
             reader.readAsDataURL(file);
         }
-    }
 
-    function handleChange(e) {
-        setDifficulty(e.target.value);
     }
 
     function handleSubmit(e) {
@@ -457,7 +533,7 @@ export default function CreateCourse() {
                                 <Grid item container justifyContent={'center'}>
                                     <Grid item>
                                         <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                            <img src={selectedImage} className="course-thumbnail" style={{ objectFit: selectedImage == image ? 'fill' : 'cover', border: '1px dashed black' }} />
+                                            <img src={course.thumbnail} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
                                         </Container>
                                     </Grid>
                                 </Grid>
@@ -466,24 +542,54 @@ export default function CreateCourse() {
                                         {/* Uploading  image file button  here */}
                                         <InputFileUpload name="thumbnail" text="Image" onChange={handleImageUpload} />
                                     </Grid>
+                                    <Grid item>
+                                        <FormattedInputs course={course} setCourse={setCourse} />
+                                    </Grid>
                                     <Grid item xs paddingBottom={4}>
                                         {/* Select menu form */}
-                                        <FormControl required fullWidth sx={{ minWidth: 150 }}>
+                                        <FormControl required sx={{ width: 200 }}>
                                             <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
                                             <Select
                                                 labelId="demo-simple-select-label"
                                                 id="demo-simple-select"
-                                                value={difficulty}
+                                                value={course.difficulty}
                                                 label="Difficulty"
-                                                onChange={handleChange}
+                                                onChange={e => {
+                                                    setCourse({
+                                                        ...course,
+                                                        difficulty: e.target.value
+                                                    })
+                                                }}
                                                 name="difficulty"
+                                                autoWidth
                                             >
                                                 <MenuItem value={'BG'}>Beginner</MenuItem>
                                                 <MenuItem value={'IN'}>Intermediate</MenuItem>
                                                 <MenuItem value={'AD'}>Advanced</MenuItem>
                                             </Select>
-                                            <FormattedInputs />
                                         </FormControl>
+                                        <TextField
+                                            id="outlined-number"
+                                            label="Weeks"
+                                            type="number"
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            defaultValue={0}
+                                            sx={{ width: 100 }}
+                                            inputProps={{
+                                                min: "0",
+                                            }}
+                                            onChange={e => {
+                                                setCourseContent(
+                                                    {
+                                                        ...courseContent,
+                                                        weeks: e.target.value
+                                                    }
+                                                )
+                                            }}
+
+                                        />
                                     </Grid>
                                 </Grid>
                             </Paper>
@@ -506,6 +612,12 @@ export default function CreateCourse() {
                                         inputProps={{ maxLength: 200 }}
                                         autoFocus
                                         name="title"
+                                        onChange={e => {
+                                            setCourse({
+                                                ...course,
+                                                title: e.target.value
+                                            })
+                                        }}
                                     />
                                 </Grid>
                                 <Grid item xs>
@@ -521,6 +633,12 @@ export default function CreateCourse() {
                                         required
                                         autoFocus
                                         name="description"
+                                        onChange={e => {
+                                            setCourse({
+                                                ...course,
+                                                description: e.target.value
+                                            })
+                                        }}
                                     />
                                 </Grid>
                             </Grid>
@@ -549,12 +667,18 @@ export default function CreateCourse() {
                                 multiline
                                 required
                                 name="overview"
+                                onChange={e => {
+                                    setCourseContent({
+                                        ...courseContent,
+                                        overview: e.target.value
+                                    })
+                                }}
                             />
                         </Grid>
                         <Grid item>
                             <ThemeProvider theme={theme}>
                                 <Typography sx={{ textAlign: 'center' }} variant="h4">
-                                    lecture for the entire course
+                                    Preview this course
                                 </Typography>
                                 <Typography sx={{ display: 'block', textAlign: 'center' }} variant="small">
                                     Put your youtube video link here
@@ -566,7 +690,10 @@ export default function CreateCourse() {
                         <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
                             <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
                                 {/* course lecture textarea input */}
-                                <TextField onChange={e => setUrl(e.target.value)}
+                                <TextField onChange={e => setCourseContent({
+                                    ...courseContent,
+                                    preview: e.target.value
+                                })}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -583,10 +710,9 @@ export default function CreateCourse() {
                                 />
                             </Box>
                             <Grid item>
-                                {getEmbedUrl(url) ?
+                                {getEmbedUrl(courseContent.preview) ?
                                     <Box mt={4} className="course-lecture-container" component={'div'}>
-
-                                        <iframe className="course-lecture" src={getEmbedUrl(url)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
+                                        <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
                                     </Box>
                                     :
                                     <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
@@ -610,14 +736,13 @@ export default function CreateCourse() {
                         </Grid>
                         <Grid item container justifyContent={'flex-end'}>
                             <Grid item>
-                            <Button startIcon={<SendIcon />} variant="contained" color="primary">
-                                Submit
-                            </Button>
+                                <Button startIcon={<SendIcon />} variant="contained" color="primary">
+                                    Submit
+                                </Button>
                             </Grid>
 
                         </Grid>
                     </Grid>
-
                 </Box>
             </Box>
         </>

@@ -1,7 +1,7 @@
 @media (max-width: 575.98px) {
     .divider {
       position:absolute;
-      background: linear-gradient(rgba(128, 128, 128, 0.416), white);
+      background: linear-gradient(rgba(128, 128, 128, 0.2), white);
       width: 100%;
       height: 69px;
       top: 50vh;
@@ -10,7 +10,7 @@
     @media (min-width: 575.98px) and (max-width: 767.98px) {
       .divider {
         position:absolute;
-        background: linear-gradient(rgba(128, 128, 128, 0.416), white);
+        background: linear-gradient(rgba(128, 128, 128, 0.2), white);
         width: 100%;
         height: 69px;
         top: 69vh;

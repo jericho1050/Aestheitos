@@ -315,9 +315,11 @@ export default function Course() {
                                     <Typography sx={{ maxWidth: { md: 250, xs: 300, sm: 400 } }} noWrap>Instructor: {user.firstName} {user.lastName} yawayadfadsfgadsgfadsfgdfagadgfadsfadsfadsfadsfadsfadsadsfadsfadsfads</Typography>
                                 </Grid>
                                 <Grid item xs>
-                                    <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <AttachMoneyIcon fontSize="large" />
-                                        <Typography fontWeight="bolder" sx={{fontSize: '2em'}} variant='button'>69</Typography>
+                                        <Typography fontWeight="bolder" sx={{ fontSize: '2em' }}>
+                                            69
+                                        </Typography>
                                     </Box>
                                 </Grid>
                                 <Grid item>
@@ -326,23 +328,26 @@ export default function Course() {
                                     </Button>
                                 </Grid>
                             </Grid>
-                            <Grid container justifyContent={'flex-start'} alignItems={"flex-end"} mt={4}>
-                                <Grid item container padding={2} justifyContent={'space-between'}>
-                                    <Grid item>
+                            <Box component={'div'} mt={2} ml={4} mr={-4} mb={2}>
+                                <Grid item container padding={2} justifyContent={'space-between'} columns={{ xs: 4, md: 12 }} rowSpacing={2}>
+                                    <Grid item xs={2} md={6}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
                                             Created on: {course.courseCreated}
                                         </Typography>
                                     </Grid>
-                                    <Grid item>
+                                    <Grid item xs={2} md={6}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
                                             Last updated: {course.courseUpdated}
                                         </Typography>
                                     </Grid>
+                                    <Grid item variant="small" fontSize={'small'} xs={2} md={6}>
+                                        Rating: {course.average_rating}
+                                    </Grid>
+                                    <Grid item variant="small" fontSize={'small'} xs={2} md={6}>
+                                        Weeks: {courseContent.weeks}
+                                    </Grid>
                                 </Grid>
-                                <Grid paddingLeft={2} paddingBottom={2} item variant="small" fontSize={'small'}>
-                                    Rating: {course.average_rating}
-                                </Grid>
-                            </Grid>
+                            </Box>
                         </Paper>
                     </Grid>
                     {/* Paper ends here */}
@@ -389,7 +394,7 @@ export default function Course() {
                     <Grid item>
                         <ThemeProvider theme={theme}>
                             <Typography sx={{ textAlign: 'center' }} variant="h4">
-                                lecture for the entire course
+                                Preview this course
                             </Typography>
                         </ThemeProvider>
                         <br />

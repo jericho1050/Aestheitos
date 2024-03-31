@@ -329,7 +329,7 @@ class CourseContentDetailAPITestCase(APITestCase):
             created_by=self.user,
         )
         self.content = CourseContent.objects.create(
-            lecture="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
             overview="API TESTING",
             course=self.course2,
             weeks=18,
@@ -354,7 +354,7 @@ class CourseContentDetailAPITestCase(APITestCase):
 
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response_1.data["lecture"], self.content.lecture)
+        self.assertEqual(response_1.data["preview"], self.content.preview)
         self.assertEqual(response_1.data["overview"], self.content.overview)
         self.assertEqual(self.user, self.content.course.created_by)
 
@@ -363,7 +363,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         response_1 = self.authenticated_client.post(
             reverse("learn:course-content", args=[1]),
             {
-                "lecture": "https://www.youtube.com",
+                "preview": "https://www.youtube.com",
                 "overview": "testing post method",
                 "weeks": 18,
             },
@@ -373,7 +373,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         response_2 = self.unauthenticated_client.post(
             reverse("learn:course-content", args=[1]),
             {
-                "lecture": "https://www.youtube.com",
+                "preview": "https://www.youtube.com",
                 "overview": "testing post method",
                 "weeks": 18,
             },
@@ -382,7 +382,7 @@ class CourseContentDetailAPITestCase(APITestCase):
 
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
         self.assertEqual(response_1.data["overview"], "testing post method")
-        self.assertEqual(response_1.data["lecture"], "https://www.youtube.com")
+        self.assertEqual(response_1.data["preview"], "https://www.youtube.com")
         self.assertEqual(response_1.data["weeks"], 18)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -391,7 +391,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         response_1 = self.authenticated_client.put(
             reverse("learn:course-content", args=[2]),
             {
-                "lecture": "https://www.youtube.com",
+                "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
                 "weeks": 69,
             },
@@ -402,7 +402,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         response_2 = self.unauthenticated_client.put(
             reverse("learn:course-content", args=[2]),
             {
-                "lecture": "https://www.youtube.com",
+                "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
                 "weeks": 69,
             },
@@ -413,7 +413,7 @@ class CourseContentDetailAPITestCase(APITestCase):
         response_3 = self.authenticated_client.put(
             reverse("learn:course-content", args=[1]),
             {
-                "lecture": "https://www.youtube.com",
+                "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
                 "weeks": 69,
             },
@@ -422,7 +422,7 @@ class CourseContentDetailAPITestCase(APITestCase):
 
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
         self.assertEqual(response_1.data["overview"], "testing Put method brah")
-        self.assertEqual(response_1.data["lecture"], "https://www.youtube.com")
+        self.assertEqual(response_1.data["preview"], "https://www.youtube.com")
         self.assertEqual(response_1.data["weeks"], 69)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)

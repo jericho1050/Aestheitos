@@ -4,22 +4,19 @@ import PropTypes from 'prop-types';
 import { NumericFormat } from 'react-number-format';
 import { TextField } from '@mui/material';
 
-export default function FormattedInputs() {
-    const [values, setValues] = React.useState({
-        numberformat: '0',
-    });
+export default function FormattedInputs({course, setCourse}) {
 
     const handleChange = (event) => {
-        setValues({
-            ...values,
-            [event.target.name]: event.target.value,
+        setCourse({
+            ...course,
+            price: event.target.value,
         });
     };
 
     return (
         <TextField
             label="Course Price"
-            value={values.numberformat}
+            value={course.price}
             onChange={handleChange}
             name="price"
             id="formatted-numberformat-input"
@@ -31,6 +28,7 @@ export default function FormattedInputs() {
         />
     );
 }
+
 
 const NumericFormatCustom = React.forwardRef(
     function NumericFormatCustom(props, ref) {
