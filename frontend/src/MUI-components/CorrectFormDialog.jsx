@@ -7,6 +7,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import AddIcon from '@mui/icons-material/Add';
+
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -19,23 +22,23 @@ const correctForm2 = {
 function VideoMediaCardCorrectForm({ correctForm, open }) {
     return (
         open &&
-        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: {xs: 500, sm: 400}, maxHeight: 645, height: '100%' }}>
+        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
             <CardMedia
-                component="iframe"
+                component="img"
                 sx={{ aspectRatio: 16 / 9, }}
                 src={correctForm.demo}
                 alt="workout demo"
                 allowFullScreen
                 allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
             />
-            <CardContent>
+            <CardContent sx={{ width: 300 }} >
                 <ThemeProvider theme={theme}>
-                    <Typography maxHeight={{xs: 200, sm: 250}} height={{xd: 200, sm: 250}} width={{xs: 420, sm: 'inherit'}} overflow={'auto'} gutterBottom variant="h5" component="div">
-                        <CheckIcon sx={{border: "2px solid green"}} fontSize="large" color="success"></CheckIcon> {correctForm.description}
+                    <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} overflow={'auto'} gutterBottom variant="h5" component="div">
+                        <CheckIcon sx={{ border: "2px solid green" }} fontSize="large" color="success"></CheckIcon> {correctForm.description}
                     </Typography>
                 </ThemeProvider>
             </CardContent>
-            <CardActions sx={{marginTop: 'auto'}}>
+            <CardActions sx={{ marginTop: 'auto' }}>
                 <Grid container justifyContent={'center'}>
                     <Grid item>
                         <Button startIcon={<EditIcon />}>
@@ -43,16 +46,19 @@ function VideoMediaCardCorrectForm({ correctForm, open }) {
                         </Button>
                     </Grid>
                 </Grid>
-                
+
             </CardActions>
         </Card>
     );
 }
 
 
-export default function CorrectFormDialog({ correctForm, open, setOpen }) {
+export default function CorrectFormDialog({ correctFormExercises, open, setOpen }) {
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+    const [parent, enableAnimations] = useAutoAnimate();
+
+
 
     const handleClose = () => {
         setOpen(false);
@@ -69,26 +75,37 @@ export default function CorrectFormDialog({ correctForm, open, setOpen }) {
                 maxWidth={'md'}
             >
                 <Grid container >
-                    <Grid item container justifyContent={'center'} marginLeft={{md : 2}} marginRight={{md: 2}}>
+                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
                         <DialogTitle id="responsive-dialog-title">
                             {"Correct Exercise Form"}
                         </DialogTitle>
-                        <DialogContent>
-                            <Grid justifyContent={{xs: 'center', sm: 'flex-start'}} item container spacing={3} columns={12}>
-                                <Grid item sm={6}>
-                                    <VideoMediaCardCorrectForm correctForm={correctForm} open={open}> </VideoMediaCardCorrectForm>
-                                </Grid>
-                                <Grid item sm={6}>
-                                    <VideoMediaCardCorrectForm correctForm={correctForm} open={open}>
-                                    </VideoMediaCardCorrectForm>
-                                </Grid>
-                                <Grid item sm={6}>
-                                    <VideoMediaCardCorrectForm correctForm={correctForm2} open={open}>
-                                    </VideoMediaCardCorrectForm>
-                                </Grid>
-                            </Grid>
-                        </DialogContent>
                     </Grid>
+                    <DialogContent>
+                        <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+
+
+                            {
+                                correctFormExercises.map(exercise => {
+
+
+                                    return (
+                                        <Grid key={exercise.id} item sm={6}>
+                                            <VideoMediaCardCorrectForm correctForm={exercise} open={open}> </VideoMediaCardCorrectForm>
+                                        </Grid>
+                                    )
+                                })
+                            }
+
+                            <Grid item sm={6}>
+                                {/* add WorkoutMediaCard / Workout button */}
+                                <Button sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                    <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
+                                </Button>
+                            </Grid>
+
+
+                        </Grid>
+                    </DialogContent>
                 </Grid>
 
                 <DialogActions>

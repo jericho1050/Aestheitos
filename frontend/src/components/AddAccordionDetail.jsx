@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 const headingDefault = 'Add an item: Lorem ipsum dolor sit amet, consectetuer adipiscing elit.'
 
-export default function AddAccordionItem({ accordionId, onAddAccordionItem }) {
+export default function AddAccordionItem({ accordionId, onClick }) {
     // This component represents the input field for adding a section / accordion
 
     const [heading, setHeading] = useState(headingDefault);
@@ -27,9 +27,9 @@ export default function AddAccordionItem({ accordionId, onAddAccordionItem }) {
                     />
                 </Grid>
                 <Grid item xs={2} lg={1}>
-                    <IconButton onClick={() => {
+                    <IconButton sx={{border: '1px solid #1976D2'}} onClick={() => {
                         setHeading('');
-                        onAddAccordionItem(heading, accordionId);
+                        onClick(heading, accordionId);
                     }} size="medium" color="primary" aria-label="add">
                         <AddIcon />
                     </IconButton>

@@ -15,7 +15,7 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 
-export default function InputFileUpload({ name, text, onChange }) {
+export default function InputFileUpload({ name, text, onChange, workoutId }) {
     return (
         <Button
             component="label"
@@ -25,7 +25,7 @@ export default function InputFileUpload({ name, text, onChange }) {
             startIcon={<CloudUploadIcon />}
         >
             Upload {text}
-            <VisuallyHiddenInput type="file" accept="image/*" onChange={onChange} name={name} />
+            <VisuallyHiddenInput type="file" accept="image/*" onChange={e => {onChange(e, workoutId)}} name={name} />
         </Button>
     );
 }

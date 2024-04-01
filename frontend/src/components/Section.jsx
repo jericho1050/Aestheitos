@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 
-export default function Section({ onDeleteItem, onChangeItem, onDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
+export default function Section({ onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
 
@@ -49,7 +49,7 @@ export default function Section({ onDeleteItem, onChangeItem, onDelete, onChange
             <AccordionSummary
                 expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Button onClick={() => setIsEditing(true)} sx={{ paddingLeft: 2 }} startIcon={!isEditing ? <EditIcon /> : null} size="small" />
-                    <Button onClick={() => onDelete(accordion.id)} sx={{ paddingLeft: 2 }} startIcon={!isEditing ? <DeleteIcon /> : null} size="small" />
+                    <Button onClick={() => onClickDelete(accordion.id)} sx={{ paddingLeft: 2 }} startIcon={!isEditing ? <DeleteIcon /> : null} size="small" />
 
                 </Box>}
                 aria-controls="panel1bh-content"
@@ -60,14 +60,14 @@ export default function Section({ onDeleteItem, onChangeItem, onDelete, onChange
                 {accordionHeadingContent}
             </AccordionSummary>
             <AccordionDetails >
-                <AddAccordionDetail onAddAccordionItem={handleAddAccordionItem} accordionId={accordion.id} />
+                <AddAccordionDetail onClick={handleAddAccordionItem} accordionId={accordion.id} />
             </AccordionDetails>
             <ul ref={parent}>
             {accordion.items ? accordion.items.map((item) => (
 
                 <AccordionDetails
                     key={item.id} sx={{ paddingLeft: '2%' }}>
-                    <ResponsiveDialog onDelete={onDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
+                    <ResponsiveDialog onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
                         {item.heading}
                     </ResponsiveDialog>
                 </AccordionDetails>

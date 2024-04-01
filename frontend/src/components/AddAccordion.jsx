@@ -4,7 +4,7 @@ import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 
 const headingDefault = 'Add a Accordion: Lorem ipsum dolor sit amet, consectetuer adipiscing elit.'
-export default function AddAccordion({ onAddAccordion }) {
+export default function AddAccordion({ onClick }) {
     // This component represents the input field for adding a section / accordion
 
     const [heading, setHeading] = useState(headingDefault);
@@ -27,7 +27,7 @@ export default function AddAccordion({ onAddAccordion }) {
                 <Grid item xs={2} sm={1}>
                     <IconButton sx={{border: '1px solid #1976D2'}} onClick={() => {
                         setHeading('');
-                        onAddAccordion(heading);
+                        onClick(heading);
                     }} color="primary" aria-label="add">
                         <AddIcon />
                     </IconButton>

@@ -50,18 +50,19 @@ const wrongForm = {
 let nextWorkoutId = 1;
 let nextCorrectFormId = 1;
 let nextWrongFormId = 1;
+
 const initialWorkoutData = {
     id: 0,
     exercise: "Your Description here ",
     demo: demoGif,
-    correctForm: {
+    correctForm: [{
         id: 0,
         ...correctForm
-    },
-    wrongForm: {
+    }],
+    wrongForm: [{
         id: 0,
         ...wrongForm
-    }
+    }]
 }
 
 
@@ -71,7 +72,7 @@ const section1 = {
 }
 const sectionItem1 = {
     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
-    description: " Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
+    description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
     heading: "Your own item header here: Lorem ipsum dolor sit amet, consectetuer adipiscing elit.Lorem ipsum dolor sit amet. "
 }
 const sectionItem2 = {
@@ -82,22 +83,26 @@ const sectionItem2 = {
 
 let nextAccordionId = 1;
 let nextItemId = 2;
+// workout routine or the video lecture
 const initialSectionData = [{
     id: 0,
     heading: section1.heading,
     items: [{
         id: 0,
-        heading: sectionItem1.heading
+        heading: sectionItem1.heading,
+        description: sectionItem1.description,
+        lecture: sectionItem1.lecture
     }, {
         id: 1,
-        heading: sectionItem2.heading
+        heading: sectionItem2.heading,
+        description: sectionItem2.description,
+        lecture: sectionItem2.lecture
     }]
 }]
 
-function WorkoutMediaCard({ onChange, onDelete, workout, open }) {
+function WorkoutMediaCard({ handleAddWorkoutCardWrongForm, onChangeImage, onChangeDescription, onClick, workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
-    const [selectedImage, setSelectedImage] = React.useState(initialWorkoutData.demo);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -110,19 +115,6 @@ function WorkoutMediaCard({ onChange, onDelete, workout, open }) {
         }
     };
 
-    function handleImageUpload(event) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-
-        reader.onloadend = () => {
-            setSelectedImage(reader.result);
-        };
-
-        if (file) {
-            reader.readAsDataURL(file);
-        }
-    }
-
 
     return (
         open &&
@@ -131,12 +123,12 @@ function WorkoutMediaCard({ onChange, onDelete, workout, open }) {
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
-                    src={selectedImage ? selectedImage : workout.src}
+                    src={workout.demo}
                     alt="workout demo"
                     allowFullScreen
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
                 />
-                <InputFileUpload name="demo" onChange={handleImageUpload} text="GIF File" />
+                <InputFileUpload workoutId={workout.id} onChange={onChangeImage} name="demo" text="GIF File" />
                 <CardContent>
                     <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                         {/* workout description textarea input */}
@@ -152,8 +144,8 @@ function WorkoutMediaCard({ onChange, onDelete, workout, open }) {
                             autoFocus
                             name="exercise"
                             value={workout.exercise}
-                            onChange={e => {
-                                onChange(e, workout.id)
+                            onChange={event => {
+                                onChangeDescription(event, workout.id);
                             }}
                             
                         />
@@ -163,14 +155,14 @@ function WorkoutMediaCard({ onChange, onDelete, workout, open }) {
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <CorrectFormDialog correctForm={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                            <CorrectFormDialog correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <WrongFormDialog wrongForm={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
+                            <WrongFormDialog workoutId={workout.id} onClick={handleAddWorkoutCardWrongForm} wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                         <Grid item >
-                            <Button onClick={() => onDelete(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
+                            <Button onClick={() => onClick(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -179,7 +171,7 @@ function WorkoutMediaCard({ onChange, onDelete, workout, open }) {
     );
 }
 
-export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionItem, children }) {
+export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
@@ -190,6 +182,36 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
 
+    function handleAddWorkoutCardWrongForm(workoutId) {
+        updateWorkouts(draft => {
+            const workout = draft.find(w => w.id === workoutId);
+            workout.wrongForm.push({
+                id: nextWrongFormId++,
+                ...wrongForm
+            })
+            
+        })
+    }
+
+    function handleAddWorkoutCardCorrectForm() {
+
+    }
+
+    function handleImageUpload(event, workoutId) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            updateWorkouts(draft => {
+                const workout = draft.find(w => w.id === workoutId);
+                workout.demo = reader.result;
+            })
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
 
     function handleWorkoutDescriptionChange(e, workoutId) {
         updateWorkouts(draft => {
@@ -205,17 +227,31 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
             draft.push(
                 {
                     id: nextWorkoutId++,
-                    ...initialWorkoutData,
-                    correctForm: {
-                        id: nextCorrectFormId++,
-                        ...initialWorkoutData.correctForm
-                    },
-                    wrongform: {
-                        id: nextWrongFormId++,
-                        ...initialWorkoutData.wrongForm,
-                    }
+                    exercise: "Your Description here",
+                    demo: demoGif,
+                    correctForm: [
+
+                    ],
+                    wrongForm: [
+
+                    ]
                 }
             )
+
+            const index = draft.length - 1;
+
+            draft[index].correctForm.push(
+                {
+                    id: 0,
+                    ...correctForm
+
+                })
+
+            draft[index].wrongForm.push(
+                {
+                    id: 0,
+                    ...wrongForm
+                })
 
         })
     }
@@ -276,7 +312,7 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                 </Grid>
                 <Grid item xs={2} lg={1}>
                     <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
-                    <Button onClick={() => onDelete(accordionId, accordionItem.id)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
+                    <Button onClick={() => onClick(accordionId, accordionItem.id)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
                 </Grid>
             </>
         )
@@ -320,8 +356,9 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                                 isWorkoutRoutine ?
                             <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
                                 {workouts.map(workout => (
+                                    // Renders Workout instance
                                     <Grid key={workout.id} item sm={6}>
-                                        <WorkoutMediaCard onChange={handleWorkoutDescriptionChange} onDelete={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                        <WorkoutMediaCard handleAddWorkoutCardWrongForm={handleAddWorkoutCardWrongForm} onChangeImage={handleImageUpload} onChangeDescription={handleWorkoutDescriptionChange} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
                                     </Grid>
                                 ))}
                                 <Grid item sm={6}>
@@ -332,15 +369,16 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                                 </Grid>
                             </Grid> :
 
-                           <Grid justifyContent={{xs: 'center', sm: 'flex-start'}} item container>
-                            {/* TODO */}
-                            {/* ALLOW USER TO BE ABLE TO INPUT YOUTUBE VIDEO AND DESCRIPTION (OPTIONAL) */}
-                            {/* <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
-                                course lecture textarea input
-                                <TextField onChange={e => setCourseContent({
-                                    ...courseContent,
-                                    preview: e.target.value
-                                })}
+                           <Grid justifyContent={{xs: 'center'}} item container>
+                            <Grid item mb={2}>
+                                <ThemeProvider theme={theme}>
+                                    <Typography variant="h4">
+                                        Your Video lecture here
+                                    </Typography>
+                                </ThemeProvider>
+                            </Grid>
+                            <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
+                                <TextField 
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -354,12 +392,20 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                                     label="e.g https://www.youtube.com/watch?v=SOMEID"
                                     type="url"
                                     name="lecture"
+                                    value={accordionItem.lecture}
+                                    onChange={e => {
+                                        onChange({
+                                            ...accordionItem,
+                                            lecture: e.target.value
+                                        },
+                                        accordionId)
+                                    }}
                                 />
                             </Box>
-                            <Grid item>http://localhost:5173/src/static/images/bgH.jpg
-                                {getEmbedUrl(courseContent.preview) ?
+                            <Grid item>
+                                {getEmbedUrl(accordionItem.lecture) ?
                                     <Box mt={4} className="course-lecture-container" component={'div'}>
-                                        <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
+                                        <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
                                     </Box>
                                     :
                                     <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
@@ -368,7 +414,28 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
                                         </Typography>
                                     </Box>
                                 }
-                            </Grid> */}
+                            </Grid>
+                            <Grid item xs={10} mt={4}>
+                            <TextField
+                                helperText=" "
+                                id="demo-helper-text-aligned-no-helper"
+                                label="Your lecture's description"
+                                fullWidth={true}
+                                minRows={10}
+                                maxRows={10}
+                                multiline
+                                required
+                                name="overview"
+                                value={accordionItem.description}
+                                onChange={e => {
+                                    onChange({
+                                        ...accordionItem,
+                                        description: e.target.value
+                                    },
+                                    accordionId)
+                                }}
+                            />
+                            </Grid>
                            </Grid>
 
 
@@ -393,7 +460,7 @@ export function ResponsiveDialog({ onDelete, onChange, accordionId, accordionIte
 
 function ControlledAccordions() {
     const [expanded, setExpanded] = React.useState(false);
-    const [accordions, updateAccordions] = useImmer(initialSectionData)
+    const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend)
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
@@ -413,7 +480,7 @@ function ControlledAccordions() {
     }
 
     function handleEditAccordionItem(nextAccordionItem, accordionId) {
-        // edits an accordion item's heading (sectionItem)
+        // edits an accordion item's heading / content (sectionItem)
         updateAccordions(draft => {
             const accordion = draft.find(accordion => accordion.id === accordionId);
             const accordionItemIndex = accordion.items.findIndex(item => item.id === nextAccordionItem.id);
@@ -459,12 +526,12 @@ function ControlledAccordions() {
     return (
         <>
             {/* Adds a new Accordion / Section  */}
-            <AddAccordion onAddAccordion={handleAddAccordion} />
+            <AddAccordion onClick={handleAddAccordion} />
             <TransitionGroup>
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <Section onDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                            <Section onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
                         </Collapse>
 
                     ))
@@ -689,7 +756,7 @@ export default function CreateCourse() {
 
                         <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
                             <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
-                                {/* course lecture textarea input */}
+                                {/* course preview textarea input */}
                                 <TextField onChange={e => setCourseContent({
                                     ...courseContent,
                                     preview: e.target.value

@@ -104,11 +104,25 @@ html {
 }
 }
 
-.course-lecture-container {
-  display: flex;
-  justify-content: center;
-  width: 69vw;
+
+@media (max-width: 575.98px) {
+  .course-lecture-container {
+    display: flex;
+    justify-content: center;
+    width: 85vw;
 }
+}
+
+@media (min-width: 575.98px) {
+  .course-lecture-container {
+    display: flex;
+    justify-content: center;
+    width: 59vw;
+}
+}
+
+
+
 .course-lecture {
   aspect-ratio: 16 / 9;
   width: 100% !important;
@@ -118,6 +132,3 @@ html {
   border-bottom: 6px solid #FFC55C;
 }
 
-.responsive-dialog-title-workout {
-  position: 'inherit';
-}

@@ -67,14 +67,14 @@ const workouts2 = {
     reps: 10,
     excertion: 8,
 }
-const correctForm = {
+const correctForm = [{
     demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
     description: "Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum."
-}
-const wrongForm = {
+}]
+const wrongForm = [{
     demo: 'https://www.youtube.com/embed/yQEx9OC2C3E',
     description: "scapula not moving"
-}
+}]
 
 const section1 = {
     title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
@@ -93,7 +93,7 @@ const sectionItem2 = {
 
 
 // responsible for the 'workout' demo card
-function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
+function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
 
@@ -109,7 +109,7 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%' }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%' }}>
                 <CardMedia
                     component="iframe"
                     sx={{ aspectRatio: 16 / 9 }}
@@ -119,9 +119,9 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
 
                 />
-                <CardContent>
+                <CardContent sx={{width: 300}}>
                     <ThemeProvider theme={theme}>
-                        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 420, sm: 'inherit' }} overflow={'auto'} gutterBottom variant="h5" component="div">
+                        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }}  overflow={'auto'} gutterBottom variant="h5" component="div">
                             {workout.exercise}
                         </Typography>
                     </ThemeProvider>
@@ -130,11 +130,11 @@ function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <CorrectFormDialog correctForm={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                            <CorrectFormDialog correctFormExercises={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <WrongFormDialog wrongForm={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
+                            <WrongFormDialog wrongFormExercises={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                         <Grid item >
                             <Button startIcon={<EditIcon />}>Edit</Button>
@@ -176,29 +176,30 @@ function ResponsiveDialog({ children }) {
                 aria-labelledby="responsive-dialog-title"
                 fullWidth={true}
                 maxWidth={'md'}
+                
             >
                 <Grid container>
                     <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
                         <DialogTitle id="responsive-dialog-title">
                             {"Workout Routine"}
                         </DialogTitle>
-                        <DialogContent>
+                    </Grid>
+                        <DialogContent >
                             <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
                                 <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}> </VideoMediaCard>
+                                    <WorkoutMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}> </WorkoutMediaCard>
                                 </Grid>
                                 <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts2} correctForm={correctForm} wrongForm={wrongForm} open={open}>
-                                    </VideoMediaCard>
+                                    <WorkoutMediaCard workout={workouts2} correctForm={correctForm} wrongForm={wrongForm} open={open}>
+                                    </WorkoutMediaCard>
                                 </Grid>
                                 <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}>
-                                    </VideoMediaCard>
+                                    <WorkoutMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}>
+                                    </WorkoutMediaCard>
                                 </Grid>
                             </Grid>
                         </DialogContent>
                     </Grid>
-                </Grid>
 
                 <DialogActions>
                     <Button autoFocus onClick={handleClose}>
@@ -290,7 +291,7 @@ export default function Course() {
     return (
         <>
             <br></br>
-            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+            <Box sx={{ marginLeft: '5vw', marginRight: '5vw' }}>
                 <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
                     <Grid item>
                         <Button>
@@ -328,8 +329,8 @@ export default function Course() {
                                     </Button>
                                 </Grid>
                             </Grid>
-                            <Box component={'div'} mt={2} ml={4} mr={-4} mb={2}>
-                                <Grid item container padding={2} justifyContent={'space-between'} columns={{ xs: 4, md: 12 }} rowSpacing={2}>
+                            <Box component={'div'} m={2}>
+                                <Grid item container padding={2} columns={{ xs: 4, md: 12 }} rowSpacing={2}>
                                     <Grid item xs={2} md={6}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
                                             Created on: {course.courseCreated}
@@ -398,7 +399,7 @@ export default function Course() {
                             </Typography>
                         </ThemeProvider>
                         <br />
-                        <Box className="course-lecture-container" component={'div'}>
+                        <Box className="course-lecture-container" sx={{width: {xs: '69vw'}}} component={'div'}>
                             <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
                         </Box>
                     </Grid>
