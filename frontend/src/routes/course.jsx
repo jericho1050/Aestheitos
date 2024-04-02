@@ -119,7 +119,7 @@ function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
 
                 />
-                <CardContent sx={{width: 300}}>
+                <CardContent sx={{width: 320}}>
                     <ThemeProvider theme={theme}>
                         <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }}  overflow={'auto'} gutterBottom variant="h5" component="div">
                             {workout.exercise}

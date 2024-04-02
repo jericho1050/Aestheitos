@@ -1,5 +1,5 @@
 import { useTheme } from "@emotion/react";
-import { Button, Card, CardActions, CardContent, CardMedia, Grid, ThemeProvider, Typography, createTheme, responsiveFontSizes, useMediaQuery } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Grid, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes, useMediaQuery } from "@mui/material";
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -9,6 +9,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import InputFileUpload from "../components/InputFileUpload";
 
 
 let theme = createTheme()
@@ -19,7 +21,10 @@ const correctForm2 = {
     description: " Aenean leo liguleget."
 }
 
-function VideoMediaCardCorrectForm({ correctForm, open }) {
+function WorkoutMediaCorrectFormCard({ onChangeImage, onClick, onChange, workoutId, correctForm, open }) {
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
     return (
         open &&
         <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
@@ -28,21 +33,37 @@ function VideoMediaCardCorrectForm({ correctForm, open }) {
                 sx={{ aspectRatio: 16 / 9, }}
                 src={correctForm.demo}
                 alt="workout demo"
-                allowFullScreen
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
             />
-            <CardContent sx={{ width: 300 }} >
-                <ThemeProvider theme={theme}>
-                    <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} overflow={'auto'} gutterBottom variant="h5" component="div">
-                        <CheckIcon sx={{ border: "2px solid green" }} fontSize="large" color="success"></CheckIcon> {correctForm.description}
-                    </Typography>
-                </ThemeProvider>
+            <InputFileUpload correctFormId={correctForm.id} workoutId={workoutId} onChange={onChangeImage} name="demo" text="GIF File" />
+
+            <CardContent sx={{ width: { xs: 320, sm: 'inherit', md: 320 } }} >
+            <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+                        {/* workout description textarea input */}
+                        <TextField
+                            helperText=" "
+                            id="demo-helper-text-aligned-no-helper"
+                            label="Your Workout's Description"
+                            fullWidth={true}
+                            minRows={isSmallScreen ? 7 : 10}
+                            maxRows={isSmallScreen ? 7 : 10}
+                            multiline
+                            required
+                            autoFocus
+                            name="exercise"
+                            value={correctForm.description}
+                            onChange={e => {
+                                onChange(e, 'correctForm', workoutId, correctForm.id)
+                            }} 
+
+                            
+                        />
+                    </Box>
             </CardContent>
             <CardActions sx={{ marginTop: 'auto' }}>
                 <Grid container justifyContent={'center'}>
                     <Grid item>
-                        <Button startIcon={<EditIcon />}>
-                            Edit
+                        <Button onClick={() => {onClick(workoutId, null, correctForm.id)}} startIcon={<DeleteIcon />}>
+                            Delete
                         </Button>
                     </Grid>
                 </Grid>
@@ -53,7 +74,7 @@ function VideoMediaCardCorrectForm({ correctForm, open }) {
 }
 
 
-export default function CorrectFormDialog({ correctFormExercises, open, setOpen }) {
+export default function CorrectFormDialog({ handleImageUpload, handleDeleteCard, handleChangeDescription, onClick, workoutId, correctFormExercises, open, setOpen }) {
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const [parent, enableAnimations] = useAutoAnimate();
@@ -90,7 +111,7 @@ export default function CorrectFormDialog({ correctFormExercises, open, setOpen 
 
                                     return (
                                         <Grid key={exercise.id} item sm={6}>
-                                            <VideoMediaCardCorrectForm correctForm={exercise} open={open}> </VideoMediaCardCorrectForm>
+                                            <WorkoutMediaCorrectFormCard onChangeImage={handleImageUpload} onClick={handleDeleteCard} onChange={handleChangeDescription} workoutId={workoutId} correctForm={exercise} open={open}> </WorkoutMediaCorrectFormCard>
                                         </Grid>
                                     )
                                 })
@@ -98,11 +119,10 @@ export default function CorrectFormDialog({ correctFormExercises, open, setOpen 
 
                             <Grid item sm={6}>
                                 {/* add WorkoutMediaCard / Workout button */}
-                                <Button sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                <Button onClick={() => onClick('correctForm', workoutId)} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                 </Button>
                             </Grid>
-
 
                         </Grid>
                     </DialogContent>
@@ -120,3 +140,35 @@ export default function CorrectFormDialog({ correctFormExercises, open, setOpen 
         </React.Fragment>
     );
 }
+
+
+
+
+// t be use later on same goes with formdialog
+{/* <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
+<CardMedia
+    component="img"
+    sx={{ aspectRatio: 16 / 9, }}
+    src={correctForm.demo}
+    alt="workout demo"
+    allowFullScreen
+    allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+/>
+<CardContent sx={{ width: 300 }} >
+    <ThemeProvider theme={theme}>
+        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} overflow={'auto'} gutterBottom variant="h5" component="div">
+            <CheckIcon sx={{ border: "2px solid green" }} fontSize="large" color="success"></CheckIcon> {correctForm.description}
+        </Typography>
+    </ThemeProvider>
+</CardContent>
+<CardActions sx={{ marginTop: 'auto' }}>
+    <Grid container justifyContent={'center'}>
+        <Grid item>
+            <Button startIcon={<EditIcon />}>
+                Edit
+            </Button>
+        </Grid>
+    </Grid>
+
+</CardActions>
+</Card> */}

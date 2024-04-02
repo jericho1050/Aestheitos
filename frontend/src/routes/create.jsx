@@ -29,7 +29,7 @@ import Section from "../components/Section";
 import AddIcon from '@mui/icons-material/Add';
 import demoGif from "../static/images/chinupVecs.gif";
 import demoGif2 from '../static/images/pushupVecs.gif';
-import { Send } from "@mui/icons-material";
+import { Send, WidthWide } from "@mui/icons-material";
 import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -100,11 +100,97 @@ const initialSectionData = [{
     }]
 }]
 
-function WorkoutMediaCard({ handleAddWorkoutCardWrongForm, onChangeImage, onChangeDescription, onClick, workout, open }) {
+function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, onClick, workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+    function handleImageUpload(event, workoutId, wrongFormId, correctFormId) {
+        // update image for wrongForm and correctForm exercise demo
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            updateWorkouts(draft => {
+                const workout = draft.find(w => w.id === workoutId);
+
+                // check if it's from a wrongForm card
+                if (wrongFormId != null) {
+                    const wrongForm = workout.wrongForm.find(w => w.id === wrongFormId);
+                    wrongForm.demo = reader.result;
+                } else {
+                    // then it's from a correctForm card
+                    const correctForm = workout.correctForm.find(w => w.id === correctFormId);
+                    correctForm.demo = reader.result;
+                }
+
+            })
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function handleDeleteCard(workoutId, wrongFormId, correctFormId) {
+        updateWorkouts(draft => {
+            const workout = draft.find(w => w.id === workoutId);
+
+            // we check if this came from WorkoutMediaWrongFormCard
+            if (wrongFormId != null) {
+                workout.wrongForm = workout.wrongForm.filter(w => w.id !== wrongFormId);
+
+            // if not, its from WorkoutMediaCorrectFormCard
+            } else {
+                workout.correctForm = workout.correctForm.filter(w => w.id !== correctFormId)
+            }
+        })
+    }
+
+    // handles the description change of correctFrom and wrongForm in their respective cards.
+    function handleChangeDescription(e, card, workoutId, wrongFormId) {
+        updateWorkouts(draft => {
+            const workout = draft.find(w => w.id === workoutId);
+
+            // we check if this came from WorkoutMediaWrongFormCard
+            if (card === 'wrongForm') {
+                const wrongForm = workout.wrongForm.find(w => w.id === wrongFormId)
+                wrongForm.description = e.target.value
+            // if not, its from WorkoutMediaCorrectFormCard
+            } else {
+                const correctForm = workout.correctForm.find(w => w.id === wrongFormId)
+                correctForm.description = e.target.value
+            }
+
+
+
+        })
+    }
+
+    //handles the addition of correctForm and wrongForm cards in their respective dialogs.
+    function handleAddCard(formDialog, workoutId) {
+        updateWorkouts(draft => {
+            const workout = draft.find(w => w.id === workoutId);
+
+            // we check if this came from WrongFormDialog 
+            if (formDialog === 'wrongForm') {
+                workout.wrongForm.push({
+                    id: nextWrongFormId++,
+                    ...wrongForm
+                })
+            // if not, its from CorrectFormDialog
+            } else {
+                workout.correctForm.push({
+                    id: nextCorrectFormId++,
+                    ...correctForm
+                })
+
+            }
+
+
+        })
+    }
 
 
     const handleClickOpen = (btn) => {
@@ -119,14 +205,12 @@ function WorkoutMediaCard({ handleAddWorkoutCardWrongForm, onChangeImage, onChan
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, width: { xs: 350, sm: '100%' }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
                     src={workout.demo}
                     alt="workout demo"
-                    allowFullScreen
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
                 />
                 <InputFileUpload workoutId={workout.id} onChange={onChangeImage} name="demo" text="GIF File" />
                 <CardContent>
@@ -147,7 +231,7 @@ function WorkoutMediaCard({ handleAddWorkoutCardWrongForm, onChangeImage, onChan
                             onChange={event => {
                                 onChangeDescription(event, workout.id);
                             }}
-                            
+
                         />
                     </Box>
                 </CardContent>
@@ -155,11 +239,11 @@ function WorkoutMediaCard({ handleAddWorkoutCardWrongForm, onChangeImage, onChan
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <CorrectFormDialog correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                            <CorrectFormDialog handleImageUpload={handleImageUpload} handleDeleteCard={handleDeleteCard} handleChangeDescription={handleChangeDescription} onClick={handleAddCard} workoutId={workout.id} correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <WrongFormDialog workoutId={workout.id} onClick={handleAddWorkoutCardWrongForm} wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
+                            <WrongFormDialog handleImageUpload={handleImageUpload} handleDeleteCard={handleDeleteCard} handleChangeDescription={handleChangeDescription} onClick={handleAddCard} workoutId={workout.id} wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                         <Grid item >
                             <Button onClick={() => onClick(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
@@ -182,22 +266,11 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
 
-    function handleAddWorkoutCardWrongForm(workoutId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
-            workout.wrongForm.push({
-                id: nextWrongFormId++,
-                ...wrongForm
-            })
-            
-        })
-    }
 
-    function handleAddWorkoutCardCorrectForm() {
 
-    }
 
     function handleImageUpload(event, workoutId) {
+        // update image for workout demo
         const file = event.target.files[0];
         const reader = new FileReader();
 
@@ -213,7 +286,7 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
         }
     }
 
-    function handleWorkoutDescriptionChange(e, workoutId) {
+    function handleChangeWorkoutDescription(e, workoutId) {
         updateWorkouts(draft => {
             const workout = draft.find(w => w.id === workoutId);
             workout.exercise = e.target.value;
@@ -354,92 +427,91 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
                         <DialogContent>
                             {
                                 isWorkoutRoutine ?
-                            <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                {workouts.map(workout => (
-                                    // Renders Workout instance
-                                    <Grid key={workout.id} item sm={6}>
-                                        <WorkoutMediaCard handleAddWorkoutCardWrongForm={handleAddWorkoutCardWrongForm} onChangeImage={handleImageUpload} onChangeDescription={handleWorkoutDescriptionChange} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                    <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+                                        {workouts.map(workout => (
+                                            // Renders Workout instance
+                                            <Grid key={workout.id} item sm={6}>
+                                                <WorkoutMediaCard updateWorkouts={updateWorkouts} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                            </Grid>
+                                        ))}
+                                        <Grid item sm={6}>
+                                            {/* add WorkoutMediaCard / Workout button */}
+                                            <Button onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                                <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
+                                            </Button>
+                                        </Grid>
+                                    </Grid> :
+
+                                    <Grid justifyContent={{ xs: 'center' }} item container>
+                                        <Grid item mb={2}>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4">
+                                                    Your Video lecture here
+                                                </Typography>
+                                            </ThemeProvider>
+                                        </Grid>
+                                        <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
+                                            <TextField
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <YouTubeIcon />
+                                                        </InputAdornment>
+
+                                                    )
+                                                }}
+                                                fullWidth={true}
+                                                id="lecture-url"
+                                                label="e.g https://www.youtube.com/watch?v=SOMEID"
+                                                type="url"
+                                                name="lecture"
+                                                value={accordionItem.lecture}
+                                                onChange={e => {
+                                                    onChange({
+                                                        ...accordionItem,
+                                                        lecture: e.target.value
+                                                    },
+                                                        accordionId)
+                                                }}
+                                            />
+                                        </Box>
+                                        <Grid item>
+                                            {getEmbedUrl(accordionItem.lecture) ?
+                                                <Box mt={4} className="course-lecture-container" component={'div'}>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowfullscreen></iframe>                                    </Box>
+                                                :
+                                                <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                    <Typography variant="body" align={'center'}>
+                                                        Your video will show up here
+                                                    </Typography>
+                                                </Box>
+                                            }
+                                        </Grid>
+                                        <Grid item xs={10} mt={4}>
+                                            <TextField
+                                                helperText=" "
+                                                id="demo-helper-text-aligned-no-helper"
+                                                label="Your lecture's description"
+                                                fullWidth={true}
+                                                minRows={10}
+                                                maxRows={10}
+                                                multiline
+                                                required
+                                                name="overview"
+                                                value={accordionItem.description}
+                                                onChange={e => {
+                                                    onChange({
+                                                        ...accordionItem,
+                                                        description: e.target.value
+                                                    },
+                                                        accordionId)
+                                                }}
+                                            />
+                                        </Grid>
                                     </Grid>
-                                ))}
-                                <Grid item sm={6}>
-                                    {/* add WorkoutMediaCard / Workout button */}
-                                    <Button onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
-                                        <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
-                                    </Button>
-                                </Grid>
-                            </Grid> :
-
-                           <Grid justifyContent={{xs: 'center'}} item container>
-                            <Grid item mb={2}>
-                                <ThemeProvider theme={theme}>
-                                    <Typography variant="h4">
-                                        Your Video lecture here
-                                    </Typography>
-                                </ThemeProvider>
-                            </Grid>
-                            <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
-                                <TextField 
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <YouTubeIcon />
-                                            </InputAdornment>
-
-                                        )
-                                    }}
-                                    fullWidth={true}
-                                    id="lecture-url"
-                                    label="e.g https://www.youtube.com/watch?v=SOMEID"
-                                    type="url"
-                                    name="lecture"
-                                    value={accordionItem.lecture}
-                                    onChange={e => {
-                                        onChange({
-                                            ...accordionItem,
-                                            lecture: e.target.value
-                                        },
-                                        accordionId)
-                                    }}
-                                />
-                            </Box>
-                            <Grid item>
-                                {getEmbedUrl(accordionItem.lecture) ?
-                                    <Box mt={4} className="course-lecture-container" component={'div'}>
-                                        <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
-                                    </Box>
-                                    :
-                                    <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                        <Typography variant="body" align={'center'}>
-                                            Your video will show up here
-                                        </Typography>
-                                    </Box>
-                                }
-                            </Grid>
-                            <Grid item xs={10} mt={4}>
-                            <TextField
-                                helperText=" "
-                                id="demo-helper-text-aligned-no-helper"
-                                label="Your lecture's description"
-                                fullWidth={true}
-                                minRows={10}
-                                maxRows={10}
-                                multiline
-                                required
-                                name="overview"
-                                value={accordionItem.description}
-                                onChange={e => {
-                                    onChange({
-                                        ...accordionItem,
-                                        description: e.target.value
-                                    },
-                                    accordionId)
-                                }}
-                            />
-                            </Grid>
-                           </Grid>
 
 
-}
+                            }
                         </DialogContent>
                     </Grid>
                 </Grid>
@@ -569,7 +641,7 @@ export default function CreateCourse() {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-            
+
             setCourse({
                 ...course,
                 thumbnail: reader.result
@@ -779,7 +851,7 @@ export default function CreateCourse() {
                             <Grid item>
                                 {getEmbedUrl(courseContent.preview) ?
                                     <Box mt={4} className="course-lecture-container" component={'div'}>
-                                        <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
+                                        <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowfullscreen></iframe>
                                     </Box>
                                     :
                                     <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
