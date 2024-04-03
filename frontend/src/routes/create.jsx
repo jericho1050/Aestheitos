@@ -68,12 +68,12 @@ const initialWorkoutData = {
 
 // For initial Data below this line
 const section1 = {
-    heading: "Your Own Heading Here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)"
 }
 const sectionItem1 = {
     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
     description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
-    heading: "Your own item header here: Lorem ipsum dolor sit amet, consectetuer adipiscing elit.Lorem ipsum dolor sit amet. "
+    heading: "Your own item header here: e.g., ReadMe Text"
 }
 const sectionItem2 = {
     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
@@ -689,6 +689,7 @@ export default function CreateCourse() {
                                         <FormControl required sx={{ width: 200 }}>
                                             <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
                                             <Select
+                                                data-cy="Select Difficulty"
                                                 labelId="demo-simple-select-label"
                                                 id="demo-simple-select"
                                                 value={course.difficulty}
@@ -762,6 +763,7 @@ export default function CreateCourse() {
                                 <Grid item xs>
                                     {/* course description textarea input */}
                                     <TextField
+                                        data-cy="Course Description"
                                         helperText=" "
                                         id="demo-helper-text-aligned-no-helper"
                                         label="Your Course's Description"
@@ -797,6 +799,7 @@ export default function CreateCourse() {
                         <Grid item container>
                             {/* course overview textarea input */}
                             <TextField
+                                data-cy="Course Overview"
                                 helperText=" "
                                 id="demo-helper-text-aligned-no-helper"
                                 label="Your Course's Overview"

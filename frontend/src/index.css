@@ -132,3 +132,9 @@ html {
   border-bottom: 6px solid #FFC55C;
 }
 
+
+#detail.loading {
+  opacity: 0.25;
+  transition: opacity 200ms;
+  transition-delay: 200ms;
+}

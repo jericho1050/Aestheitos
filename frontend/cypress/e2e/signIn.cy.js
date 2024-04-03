@@ -11,7 +11,7 @@ describe('User Signs In', () => {
     const password = '123'
 
     beforeEach(() => {
-        cy.visit(`http://localhost:5173/signin`);
+        cy.visit(`${Cypress.env('FRONTEND_API_URL')}signin`);
     });
 
     it('has a title', () => {

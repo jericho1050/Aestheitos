@@ -15,6 +15,7 @@ import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
 import Course from './routes/course';
 import CreateCourse from './routes/create';
+import ProectedRoute from './helper/protectedRoute';
 
 
 const theme = createTheme({
@@ -48,9 +49,14 @@ const router = createBrowserRouter([
         element: <Course />
       },
       {
-        path: "course/create",
-        element: <CreateCourse />
-
+       
+        element: <ProectedRoute />,
+        children: [
+          {
+          path: "course/create",
+          element: <CreateCourse />
+          }
+        ]
       }
     ],
   },

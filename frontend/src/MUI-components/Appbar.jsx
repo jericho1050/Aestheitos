@@ -92,7 +92,7 @@ function ResponsiveAppBar() {
         // console.log(`current time: ${currentTime}`);
         // console.log(`expiration: ${accessTokenExp.exp}`);
         if (currentTime > accessTokenExp.exp) {
-          console.log("expires!");
+          // console.log("expires!");
           const accessToken = await refreshAccessToken(token['refresh'])
           // console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
           dispatch({
@@ -110,7 +110,7 @@ function ResponsiveAppBar() {
 
 
   React.useEffect(() => {
-    const hasToken = token['access'] !== null;
+  const hasToken = token['access'] !== null;
     if (hasToken) {
       setIsAuthenticated(true);
     } else {
