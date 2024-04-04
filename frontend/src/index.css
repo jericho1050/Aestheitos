@@ -125,7 +125,7 @@ html {
 
 .course-lecture {
   aspect-ratio: 16 / 9;
-  width: 100% !important;
+  width: 80% !important;
 }
 
 .course-card:hover {

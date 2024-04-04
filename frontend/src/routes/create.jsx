@@ -634,6 +634,7 @@ export default function CreateCourse() {
 
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+    const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
 
 
     function handleImageUpload(event) {
@@ -876,15 +877,13 @@ export default function CreateCourse() {
                         <Grid item width={{ xs: '100%', md: '69%' }}>
                             <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
                         </Grid>
-                        <Grid item container justifyContent={'flex-end'}>
-                            <Grid item>
-                                <Button startIcon={<SendIcon />} variant="contained" color="primary">
-                                    Submit
-                                </Button>
-                            </Grid>
-
-                        </Grid>
                     </Grid>
+                    <Box display="flex" justifyContent={'flex-end'}>
+                    <Button sx={{mt: 3}} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+                        Submit
+                    </Button>
+                    </Box>
+
                 </Box>
             </Box>
         </>

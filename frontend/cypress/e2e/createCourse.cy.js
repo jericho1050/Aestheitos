@@ -169,9 +169,13 @@ describe('Create Course Route', () => {
     cy.get('.css-15v22id-MuiAccordionDetails-root > .MuiBox-root > .MuiGrid-container > .MuiGrid-grid-xs-10 > .MuiFormControl-root > .MuiInputBase-root > #outlined-textarea').type('Testing, Adding Accordion Item');
     cy.get('[data-cy="Add Accordion Item"]').click();
     /* ==== End Cypress Studio ==== */
-    
+
 
     // TODO
     // ADD MORE E2E TEST CASES
+    /* ==== Generated with Cypress Studio ==== */
+    cy.get(':nth-child(2) > .MuiGrid-container > .MuiGrid-grid-xs-10 > .MuiTypography-root').should('have.text', 'Add an item, e.g., week 1-4: workout routine.Testing, Adding Accordion Item');
+    cy.get(':nth-child(1) > .MuiGrid-container > .MuiGrid-grid-xs-2 > :nth-child(2) > .MuiButton-icon > [data-testid="DeleteIcon"] > path').click();
+    /* ==== End Cypress Studio ==== */
   });
 })

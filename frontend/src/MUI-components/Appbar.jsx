@@ -16,7 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AccessTokenExpContext, AuthContext, AuthDispatchContext, CurrentTimeContext, IsAuthenticatedContext, setIsAuthenticatedContext } from '../helper/authContext';
+import { useAuthToken } from '../helper/authContext';
 import SearchIcon from '@mui/icons-material/Search';
 import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
@@ -30,6 +30,8 @@ import validateJWTToken from '../helper/verifySignature';
 import { jwtDecode } from 'jwt-decode';
 import refreshAccessToken from '../helper/refreshAccessToken';
 import logo from '../static/images/aestheitoslogo.png';
+import persistToken from '../helper/persistToken';
+import useRefreshToken from '../helper/useRefreshToken';
 
 const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -39,14 +41,14 @@ function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isOpen, setIsOpen] = React.useState(false);
-  const token = React.useContext(AuthContext); // access token and refresh token
-  const dispatch = React.useContext(AuthDispatchContext);
-  const accessTokenExp = React.useContext(AccessTokenExpContext)
-  const currentTime = React.useContext(CurrentTimeContext)
+
   const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
-  const isAuthenticated = React.useContext(IsAuthenticatedContext); // boolean state value; it checks if the user is authenticated.
-  const setIsAuthenticated = React.useContext(setIsAuthenticatedContext); // a state setter function to update isAuthenticated variable.
+  // returns the token state and it's dispatch function 
+  const { token, dispatch } = useAuthToken();
+  const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
+
+
 
   // attach event listener to  each setting
   const settingsHandlers = {
@@ -63,60 +65,13 @@ function ResponsiveAppBar() {
     'Create': handleCreate
   }
 
-  // handle jwt in state  when user refreshes page.
-  // for PRESERVATION OF STATE
-  React.useEffect(() => {
-    // token is initialized to null when page loads, so this will run after a refresh.
-    (async () => {
-      const response = await validateJWTToken();
-
-      if (response['access'] && response['refresh']) {
-        dispatch({
-          type: 'setToken',
-          access: response['access'],
-          refresh: response['refresh']
-        })
-      }
-    })(); // calls the nameless async fn
-  }, []);
-
-  // refreshing the access token when it expires, use refresh token
-  // persist user authentication == true
-  React.useEffect(() => {
-    const hasToken = token['access'] !== null;
-    // console.log(hasToken);
-
-    (async () => {
-
-      if (hasToken) {
-        // console.log(`current time: ${currentTime}`);
-        // console.log(`expiration: ${accessTokenExp.exp}`);
-        if (currentTime > accessTokenExp.exp) {
-          // console.log("expires!");
-          const accessToken = await refreshAccessToken(token['refresh'])
-          // console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
-          dispatch({
-            type: 'setToken',
-            access: accessToken,
-            refresh: token['refresh']
-          })
-          setIsAuthenticated(true);
-        }
-      }
-
-    })(); // calls the nameless async fn
-
-  }, [currentTime]);
 
 
-  React.useEffect(() => {
-  const hasToken = token['access'] !== null;
-    if (hasToken) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-    }
-  }, [token['access']]);
+  persistToken();
+  useRefreshToken();
+
+
+
 
 
   const handleOpenNavMenu = (event) => {

@@ -16,7 +16,7 @@ import { Index, loader as indexLoader } from './routes/index';
 import Course from './routes/course';
 import CreateCourse from './routes/create';
 import ProectedRoute from './helper/protectedRoute';
-
+import { IsLoadingProvider } from './helper/IsLoadingContext';
 
 const theme = createTheme({
   palette: {
@@ -74,7 +74,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <AuthProvider>
+        <IsLoadingProvider>
         <RouterProvider router={router} />
+        </IsLoadingProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>

@@ -46,14 +46,14 @@ describe("User Signs up ", () => {
     });
 
     it('inputs all required fields, then sends a request to server with valid credentials', () => {
-
+        // IDK SEEMS TO BE A BUG.
+        // THIS IS SUPPOSED TO PASSED BUT FOR SOME REASON IT DIND'T
         // intercept the XHR to our backend server
-        Cypress.env()
-        cy.intercept('POST', `${Cypress.env('REST_API_URL')}/register`, {
+        cy.intercept('POST', `${Cypress.env('REST_API_URL')}register`, {
             statusCode: 200,
             body: { "access": Cypress.env('ACCESS_TOKEN_TEST'), "refresh": Cypress.env('REFRESH_TOKEN_TEST')}
 
-        }).as('postRegister');
+        }).as('register');
         console.log(Cypress.env('REST_API_URL'));
         console.log(Cypress.env('ACCESS_TOKEN_TEST'));
         console.log(Cypress.env('REFRESH_TOKEN_TEST'));
@@ -62,8 +62,8 @@ describe("User Signs up ", () => {
         cy.get('input[name=username').type(username);
         cy.get('input[name=password').type(password);
         cy.get('button').click();
-
-        cy.wait('@postRegister').should(({ request, response }) => {
+        cy.wait(20000);
+        cy.wait('@register').should(({ request, response }) => { // this line is the problem the 'cy.wait()!'
             
             expect(request.body).to.have.property('first_name')
             expect(request.body).to.have.property('last_name')
