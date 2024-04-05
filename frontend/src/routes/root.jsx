@@ -7,11 +7,7 @@ export default function Root(){
     return (
     <>
         <ResponsiveAppBar></ResponsiveAppBar>
-        <div id="detail"
-            className={
-                navigation.state === "loading" ? "loading" : ""
-            }
-        >
+        <div id="detail" className={ navigation.state === "loading" ? "loading" : ""}>
             <Outlet></Outlet>
         </div>
     </>

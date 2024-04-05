@@ -447,7 +447,7 @@ function signOutAPI() {
     }
     return response.json()
   }).catch(err => console.error(err));
-
+  sessionStorage.clear();
   return response
 
 }

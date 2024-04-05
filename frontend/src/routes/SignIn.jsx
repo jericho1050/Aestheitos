@@ -42,6 +42,7 @@ export default function SignIn() {
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
+            sessionStorage.setItem('isAuthenticated', true)
             dispatch({
                 type: 'setToken',
                 access: token['access'],

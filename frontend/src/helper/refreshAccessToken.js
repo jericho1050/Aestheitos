@@ -22,6 +22,7 @@ export default async function refreshAccessToken(refreshToken) {
 
     } catch(error) {
         console.error(`error code: ${error}`);
+        return false;
     }
 
     
