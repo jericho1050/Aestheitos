@@ -27,7 +27,7 @@ function WorkoutMediaWrongFormCard({ onChangeImage, onClick, onChange, wrongForm
 
     return (
         open &&
-        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: '4px solid red' }}>
+        <Card data-cy="Wrong Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: '4px solid red' }}>
             <CardMedia
                 component="img"
                 sx={{ aspectRatio: 16 / 9, }}

@@ -25,7 +25,7 @@ export default function InputFileUpload({ name, text, onChange, workoutId, wrong
             startIcon={<CloudUploadIcon />}
         >
             Upload {text}
-            <VisuallyHiddenInput type="file" accept="image/*" onChange={e => {onChange(e, workoutId, wrongFormId, correctFormId)}} name={name} />
+            <VisuallyHiddenInput type="file" accept="image/*" onChange={e => { onChange(e, workoutId, wrongFormId, correctFormId) }} name={name} />
         </Button>
     );
 }

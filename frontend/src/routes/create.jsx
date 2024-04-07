@@ -41,11 +41,11 @@ theme = responsiveFontSizes(theme)
 // Initial data for workouts state in ResponsiveDialog
 const correctForm = {
     demo: demoGif2,
-    description: "Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum."
+    description: "Correct exercise form description: e.g., Shoulder blades are depressed downwards"
 }
 const wrongForm = {
     demo: demoGif2,
-    description: "scapula not moving"
+    description: "Wrong exercise form description: e.g., Shoulder blades not retracting"
 }
 let nextWorkoutId = 1;
 let nextCorrectFormId = 1;
@@ -71,7 +71,7 @@ const section1 = {
     heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)"
 }
 const sectionItem1 = {
-    lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
+    lecture: null,
     description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
     heading: "Your own item header here: e.g., ReadMe Text"
 }
@@ -141,7 +141,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
             if (wrongFormId != null) {
                 workout.wrongForm = workout.wrongForm.filter(w => w.id !== wrongFormId);
 
-            // if not, its from WorkoutMediaCorrectFormCard
+                // if not, its from WorkoutMediaCorrectFormCard
             } else {
                 workout.correctForm = workout.correctForm.filter(w => w.id !== correctFormId)
             }
@@ -157,7 +157,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
             if (card === 'wrongForm') {
                 const wrongForm = workout.wrongForm.find(w => w.id === wrongFormId)
                 wrongForm.description = e.target.value
-            // if not, its from WorkoutMediaCorrectFormCard
+                // if not, its from WorkoutMediaCorrectFormCard
             } else {
                 const correctForm = workout.correctForm.find(w => w.id === wrongFormId)
                 correctForm.description = e.target.value
@@ -179,7 +179,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
                     id: nextWrongFormId++,
                     ...wrongForm
                 })
-            // if not, its from CorrectFormDialog
+                // if not, its from CorrectFormDialog
             } else {
                 workout.correctForm.push({
                     id: nextCorrectFormId++,
@@ -205,7 +205,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
+            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
@@ -255,7 +255,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
     );
 }
 
-export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem, children }) {
+export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
@@ -343,6 +343,7 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
                 <Grid item xs={10} lg={11}>
                     {/* AccordtionDetail edit input form */}
                     <TextField
+                        data-cy={`Accordion item edit-${itemId}`}
                         id="standard-multiline-flexible"
                         label="Accordiong Item Heading"
                         multiline
@@ -378,7 +379,7 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
                 <Grid item xs={10} lg={11}>
                     <ThemeProvider theme={theme} >
                         <DescriptionIcon theme={theme2} sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
-                        <Typography align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
+                        <Typography data-cy={`Accordion item ${itemId}`} align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
                             {children}
                         </Typography>
                     </ThemeProvider>
@@ -419,7 +420,7 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
                                 aria-label="button group"
                             >
                                 <Button onClick={() => setIsWorkoutRoutine(true)} variant={isWorkoutRoutine ? 'contained' : 'outlined'}>Workout Routine</Button>
-                                <Button onClick={() => setIsWorkoutRoutine(false)} variant={isWorkoutRoutine ? 'outlined' : 'contained'}>Video Lecture</Button>
+                                <Button onClick={() => setIsWorkoutRoutine(false)} variant={isWorkoutRoutine ? 'outlined' : 'contained'}>Video Lecture / Readme</Button>
                             </ButtonGroup>
                         </DialogTitle>
                     </Grid>
@@ -436,7 +437,7 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
                                         ))}
                                         <Grid item sm={6}>
                                             {/* add WorkoutMediaCard / Workout button */}
-                                            <Button onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                            <Button data-cy={`Add icon`} onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                                 <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                             </Button>
                                         </Grid>
@@ -446,7 +447,7 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
                                         <Grid item mb={2}>
                                             <ThemeProvider theme={theme}>
                                                 <Typography variant="h4">
-                                                    Your Video lecture here
+                                                    Your information here
                                                 </Typography>
                                             </ThemeProvider>
                                         </Grid>
@@ -489,9 +490,10 @@ export function ResponsiveDialog({ onClick, onChange, accordionId, accordionItem
                                         </Grid>
                                         <Grid item xs={10} mt={4}>
                                             <TextField
+                                                data-cy="lecture textfield"
                                                 helperText=" "
                                                 id="demo-helper-text-aligned-no-helper"
-                                                label="Your lecture's description"
+                                                label="Your lecture's description or Readme Text"
                                                 fullWidth={true}
                                                 minRows={10}
                                                 maxRows={10}
@@ -879,9 +881,9 @@ export default function CreateCourse() {
                         </Grid>
                     </Grid>
                     <Box display="flex" justifyContent={'flex-end'}>
-                    <Button sx={{mt: 3}} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                        Submit
-                    </Button>
+                        <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+                            Submit
+                        </Button>
                     </Box>
 
                 </Box>

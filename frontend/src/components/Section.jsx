@@ -19,6 +19,7 @@ export default function Section({ onClickDeleteItem, onChangeItem, onClickDelete
             <>
                 {/* Accordtion heading edit, Textarea input form */}
                 <TextField
+                    data-cy={`Accordion edit-${accordion.id}`}
                     id="standard-multiline-flexible"
                     label="Accordion Heading"
                     multiline
@@ -66,8 +67,8 @@ export default function Section({ onClickDeleteItem, onChangeItem, onClickDelete
             {accordion.items ? accordion.items.map((item) => (
 
                 <AccordionDetails
-                    key={item.id} sx={{ paddingLeft: '2%' }}>
-                    <ResponsiveDialog onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
+                     key={item.id} sx={{ paddingLeft: '2%' }}>
+                    <ResponsiveDialog itemId={item.id} onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
                         {item.heading}
                     </ResponsiveDialog>
                 </AccordionDetails>

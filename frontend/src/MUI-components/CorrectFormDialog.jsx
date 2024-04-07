@@ -27,7 +27,7 @@ function WorkoutMediaCorrectFormCard({ onChangeImage, onClick, onChange, workout
 
     return (
         open &&
-        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
+        <Card data-cy="Correct Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
             <CardMedia
                 component="img"
                 sx={{ aspectRatio: 16 / 9, }}
@@ -36,7 +36,7 @@ function WorkoutMediaCorrectFormCard({ onChangeImage, onClick, onChange, workout
             />
             <InputFileUpload correctFormId={correctForm.id} workoutId={workoutId} onChange={onChangeImage} name="demo" text="GIF File" />
 
-            <CardContent sx={{ width: { xs: 320, sm: 'inherit', md: 320 } }} >
+            <CardContent>
             <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                         {/* workout description textarea input */}
                         <TextField
