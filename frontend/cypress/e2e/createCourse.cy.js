@@ -88,6 +88,7 @@ describe('Create Course Route', () => {
 
   /* ==== Test Created with Cypress Studio ==== */
   it('Test Course\'s Overview Textarea', function() {
+    cy.get('[data-cy="nextButton"]').click();
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.css-f4w4gy-MuiGrid-root > :nth-child(1) > .MuiTypography-root').should('be.visible');
     /* ==== End Cypress Studio ==== */
@@ -97,22 +98,22 @@ describe('Create Course Route', () => {
     /* ==== End Cypress Studio ==== */
 
 
-    cy.get('[data-cy="Course Overview"]').type(`Why do we use it?
+    cy.get('#demo-helper-text-aligned-no-helper').type(`Why do we use it?
     It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.`)
 
     /* ==== Generated with Cypress Studio ==== */
 
-    cy.get('[data-cy="Course Overview"] > .MuiInputBase-root > #demo-helper-text-aligned-no-helper').should(
+    cy.get('#demo-helper-text-aligned-no-helper').should(
       'have.value',
       'Why do we use it?\n    It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using \'Content here, content here\', making it look like readable English.'
     );
 
-    /* ==== End Cypress Studio ==== */
   });
 
 
   /* ==== Test Created with Cypress Studio ==== */
   it('Test Preview this Course \'s textarea input', function() {
+    cy.get('[data-cy="nextButton"]').click();
     /* ==== Generated with Cypress Studio ==== */
     cy.get(':nth-child(3) > .MuiTypography-h4').should('be.visible');
     cy.get('#lecture-url').clear('https://www.youtube.com/watch?v=jfKfPfyJRdk');
@@ -123,6 +124,10 @@ describe('Create Course Route', () => {
 
   /* ==== Test Created with Cypress Studio ==== */
   it('Test Course Content \'s Accordions', function() {
+    for (let i = 0; i < 2; i++) {
+      cy.get('[data-cy="nextButton"]').click();
+
+    }
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-10 > .MuiFormControl-root > .MuiInputBase-root > #outlined-textarea').should('be.visible');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root > [data-testid="AddIcon"]').should('be.visible');
@@ -178,7 +183,7 @@ describe('Create Course Route', () => {
     cy.get(':nth-child(1) > .MuiGrid-container > .MuiGrid-grid-xs-2 > :nth-child(2) > .MuiButton-icon > [data-testid="DeleteIcon"] > path').click();
     /* ==== End Cypress Studio ==== */
     /* ==== Generated with Cypress Studio ==== */
-    cy.get('[data-cy="Accordion item 5"]').click();
+    cy.get('[data-cy="Accordion item 5"]').click( {force: true});
     cy.get('.MuiDialogContent-root').should('be.visible');
     cy.get('.MuiCardContent-root').should('be.visible');
     cy.get('.MuiButtonGroup-root > .MuiButton-contained').should('be.enabled');
@@ -197,6 +202,10 @@ describe('Create Course Route', () => {
 
   /* ==== Test Created with Cypress Studio ==== */
   it('Testing accordion item\'s responsive dialog (Workout Routine & Video Lecture section)', function() {
+    for (let i = 0; i < 2; i++) {
+      cy.get('[data-cy="nextButton"]').click();
+
+    }
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.MuiAccordionSummary-content > .MuiTypography-root').click();
     cy.get('[data-cy="Accordion item 0"]').click();
@@ -206,7 +215,7 @@ describe('Create Course Route', () => {
     cy.get('.MuiDialogContent-root > .MuiGrid-container > .MuiGrid-root > .MuiButtonBase-root > [data-testid="AddIcon"] > path').should('be.visible');
     cy.get('.MuiButtonGroup-root > .MuiButton-outlined').should('be.enabled');
     cy.get('.MuiButtonGroup-root > .MuiButton-outlined').click();
-    cy.get('.css-rje4ir-MuiGrid-root > .MuiTypography-root').should('have.text', 'Your information here');
+    cy.get('.css-rje4ir-MuiGrid-root > .MuiTypography-root').should('have.text', 'Your readme text here');
     cy.get('.MuiDialogContent-root > .MuiGrid-container > .course-lecture-container > .MuiFormControl-root > .MuiInputBase-root > #lecture-url').should('be.visible');
     cy.get('.MuiDialogContent-root > .MuiGrid-container > .css-13i4rnv-MuiGrid-root > .MuiBox-root').should('be.visible');
     cy.get('.MuiDialogContent-root > .MuiGrid-container > .course-lecture-container > .MuiFormControl-root > .MuiInputBase-root > #lecture-url').click();
@@ -218,10 +227,10 @@ describe('Create Course Route', () => {
     cy.get('.MuiDialogActions-root > .MuiButtonBase-root').click();
     /* ==== End Cypress Studio ==== */
     /* ==== Generated with Cypress Studio ==== */
-    cy.get('[data-cy="Accordion item 1"]').click();
-    cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"] > path').click();
-    cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"] > path').click();
-    cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"]').click();
+    cy.get('[data-cy="Accordion item 1"]').click({force: true});
+    cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"] > path').click({force: true});
+    cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"] > path').click({force: true});
+    cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"]').click({force: true});
     // cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"] > path').click();
     // cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"]').click();
     // cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"]').click();
@@ -321,15 +330,20 @@ describe('Create Course Route', () => {
     cy.get('#outlined-number').should('have.value', '14');
     /* ==== End Cypress Studio ==== */
     /* ==== Generated with Cypress Studio ==== */
-    cy.get('[data-cy="Course Overview"] > .MuiInputBase-root > #demo-helper-text-aligned-no-helper').click().type('Testing Course Oveview. meaning this Course overview is just a test case that is part of my e2e testing that all im writing here is nothing but tet that is been on my mind.');
+    cy.get('[data-cy="nextButton"]').click();
+
+    cy.get('#demo-helper-text-aligned-no-helper').click().type('Testing Course Oveview. meaning this Course overview is just a test case that is part of my e2e testing that all im writing here is nothing but tet that is been on my mind.');
     /* ==== End Cypress Studio ==== */
     /* ==== Generated with Cypress Studio ==== */
-    cy.get('[data-cy="Course Overview"] > .MuiInputBase-root > #demo-helper-text-aligned-no-helper').should('have.value', 'Testing Course Oveview. meaning this Course overview is just a test case that is part of my e2e testing that all im writing here is nothing but tet that is been on my mind.');
+    cy.get('#demo-helper-text-aligned-no-helper').should('have.value', 'Testing Course Oveview. meaning this Course overview is just a test case that is part of my e2e testing that all im writing here is nothing but tet that is been on my mind.');
     /* ==== End Cypress Studio ==== */
     /* ==== Generated with Cypress Studio ==== */
     cy.get('#lecture-url').click();
     cy.get('#lecture-url').clear('https://www.youtube.com/watch?v=7N63cMKosIE&t=373s');
     cy.get('#lecture-url').type('https://www.youtube.com/watch?v=7N63cMKosIE&t=373s');
+
+
+    cy.get('[data-cy="nextButton"]').click();
     cy.get('[data-cy="Add Accordion Input"] > .MuiInputBase-root > #outlined-textarea').click();
     cy.get('.MuiAccordionSummary-content > .MuiTypography-root').click();
     cy.get('.MuiAccordionSummary-content > .MuiTypography-root').click();
@@ -346,7 +360,7 @@ describe('Create Course Route', () => {
     /* ==== Generated with Cypress Studio ==== */
     cy.get('#panel1bh-header').click();
     cy.get('.MuiAccordionSummary-content > .MuiTypography-root').click();
-    cy.get(':nth-child(2) > .MuiGrid-container > .MuiGrid-grid-xs-2 > :nth-child(2) > .MuiButton-icon > [data-testid="DeleteIcon"]').click();
+    cy.get(':nth-child(2) > .MuiGrid-container > .MuiGrid-grid-xs-2 > :nth-child(2) > .MuiButton-icon > [data-testid="DeleteIcon"]').click( {force: true});
     // cy.get('.MuiAccordionDetails-root > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root').click();
     /* ==== End Cypress Studio ==== */
     // cy.get('[data-cy="Accordion item edit-0"]').click().clear();

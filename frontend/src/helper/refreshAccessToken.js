@@ -1,4 +1,5 @@
 export default async function refreshAccessToken(refreshToken) {
+//   refreshing access token when it's due.
 
     try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}token/refresh`, {

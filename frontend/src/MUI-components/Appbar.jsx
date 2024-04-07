@@ -67,8 +67,6 @@ function ResponsiveAppBar() {
 
 
 
-  persistToken();
-  useRefreshToken();
 
 
 

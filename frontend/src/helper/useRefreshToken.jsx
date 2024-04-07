@@ -35,6 +35,5 @@ export default function useRefreshToken() {
 
     }, [currentTime]);
 
-    return token['access'];
 
 }

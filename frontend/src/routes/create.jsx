@@ -33,72 +33,12 @@ import { Send, WidthWide } from "@mui/icons-material";
 import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
 
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-// Initial data for workouts state in ResponsiveDialog
-const correctForm = {
-    demo: demoGif2,
-    description: "Correct exercise form description: e.g., Shoulder blades are depressed downwards"
-}
-const wrongForm = {
-    demo: demoGif2,
-    description: "Wrong exercise form description: e.g., Shoulder blades not retracting"
-}
-let nextWorkoutId = 1;
-let nextCorrectFormId = 1;
-let nextWrongFormId = 1;
-
-const initialWorkoutData = {
-    id: 0,
-    exercise: "Your Description here ",
-    demo: demoGif,
-    correctForm: [{
-        id: 0,
-        ...correctForm
-    }],
-    wrongForm: [{
-        id: 0,
-        ...wrongForm
-    }]
-}
-
-
-// For initial Data below this line
-const section1 = {
-    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)"
-}
-const sectionItem1 = {
-    lecture: null,
-    description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
-    heading: "Your own item header here: e.g., ReadMe Text"
-}
-const sectionItem2 = {
-    lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
-    description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-    heading: "Workout Routine"
-}
-
-let nextAccordionId = 1;
-let nextItemId = 2;
-// workout routine or the video lecture
-const initialSectionData = [{
-    id: 0,
-    heading: section1.heading,
-    items: [{
-        id: 0,
-        heading: sectionItem1.heading,
-        description: sectionItem1.description,
-        lecture: sectionItem1.lecture
-    }, {
-        id: 1,
-        heading: sectionItem2.heading,
-        description: sectionItem2.description,
-        lecture: sectionItem2.lecture
-    }]
-}]
 
 function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, onClick, workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
@@ -447,7 +387,7 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                                         <Grid item mb={2}>
                                             <ThemeProvider theme={theme}>
                                                 <Typography variant="h4">
-                                                    Your information here
+                                                    Your readme text here
                                                 </Typography>
                                             </ThemeProvider>
                                         </Grid>
@@ -619,6 +559,7 @@ function ControlledAccordions() {
 
 
 export default function CreateCourse() {
+    const [activeStep, setActiveStep] = React.useState(0);
 
     const [course, setCourse] = React.useState({
         title: '',
@@ -663,231 +604,251 @@ export default function CreateCourse() {
 
     return (
         <>
-
-
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+            </Box>
             <br></br>
-            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
-                <Box component="form" onSubmit={handleSubmit} noValidate>
-                    <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
-                        {/* Paper starts here */}
-                        <Grid item xs md={'auto'}>
-                            <Paper elevation={4}>
-                                <Grid item container justifyContent={'center'}>
-                                    <Grid item>
-                                        <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                            <img src={course.thumbnail} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
-                                        </Container>
-                                    </Grid>
+            {
+                activeStep === 0 ? (
+                    <Box sx={{ m: '3vw' }}>
+                        <Box component="form" onSubmit={handleSubmit} noValidate>
+                            <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
+                                {/* Paper starts here */}
+                                <Grid item xs md={'auto'}>
+                                    <Paper elevation={4}>
+                                        <Grid item container justifyContent={'center'}>
+                                            <Grid item>
+                                                <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
+                                                    <img src={course.thumbnail} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
+                                                </Container>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={4}>
+                                            <Grid item>
+                                                {/* Uploading  image file button  here */}
+                                                <InputFileUpload name="thumbnail" text="Image" onChange={handleImageUpload} />
+                                            </Grid>
+                                            <Grid item>
+                                                <FormattedInputs course={course} setCourse={setCourse} />
+                                            </Grid>
+                                            <Grid item xs paddingBottom={4}>
+                                                {/* Select menu form */}
+                                                <FormControl required sx={{ width: 200 }}>
+                                                    <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
+                                                    <Select
+                                                        data-cy="Select Difficulty"
+                                                        labelId="demo-simple-select-label"
+                                                        id="demo-simple-select"
+                                                        value={course.difficulty}
+                                                        label="Difficulty"
+                                                        onChange={e => {
+                                                            setCourse({
+                                                                ...course,
+                                                                difficulty: e.target.value
+                                                            })
+                                                        }}
+                                                        name="difficulty"
+                                                        autoWidth
+                                                    >
+                                                        <MenuItem value={'BG'}>Beginner</MenuItem>
+                                                        <MenuItem value={'IN'}>Intermediate</MenuItem>
+                                                        <MenuItem value={'AD'}>Advanced</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                                <TextField
+                                                    id="outlined-number"
+                                                    label="Weeks"
+                                                    type="number"
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    defaultValue={0}
+                                                    sx={{ width: 100 }}
+                                                    inputProps={{
+                                                        min: "0",
+                                                    }}
+                                                    value={courseContent.weeks}
+                                                    onChange={e => {
+                                                        setCourseContent(
+                                                            {
+                                                                ...courseContent,
+                                                                weeks: e.target.value
+                                                            }
+                                                        )
+                                                    }}
+
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
-                                <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={4}>
-                                    <Grid item>
-                                        {/* Uploading  image file button  here */}
-                                        <InputFileUpload name="thumbnail" text="Image" onChange={handleImageUpload} />
-                                    </Grid>
-                                    <Grid item>
-                                        <FormattedInputs course={course} setCourse={setCourse} />
-                                    </Grid>
-                                    <Grid item xs paddingBottom={4}>
-                                        {/* Select menu form */}
-                                        <FormControl required sx={{ width: 200 }}>
-                                            <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
-                                            <Select
-                                                data-cy="Select Difficulty"
-                                                labelId="demo-simple-select-label"
-                                                id="demo-simple-select"
-                                                value={course.difficulty}
-                                                label="Difficulty"
+                                {/* Paper ends here */}
+                                {/* title  & description starts here */}
+                                <Grid item xs={12} sm={12} md lg>
+                                    <Grid item container wrap="nowrap" direction="column">
+                                        <Grid item xs>
+                                            {/* Course title textarea input */}
+                                            <TextField
+                                                helperText=" "
+                                                id="demo-helper-text-aligned-no-helper"
+                                                label="Your Course's Title"
+                                                fullWidth={true}
+                                                minRows={5}
+                                                maxRows={5}
+                                                multiline
+                                                required
+                                                inputProps={{ maxLength: 200 }}
+                                                autoFocus
+                                                name="title"
+                                                value={course.title}
                                                 onChange={e => {
                                                     setCourse({
                                                         ...course,
-                                                        difficulty: e.target.value
+                                                        title: e.target.value
                                                     })
                                                 }}
-                                                name="difficulty"
-                                                autoWidth
-                                            >
-                                                <MenuItem value={'BG'}>Beginner</MenuItem>
-                                                <MenuItem value={'IN'}>Intermediate</MenuItem>
-                                                <MenuItem value={'AD'}>Advanced</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                        <TextField
-                                            id="outlined-number"
-                                            label="Weeks"
-                                            type="number"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            defaultValue={0}
-                                            sx={{ width: 100 }}
-                                            inputProps={{
-                                                min: "0",
-                                            }}
-                                            onChange={e => {
-                                                setCourseContent(
-                                                    {
-                                                        ...courseContent,
-                                                        weeks: e.target.value
-                                                    }
-                                                )
-                                            }}
-
-                                        />
+                                            />
+                                        </Grid>
+                                        <Grid item xs>
+                                            {/* course description textarea input */}
+                                            <TextField
+                                                data-cy="Course Description"
+                                                helperText=" "
+                                                id="demo-helper-text-aligned-no-helper"
+                                                label="Your Course's Description"
+                                                fullWidth={true}
+                                                minRows={isSmallScreen ? 10 : 20}
+                                                maxRows={isSmallScreen ? 10 : 20}
+                                                multiline
+                                                required
+                                                autoFocus
+                                                name="description"
+                                                value={course.description}
+                                                onChange={e => {
+                                                    setCourse({
+                                                        ...course,
+                                                        description: e.target.value
+                                                    })
+                                                }}
+                                            />
+                                        </Grid>
                                     </Grid>
                                 </Grid>
-                            </Paper>
-                        </Grid>
-                        {/* Paper ends here */}
-                        {/* title  & description starts here */}
-                        <Grid item xs={12} sm={12} md lg>
-                            <Grid item container wrap="nowrap" direction="column">
-                                <Grid item xs>
-                                    {/* Course title textarea input */}
-                                    <TextField
-                                        helperText=" "
-                                        id="demo-helper-text-aligned-no-helper"
-                                        label="Your Course's Title"
-                                        fullWidth={true}
-                                        minRows={5}
-                                        maxRows={5}
-                                        multiline
-                                        required
-                                        inputProps={{ maxLength: 200 }}
-                                        autoFocus
-                                        name="title"
-                                        onChange={e => {
-                                            setCourse({
-                                                ...course,
-                                                title: e.target.value
-                                            })
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs>
-                                    {/* course description textarea input */}
-                                    <TextField
-                                        data-cy="Course Description"
-                                        helperText=" "
-                                        id="demo-helper-text-aligned-no-helper"
-                                        label="Your Course's Description"
-                                        fullWidth={true}
-                                        minRows={isSmallScreen ? 10 : 20}
-                                        maxRows={isSmallScreen ? 10 : 20}
-                                        multiline
-                                        required
-                                        autoFocus
-                                        name="description"
-                                        onChange={e => {
-                                            setCourse({
-                                                ...course,
-                                                description: e.target.value
-                                            })
-                                        }}
-                                    />
-                                </Grid>
                             </Grid>
-                        </Grid>
-                    </Grid>
-                    {/* title  & description ends here */}
-                    <br></br>
-                    <hr></hr>
-                    <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                        <Grid item>
-                            <ThemeProvider theme={theme} >
-                                <Typography variant="h3">
-                                    Overview
-                                </Typography>
-                            </ThemeProvider>
-                        </Grid>
-                        <Grid item container>
-                            {/* course overview textarea input */}
-                            <TextField
-                                data-cy="Course Overview"
-                                helperText=" "
-                                id="demo-helper-text-aligned-no-helper"
-                                label="Your Course's Overview"
-                                fullWidth={true}
-                                minRows={10}
-                                maxRows={10}
-                                multiline
-                                required
-                                name="overview"
-                                onChange={e => {
-                                    setCourseContent({
-                                        ...courseContent,
-                                        overview: e.target.value
-                                    })
-                                }}
-                            />
-                        </Grid>
-                        <Grid item>
-                            <ThemeProvider theme={theme}>
-                                <Typography sx={{ textAlign: 'center' }} variant="h4">
-                                    Preview this course
-                                </Typography>
-                                <Typography sx={{ display: 'block', textAlign: 'center' }} variant="small">
-                                    Put your youtube video link here
-                                </Typography>
-                            </ThemeProvider>
-                        </Grid>
-                        <br />
-
-                        <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
-                            <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
-                                {/* course preview textarea input */}
-                                <TextField onChange={e => setCourseContent({
-                                    ...courseContent,
-                                    preview: e.target.value
-                                })}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <YouTubeIcon />
-                                            </InputAdornment>
-
-                                        )
-                                    }}
-                                    fullWidth={true}
-                                    id="lecture-url"
-                                    label="e.g https://www.youtube.com/watch?v=SOMEID"
-                                    type="url"
-                                    name="lecture"
-                                />
-                            </Box>
-                            <Grid item>
-                                {getEmbedUrl(courseContent.preview) ?
-                                    <Box mt={4} className="course-lecture-container" component={'div'}>
-                                        <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowfullscreen></iframe>
-                                    </Box>
-                                    :
-                                    <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                        <Typography variant="body" align={'center'}>
-                                            Your video will show up here
-                                        </Typography>
-                                    </Box>
-                                }
-                            </Grid>
-                        </Grid>
-                        <br />
-                        <Grid item>
-                            <ThemeProvider theme={theme}>
-                                <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                    Course content
-                                </Typography>
-                            </ThemeProvider>
-                        </Grid>
-                        <Grid item width={{ xs: '100%', md: '69%' }}>
-                            <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
-                        </Grid>
-                    </Grid>
-                    <Box display="flex" justifyContent={'flex-end'}>
-                        <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                            Submit
-                        </Button>
+                        </Box>
                     </Box>
+                    
+                                /* title  & description ends here */
+                )
+                    : activeStep === 1 ? (
+                        <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                            <Box component="form" onSubmit={handleSubmit} noValidate>
+                                {/* title  & description ends here */}
+                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                    <Grid item>
+                                        <ThemeProvider theme={theme} >
+                                            <Typography variant="h3">
+                                                Overview
+                                            </Typography>
+                                        </ThemeProvider>
+                                    </Grid>
+                                    <Grid item container>
+                                        {/* course overview textarea input */}
+                                        <TextField
+                                            data-cy="Course Overview"
+                                            helperText=" "
+                                            id="demo-helper-text-aligned-no-helper"
+                                            label="Your Course's Overview"
+                                            fullWidth={true}
+                                            minRows={10}
+                                            maxRows={10}
+                                            multiline
+                                            required
+                                            name="overview"
+                                            onChange={e => {
+                                                setCourseContent({
+                                                    ...courseContent,
+                                                    overview: e.target.value
+                                                })
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item>
+                                        <ThemeProvider theme={theme}>
+                                            <Typography sx={{ textAlign: 'center' }} variant="h4">
+                                                Preview this course
+                                            </Typography>
+                                            <Typography sx={{ display: 'block', textAlign: 'center' }} variant="small">
+                                                Put your youtube video link here
+                                            </Typography>
+                                        </ThemeProvider>
+                                    </Grid>
+                                    <br />
 
-                </Box>
-            </Box>
+                                    <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
+                                        <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
+                                            {/* course preview textarea input */}
+                                            <TextField onChange={e => setCourseContent({
+                                                ...courseContent,
+                                                preview: e.target.value
+                                            })}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <YouTubeIcon />
+                                                        </InputAdornment>
+
+                                                    )
+                                                }}
+                                                fullWidth={true}
+                                                id="lecture-url"
+                                                label="e.g https://www.youtube.com/watch?v=SOMEID"
+                                                type="url"
+                                                name="lecture"
+                                            />
+                                        </Box>
+                                        <Grid item>
+                                            {getEmbedUrl(courseContent.preview) ?
+                                                <Box mt={4} className="course-lecture-container" component={'div'}>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowfullscreen></iframe>
+                                                </Box>
+                                                :
+                                                <Box mb="5%" mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                    <Typography variant="body" align={'center'}>
+                                                        Your video will show up here
+                                                    </Typography>
+                                                </Box>
+                                            }
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Box>
+                    ) : (
+
+                        <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                            <Box component="form" onSubmit={handleSubmit} noValidate>
+
+                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                    <Grid item>
+                                        <ThemeProvider theme={theme}>
+                                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                                Course content
+                                            </Typography>
+                                        </ThemeProvider>
+                                    </Grid>
+                                    <Grid item width={{ xs: '100%', md: '69%' }}>
+                                        <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
+                                    </Grid>
+                                </Grid>
+                                    <Box display="flex" justifyContent={'flex-end'} position="absolute" bottom={0} right={0} left={0} p={2} mr={2}>
+                                        <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+                                            Submit
+                                        </Button>
+                                    </Box>
+                            </Box>
+                        </Box>
+                    )}
         </>
     )
 }
@@ -911,11 +872,66 @@ export default function CreateCourse() {
 
 
 
+// Initial data for workouts state in ResponsiveDialog
+const correctForm = {
+    demo: demoGif2,
+    description: "Correct exercise form description: e.g., Shoulder blades are depressed downwards"
+}
+const wrongForm = {
+    demo: demoGif2,
+    description: "Wrong exercise form description: e.g., Shoulder blades not retracting"
+}
+let nextWorkoutId = 1;
+let nextCorrectFormId = 1;
+let nextWrongFormId = 1;
 
+const initialWorkoutData = {
+    id: 0,
+    exercise: "Your Description here ",
+    demo: demoGif,
+    correctForm: [{
+        id: 0,
+        ...correctForm
+    }],
+    wrongForm: [{
+        id: 0,
+        ...wrongForm
+    }]
+}
 
+// For initial Data below this line
+const section1 = {
+    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)"
+}
+const sectionItem1 = {
+    lecture: null,
+    description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
+    heading: "Your own item header here: e.g., ReadMe Text"
+}
+const sectionItem2 = {
+    lecture: null,
+    description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
+    heading: "Workout Routine"
+}
 
-
-
+let nextAccordionId = 1;
+let nextItemId = 2;
+// workout routine or the video lecture
+const initialSectionData = [{
+    id: 0,
+    heading: section1.heading,
+    items: [{
+        id: 0,
+        heading: sectionItem1.heading,
+        description: sectionItem1.description,
+        lecture: sectionItem1.lecture
+    }, {
+        id: 1,
+        heading: sectionItem2.heading,
+        description: sectionItem2.description,
+        lecture: sectionItem2.lecture
+    }]
+}]
 
 // const workouts2 = {
 //     intesity: "H",

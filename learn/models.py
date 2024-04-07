@@ -71,7 +71,9 @@ class Course(models.Model):
         "User", on_delete=models.CASCADE, related_name="creator"
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)   
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00) 
+    weeks = models.IntegerField()
+  
 
     def __str__(self):
         return f"( id: {self.id}) Course: {self.title}. By {self.created_by.username}"
@@ -104,7 +106,6 @@ class CourseContent(models.Model):
     course = models.ForeignKey(
         "Course", on_delete=models.CASCADE, related_name="course_content"
     )
-    weeks = models.IntegerField()
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.course.title}"

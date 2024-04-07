@@ -1,15 +1,31 @@
 import { Outlet } from "react-router-dom";
 import ResponsiveAppBar from "../MUI-components/Appbar";
 import { useNavigation } from "react-router-dom";
+import persistToken from "../helper/persistToken";
+import useRefreshToken from "../helper/useRefreshToken";
+import { useContext } from "react";
+import { IsLoadingContext } from "../helper/IsLoadingContext";
+import Box from '@mui/material/Box';
 
-export default function Root(){
+export default function Root() {
     const navigation = useNavigation();
+    const isLoading = useContext(IsLoadingContext);
+
+    persistToken(); // here we are persisting log in state
+    useRefreshToken(); // refreshing access token when it's due if the user has a refresh token in storage.
+
     return (
-    <>
-        <ResponsiveAppBar></ResponsiveAppBar>
-        <div id="detail" className={ navigation.state === "loading" ? "loading" : ""}>
-            <Outlet></Outlet>
-        </div>
-    </>
+        <>
+            <ResponsiveAppBar></ResponsiveAppBar>
+            <>
+
+                {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: '100%' }}>
+                    <progress value={null} />
+                    <p>Loading...</p>
+                </Box>)
+                    : <Outlet />}
+            </>
+
+        </>
     )
 }

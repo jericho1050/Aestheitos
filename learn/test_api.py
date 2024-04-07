@@ -81,6 +81,7 @@ class CourseListAPITestCase(APITestCase):
             difficulty="BG",
             thumbnail="images/images/skillz.jpg",
             created_by=self.user,
+            weeks=18,
         )
         Course.objects.create(
             title="set up2",
@@ -88,6 +89,7 @@ class CourseListAPITestCase(APITestCase):
             difficulty="BG",
             thumbnail="images/images/skillz.jpg",
             created_by=self.user,
+            weeks=18,
         )
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.unaunthenticated_client = APIClient(enforce_csrf_checks=True)
@@ -118,10 +120,12 @@ class CourseListAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(
-            Course.objects.get(title="set up").title, response.data[0]["title"]
+            Course.objects.get(title="set up").title,
+            response.data[0]["title"],
         )
         self.assertEqual(
-            Course.objects.get(title="set up2").title, response.data[1]["title"]
+            Course.objects.get(title="set up2").title,
+            response.data[1]["title"],
         )
 
     def test_create_course(self):
@@ -150,6 +154,7 @@ class CourseListAPITestCase(APITestCase):
                 "description": "testing thumbnail is not a valid file",
                 "difficulty": "BG",
                 "thumbnail": "/images/images/skillz.jpg",
+                "weeks": 12,
             },
         )
 
@@ -161,6 +166,7 @@ class CourseListAPITestCase(APITestCase):
                 "description": "not empty",
                 "difficulty": "BG",
                 "thumbnail": image,
+                "weeks": 12
             },
         )
 
@@ -175,6 +181,7 @@ class CourseListAPITestCase(APITestCase):
                 "description": "all fields properly filled",
                 "difficulty": "BG",
                 "thumbnail": image,
+                "weeks": 12
             },
         )
 
@@ -204,6 +211,8 @@ class CourseDetailAPITestCase(APITestCase):
             difficulty="BG",
             thumbnail="images/images/skillz.jpg",
             created_by=user,
+                        weeks=18,
+
         )
         Course.objects.create(
             title="set up2",
@@ -211,6 +220,8 @@ class CourseDetailAPITestCase(APITestCase):
             difficulty="BG",
             thumbnail="images/images/skillz.jpg",
             created_by=user,
+                        weeks=18,
+
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -251,6 +262,7 @@ class CourseDetailAPITestCase(APITestCase):
                 "title": "test unauth",
                 "description": "test unauth",
                 "difficulty": "AD",
+                "weeks": 1
             },
             format="json",
         )
@@ -261,6 +273,7 @@ class CourseDetailAPITestCase(APITestCase):
                 "title": "test changing title",
                 "description": "",
                 "difficulty": "abc",
+                "weeks": 2
             },
             format="json",
         )
@@ -271,6 +284,8 @@ class CourseDetailAPITestCase(APITestCase):
                 "title": "test changing title",
                 "description": "",
                 "difficulty": "abc",
+                "weeks": 2
+
             },
             format="json",
         )
@@ -282,6 +297,8 @@ class CourseDetailAPITestCase(APITestCase):
                 "title": "changing title using put",
                 "description": "nothing1",
                 "difficulty": "AD",
+                "weeks": 2
+
             },
             format="json",
         )
@@ -291,6 +308,7 @@ class CourseDetailAPITestCase(APITestCase):
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_200_OK)
         self.assertEqual(response_4.data["title"], "changing title using put")
+        self.assertEqual(response_4.data['weeks'], 2)
 
     def test_delete_course(self):
         """
@@ -321,18 +339,21 @@ class CourseContentDetailAPITestCase(APITestCase):
             description="Lorem ipsum",
             difficulty="BG",
             created_by=self.user,
+                        weeks=18,
+
         )
         self.course2 = Course.objects.create(
             title="Testing Content",
             description="Lorem ipsum",
             difficulty="BG",
             created_by=self.user,
+                        weeks=18,
+
         )
         self.content = CourseContent.objects.create(
             preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
             overview="API TESTING",
             course=self.course2,
-            weeks=18,
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -365,7 +386,6 @@ class CourseContentDetailAPITestCase(APITestCase):
             {
                 "preview": "https://www.youtube.com",
                 "overview": "testing post method",
-                "weeks": 18,
             },
             format="json",
         )
@@ -375,7 +395,6 @@ class CourseContentDetailAPITestCase(APITestCase):
             {
                 "preview": "https://www.youtube.com",
                 "overview": "testing post method",
-                "weeks": 18,
             },
             format="json",
         )
@@ -383,7 +402,6 @@ class CourseContentDetailAPITestCase(APITestCase):
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
         self.assertEqual(response_1.data["overview"], "testing post method")
         self.assertEqual(response_1.data["preview"], "https://www.youtube.com")
-        self.assertEqual(response_1.data["weeks"], 18)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_course_content(self):
@@ -393,7 +411,6 @@ class CourseContentDetailAPITestCase(APITestCase):
             {
                 "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
-                "weeks": 69,
             },
             format="json",
         )
@@ -404,7 +421,6 @@ class CourseContentDetailAPITestCase(APITestCase):
             {
                 "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
-                "weeks": 69,
             },
             format="json",
         )
@@ -415,7 +431,6 @@ class CourseContentDetailAPITestCase(APITestCase):
             {
                 "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
-                "weeks": 69,
             },
             format="json",
         )
@@ -423,7 +438,6 @@ class CourseContentDetailAPITestCase(APITestCase):
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
         self.assertEqual(response_1.data["overview"], "testing Put method brah")
         self.assertEqual(response_1.data["preview"], "https://www.youtube.com")
-        self.assertEqual(response_1.data["weeks"], 69)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -431,7 +445,8 @@ class CourseContentDetailAPITestCase(APITestCase):
 class WorkoutListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
-        self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        self.course = Course.objects.create(title="Test Course", created_by=self.user,             weeks=18,
+)
         self.section = Section.objects.create(course=self.course, heading="testing")
         self.section_item = SectionItem.objects.create(
             section=self.section, description="go to this and that and that "
@@ -556,7 +571,7 @@ class WorkoutListAPITestCase(APITestCase):
         self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_1.data["exercise"], "Reverse Plank bridge")
         self.assertIn(
-            'images',
+            "images",
             response_1.data["demo"],
         )
         self.assertEqual(response_1.data["intensity"], "M")
@@ -574,7 +589,8 @@ class WorkoutDetailAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
 
-        self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        self.course = Course.objects.create(title="Test Course", created_by=self.user,             weeks=18,
+)
         self.section = Section.objects.create(
             heading="Testing section", course=self.course
         )
@@ -660,7 +676,6 @@ class WorkoutDetailAPITestCase(APITestCase):
 
         image.seek(0)
 
-
         # test update instance with an unauthenticated client
         response_2 = self.unauthenticated_client.put(
             reverse("learn:course-workout-detail", args=[1]),
@@ -739,8 +754,10 @@ class CourseCommentListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
-        self.course = Course.objects.create(title="test", created_by=self.user)
-        self.course_2 = Course.objects.create(title="test_2", created_by=self.user)
+        self.course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
+)
+        self.course_2 = Course.objects.create(title="test_2", created_by=self.user,             weeks=18,
+)
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
@@ -850,7 +867,8 @@ class CourseCommentDetailAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
-        course = Course.objects.create(title="test", created_by=self.user_2)
+        course = Course.objects.create(title="test", created_by=self.user_2,             weeks=18,
+)
         self.comment = CourseComments.objects.create(
             course=course, comment="to modify", comment_by=self.user
         )
@@ -993,7 +1011,8 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
-        course = Course.objects.create(title="test", created_by=self.user)
+        course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
+)
         section = Section.objects.create(heading="week 5", course=course)
         section_item = SectionItem.objects.create(
             section=section, lecture="https://www.youtube.com"
@@ -1085,7 +1104,6 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
 
         image.seek(0)
 
-
         # test create correct exercise demo with an authenticated client != created_by
         response_2 = self.authenticated_client_2.post(
             reverse("learn:correct-exercise-list", args=[1]),
@@ -1096,7 +1114,6 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         )
 
         image.seek(0)
-
 
         # test create correct exercise demo that a workout instance doesn't exist
         response_3 = self.authenticated_client.post(
@@ -1134,7 +1151,8 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
-        course = Course.objects.create(title="test", created_by=self.user)
+        course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
+)
         section = Section.objects.create(
             course=course, heading="idk just section testing"
         )
@@ -1232,7 +1250,6 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
 
         image.seek(0)
 
-
         # test update instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.put(
             reverse("learn:correct-exercise-detail", args=[1]),
@@ -1244,14 +1261,12 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
 
         image.seek(0)
 
-
         # test update instance with an empty fields
         response_3 = self.authenticated_client.put(
             reverse("learn:correct-exercise-detail", args=[1])
         )
 
         image.seek(0)
-
 
         # test update instance that doesn't exists
         response_4 = self.authenticated_client.put(
@@ -1316,7 +1331,8 @@ class WrongExerciseFormListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
-        course = Course.objects.create(title="test", created_by=self.user)
+        course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
+)
         section = Section.objects.create(course=course, heading="WEEK 4")
         section_item = SectionItem.objects.create(
             section=section, description="GO ON GO GO GO GO GO"
@@ -1408,7 +1424,6 @@ class WrongExerciseFormListAPITestCase(APITestCase):
 
         image.seek(0)
 
-
         # test create wrong exercise demo with an authenticated client != created_by
         response_2 = self.authenticated_client_2.post(
             reverse("learn:wrong-exercise-list", args=[1]),
@@ -1437,7 +1452,6 @@ class WrongExerciseFormListAPITestCase(APITestCase):
             {"demo": image, "description": "idk"},
         )
 
-
         # test create wrong exercise demo with an empty field
         response_5 = self.authenticated_client.post(
             reverse("learn:wrong-exercise-list", args=[1])
@@ -1457,7 +1471,8 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
-        course = Course.objects.create(title="test", created_by=self.user)
+        course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
+)
         section = Section.objects.create(heading="week 60", course=course)
         section_item = SectionItem.objects.create(
             section=section, lecture="https://www.youtube.com/watchme"
@@ -1553,7 +1568,6 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
 
         image.seek(0)
 
-
         # test update instance with an authenticated client != created_by
         response_2 = self.authenticated_client_2.put(
             reverse("learn:wrong-exercise-detail", args=[1]),
@@ -1564,7 +1578,6 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         )
 
         image.seek(0)
-
 
         # test update instance with an empty fields
         response_3 = self.authenticated_client.put(
