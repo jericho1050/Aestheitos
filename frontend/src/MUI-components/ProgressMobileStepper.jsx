@@ -4,7 +4,6 @@ import MobileStepper from '@mui/material/MobileStepper';
 import Button from '@mui/material/Button';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-
 export default function ProgressMobileStepper({ activeStep, setActiveStep}) {
   const theme = useTheme();
 
@@ -24,7 +23,7 @@ export default function ProgressMobileStepper({ activeStep, setActiveStep}) {
       activeStep={activeStep}
       sx={{ maxWidth: 400, flexGrow: 1 }}
       nextButton={
-        <Button data-cy="nextButton" size="small" onClick={handleNext} disabled={activeStep === 2}>
+        <Button data-cy="nextButton" size="small" type="submit" onSubmit={handleNext} disabled={activeStep === 2}>
           Next
           {theme.direction === 'rtl' ? (
             <KeyboardArrowLeft />
@@ -34,7 +33,7 @@ export default function ProgressMobileStepper({ activeStep, setActiveStep}) {
         </Button>
       }
       backButton={
-        <Button data-cy="prevButton" size="small" onClick={handleBack} disabled={activeStep === 0}>
+        <Button data-cy="prevButton" size="small" type="submit" onClick={handleBack} disabled={activeStep === 0}>
           {theme.direction === 'rtl' ? (
             <KeyboardArrowRight />
           ) : (

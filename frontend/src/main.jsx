@@ -15,6 +15,7 @@ import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
 import Course from './routes/course';
 import CreateCourse from './routes/create';
+import {action as createAction} from './routes/create';
 import ProectedRoute from './helper/protectedRoute';
 import { IsLoadingProvider } from './helper/IsLoadingContext';
 
@@ -54,7 +55,9 @@ const router = createBrowserRouter([
         children: [
           {
           path: "course/create",
-          element: <CreateCourse />
+          element: <CreateCourse />,
+          action: createAction
+          
           }
         ]
       }

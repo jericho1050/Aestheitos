@@ -3,9 +3,11 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import { NumericFormat } from 'react-number-format';
 import { TextField } from '@mui/material';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import {Box} from "@mui/material";
 
 export default function FormattedInputs({course, setCourse}) {
-
+    
     const handleChange = (event) => {
         setCourse({
             ...course,
@@ -14,6 +16,8 @@ export default function FormattedInputs({course, setCourse}) {
     };
 
     return (
+    <Box display={{display: 'flex', alignItems: 'center'}}>
+        <AttachMoneyIcon sx={{mb: -4}} />
         <TextField
             label="Course Price"
             value={course.price}
@@ -26,6 +30,7 @@ export default function FormattedInputs({course, setCourse}) {
             variant="standard"
             sx={{ marginTop: 3 }}
         />
+    </Box>
     );
 }
 
@@ -48,7 +53,6 @@ const NumericFormatCustom = React.forwardRef(
                 }}
                 thousandSeparator
                 valueIsNumericString
-                prefix="$"
             />
         );
     },

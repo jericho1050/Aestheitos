@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { Box, CardActionArea, Grid, Rating, ThemeProvider, createTheme, responsiveFontSizes } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import defaultImage from '../static/images/noimg.png'
+import { Link } from 'react-router-dom';
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
 
@@ -16,6 +17,7 @@ export default function CourseCard(props) {
       <ThemeProvider theme={theme}>
 
         <CardActionArea className="course-card" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <Link to={`courses/${props.id}`}>
           <CardMedia
             component="img"
             sx={{ aspectRatio: 16 / 9 }}
@@ -75,8 +77,8 @@ export default function CourseCard(props) {
               </Grid>
             </Grid>
           </Box>
+          </Link>
         </CardActionArea>
-
       </ThemeProvider>
     </Card>
   );
