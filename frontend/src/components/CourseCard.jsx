@@ -17,7 +17,7 @@ export default function CourseCard(props) {
       <ThemeProvider theme={theme}>
 
         <CardActionArea className="course-card" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <Link to={`courses/${props.id}`}>
+          <Link to={`courses/${props.id}`} style={{color: 'inherit', textDecoration: 'none'}}>
           <CardMedia
             component="img"
             sx={{ aspectRatio: 16 / 9 }}

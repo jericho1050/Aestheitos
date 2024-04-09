@@ -35,25 +35,29 @@ import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
 import { createCourse } from "../courses";
-import { Form } from "react-router-dom";
+import { Form, useActionData } from "react-router-dom";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-let readImageThumbnail;
 
 export async function action({ request }) {
     let formData = await request.formData();
     const courseData = Object.fromEntries(formData);
-    formData.set('thumbnail', readImageThumbnail);
-    // console.log(`my course data ${courseData.title}`);
-    // console.log(`my course data ${readImageThumbnail.name}`);
-    // console.log(`my course data ${courseData.price}`);
-    // console.log(`my course data ${courseData.difficulty}`);
-    // console.log(`my course data ${courseData.weeks}`);
-    // console.log(`my course data ${courseData.description}`);
+    let error = {}
+
+    console.log(`my course data ${courseData.title}`);
+    console.log(`my course data ${courseData.name}`);
+    console.log(`my course data ${courseData.price}`);
+    console.log(`my course data ${courseData.difficulty}`);
+    console.log(`my course data ${courseData.weeks}`);
+    console.log(`my course data ${courseData.description}`);
     const course = await createCourse(formData);
-    console.log(`this is my course var ${course}`);
+    console.log(`my course lol ${course.message}`)
+    if (course.statusCode >= 400) {
+        error = { ...course };
+        return error;
+    }
     return { course };
 }
 
@@ -582,9 +586,9 @@ export default function CreateCourse() {
         title: '',
         difficulty: '',
         description: '',
-        thumbnail: null,
+        thumbnail: image,
         price: 0,
-        weeks: 0,
+        weeks: null,
 
     });
     const [courseContent, setCourseContent] = React.useState({
@@ -592,11 +596,41 @@ export default function CreateCourse() {
         overview: '',
 
     })
-
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
+    const errorAction = useActionData(); // waiting for the return value of action if it runs to an error
+    const [isError, setIsError] = React.useState(false);
+    const [status, setStatus] = React.useState('empty');
 
+    React.useEffect(() => {
+        if (errorAction?.message) {
+            setIsError(true);
+        } 
+
+    }, [errorAction])
+
+    React.useEffect(() => {
+        function checkFields() {
+            for (let key in course) {
+                if (course[key] === '' || course[key] === null) {
+                    return false;
+                }
+            }
+            // for (let key in courseContent) {
+            //     if (courseContent[key] === '') {
+            //         return false;
+            //     }
+            // }
+            return true;
+        }
+        if (checkFields()) {
+            setStatus('success');
+            setIsError(false);
+        } else {
+            setStatus('typing')
+        }
+    }, [course]);
 
     function handleImageUpload(event) {
         const file = event.target.files[0];
@@ -604,7 +638,6 @@ export default function CreateCourse() {
             ...course,
             thumbnail: file
         })
-        readImageThumbnail = file;
 
 
         // read file for preview
@@ -615,27 +648,37 @@ export default function CreateCourse() {
 
         if (file) {
             reader.readAsDataURL(file);
-            
+
         }
 
     }
 
-    // function handleSubmit(e) {
+    // This is Actually 
+    function handleCourseSubmit(){
+        if (!isError && status === 'success') {
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        } 
+    }
 
-    // }
+    function handleCourseOverviewSubmit() {
+        // TODO
+    } 
+     function handleCourseContentSubmit() {
+
+     }
+
+
 
     return (
         <>
-
-
             <br></br>
             {
-                activeStep === 0 ? (
-                    <Form method="post">
+                activeStep === 0  ? (
+                    <Form method="post" encType="multipart/form-data" noValidate onSubmit={handleCourseSubmit}>
 
                         <Box sx={{ m: '3vw' }}>
                             <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                                <ProgressMobileStepper status={status} setStatus={setStatus} error={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                             </Box>
                             <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                                 {/* Paper starts here */}
@@ -651,14 +694,28 @@ export default function CreateCourse() {
                                         <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={4}>
                                             <Grid item>
                                                 {/* Uploading  image file button  here */}
-                                                <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" onChange={handleImageUpload} />
+                                                <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" setIsError={setIsError} onChange={handleImageUpload} />
                                             </Grid>
                                             <Grid item>
-                                                <FormattedInputs course={course} setCourse={setCourse} />
+                                                {isError  &&
+                                                    errorAction?.message && (
+                                                        <>
+                                                            {Object.entries(JSON.parse(errorAction.message)).map(([key, value]) => (
+                                                                <Box key={key} component="div">
+                                                                    <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left' }}>
+                                                                        {key}: {value[0]}
+                                                                    </Typography>
+                                                                </Box>
+                                                            ))}
+                                                        </>
+                                                    )}
+                                            </Grid>
+                                            <Grid item>
+                                                <FormattedInputs setIsError={setIsError} error={isError} course={course} setCourse={setCourse} />
                                             </Grid>
                                             <Grid item xs paddingBottom={4}>
                                                 {/* Select menu form */}
-                                                <FormControl required={true} sx={{ width: 200 }}>
+                                                <FormControl required={true} sx={{ width: 200 }} error={isError }>
                                                     <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
                                                     <Select
                                                         data-cy="Select Difficulty"
@@ -670,7 +727,8 @@ export default function CreateCourse() {
                                                             setCourse({
                                                                 ...course,
                                                                 difficulty: e.target.value
-                                                            })
+                                                            });
+                                                            setIsError(false);
                                                         }}
                                                         inputProps={{ name: "difficulty" }}
                                                         autoWidth
@@ -692,15 +750,17 @@ export default function CreateCourse() {
                                                     inputProps={{
                                                         min: "0",
                                                     }}
-                                                    value={courseContent.weeks}
+                                                    value={course.weeks}
                                                     onChange={e => {
                                                         setCourse(
                                                             {
                                                                 ...course,
                                                                 weeks: e.target.value
                                                             }
-                                                        )
+                                                        );
+                                                        setIsError(false);
                                                     }}
+                                                    error={isError}
 
                                                 />
                                             </Grid>
@@ -730,8 +790,10 @@ export default function CreateCourse() {
                                                     setCourse({
                                                         ...course,
                                                         title: e.target.value
-                                                    })
+                                                    });
+                                                    setIsError(false);
                                                 }}
+                                                error={isError }
                                             />
                                         </Grid>
                                         <Grid item xs>
@@ -753,8 +815,10 @@ export default function CreateCourse() {
                                                     setCourse({
                                                         ...course,
                                                         description: e.target.value
-                                                    })
+                                                    });
+                                                    setIsError(false);
                                                 }}
+                                                error={isError }
                                             />
                                         </Grid>
                                     </Grid>
@@ -766,109 +830,124 @@ export default function CreateCourse() {
                     /* title  & description ends here */
                 )
                     : activeStep === 1 ? (
-                        <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
-                            {/* title  & description ends here */}
-                            <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                <Grid item>
-                                    <ThemeProvider theme={theme} >
-                                        <Typography variant="h3">
-                                            Overview
-                                        </Typography>
-                                    </ThemeProvider>
-                                </Grid>
-                                <Grid item container>
-                                    {/* course overview textarea input */}
-                                    <TextField
-                                        data-cy="Course Overview"
-                                        helperText=" "
-                                        id="demo-helper-text-aligned-no-helper"
-                                        label="Your Course's Overview"
-                                        fullWidth={true}
-                                        minRows={10}
-                                        maxRows={10}
-                                        multiline
-                                        required={true}
-                                        name="overview"
-                                        onChange={e => {
-                                            setCourseContent({
-                                                ...courseContent,
-                                                overview: e.target.value
-                                            })
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item>
-                                    <ThemeProvider theme={theme}>
-                                        <Typography sx={{ textAlign: 'center' }} variant="h4">
-                                            Preview this course
-                                        </Typography>
-                                        <Typography sx={{ display: 'block', textAlign: 'center' }} variant="small">
-                                            Put your youtube video link here
-                                        </Typography>
-                                    </ThemeProvider>
-                                </Grid>
-                                <br />
+                        <Form method="post" encType="multipart/form-data" noValidate>
 
-                                <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
-                                    <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
-                                        {/* course preview textarea input */}
-                                        <TextField onChange={e => setCourseContent({
-                                            ...courseContent,
-                                            preview: e.target.value
-                                        })}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <YouTubeIcon />
-                                                    </InputAdornment>
-
-                                                )
-                                            }}
-                                            fullWidth={true}
-                                            id="lecture-url"
-                                            label="e.g https://www.youtube.com/watch?v=SOMEID"
-                                            type="url"
-                                            name="lecture"
-                                        />
-                                    </Box>
+                            <Box sx={{ m: '3vw' }}>
+                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                    <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                                </Box>
+                            </Box>
+                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                                {/* title  & description ends here */}
+                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item>
-                                        {getEmbedUrl(courseContent.preview) ?
-                                            <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowfullscreen></iframe>
-                                            </Box>
-                                            :
-                                            <Box mb="5%" mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                <Typography variant="body" align={'center'}>
-                                                    Your video will show up here
-                                                </Typography>
-                                            </Box>
-                                        }
+                                        <ThemeProvider theme={theme} >
+                                            <Typography variant="h3">
+                                                Overview
+                                            </Typography>
+                                        </ThemeProvider>
+                                    </Grid>
+                                    <Grid item container>
+                                        {/* course overview textarea input */}
+                                        <TextField
+                                            data-cy="Course Overview"
+                                            helperText=" "
+                                            id="demo-helper-text-aligned-no-helper"
+                                            label="Your Course's Overview"
+                                            fullWidth={true}
+                                            minRows={10}
+                                            maxRows={10}
+                                            multiline
+                                            required={true}
+                                            name="overview"
+                                            onChange={e => {
+                                                setCourseContent({
+                                                    ...courseContent,
+                                                    overview: e.target.value
+                                                })
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item>
+                                        <ThemeProvider theme={theme}>
+                                            <Typography sx={{ textAlign: 'center' }} variant="h4">
+                                                Preview this course
+                                            </Typography>
+                                            <Typography sx={{ display: 'block', textAlign: 'center' }} variant="small">
+                                                Put your youtube video link here
+                                            </Typography>
+                                        </ThemeProvider>
+                                    </Grid>
+                                    <br />
+
+                                    <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
+                                        <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
+                                            {/* course preview textarea input */}
+                                            <TextField onChange={e => setCourseContent({
+                                                ...courseContent,
+                                                preview: e.target.value
+                                            })}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <YouTubeIcon />
+                                                        </InputAdornment>
+
+                                                    )
+                                                }}
+                                                fullWidth={true}
+                                                id="lecture-url"
+                                                label="e.g https://www.youtube.com/watch?v=SOMEID"
+                                                type="url"
+                                                name="lecture"
+                                            />
+                                        </Box>
+                                        <Grid item>
+                                            {getEmbedUrl(courseContent.preview) ?
+                                                <Box mt={4} className="course-lecture-container" component={'div'}>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowfullscreen></iframe>
+                                                </Box>
+                                                :
+                                                <Box mb="5%" mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                    <Typography variant="body" align={'center'}>
+                                                        Your video will show up here
+                                                    </Typography>
+                                                </Box>
+                                            }
+                                        </Grid>
                                     </Grid>
                                 </Grid>
-                            </Grid>
-                        </Box>
-                    ) : (
-
-                        <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
-
-                            <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                <Grid item>
-                                    <ThemeProvider theme={theme}>
-                                        <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                            Course content
-                                        </Typography>
-                                    </ThemeProvider>
-                                </Grid>
-                                <Grid item width={{ xs: '100%', md: '69%' }}>
-                                    <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
-                                </Grid>
-                            </Grid>
-                            <Box display="flex" justifyContent={'flex-end'} position="absolute" bottom={0} right={0} left={0} p={2} mr={2}>
-                                <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                                    Submit
-                                </Button>
                             </Box>
-                        </Box>
+                        </Form>
+                    ) : (
+                        <Form method="post" encType="multipart/form-data noValidate">
+
+                            <Box sx={{ m: '3vw' }}>
+                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                    <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                                </Box>
+                            </Box>
+                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+
+                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                    <Grid item>
+                                        <ThemeProvider theme={theme}>
+                                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                                Course content
+                                            </Typography>
+                                        </ThemeProvider>
+                                    </Grid>
+                                    <Grid item width={{ xs: '100%', md: '69%' }}>
+                                        <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
+                                    </Grid>
+                                </Grid>
+                                <Box display="flex" justifyContent={'flex-end'} position="absolute" bottom={0} right={0} left={0} p={2} mr={2}>
+                                    <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+                                        Submit
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Form>
                     )}
 
         </>
@@ -954,6 +1033,7 @@ const initialSectionData = [{
         lecture: sectionItem2.lecture
     }]
 }]
+
 
 // const workouts2 = {
 //     intesity: "H",

@@ -6,29 +6,32 @@ import { TextField } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import {Box} from "@mui/material";
 
-export default function FormattedInputs({course, setCourse}) {
+export default function FormattedInputs({setIsError, error, course, setCourse}) {
     
     const handleChange = (event) => {
         setCourse({
             ...course,
             price: event.target.value,
         });
+        setIsError(false);
     };
 
     return (
     <Box display={{display: 'flex', alignItems: 'center'}}>
         <AttachMoneyIcon sx={{mb: -4}} />
         <TextField
-            label="Course Price"
+            label="Price"
             value={course.price}
             onChange={handleChange}
             name="price"
             id="formatted-numberformat-input"
             InputProps={{
                 inputComponent: NumericFormatCustom,
+                style: { fontSize: '2.5rem' } 
             }}
             variant="standard"
-            sx={{ marginTop: 3 }}
+            sx={{ml: 'auto', mr: 4, marginTop: 3, width: 69 }}
+            error={error}
         />
     </Box>
     );
@@ -53,6 +56,7 @@ const NumericFormatCustom = React.forwardRef(
                 }}
                 thousandSeparator
                 valueIsNumericString
+                
             />
         );
     },
