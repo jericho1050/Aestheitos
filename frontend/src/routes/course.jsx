@@ -291,7 +291,8 @@ export default function Course() {
     return (
         <>
             <br></br>
-            <Box sx={{ marginLeft: '5vw', marginRight: '5vw' }}>
+            <Container maxWidth="xl">
+            <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
                 <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
                     <Grid item>
                         <Button>
@@ -416,6 +417,7 @@ export default function Course() {
                     </Grid>
                 </Grid>
             </Box>
+            </Container>
         </>
     )
 }

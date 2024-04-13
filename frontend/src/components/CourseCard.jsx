@@ -26,17 +26,17 @@ export default function CourseCard(props) {
           />
 
           <CardContent>
-            <Typography align='justify' gutterBottom variant='h5'>
-              {truncateText(props.title, 29)} {/* Replace 2nd argument with the maximum number of words you want */}
+            <Typography sx={{ height: 60, mb: 5}} align='justify' gutterBottom variant='h5'>
+              {truncateText(props.title, 10)} {/* Replace 2nd argument with the maximum number of words you want */}
             </Typography>
 
-            <Typography variant='body2' color={"text.secondary"}>
-              Description: {truncateText(props.description, 20)}
+            <Typography sx={{ height: 40}} variant='body2' color={"text.secondary"}>
+              Description: {truncateText(props.description, 10)}
             </Typography>
 
 
           </CardContent>
-          <Box sx={{ marginLeft: 2, marginRight: 2, marginTop: 'auto' }} component={'div'}>
+          <Box sx={{ marginLeft: 2, marginRight: 2}} component={'div'}>
             <Grid marginBottom={2} spacing={2} container>
               <Grid item container justifyContent={'space-between'}>
                 <Grid item>
