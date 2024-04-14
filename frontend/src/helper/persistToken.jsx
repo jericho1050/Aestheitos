@@ -15,7 +15,7 @@ export default function persistToken() {
         (async () => {
           const response = await validateJWTToken(); // returns both access and refresh token
           setIsLoading(false);
-          if (response['access'] && response['refresh']) {
+          if (response?.access && response?.refresh) {
             dispatch({
               type: 'setToken',
               access: response['access'],

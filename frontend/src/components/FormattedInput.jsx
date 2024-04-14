@@ -30,7 +30,7 @@ export default function FormattedInputs({setIsError, error, course, setCourse}) 
                 style: { fontSize: '2.5rem' } 
             }}
             variant="standard"
-            sx={{ml: 'auto', mr: 4, marginTop: 3, width: 69 }}
+            sx={{ml: 'auto', width: 69 }}
             error={error}
         />
     </Box>

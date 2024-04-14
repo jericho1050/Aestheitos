@@ -48,3 +48,6 @@ export async function getCourses() {
       return err;
     }
   }
+  
+  // TODO updateCourse(courseId) {}
+  // fetch api

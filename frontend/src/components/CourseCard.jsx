@@ -26,7 +26,7 @@ export default function CourseCard(props) {
           />
 
           <CardContent>
-            <Typography sx={{ height: 60, mb: 5}} align='justify' gutterBottom variant='h5'>
+            <Typography sx={{ height: 60, mb: {xs: 3, md: 5}}} align='justify' gutterBottom variant='h5'>
               {truncateText(props.title, 10)} {/* Replace 2nd argument with the maximum number of words you want */}
             </Typography>
 

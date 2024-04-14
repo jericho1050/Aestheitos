@@ -79,7 +79,7 @@ export function Index() {
                     </ThemeProvider>
                 </Grid>
             </Grid>
-            <Container maxWidth="xl" marginLeft={'auto'} marginRight={'auto'}>
+            <Container maxWidth="xl" sx={{ml:'auto', mr: 'auto'}}>
                 <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
                     {/* Load lists of Courses that are approved only */}
                     {courses.map(course => {

@@ -332,20 +332,20 @@ export default function Course() {
                             </Grid>
                             <Box component={'div'} m={2}>
                                 <Grid item container padding={2} columns={{ xs: 4, md: 12 }} rowSpacing={2}>
-                                    <Grid item xs={2} md={6}>
+                                    <Grid item xs={2} md={7}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
                                             Created on: {course.courseCreated}
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={2} md={6}>
+                                    <Grid item xs={2} md={5}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
                                             Last updated: {course.courseUpdated}
                                         </Typography>
                                     </Grid>
-                                    <Grid item variant="small" fontSize={'small'} xs={2} md={6}>
+                                    <Grid item variant="small" fontSize={'small'} xs={2} md={7}>
                                         Rating: {course.average_rating}
                                     </Grid>
-                                    <Grid item variant="small" fontSize={'small'} xs={2} md={6}>
+                                    <Grid item variant="small" fontSize={'small'} xs={2} md={5}>
                                         Weeks: {courseContent.weeks}
                                     </Grid>
                                 </Grid>
@@ -358,7 +358,7 @@ export default function Course() {
                         <Grid item container wrap="nowrap" direction="column">
                             <Grid item xs>
                                 <ThemeProvider theme={theme}>
-                                    <Typography fontWeight="bold" variant="h2">
+                                    <Typography align="justify" fontWeight="bold" variant="h3">
                                         {course.title}
                                     </Typography>
                                 </ThemeProvider>

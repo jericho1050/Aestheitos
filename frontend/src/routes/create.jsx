@@ -35,7 +35,7 @@ import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
 import { createCourse } from "../courses";
-import { Form, useActionData } from "react-router-dom";
+import { Form, useActionData, useFetcher } from "react-router-dom";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -588,7 +588,7 @@ export default function CreateCourse() {
         description: '',
         thumbnail: image,
         price: 0,
-        weeks: null,
+        weeks: '',
 
     });
     const [courseContent, setCourseContent] = React.useState({
@@ -599,21 +599,24 @@ export default function CreateCourse() {
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
-    const errorAction = useActionData(); // waiting for the return value of action if it runs to an error
+    const fetcher = useFetcher(); 
+    const actionData = fetcher.data; // returns the response from previous action 
     const [isError, setIsError] = React.useState(false);
     const [status, setStatus] = React.useState('empty');
+    const [intent, setIntent] = React.useState('create');
 
     React.useEffect(() => {
-        if (errorAction?.message) {
+        if (actionData?.message) {
             setIsError(true);
-        } 
+        }
 
-    }, [errorAction])
+    }, [actionData])
 
     React.useEffect(() => {
+        // checks if all fields are filled by the user
         function checkFields() {
             for (let key in course) {
-                if (course[key] === '' || course[key] === null) {
+                if (key != 'price' && (course[key] === '' || course[key] === null)) {
                     return false;
                 }
             }
@@ -653,54 +656,51 @@ export default function CreateCourse() {
 
     }
 
-    // This is Actually 
-    function handleCourseSubmit(){
+    function handleCourseSubmit() {
         if (!isError && status === 'success') {
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        } 
+        }
     }
 
     function handleCourseOverviewSubmit() {
         // TODO
-    } 
-     function handleCourseContentSubmit() {
+    }
+    function handleCourseContentSubmit() {
 
-     }
-
-
+    }
 
     return (
         <>
             <br></br>
             {
-                activeStep === 0  ? (
-                    <Form method="post" encType="multipart/form-data" noValidate onSubmit={handleCourseSubmit}>
+                activeStep === 0 ? (
+                    <fetcher.Form method="post" encType="multipart/form-data" noValidate onSubmit={handleCourseSubmit}>
 
                         <Box sx={{ m: '3vw' }}>
                             <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper status={status} setStatus={setStatus} error={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                <ProgressMobileStepper setIntent={setIntent} intent={intent} actionData={fetcher.data} activeStep={activeStep} setActiveStep={setActiveStep} />
                             </Box>
                             <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                                 {/* Paper starts here */}
                                 <Grid item xs md={'auto'}>
-                                    <Paper elevation={4}>
+                                    <Paper elevation={4} sx={{ height: { xs: 'auto', m: 700 } }}>
                                         <Grid item container justifyContent={'center'}>
                                             <Grid item>
-                                                <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
+                                                <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
                                                     <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
                                                 </Container>
                                             </Grid>
                                         </Grid>
-                                        <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={4}>
+                                        <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
                                             <Grid item>
                                                 {/* Uploading  image file button  here */}
                                                 <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" setIsError={setIsError} onChange={handleImageUpload} />
                                             </Grid>
                                             <Grid item>
-                                                {isError  &&
-                                                    errorAction?.message && (
+                                                {isError &&
+                                                    actionData?.message && ( // this is equivalent to saying if there's an error and actionData returns an error message
                                                         <>
-                                                            {Object.entries(JSON.parse(errorAction.message)).map(([key, value]) => (
+                                                            {Object.entries(JSON.parse(actionData.message)).map(([key, value]) => (
                                                                 <Box key={key} component="div">
                                                                     <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left' }}>
                                                                         {key}: {value[0]}
@@ -715,7 +715,7 @@ export default function CreateCourse() {
                                             </Grid>
                                             <Grid item xs paddingBottom={4}>
                                                 {/* Select menu form */}
-                                                <FormControl required={true} sx={{ width: 200 }} error={isError }>
+                                                <FormControl required={true} sx={{ width: 200 }} error={isError}>
                                                     <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
                                                     <Select
                                                         data-cy="Select Difficulty"
@@ -793,7 +793,7 @@ export default function CreateCourse() {
                                                     });
                                                     setIsError(false);
                                                 }}
-                                                error={isError }
+                                                error={isError}
                                             />
                                         </Grid>
                                         <Grid item xs>
@@ -818,7 +818,7 @@ export default function CreateCourse() {
                                                     });
                                                     setIsError(false);
                                                 }}
-                                                error={isError }
+                                                error={isError}
                                             />
                                         </Grid>
                                     </Grid>
@@ -826,11 +826,11 @@ export default function CreateCourse() {
                             </Grid>
 
                         </Box>
-                    </Form>
+                    </fetcher.Form>
                     /* title  & description ends here */
                 )
                     : activeStep === 1 ? (
-                        <Form method="post" encType="multipart/form-data" noValidate>
+                        <fetcher.Form method="post" encType="multipart/form-data" noValidate>
 
                             <Box sx={{ m: '3vw' }}>
                                 <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
@@ -918,7 +918,7 @@ export default function CreateCourse() {
                                     </Grid>
                                 </Grid>
                             </Box>
-                        </Form>
+                        </fetcher.Form>
                     ) : (
                         <Form method="post" encType="multipart/form-data noValidate">
 
