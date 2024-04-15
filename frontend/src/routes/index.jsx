@@ -12,23 +12,7 @@ import { useLoaderData } from "react-router-dom";
 // basis for this animation Mysterious Text 
 // https://codesandbox.io/p/sandbox/mysterious-text-animation-with-react-spring-vhj66
 // By imhuyqn
-const text = {
-    title: `Lizards are a widespread group of squamate reptiles, with over 6,000
-    species, ranging across all continents except Antarctica               Lizards are a widespread group of squamate reptiles, with over 6,000
-    species, ranging across all continents except Antarctica               Lizards are a widespread group of squamate reptiles, with over 6,000
-    species, ranging across all continents except Antarctica  TESTINGG AGAIN AGAIN IAGINAOIGASDF WTF WITSAOIFDSKLAFMLKSMLKAS HWTMWTWANTATATTSA WTHF SSRIESTWE SWWHERE TIS THIS AGAIN MA NAG NAWM IASNG AMT PO TA`
-}
 
-const text2 = {
-    title: `              Lizards are a widespread group of squamate reptiles, with over 6,000
-    species, ranging across all continents except Antarctica `
-}
-
-const test3 = {
-    description: `           Lizards are a widespread group of squamate reptiles, with over 6,000
-    species, ranging across all continents except Antarctica TANGI NA WTF            Lizards are a widespread group of squamate reptiles, with over 6,000
-    species, ranging across all continents except Antarctica TANGI NA WTF `
-}
 
 export async function loader() {
     const courses = await getCourses();
@@ -68,7 +52,7 @@ export function Index() {
 
     return (<>
         <Box sx={{ margin: -1, padding: 0, position: 'relative' }}>
-            <img src="src/static/images/bgH.jpg" alt="pair of rings" className="background-image" />
+            <img src="src/static/images/backgroundM.jpg" alt="pair of rings" className="background-image" />
             <animated.div style={{ ...springs }}>
                 <Container fixed={true} maxWidth={false} sx={{ display: 'flex', backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: { xs: '4%', sm: '6%' }, paddingLeft: { xs: '8%' }, paddingRight: { xs: '8%' }, width: { xs: '69%' } }} className="container-homepage">
                     <ThemeProvider theme={theme}>
@@ -95,30 +79,27 @@ export function Index() {
                     </ThemeProvider>
                 </Grid>
             </Grid>
-            <Box marginLeft={'3vw'} marginRight={'3vw'}>
-                <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
-                    {/* Load lists of Courses              */}
-                    {courses.map(course => {
-                        return (
-                        <Grid key={course.id} item xs={4} sm={4} md={3}>
-                            <CourseCard  {...course} />
-                        </Grid>
-                    )}
+            <Container maxWidth="xl" sx={{ml:'auto', mr: 'auto'}}>
+                <Box sx={{ml: {xs: 4, m: 3, l: 0}, mr: {xs: 4, m: 3, l: 0}}}>
+                    <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
+                        {/* Load lists of Courses that are approved only */}
+                        {courses.map(course => {
+                            
+                            return (
+                            course.status === 'A' ?  
+                            <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
+                                <CourseCard  {...course} />
+                            </Grid>
+                            : null
+                        )}
 
-                    )}
-
-                    {/* <Grid item xs={4} sm={4} md={3}>
-                        <CourseCard thumbnail={pic2} title={text2.title} description={test3.description} />
+                        )}
                     </Grid>
-                    <Grid item xs={4} sm={4} md={3}>
-                        <CourseCard thumbnail={pic2} title={text2.title} description={test3.description} />
-                    </Grid>
-                    <Grid item xs={4} sm={4} md={3}>
-                        <CourseCard thumbnail={pic2} title={text2.title} description={test3.description} />
-                    </Grid> */}
-                </Grid>
-            </Box>
+                </Box>
+            </Container>
         </Box>
 
     </>)
 }
+
+

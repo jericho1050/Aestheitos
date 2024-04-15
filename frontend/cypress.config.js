@@ -9,6 +9,7 @@ export default defineConfig({
   },
   "env": {
     "REST_API_URL": "http://127.0.0.1:8000/",
+    "FRONTEND_API_URL": "http://localhost:5173/"
   }
 
 });

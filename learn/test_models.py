@@ -17,6 +17,7 @@ class UserProgressTestCase(TestCase):
             description="Lorem ipsum dolor sit amet. Et illum dolores et numquam aperiam aut totam labore. Est tempora dicta At corrupti tenetur aut optio autem aut maiores distinctio ut sequi accusantium aut provident rerum et natus laudantium.Est nihil vero quo blanditiis doloribus et nesciunt rerum! Est magni accusantium non blanditiis doloribus eum molestias asperiores aut soluta odio id nisi velit!",
             difficulty="BG",
             created_by=self.user,
+            weeks=18,
         )
         self.progress = UserProgress.objects.create(
             user=self.user, course=self.course, weeks_completed=3
@@ -38,13 +39,18 @@ class CourseRatingTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
         self.user_2 = User.objects.create(username="testuser-course")
         self.course = Course.objects.create(
-            title="test", description="testing", difficulty="AD", created_by=self.user_2
+            title="test",
+            description="testing",
+            difficulty="AD",
+            created_by=self.user_2,
+            weeks=18,
         )
         self.course_2 = Course.objects.create(
             title="test_2",
             description="testing 2",
             difficulty="AD",
             created_by=self.user_2,
+            weeks=18,
         )
 
         self.rating = CourseRating.objects.create(
@@ -95,6 +101,7 @@ class CourseTestCase(TestCase):
             description="Lorem ipsum dolor sit amet. Et illum dolores et numquam aperiam aut totam labore. Est tempora dicta At corrupti tenetur aut optio autem aut maiores distinctio ut sequi accusantium aut provident rerum et natus laudantium.Est nihil vero quo blanditiis doloribus et nesciunt rerum! Est magni accusantium non blanditiis doloribus eum molestias asperiores aut soluta odio id nisi velit!",
             difficulty="BG",
             created_by=self.user,
+            weeks=18,
         )
 
     def test_created_course(self):
@@ -128,7 +135,6 @@ class CourseTestCase(TestCase):
         course = Course.objects.get(id=self.course.id)
 
         self.assertEqual(course.course_created, course.course_updated)
-
 
         # Update the course
         course.difficulty = "IN"
@@ -183,12 +189,12 @@ class CourseContentTestCase(TestCase):
             description="Lorem ipsum",
             difficulty="BG",
             created_by=self.user,
+            weeks=18,
         )
         CourseContent.objects.create(
-            lecture="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
             overview="Testing the goal of this program is give you mobility and by end of it you'll be flexible as Yujiro Hanma or Baki Hanma",
             course=self.course,
-            weeks=18,
         )
 
     def test_created_content(self):
@@ -199,28 +205,26 @@ class CourseContentTestCase(TestCase):
         course = CourseContent.objects.get(id=self.course.id)
         self.assertEqual(course.course, self.course)
         self.assertEqual(
-            course.lecture, "https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s"
+            course.preview, "https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s"
         )
         self.assertEqual(
             course.overview,
             "Testing the goal of this program is give you mobility and by end of it you'll be flexible as Yujiro Hanma or Baki Hanma",
         )
-        self.assertEqual(course.weeks, 18)
+        self.assertEqual(course.course.weeks, 18)
 
     def test_update_content(self):
         """
         Tests when updating a content
         """
         course = CourseContent.objects.get(id=self.course.id)
-        course.lecture = "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
+        course.preview = "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
         course.overview = "Mobility exercise"
-        course.weeks = 8
         self.assertEqual(course.course, self.course)
         self.assertEqual(
-            course.lecture, "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
+            course.preview, "https://www.youtube.com/watch?v=Ru1hYrwCZJo&t=196s"
         )
         self.assertEqual(course.overview, "Mobility exercise")
-        self.assertEqual(course.weeks, 8)
 
     def test_content_deletion(self):
         course = CourseContent.objects.get(id=self.course.id)
@@ -232,9 +236,8 @@ class CourseContentTestCase(TestCase):
     def test_course_content_without_course(self):
         with self.assertRaises(IntegrityError):
             CourseContent.objects.create(
-                lecture="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+                preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
                 overview="Testing the goal of this program is give you mobility and by end of it you'll be flexible as Yujiro Hanma or Baki Hanma",
-                weeks=18,
             )
 
 
@@ -247,6 +250,7 @@ class CourseCommentsTestCase(TestCase):
             description="Lorem ipsum",
             difficulty="BG",
             created_by=self.user,
+            weeks=18,
         )
         self.comment = CourseComments.objects.create(
             course=self.course, comment_by=self.user, comment="WOW grape nice material"
@@ -300,41 +304,52 @@ class CourseCommentsTestCase(TestCase):
         with self.assertRaises(ValidationError):
             comment.full_clean()
 
+
 class SectionTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username="testuser")
         self.user2 = User.objects.create(username="testuser123")
-        self.course = Course.objects.create(title="testing", created_by=self.user)
-        self.section = Section.objects.create(course=self.course, title="week 6")
+        self.course = Course.objects.create(
+            title="testing",
+            created_by=self.user,
+            weeks=18,
+        )
+        self.section = Section.objects.create(course=self.course, heading="week 6")
 
     def test_section_creation(self):
 
         self.assertEqual(self.section.course, self.course)
-        self.assertEqual(self.section.title, "week 6")
+        self.assertEqual(self.section.heading, "week 6")
         self.assertEqual(self.section.course.created_by, self.user)
         self.assertNotEqual(self.section.course.created_by, self.user2)
 
     def test_section_without_course_reference(self):
 
         with self.assertRaises(IntegrityError):
-            Section.objects.create(title="forgot ops")
+            Section.objects.create(heading="forgot ops")
 
     def test_section_without_title(self):
         section = Section.objects.create(course=self.course)
         with self.assertRaises(ValidationError):
             section.full_clean()
-        
-
 
 
 class SectionItemTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username="testme")
-        self.course = Course.objects.create(created_by=self.user, title="testing sectionItem")
-        self.section = Section.objects.create(course=self.course, title="week 12")
-        self.section_item = SectionItem.objects.create(section=self.section, lecture="https://www.youtube.com", title="test instance's section item title")
+        self.course = Course.objects.create(
+            created_by=self.user,
+            title="testing sectionItem",
+            weeks=18,
+        )
+        self.section = Section.objects.create(course=self.course, heading="week 12")
+        self.section_item = SectionItem.objects.create(
+            section=self.section,
+            lecture="https://www.youtube.com",
+            heading="test instance's section item heading",
+        )
         self.workout = Workouts.objects.create(
             section_item=self.section_item,
             exercise="Test Exercise",
@@ -357,16 +372,25 @@ class SectionItemTestCase(TestCase):
     def test_section_item_creation(self):
 
         self.assertEqual(self.section_item.section, self.section)
-        self.assertIn("test", self.section_item.title)
+        self.assertIn("test", self.section_item.heading)
+
 
 class WorkoutsTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username="testuser")
 
-        self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        section = Section.objects.create(course=self.course, title="week 123")
-        self.section_item = SectionItem.objects.create(section=section , description="after doing this go do this", title="test instance's section item title")
+        self.course = Course.objects.create(
+            title="Test Course",
+            created_by=self.user,
+            weeks=18,
+        )
+        section = Section.objects.create(course=self.course, heading="week 123")
+        self.section_item = SectionItem.objects.create(
+            section=section,
+            description="after doing this go do this",
+            heading="test instance's section item heading",
+        )
         self.workout = Workouts.objects.create(
             section_item=self.section_item,
             exercise="Test Exercise",
@@ -416,9 +440,17 @@ class CorrectExerciseFormTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="testuser")
 
-        self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        section = Section.objects.create(title="week 6", course=self.course)
-        section_item = SectionItem.objects.create(section=section, lecture="https://www.youtube.com", title="test instance's section item title")
+        self.course = Course.objects.create(
+            title="Test Course",
+            created_by=self.user,
+            weeks=18,
+        )
+        section = Section.objects.create(heading="week 6", course=self.course)
+        section_item = SectionItem.objects.create(
+            section=section,
+            lecture="https://www.youtube.com",
+            heading="test instance's section item heading",
+        )
         self.workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Push Up",
@@ -429,7 +461,7 @@ class CorrectExerciseFormTestCase(TestCase):
             excertion=5,
         )
         self.correct_exercise_form = CorrectExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=IODxDxX7oi4",
+            demo="images/images/chinwhiteup.gif",
             workout=self.workout,
             description="Scapula position retracted",
         )
@@ -437,7 +469,7 @@ class CorrectExerciseFormTestCase(TestCase):
     def test_correct_exercise_form_creation(self):
         self.assertEqual(
             self.correct_exercise_form.demo,
-            "https://www.youtube.com/watch?v=IODxDxX7oi4",
+            "images/images/chinwhiteup.gif",
         )
         self.assertEqual(self.correct_exercise_form.workout, self.workout)
         self.assertEqual(
@@ -454,7 +486,7 @@ class CorrectExerciseFormTestCase(TestCase):
 
     def test_correct_exercise_form_creation_with_invalid_demo(self):
         exercise = CorrectExerciseForm.objects.create(
-            demo="invalid_url",
+            demo="",
             workout=self.workout,
             description="Flared elbow",
         )
@@ -466,9 +498,17 @@ class WrongExerciseFormTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="testuser")
 
-        self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        section = Section.objects.create(course=self.course, title="week 10")
-        section_item = SectionItem.objects.create(section=section, description="after doing a set rest 100000 minutes", title="test instance's section item title")
+        self.course = Course.objects.create(
+            title="Test Course",
+            created_by=self.user,
+            weeks=18,
+        )
+        section = Section.objects.create(course=self.course, heading="week 10")
+        section_item = SectionItem.objects.create(
+            section=section,
+            description="after doing a set rest 100000 minutes",
+            heading="test instance's section item heading",
+        )
         self.workout = Workouts.objects.create(
             section_item=section_item,
             exercise="Push Up",
@@ -479,7 +519,7 @@ class WrongExerciseFormTestCase(TestCase):
             excertion=5,
         )
         self.wrong_exercise_form = WrongExerciseForm.objects.create(
-            demo="https://www.youtube.com/watch?v=VJsayRzxq-U&t=113s",
+            demo="images/images/chinwhiteup.gif",
             workout=self.workout,
             description="Flared elbow",
         )
@@ -487,7 +527,7 @@ class WrongExerciseFormTestCase(TestCase):
     def test_wrong_exercise_form_creation(self):
         self.assertEqual(
             self.wrong_exercise_form.demo,
-            "https://www.youtube.com/watch?v=VJsayRzxq-U&t=113s",
+            "images/images/chinwhiteup.gif",
         )
         self.assertEqual(self.wrong_exercise_form.workout, self.workout)
         self.assertEqual(self.wrong_exercise_form.description, "Flared elbow")
@@ -495,14 +535,14 @@ class WrongExerciseFormTestCase(TestCase):
     def test_wrong_exercise_form_without_workout(self):
         with self.assertRaises(IntegrityError):
             WrongExerciseForm.objects.create(
-                demo="https://www.youtube.com/watch?v=IODxDxX7oi4",
+                demo="images/images/chinupVecs.gif",
                 workout=None,
                 description="Scapula position retracted",
             )
 
     def test_wrong_exercise_form_creation_with_invalid_demo(self):
         exercise = WrongExerciseForm.objects.create(
-            demo="invalid_url",
+            demo="",
             workout=self.workout,
             description="Flared elbow",
         )
@@ -515,7 +555,11 @@ class EnrollmentTestCase(TestCase):
         self.user = User.objects.create(username="testuser")
         self.user2 = User.objects.create(username="testuser123")
 
-        self.course = Course.objects.create(title="Test Course", created_by=self.user)
+        self.course = Course.objects.create(
+            title="Test Course",
+            created_by=self.user,
+            weeks=18,
+        )
         self.enrollment = Enrollment.objects.create(user=self.user2, course=self.course)
 
     def test_user_enrollment(self):

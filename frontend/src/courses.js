@@ -2,7 +2,7 @@
 // fetches the list of courses 
 export async function getCourses() {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/courses`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}courses`);
   
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -12,5 +12,81 @@ export async function getCourses() {
     } catch (error) {
       console.error('An error occurred:', error);
       return null;
+    }
+  }
+
+  
+  class HttpError extends Error {
+    constructor(statusCode, message, ...params) {
+      super(...params);
+  
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, HttpError);
+      }
+  
+      this.statusCode = statusCode;
+      this.message = message;
+    }
+  }
+  
+  export async function createCourse(courseFormData) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}courses`, {
+        method: 'POST',
+        credentials: 'include',
+        body: courseFormData
+      });
+      if (!response.ok) {
+        const message = await response.text();
+        throw new HttpError(response.status, message);
+      }
+      const data = await response.json();
+      return data;
+    }
+    catch(err) {
+      console.error('An error occurred:', err)
+      return err;
+    }
+  }
+
+  export async function createCourseContent(courseId, courseContentFormData) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}course/${courseId}/course-content`, {
+        method: 'POST',
+        credentials: 'include',
+        body: courseContentFormData
+      });
+      if (!response.ok) {
+        const message = await response.text();
+        throw new HttpError(response.status, message)
+      }
+
+      const data = await response.json();
+      return data;
+    } 
+    catch (err) {
+      console.error('An error occured', err)
+      return err;
+    }
+  }
+  
+  // TODO updateCourse(courseId) {}
+  // fetch api
+
+  export async function updateCourse(id, updates){
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/course/${id}`, {
+        method: 'PUT',
+        credentials: 'include',
+        body: updates 
+      })
+      if (!response.ok) {
+        const message = await response.text();
+        throw new HttpError(response.status, message)
+      }
+    }
+    catch (err) {
+      console.error('An error occured', err)
+      return err
     }
   }

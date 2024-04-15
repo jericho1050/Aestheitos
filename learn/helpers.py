@@ -43,7 +43,7 @@ from Aestheitos import settings
 def user_authentication(request):
     """
     Validating token for authentication purposes.
-    Ensure that the user is logged in.
+    Ensure that the user is logged in and JWT is not tampered.
 
     return user instance
     """

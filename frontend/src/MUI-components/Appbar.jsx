@@ -16,7 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AccessTokenExpContext, AuthContext, AuthDispatchContext, CurrentTimeContext } from '../helper/authContext';
+import { useAuthToken } from '../helper/authContext';
 import SearchIcon from '@mui/icons-material/Search';
 import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
@@ -30,8 +30,10 @@ import validateJWTToken from '../helper/verifySignature';
 import { jwtDecode } from 'jwt-decode';
 import refreshAccessToken from '../helper/refreshAccessToken';
 import logo from '../static/images/aestheitoslogo.png';
+import persistToken from '../helper/persistToken';
+import useRefreshToken from '../helper/useRefreshToken';
 
-const pages = ['Courses', 'Blog'];
+const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
 
 
@@ -39,13 +41,16 @@ function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isOpen, setIsOpen] = React.useState(false);
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const token = React.useContext(AuthContext); // access token and refresh token
-  const dispatch = React.useContext(AuthDispatchContext);
-  const accessTokenExp = React.useContext(AccessTokenExpContext)
-  const currentTime = React.useContext(CurrentTimeContext)
-  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
 
+  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+  // returns the token state and it's dispatch function 
+  const { token, dispatch } = useAuthToken();
+  const isAuthenticated = token['access'] !== null;
+  const navigate = useNavigate();
+
+
+
+  // attach event listener to  each setting
   const settingsHandlers = {
     'Profile': handleProfile,
     'Account': handleAccount,
@@ -53,60 +58,18 @@ function ResponsiveAppBar() {
     'Logout': () => handleLogout(dispatch)
   }
 
-  // handle jwt in state  when user refreshes page.
-  // for PRESERVATION OF STATE
-  React.useEffect(() => {
-    // token is initialized to null when page loads, so this will run after a refresh.
-    (async () => {
-      const response = await validateJWTToken();
-
-      if (response['access'] && response['refresh']) {
-        dispatch({
-          type: 'setToken',
-          access: response['access'],
-          refresh: response['refresh']
-        })
-      }
-    })(); // calls the nameless async fn
-  }, []);
-
-  // refreshing the access token when it expires, use refresh token
-  // persist user authentication == true
-  React.useEffect(() => {
-    const hasToken = token['access'] !== null;
-    // console.log(hasToken);
-
-    (async () => {
-
-      if (hasToken) {
-        // console.log(`current time: ${currentTime}`);
-        // console.log(`expiration: ${accessTokenExp.exp}`);
-        if (currentTime > accessTokenExp.exp) {
-          console.log("expires!");
-          const accessToken = await refreshAccessToken(token['refresh'])
-          // console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);
-          dispatch({
-            type: 'setToken',
-            access: accessToken,
-            refresh: token['refresh']
-          })
-          setIsAuthenticated(true);
-        }
-      }
-
-    })(); // calls the nameless async fn
-
-  }, [currentTime]);
+  // attach event listener to each page in navbar
+  const pageHandlers = {
+    'Courses': handleCourses,
+    'Blogs': handleBlogs,
+    'Create': handleCreate
+  }
 
 
-  React.useEffect(() => {
-    const hasToken = token['access'] !== null;
-    if (hasToken) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-    }
-  }, [token['access']]);
+
+
+
+
 
 
   const handleOpenNavMenu = (event) => {
@@ -116,7 +79,6 @@ function ResponsiveAppBar() {
     setAnchorElUser(event.currentTarget);
   };
   const handleClickSearch = () => {
-
     setIsOpen(true);
   };
 
@@ -132,6 +94,7 @@ function ResponsiveAppBar() {
     setIsOpen(false);
   };
 
+  // settings handlers
   function handleProfile() {
 
   }
@@ -141,7 +104,19 @@ function ResponsiveAppBar() {
   }
 
   function handleEnrolled() {
+  }
 
+  // pages handlers
+  function handleCourses() {
+
+  }
+
+  function handleBlogs() {
+
+  }
+
+  function handleCreate() {
+    navigate('/course/create')
   }
 
 
@@ -208,7 +183,7 @@ function ResponsiveAppBar() {
                 }}
               >
                 {pages.map((page) => (
-                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                  <MenuItem key={page} onClick={pageHandlers[page]}>
                     <Typography textAlign="center">{page}</Typography>
                   </MenuItem>
                 ))}
@@ -237,7 +212,7 @@ function ResponsiveAppBar() {
               {pages.map((page) => (
                 <Button
                   key={page}
-                  onClick={handleCloseNavMenu}
+                  onClick={pageHandlers[page]}
                   sx={{ my: 2, color: 'white', display: 'block' }}
                 >
                   {page}
@@ -470,7 +445,7 @@ function signOutAPI() {
     }
     return response.json()
   }).catch(err => console.error(err));
-
+  sessionStorage.clear();
   return response
 
 }

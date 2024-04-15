@@ -32,7 +32,7 @@ html {
     width: 100%;
     height: 50vh;
     object-fit: cover;
-    opacity: 0.6;
+    opacity: 0.5;
   }
 }
 
@@ -41,7 +41,7 @@ html {
     width: 100%;
     height: 69vh;
     object-fit: cover;
-    opacity: 0.6;
+    opacity: 0.5;
 
   }
 }
@@ -50,7 +50,7 @@ html {
   .background-image {
     width: 100%;
     height: 75vh;
-    object-fit: fill;
+    object-fit: cover;
     opacity: 0.4;
 
   }
@@ -104,12 +104,37 @@ html {
 }
 }
 
-.course-lecture-container {
-  display: flex;
-  justify-content: center;
-  width: 69vw;
+
+@media (max-width: 575.98px) {
+  .course-lecture-container {
+    display: flex;
+    justify-content: center;
+    width: 85vw;
 }
+}
+
+@media (min-width: 575.98px) {
+  .course-lecture-container {
+    display: flex;
+    justify-content: center;
+    width: 59vw;
+}
+}
+
+
+
 .course-lecture {
   aspect-ratio: 16 / 9;
-  width: 100% !important;
+  width: 80% !important;
+}
+
+.course-card:hover {
+  border-bottom: 6px solid #FFC55C;
+}
+
+
+#detail.loading {
+  opacity: 0.25;
+  transition: opacity 200ms;
+  transition-delay: 200ms;
 }

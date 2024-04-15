@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 
 class CourseAdmin(admin.ModelAdmin):
-    readonly_fields = ('course_created', 'created_by')
+    readonly_fields = ['course_created']
     list_display = ('id', 'title')
 
 class UserAdmin(admin.ModelAdmin):

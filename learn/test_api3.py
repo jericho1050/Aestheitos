@@ -19,9 +19,15 @@ class SectionListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
         self.user_2 = User.objects.create_user(username="testuser2", password="123")
-        self.course = Course.objects.create(title="testcourse", created_by=self.user)
-        self.section = Section.objects.create(title="test week 5", course=self.course)
-        self.section_2 = Section.objects.create(title="test week 6", course=self.course)
+        self.course = Course.objects.create(
+            title="testcourse",
+            created_by=self.user,
+            weeks=18,
+        )
+        self.section = Section.objects.create(heading="test week 5", course=self.course)
+        self.section_2 = Section.objects.create(
+            heading="test week 6", course=self.course
+        )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
@@ -59,8 +65,8 @@ class SectionListAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
-        self.assertAlmostEqual(response.data[0]["title"], "test week 5")
-        self.assertAlmostEqual(response.data[1]["title"], "test week 6")
+        self.assertAlmostEqual(response.data[0]["heading"], "test week 5")
+        self.assertAlmostEqual(response.data[1]["heading"], "test week 6")
 
     def test_create_section(self):
         """
@@ -71,7 +77,7 @@ class SectionListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:course-section-list", args=[1]),
             {
-                "title": "testing creation",
+                "heading": "testing creation",
             },
             format="json",
         )
@@ -84,26 +90,26 @@ class SectionListAPITestCase(APITestCase):
         # test create section with an authenticated client != course's created_by
         response_3 = self.authenticated_client_2.post(
             reverse("learn:course-section-list", args=[1]),
-            {"title": "not my own course"},
+            {"heading": "not my own course"},
             format="json",
         )
 
         # test create section with an unauthenticated client
         response_4 = self.unauthenticated_client.post(
             reverse("learn:course-section-list", args=[1]),
-            {"title": "try adding section"},
+            {"heading": "try adding section"},
             format="json",
         )
 
         # test create section with an authenticated client and a course that doesn't exist
         response_5 = self.authenticated_client.post(
             reverse("learn:course-section-list", args=[2]),
-            {"title": "testing no course"},
+            {"heading": "testing no course"},
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["title"], "testing creation")
+        self.assertEqual(response.data["heading"], "testing creation")
         self.assertIsNotNone(response.data)
         self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
@@ -116,8 +122,12 @@ class SectionDetailAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
         self.user_2 = User.objects.create_user(username="testuser2", password="123")
-        self.course = Course.objects.create(title="testcourse", created_by=self.user)
-        self.section = Section.objects.create(title="test week 1", course=self.course)
+        self.course = Course.objects.create(
+            title="testcourse",
+            created_by=self.user,
+            weeks=18,
+        )
+        self.section = Section.objects.create(heading="test week 1", course=self.course)
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
@@ -159,7 +169,7 @@ class SectionDetailAPITestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["title"], "test week 1")
+        self.assertEqual(response.data["heading"], "test week 1")
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_section(self):
@@ -170,14 +180,14 @@ class SectionDetailAPITestCase(APITestCase):
         # test update instance with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:course-section-detail", args=[1]),
-            {"title": "testing new title"},
+            {"heading": "testing new heading"},
             format="json",
         )
 
         # test update instance that doesn't exist with an auth client
         response_2 = self.authenticated_client.put(
             reverse("learn:course-section-detail", args=[6]),
-            {"title": "testing new title"},
+            {"heading": "testing new heading"},
             format="json",
         )
 
@@ -188,18 +198,18 @@ class SectionDetailAPITestCase(APITestCase):
 
         # test update instance with an authenticated client != course's created_by
         response_4 = self.authenticated_client_2.put(
-            reverse("learn:course-section-detail", args=[1]), {"title": "testing"}
+            reverse("learn:course-section-detail", args=[1]), {"heading": "testing"}
         )
 
         # test update instance with an unauthenticated client
         response_5 = self.unauthenticated_client.put(
             reverse("learn:course-section-detail", args=[1]),
-            {"title": "nothing"},
+            {"heading": "nothing"},
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["title"], "testing new title")
+        self.assertEqual(response.data["heading"], "testing new heading")
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_4.status_code, status.HTTP_403_FORBIDDEN)
@@ -247,19 +257,23 @@ class SectionItemListAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
         self.user_2 = User.objects.create_user(username="testuser2", password="123")
-        self.course = Course.objects.create(title="testcourse", created_by=self.user)
-        self.section = Section.objects.create(title="test week 5", course=self.course)
+        self.course = Course.objects.create(
+            title="testcourse",
+            created_by=self.user,
+            weeks=18,
+        )
+        self.section = Section.objects.create(heading="test week 5", course=self.course)
         self.section_item = SectionItem.objects.create(
             section=self.section,
             description="testing just testing just testing",
             lecture="https://www.youtube.com/testing",
-            title="testing item lol"
+            heading="testing item lol",
         )
         self.section_item_2 = SectionItem.objects.create(
             section=self.section,
             description="testing just another test lmao",
             lecture="https://www.youtube/com/wwatchthistest",
-            title="testing item 2"
+            heading="testing item 2",
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -302,8 +316,8 @@ class SectionItemListAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("testing", response.data[0]["description"])
         self.assertIn("testing", response.data[1]["description"])
-        self.assertIn("testing", response.data[0]["title"])
-        self.assertIn("testing", response.data[1]["title"])
+        self.assertIn("testing", response.data[0]["heading"])
+        self.assertIn("testing", response.data[1]["heading"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
         self.assertListEqual(response_2.data, [])
 
@@ -315,21 +329,33 @@ class SectionItemListAPITestCase(APITestCase):
         # test create section item with an authenticated client
         response = self.authenticated_client.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://www.youtube.com/readme", "description": "go move here", "title": "nothing just test title for a section item"},
+            {
+                "lecture": "https://www.youtube.com/readme",
+                "description": "go move here",
+                "heading": "nothing just test heading for a section item",
+            },
             format="json",
         )
 
         # test create section item with an authenticated client and section that doesn't exist
         response_2 = self.authenticated_client.post(
             reverse("learn:section-item-list", args=[6]),
-            {"lecture": "https://facebook.com/lmao", "description": "noope", "title": "nothing just test title for a section item"},
+            {
+                "lecture": "https://facebook.com/lmao",
+                "description": "noope",
+                "heading": "nothing just test heading for a section item",
+            },
             format="json",
         )
 
         # test create section item with an authenticated client != course's created by
         response_3 = self.authenticated_client_2.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://youtube.com/nothing", "description": "lol", "title": "nothing just test title for a section item"},
+            {
+                "lecture": "https://youtube.com/nothing",
+                "description": "lol",
+                "heading": "nothing just test heading for a section item",
+            },
             format="json",
         )
 
@@ -341,13 +367,19 @@ class SectionItemListAPITestCase(APITestCase):
         # test create section item with missing field
         response_5 = self.authenticated_client.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://youtube.com/stillokay", },
+            {
+                "lecture": "https://youtube.com/stillokay",
+            },
             format="json",
         )
 
         response_6 = self.unauthenticated_client.post(
             reverse("learn:section-item-list", args=[1]),
-            {"lecture": "https://youtube.com/nope", "description": "still error", "title": "nothing just test title for a section item"},
+            {
+                "lecture": "https://youtube.com/nope",
+                "description": "still error",
+                "heading": "nothing just test heading for a section item",
+            },
             format="json",
         )
 
@@ -356,12 +388,8 @@ class SectionItemListAPITestCase(APITestCase):
         self.assertIn("go", response.data["description"])
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertNotEqual(
-            response_4.status_code, status.HTTP_201_CREATED
-        ) 
-        self.assertEqual(
-            response_5.status_code, status.HTTP_400_BAD_REQUEST
-        )  
+        self.assertNotEqual(response_4.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -370,19 +398,25 @@ class SectionItemDetailAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
         self.user_2 = User.objects.create_user(username="testuser2", password="123")
-        self.course = Course.objects.create(title="testcourse", created_by=self.user)
-        self.section = Section.objects.create(title="test week 100", course=self.course)
+        self.course = Course.objects.create(
+            title="testcourse",
+            created_by=self.user,
+            weeks=18,
+        )
+        self.section = Section.objects.create(
+            heading="test week 100", course=self.course
+        )
         self.section_item = SectionItem.objects.create(
             section=self.section,
             description="testing just testing just testing",
             lecture="https://www.youtube.com/testing",
-            title="testing section item title"
+            heading="testing section item heading",
         )
         self.section_item_2 = SectionItem.objects.create(
             section=self.section,
             description="testing just another test lmao",
             lecture="https://www.youtube/com/metest",
-            title="testing section item 2 title"
+            heading="testing section item 2 heading",
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -433,11 +467,11 @@ class SectionItemDetailAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("testing", response.data["description"])
         self.assertIn("youtube", response.data["lecture"])
-        self.assertIn("testing", response.data["title"])
+        self.assertIn("testing", response.data["heading"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
         self.assertIn("testing", response_2.data["description"])
         self.assertIn("youtube", response_2.data["lecture"])
-        self.assertIn("testing", response.data["title"])
+        self.assertIn("testing", response.data["heading"])
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_section_item(self):
@@ -448,59 +482,82 @@ class SectionItemDetailAPITestCase(APITestCase):
         # test update section item instance with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:section-item-detail", args=[1]),
-            {"description": "new testing", "lecture": "https://youtube.com/calisthenics", "title": "nothing just test title for a section item"},
+            {
+                "description": "new testing",
+                "lecture": "https://youtube.com/calisthenics",
+                "heading": "nothing just test heading for a section item",
+            },
             format="json",
         )
 
         # test update section item instance with authenticated  client
         response_2 = self.authenticated_client.put(
             reverse("learn:section-item-detail", args=[2]),
-            {"description": "new testing 2", "lecture": "https://instagram.com/video", "title": "nothing just test title for a section item"},
+            {
+                "description": "new testing 2",
+                "lecture": "https://instagram.com/video",
+                "heading": "nothing just test heading for a section item",
+            },
             format="json",
         )
 
         # test update section item instance that doesn't exist with auth client
         response_3 = self.authenticated_client.put(
             reverse("learn:section-item-detail", args=[6]),
-            {"description": "new testing this put", "lecture": "https://youtube.com/calime", "title": "nothing just test title for a section item"}, format="json"
+            {
+                "description": "new testing this put",
+                "lecture": "https://youtube.com/calime",
+                "heading": "nothing just test heading for a section item",
+            },
+            format="json",
         )
 
         # test update section item instance wtih an empty field and auth client
-        response_4 = self.authenticated_client.put (
-            reverse("learn:section-item-detail", args=[1]),
-            {},
-            format="json"
+        response_4 = self.authenticated_client.put(
+            reverse("learn:section-item-detail", args=[1]), {}, format="json"
         )
 
         # test update section item instance with an authenticated client != course's created by
         response_5 = self.authenticated_client_2.put(
-            reverse("learn:section-item-detail", args=[2]), {"description": "something new ", "lecture": "https://udemy.com/lolno", "title": "nothing just test title for a section item"}, format="json"
+            reverse("learn:section-item-detail", args=[2]),
+            {
+                "description": "something new ",
+                "lecture": "https://udemy.com/lolno",
+                "heading": "nothing just test heading for a section item",
+            },
+            format="json",
         )
-
 
         # test update section item instance with an empty field and auth client 2 -> forbidden anyway
         response_6 = self.authenticated_client_2.put(
-            reverse("learn:section-item-detail", args=[1]), {"title": "nothing just test title for a section item"}, format="json"
+            reverse("learn:section-item-detail", args=[1]),
+            {"heading": "nothing just test heading for a section item"},
+            format="json",
         )
 
         # test update section item instance with an unauthenticated client
         response_7 = self.unauthenticated_client.put(
-            reverse("learn:section-item-detail", args=[1]), {"description": "trying to change it ", "lecture": "https://idk.com/anymore", "title": "nothing just test title for a section item"}, format="json"
+            reverse("learn:section-item-detail", args=[1]),
+            {
+                "description": "trying to change it ",
+                "lecture": "https://idk.com/anymore",
+                "heading": "nothing just test heading for a section item",
+            },
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('new testing', response.data['description'])
-        self.assertIn('calisthenics', response.data['lecture'])
-        self.assertIn('nothing', response.data['title'])
+        self.assertIn("new testing", response.data["description"])
+        self.assertIn("calisthenics", response.data["lecture"])
+        self.assertIn("nothing", response.data["heading"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
-        self.assertIn('2', response_2.data['description'])
-        self.assertIn('instagram', response_2.data['lecture'])
+        self.assertIn("2", response_2.data["description"])
+        self.assertIn("instagram", response_2.data["lecture"])
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_5.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_7.status_code, status.HTTP_403_FORBIDDEN)
-
 
     def test_delete_section_item(self):
         """
@@ -508,25 +565,39 @@ class SectionItemDetailAPITestCase(APITestCase):
         """
 
         # test delete section item instance with an unauthenticated client
-        response = self.unauthenticated_client.delete(reverse("learn:section-item-detail", args=[1]))
+        response = self.unauthenticated_client.delete(
+            reverse("learn:section-item-detail", args=[1])
+        )
 
         # test delete section item instance that doesn't exist with auth client
-        response_2 = self.authenticated_client.delete(reverse("learn:section-item-detail", args=[6]))
+        response_2 = self.authenticated_client.delete(
+            reverse("learn:section-item-detail", args=[6])
+        )
 
         # test delete section item instance with an authenticated client != course's created_by
-        response_3 = self.authenticated_client_2.delete(reverse("learn:section-item-detail", args=[1]))
+        response_3 = self.authenticated_client_2.delete(
+            reverse("learn:section-item-detail", args=[1])
+        )
 
         # test delete section item instance with an authenticated client
-        response_4 = self.authenticated_client.delete(reverse("learn:section-item-detail", args=[1]))
+        response_4 = self.authenticated_client.delete(
+            reverse("learn:section-item-detail", args=[1])
+        )
 
         # check if the instance is really deleted
-        response_5 = self.authenticated_client.get(reverse("learn:section-item-detail", args=[1]))
+        response_5 = self.authenticated_client.get(
+            reverse("learn:section-item-detail", args=[1])
+        )
 
         # test delete section item instance with an authenticated client again
-        response_6 = self.authenticated_client.delete(reverse("learn:section-item-detail", args=[2]))
+        response_6 = self.authenticated_client.delete(
+            reverse("learn:section-item-detail", args=[2])
+        )
 
         # check if the instance is really deleted
-        response_7 = self.authenticated_client.get(reverse("learn:section-item-detail", args=[2]))
+        response_7 = self.authenticated_client.get(
+            reverse("learn:section-item-detail", args=[2])
+        )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
@@ -535,8 +606,3 @@ class SectionItemDetailAPITestCase(APITestCase):
         self.assertEqual(response_5.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_6.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response_7.status_code, status.HTTP_404_NOT_FOUND)
-
-
-    
-
-    

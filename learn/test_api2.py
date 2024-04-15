@@ -26,12 +26,14 @@ class UserProgressListAPITestCase(APITestCase):
             description="nothing",
             difficulty="BG",
             created_by=self.user_2,
+            weeks=18,
         )
         course_2 = Course.objects.create(
             title="test progress",
             description="nothing",
             difficulty="BG",
             created_by=self.user_2,
+            weeks=18,
         )
 
         Enrollment.objects.create(user=self.user, course=course)
@@ -53,7 +55,9 @@ class UserProgressListAPITestCase(APITestCase):
 
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.unauthenticated_client.force_authenticate(user=None)
 
     def test_retrieve_user_progress(self):
@@ -86,18 +90,21 @@ class UserProgressDetailAPITestCase(APITestCase):
             description="nothing",
             difficulty="BG",
             created_by=self.user_2,
+            weeks=18,
         )
         self.course_2 = Course.objects.create(
             title="test progress",
             description="nothing",
             difficulty="BG",
             created_by=self.user_2,
+            weeks=18,
         )
         self.course_3 = Course.objects.create(
             title="test progress",
             description="nothing",
             difficulty="BG",
             created_by=self.user_2,
+            weeks=18,
         )
 
         Enrollment.objects.create(user=self.user, course=self.course)
@@ -126,7 +133,9 @@ class UserProgressDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user, token=token_2["access"]
         )
@@ -272,6 +281,7 @@ class CourseRatingViewAPITestCase(APITestCase):
             description="nothing",
             difficulty="BG",
             created_by=self.user_2,
+            weeks=18,
         )
 
         Enrollment.objects.create(user=self.user, course=course)
@@ -304,7 +314,9 @@ class CourseRatingViewAPITestCase(APITestCase):
         token_2 = response_2.json()
         token_3 = response_3.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
@@ -374,7 +386,11 @@ class EnrollmentListAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         self.user_3 = User.objects.create_user(username="testuser3", password="secret")
 
-        course = Course.objects.create(title="testing", created_by=self.user_2)
+        course = Course.objects.create(
+            title="testing",
+            created_by=self.user_2,
+            weeks=18,
+        )
         Enrollment.objects.create(user=self.user_3, course=course)
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -402,7 +418,9 @@ class EnrollmentListAPITestCase(APITestCase):
         token_2 = response_2.json()
         token_3 = response_3.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
@@ -476,7 +494,11 @@ class UnenrollmentViewAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         self.user_3 = User.objects.create_user(username="testuser3", password="secret")
 
-        self.course = Course.objects.create(title="testing", created_by=self.user_2)
+        self.course = Course.objects.create(
+            title="testing",
+            created_by=self.user_2,
+            weeks=18,
+        )
         Enrollment.objects.create(user=self.user, course=self.course)
         Enrollment.objects.create(user=self.user_3, course=self.course)
 
@@ -505,7 +527,9 @@ class UnenrollmentViewAPITestCase(APITestCase):
         token_2 = response_2.json()
         token_3 = response_3.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user_2, token=token_2["access"]
         )
@@ -556,8 +580,16 @@ class EnrollmentUserListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
 
-        course = Course.objects.create(title="testing", created_by=self.user_2)
-        course_2 = Course.objects.create(title="testing2", created_by=self.user_2)
+        course = Course.objects.create(
+            title="testing",
+            created_by=self.user_2,
+            weeks=18,
+        )
+        course_2 = Course.objects.create(
+            title="testing2",
+            created_by=self.user_2,
+            weeks=18,
+        )
 
         Enrollment.objects.create(user=self.user, course=course)
         Enrollment.objects.create(user=self.user, course=course_2)
@@ -572,7 +604,9 @@ class EnrollmentUserListAPITestCase(APITestCase):
 
         token = response.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
 
     def test_retrieve_user_enrolled_courses(self):
         """
@@ -618,7 +652,9 @@ class BlogListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user, token=token_2["access"]
         )
@@ -706,7 +742,9 @@ class BlogDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user, token=token_2["access"]
         )
@@ -849,7 +887,9 @@ class BlogCommentListAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user, token=token_2["access"]
         )
@@ -964,7 +1004,9 @@ class BlogCommentDetailAPITestCase(APITestCase):
         token = response.json()
         token_2 = response_2.json()
 
-        self.authenticated_client.force_authenticate(user=self.user, token=token["access"])
+        self.authenticated_client.force_authenticate(
+            user=self.user, token=token["access"]
+        )
         self.authenticated_client_2.force_authenticate(
             user=self.user, token=token_2["access"]
         )

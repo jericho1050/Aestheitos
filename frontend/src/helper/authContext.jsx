@@ -1,10 +1,11 @@
-import { createContext, useReducer, useEffect, useState } from "react";
+import { createContext, useReducer, useEffect, useState, useContext } from "react";
 import {jwtDecode} from 'jwt-decode';
 
 export const AuthContext = createContext(null);
 export const AuthDispatchContext = createContext(null);
 export const AccessTokenExpContext = createContext(null);
 export const CurrentTimeContext = createContext(null);
+
 
 
 // eslint-disable-next-line react-refresh/only-export-components, react/prop-types
@@ -30,7 +31,9 @@ export function AuthProvider({ children }) {
             <AuthDispatchContext.Provider value={dispatch}>
                 <AccessTokenExpContext.Provider value={decoded}>
                     <CurrentTimeContext.Provider value={currentTime}>
-                    {children}
+
+                                {children}
+
                     </CurrentTimeContext.Provider>
                 </AccessTokenExpContext.Provider>
             </AuthDispatchContext.Provider>
@@ -48,4 +51,10 @@ export function authReducer(state, action) {
             // eslint-disable-next-line no-case-declarations, no-unused-vars
             return {};
     }
+}
+
+
+
+export function useAuthToken() {
+    return {token: useContext(AuthContext), dispatch: useContext(AuthDispatchContext)}
 }

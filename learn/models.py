@@ -71,7 +71,9 @@ class Course(models.Model):
         "User", on_delete=models.CASCADE, related_name="creator"
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)   
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00) 
+    weeks = models.IntegerField()
+  
 
     def __str__(self):
         return f"( id: {self.id}) Course: {self.title}. By {self.created_by.username}"
@@ -99,12 +101,11 @@ class CourseContent(models.Model):
     Represents a course's overview content
     """
 
-    lecture = models.URLField()
+    preview = models.URLField()
     overview = models.TextField()
     course = models.ForeignKey(
         "Course", on_delete=models.CASCADE, related_name="course_content"
     )
-    weeks = models.IntegerField()
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.course.title}"
@@ -117,7 +118,7 @@ class Section(models.Model):
     """
 
     course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name="sections")
-    title = models.CharField(max_length=200)
+    heading = models.CharField(max_length=200)
 
     def delete_with_auth_user(self, user):
         if self.course.created_by != user:
@@ -134,7 +135,7 @@ class SectionItem(models.Model):
     section = models.ForeignKey("Section", on_delete=models.CASCADE, related_name="contents")
     lecture = models.URLField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    title = models.CharField(max_length=200)
+    heading = models.CharField(max_length=200)
 
     def delete_with_auth_user(self, user):
         from .helpers import is_valid_ownership
@@ -182,8 +183,8 @@ class Workouts(models.Model):
     section_item = models.ForeignKey(
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
-    exercise = models.CharField(max_length=200)
-    demo = models.URLField()
+    exercise = models.CharField(max_length=400) # this is suppose to be description but im too lazy to change the field for my test cases too
+    demo = models.ImageField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True
     )
@@ -205,11 +206,11 @@ class Workouts(models.Model):
 
 
 class CorrectExerciseForm(models.Model):
-    demo = models.URLField()
+    demo = models.ImageField()
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="correct_exercise_form"
     )
-    description = models.CharField(max_length=100)
+    description = models.CharField(max_length=200)
 
     def __str__(self):
         return f"( pk: { self.pk } )Course: {self.workout.section_item.section.course.title}. Workout: {self.workout.exercise}"
@@ -223,11 +224,11 @@ class CorrectExerciseForm(models.Model):
 
 
 class WrongExerciseForm(models.Model):
-    demo = models.URLField()
+    demo = models.ImageField()
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="wrong_exercise_form"
     )
-    description = models.CharField(max_length=100)
+    description = models.CharField(max_length=200)
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.workout.section_item.section.course.title} Workout: {self.workout.exercise}"

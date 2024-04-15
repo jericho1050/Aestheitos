@@ -38,7 +38,7 @@ export default function SignIn() {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const token = await signInAPI(data);
-        console.log(token)
+        // console.log(token['access'])
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {
