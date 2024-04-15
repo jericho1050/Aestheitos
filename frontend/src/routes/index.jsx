@@ -80,20 +80,22 @@ export function Index() {
                 </Grid>
             </Grid>
             <Container maxWidth="xl" sx={{ml:'auto', mr: 'auto'}}>
-                <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
-                    {/* Load lists of Courses that are approved only */}
-                    {courses.map(course => {
-                        
-                        return (
-                        course.status === 'A' ?  
-                        <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
-                            <CourseCard  {...course} />
-                        </Grid>
-                        : null
-                    )}
+                <Box sx={{ml: {xs: 4, m: 3, l: 0}, mr: {xs: 4, m: 3, l: 0}}}>
+                    <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
+                        {/* Load lists of Courses that are approved only */}
+                        {courses.map(course => {
+                            
+                            return (
+                            course.status === 'A' ?  
+                            <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
+                                <CourseCard  {...course} />
+                            </Grid>
+                            : null
+                        )}
 
-                    )}
-                </Grid>
+                        )}
+                    </Grid>
+                </Box>
             </Container>
         </Box>
 

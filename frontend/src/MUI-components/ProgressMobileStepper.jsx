@@ -6,18 +6,18 @@ import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { useFormAction } from 'react-router-dom';
 
-// stepper is responsible for submission of our FORMS
-export default function ProgressMobileStepper({ setIntent, intent, actionData, activeStep, setActiveStep }) {
+// stepper is responsible also for submission of our FORMS
+export default function ProgressMobileStepper({ isError, activeStep, setActiveStep }) {
   const theme = useTheme();
 
-  const handleBack = () => { 
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    if (actionData?.course || actionData?.overview || actionData?.courseContent) {
-      setIntent('edit');
-    } else {
-      setIntent('create');
-    } 
-  };
+  // const handleBack = () => { 
+  //   setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  //   if (actionData?.course ||  actionData?.courseContent) {
+  //     setIntent('edit');
+  //   } else {
+  //     setIntent('create');
+  //   } 
+  // };
 
   return (
     <MobileStepper
@@ -28,12 +28,10 @@ export default function ProgressMobileStepper({ setIntent, intent, actionData, a
       sx={{ maxWidth: 400, flexGrow: 1 }}
       nextButton={
         <Button
-          name="intent"
-          value={intent}
           data-cy="nextButton"
           size="small"
           type="submit"
-          disabled={activeStep === 2}
+          disabled={activeStep === 2 || isError}
         >
           Next
           {theme.direction === 'rtl' ? (
@@ -44,13 +42,7 @@ export default function ProgressMobileStepper({ setIntent, intent, actionData, a
         </Button>
       }
       backButton={
-        <Button data-cy="prevButton" size="small" type="submit" onClick={handleBack} disabled={activeStep === 0}>
-          {theme.direction === 'rtl' ? (
-            <KeyboardArrowRight />
-          ) : (
-            <KeyboardArrowLeft />
-          )}
-          Back
+        <Button data-cy="prevButton" size="small" type="" disabled={true}>
         </Button>
       }
     />

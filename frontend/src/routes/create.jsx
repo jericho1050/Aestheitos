@@ -34,7 +34,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse } from "../courses";
+import { createCourse, createCourseContent, updateCourse } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 
 let theme = createTheme()
@@ -43,20 +43,29 @@ theme = responsiveFontSizes(theme)
 
 export async function action({ request }) {
     let formData = await request.formData();
-    const courseData = Object.fromEntries(formData);
+    // const courseData = Object.fromEntries(formData);
+    let course;
+    if (parseInt(formData.get('activeStep')) === 0) {
+        formData.delete('activeStep');
+        course = await createCourse(formData);
+    } else {
+        let courseId = formData.get('courseId')
+        formData.delete('courseId');
+        formData.delete('activeStep');
+        course = await createCourseContent(courseId, formData);
+    }
     let error = {}
-
-    console.log(`my course data ${courseData.title}`);
-    console.log(`my course data ${courseData.name}`);
-    console.log(`my course data ${courseData.price}`);
-    console.log(`my course data ${courseData.difficulty}`);
-    console.log(`my course data ${courseData.weeks}`);
-    console.log(`my course data ${courseData.description}`);
-    const course = await createCourse(formData);
-    console.log(`my course lol ${course.message}`)
-    if (course.statusCode >= 400) {
-        error = { ...course };
-        return error;
+    // console.log(`my course data ${courseData.title}`);
+    // console.log(`my course data ${courseData.name}`);
+    // console.log(`my course data ${courseData.price}`);
+    // console.log(`my course data ${courseData.difficulty}`);
+    // console.log(`my course data ${courseData.weeks}`);
+    // console.log(`my course data ${courseData.description}`);
+    if (course?.statusCode) {
+        if (course.statusCode >= 400) {
+            error = { ...course };
+            return error;
+        }
     }
     return { course };
 }
@@ -592,6 +601,7 @@ export default function CreateCourse() {
 
     });
     const [courseContent, setCourseContent] = React.useState({
+        courseId: '',
         preview: '',
         overview: '',
 
@@ -599,41 +609,57 @@ export default function CreateCourse() {
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
-    const fetcher = useFetcher(); 
+    const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
     const [isError, setIsError] = React.useState(false);
-    const [status, setStatus] = React.useState('empty');
-    const [intent, setIntent] = React.useState('create');
+    // const [status, setStatus] = React.useState('empty');
 
+    // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     React.useEffect(() => {
+        // !resonse.ok then there's a message
         if (actionData?.message) {
             setIsError(true);
         }
+        // persist the courseId state so that we can use it to sent to our api (/course/courseId/course-content, note: this rest endpoint requires courseId)
+        else if (actionData?.course) {  // returned value of previous action.
+            setCourseContent({
+                ...courseContent,
+                courseId: actionData.course.id
+            })
+            // because im assuming this is somewhere 200 status code so we move on to the next step
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+
 
     }, [actionData])
 
     React.useEffect(() => {
         // checks if all fields are filled by the user
         function checkFields() {
-            for (let key in course) {
-                if (key != 'price' && (course[key] === '' || course[key] === null)) {
-                    return false;
+            if (activeStep === 0) {
+                for (let key in course) {
+                    if (key != 'price' && (course[key] === '' || course[key] === null)) {
+                        return false;
+                    }
                 }
             }
-            // for (let key in courseContent) {
-            //     if (courseContent[key] === '') {
-            //         return false;
-            //     }
-            // }
+            else if (activeStep === 1) {
+                for (let key in courseContent) {
+                    if (courseContent[key] === '') {
+                        return false;
+                    }
+                }
+            }
+
             return true;
         }
         if (checkFields()) {
-            setStatus('success');
             setIsError(false);
-        } else {
-            setStatus('typing')
         }
-    }, [course]);
+        //  else {
+        //     setStatus('typing')
+        // }
+    }, [course, courseContent]);
 
     function handleImageUpload(event) {
         const file = event.target.files[0];
@@ -656,11 +682,14 @@ export default function CreateCourse() {
 
     }
 
-    function handleCourseSubmit() {
-        if (!isError && status === 'success') {
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        }
-    }
+    // function handleSubmit() {
+    //     if (!isError && status === 'success') {
+    //         setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    //         setStatus('empty');
+    //         //https://react.dev/learn/state-as-a-snapshot
+    //         //can't it's for the next render if we changed status to success in useEFFECT HOOK
+    //     }
+    // }
 
     function handleCourseOverviewSubmit() {
         // TODO
@@ -674,11 +703,11 @@ export default function CreateCourse() {
             <br></br>
             {
                 activeStep === 0 ? (
-                    <fetcher.Form method="post" encType="multipart/form-data" noValidate onSubmit={handleCourseSubmit}>
-
+                    <fetcher.Form method="post" encType="multipart/form-data" noValidate >
+                        <input type="hidden" value={activeStep} name="activeStep" />
                         <Box sx={{ m: '3vw' }}>
                             <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper setIntent={setIntent} intent={intent} actionData={fetcher.data} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                <ProgressMobileStepper isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                             </Box>
                             <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                                 {/* Paper starts here */}
@@ -728,7 +757,6 @@ export default function CreateCourse() {
                                                                 ...course,
                                                                 difficulty: e.target.value
                                                             });
-                                                            setIsError(false);
                                                         }}
                                                         inputProps={{ name: "difficulty" }}
                                                         autoWidth
@@ -769,6 +797,7 @@ export default function CreateCourse() {
                                 </Grid>
                                 {/* Paper ends here */}
                                 {/* title  & description starts here */}
+
                                 <Grid item xs={12} sm={12} md lg>
                                     <Grid item container wrap="nowrap" direction="column">
                                         <Grid item xs>
@@ -830,11 +859,12 @@ export default function CreateCourse() {
                     /* title  & description ends here */
                 )
                     : activeStep === 1 ? (
-                        <fetcher.Form method="post" encType="multipart/form-data" noValidate>
-
+                        <fetcher.Form method="post" encType="multipart/form-data" noValidate >
+                            <input type="hidden" value={activeStep} name="activeStep" />
+                            <input type="hidden" value={courseContent.courseId} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
                                 <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    <ProgressMobileStepper isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
                             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
@@ -847,9 +877,25 @@ export default function CreateCourse() {
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
+                                    {isError && actionData?.message ?
+                                        <Grid item>
+                                            <Typography variant='small' sx={{ color: 'red'}}>
+
+                                                {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                    if (key === 'overview') {
+                                                        return `${key}: ${value}`;
+                                                    } else {
+                                                        return null;
+                                                    }
+                                                })}
+                                            </Typography>
+                                        </Grid>
+                                        : null
+                                    }
                                     <Grid item container>
                                         {/* course overview textarea input */}
                                         <TextField
+
                                             data-cy="Course Overview"
                                             helperText=" "
                                             id="demo-helper-text-aligned-no-helper"
@@ -860,12 +906,15 @@ export default function CreateCourse() {
                                             multiline
                                             required={true}
                                             name="overview"
+                                            value={courseContent.overview}
                                             onChange={e => {
                                                 setCourseContent({
                                                     ...courseContent,
                                                     overview: e.target.value
                                                 })
+                                                setIsError(false);
                                             }}
+                                            error={isError}
                                         />
                                     </Grid>
                                     <Grid item>
@@ -879,14 +928,36 @@ export default function CreateCourse() {
                                         </ThemeProvider>
                                     </Grid>
                                     <br />
+                                    {isError && actionData?.message ?
+                                        <Grid item>
+                                            <Typography variant='small' sx={{ color: 'red'}}>
 
+                                                {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                    if (key === 'preview') {
+                                                        return `${key}: ${value}`;
+                                                    } else {
+                                                        return null;
+                                                    }
+                                                })}
+                                            </Typography>
+                                        </Grid>
+                                        : null
+                                    }
                                     <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
                                         <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
                                             {/* course preview textarea input */}
-                                            <TextField onChange={e => setCourseContent({
-                                                ...courseContent,
-                                                preview: e.target.value
-                                            })}
+                                            <TextField
+                                                value={courseContent.preview}
+                                                onChange={e => {
+                                                    setIsError(false);
+                                                    setCourseContent({
+                                                        ...courseContent,
+                                                        preview: e.target.value
+                                                    })
+                                                }
+
+
+                                                }
                                                 InputProps={{
                                                     startAdornment: (
                                                         <InputAdornment position="start">
@@ -899,7 +970,8 @@ export default function CreateCourse() {
                                                 id="lecture-url"
                                                 label="e.g https://www.youtube.com/watch?v=SOMEID"
                                                 type="url"
-                                                name="lecture"
+                                                name="preview"
+                                                error={isError}
                                             />
                                         </Box>
                                         <Grid item>
