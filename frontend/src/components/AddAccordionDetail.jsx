@@ -28,7 +28,7 @@ export default function AddAccordionItem({ accordionId, onClick }) {
                         multiline
                         fullWidth
                         onChange={e => setHeading(e.target.value)}
-                        name="heading"
+                        // name="heading"
                     />
                 </Grid>
                 <Grid item xs={2} lg={1}>

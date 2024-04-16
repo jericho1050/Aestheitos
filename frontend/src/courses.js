@@ -15,6 +15,10 @@ export async function getCourses() {
     }
   }
 
+  export async function getCourse(id) {
+    //TODO 
+  }
+
   
   class HttpError extends Error {
     constructor(statusCode, message, ...params) {
@@ -58,7 +62,7 @@ export async function getCourses() {
       });
       if (!response.ok) {
         const message = await response.text();
-        throw new HttpError(response.status, message)
+        throw new HttpError(response.status, message);
       }
 
       const data = await response.json();
@@ -70,8 +74,31 @@ export async function getCourses() {
     }
   }
   
-  // TODO updateCourse(courseId) {}
-  // fetch api
+
+  // in which is called when user creates an accordion
+  export async function createSection(courseContentId, sectionFormData) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}sections/course-content/${courseContentId}`, {
+        method: 'POST',
+        credentials: 'include',
+        body: sectionFormData
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new HttpError(response.status, message);
+      }
+
+      const data = await response.json();
+      return data;
+    }
+    catch (err) {
+      console.error('An error occured', err)
+      return err;
+    }
+  }
+
+
 
   export async function updateCourse(id, updates){
     try {

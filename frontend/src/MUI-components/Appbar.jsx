@@ -135,11 +135,10 @@ function ResponsiveAppBar() {
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <Avatar alt="logo" src={logo} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
+            <Link to='/' style={{color: 'inherit', textDecoration: 'none'}}>
             <Typography
               variant="h6"
               noWrap
-              component="a"
-              href="http://localhost:5173/"
               sx={{
                 mr: 2,
                 display: { xs: 'none', md: 'flex' },
@@ -152,7 +151,7 @@ function ResponsiveAppBar() {
             >
               Aestheitos
             </Typography>
-
+            </Link>
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
               <IconButton
                 size="large"
@@ -193,7 +192,7 @@ function ResponsiveAppBar() {
               variant="h6"
               noWrap
               component="a"
-              href="http://localhost:5173/"
+              href="/"
               sx={{
                 ml: 4,
                 mr: 0,

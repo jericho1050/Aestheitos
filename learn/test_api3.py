@@ -24,9 +24,15 @@ class SectionListAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
-        self.section = Section.objects.create(heading="test week 5", course=self.course)
+
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(heading="test week 5", course_content=self.course_content)
         self.section_2 = Section.objects.create(
-            heading="test week 6", course=self.course
+            heading="test week 6", course_content=self.course_content
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -127,7 +133,12 @@ class SectionDetailAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
-        self.section = Section.objects.create(heading="test week 1", course=self.course)
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(heading="test week 1", course_content=self.course_content)
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
@@ -262,7 +273,12 @@ class SectionItemListAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
-        self.section = Section.objects.create(heading="test week 5", course=self.course)
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(heading="test week 5", course_content=self.course_content)
         self.section_item = SectionItem.objects.create(
             section=self.section,
             description="testing just testing just testing",
@@ -403,8 +419,13 @@ class SectionItemDetailAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
         self.section = Section.objects.create(
-            heading="test week 100", course=self.course
+            heading="test week 100", course_content=self.course_content
         )
         self.section_item = SectionItem.objects.create(
             section=self.section,

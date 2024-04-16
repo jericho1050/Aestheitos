@@ -315,14 +315,19 @@ class SectionTestCase(TestCase):
             created_by=self.user,
             weeks=18,
         )
-        self.section = Section.objects.create(course=self.course, heading="week 6")
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(course_content=self.course_content, heading="week 6")
 
     def test_section_creation(self):
 
-        self.assertEqual(self.section.course, self.course)
+        self.assertEqual(self.section.course_content, self.course_content)
         self.assertEqual(self.section.heading, "week 6")
-        self.assertEqual(self.section.course.created_by, self.user)
-        self.assertNotEqual(self.section.course.created_by, self.user2)
+        self.assertEqual(self.section.course_content.course.created_by, self.user)
+        self.assertNotEqual(self.section.course_content.course.created_by, self.user2)
 
     def test_section_without_course_reference(self):
 
@@ -330,7 +335,7 @@ class SectionTestCase(TestCase):
             Section.objects.create(heading="forgot ops")
 
     def test_section_without_title(self):
-        section = Section.objects.create(course=self.course)
+        section = Section.objects.create(course_content=self.course_content)
         with self.assertRaises(ValidationError):
             section.full_clean()
 
@@ -344,7 +349,12 @@ class SectionItemTestCase(TestCase):
             title="testing sectionItem",
             weeks=18,
         )
-        self.section = Section.objects.create(course=self.course, heading="week 12")
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(course_content=self.course_content, heading="week 12")
         self.section_item = SectionItem.objects.create(
             section=self.section,
             lecture="https://www.youtube.com",
@@ -385,7 +395,12 @@ class WorkoutsTestCase(TestCase):
             created_by=self.user,
             weeks=18,
         )
-        section = Section.objects.create(course=self.course, heading="week 123")
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        section = Section.objects.create(course_content=self.course_content, heading="week 123")
         self.section_item = SectionItem.objects.create(
             section=section,
             description="after doing this go do this",
@@ -445,7 +460,12 @@ class CorrectExerciseFormTestCase(TestCase):
             created_by=self.user,
             weeks=18,
         )
-        section = Section.objects.create(heading="week 6", course=self.course)
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        section = Section.objects.create(heading="week 6", course_content=self.course_content)
         section_item = SectionItem.objects.create(
             section=section,
             lecture="https://www.youtube.com",
@@ -503,7 +523,12 @@ class WrongExerciseFormTestCase(TestCase):
             created_by=self.user,
             weeks=18,
         )
-        section = Section.objects.create(course=self.course, heading="week 10")
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        section = Section.objects.create(course_content=self.course_content, heading="week 10")
         section_item = SectionItem.objects.create(
             section=section,
             description="after doing a set rest 100000 minutes",

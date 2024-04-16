@@ -34,7 +34,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse, createCourseContent, updateCourse } from "../courses";
+import { createCourse, createCourseContent, createSection, updateCourse } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 
 let theme = createTheme()
@@ -46,15 +46,33 @@ export async function action({ request }) {
     // const courseData = Object.fromEntries(formData);
     let course;
     if (parseInt(formData.get('activeStep')) === 0) {
+        // create a course
         formData.delete('activeStep');
         course = await createCourse(formData);
-    } else {
+    } else if (parseInt(formData.get('activeStep')) === 1) {
+        // create a course's overview (content)
         let courseId = formData.get('courseId')
         formData.delete('courseId');
         formData.delete('activeStep');
         course = await createCourseContent(courseId, formData);
+    } else {
+        if (formData.get('heading') && formData.get('courseContentId')) {
+            let courseContentId = formData.get('courseContentId')
+            formData.delete('activeStep');
+            formData.delete('courseContentId');
+            course = await createSection(courseContentId, formData);
+        }
+        `Yes, in JavaScript, if the value retrieved by formData.get('value') is an empty string, 
+        it will be considered "falsy". This means that it will behave like false in a boolean context, 
+        such as an if statement. So, if formData.get('heading') or formData.get('courseContentId') 
+        returns an empty string, the if condition will not be satisfied and the code inside the if block 
+        will not be executed. - ddb50`
     }
     let error = {}
+    // if (course?.heading) {
+    //     console.log(`my course section data ${course.heading} and ${course.course_content}`);
+    // }
+
     // console.log(`my course data ${courseData.title}`);
     // console.log(`my course data ${courseData.name}`);
     // console.log(`my course data ${courseData.price}`);
@@ -449,7 +467,7 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                                         <Grid item>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowfullscreen></iframe>                                    </Box>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
                                                 :
                                                 <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                     <Typography variant="body" align={'center'}>
@@ -502,9 +520,27 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
 
 
 
-function ControlledAccordions() {
+function ControlledAccordions({ courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
-    const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend)
+    const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
+    const fetcher = useFetcher();
+    const actionData = fetcher.data; // returns the response from previous action 
+    const [isError, setIsError] = React.useState(false);
+
+    // continuously update real time 'IDs' of our state variables
+    React.useEffect(() => {
+        // continuously update real time 'IDs' of our state variables
+
+        if (actionData?.message) {
+            setIsError(true);
+        }
+        else if (actionData?.course?.heading && actionData?.course?.course_content) {
+            updateAccordions(draft => {
+                const index = draft.length - 1;
+                draft[index].id = actionData.course.id;
+            })
+        }
+    }, [actionData])
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
@@ -539,7 +575,8 @@ function ControlledAccordions() {
             draft[accordionIndex].items.splice(accordionItemIndex, 1)
         })
     }
-
+    // TODO
+    // PLS ADD HANDLING OF ERROR AND FIX THE EMPTY HEADING.
     function handleAddAccordion(heading) {
         // adds  a new accordion  (section)
         updateAccordions(draft => {
@@ -552,6 +589,12 @@ function ControlledAccordions() {
                 }]
             })
         })
+        const index = accordions.length - 1;
+        fetcher.submit({ heading: accordions[index].heading, courseContentId: courseContentId }, {
+            method: 'post',
+            encType: "multipart/form-data"
+        })
+
     }
 
     function handleEditAccordion(nextAccordion) {
@@ -572,6 +615,7 @@ function ControlledAccordions() {
             {/* Adds a new Accordion / Section  */}
             <AddAccordion onClick={handleAddAccordion} />
             <TransitionGroup>
+
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
@@ -580,7 +624,6 @@ function ControlledAccordions() {
 
                     ))
                 }
-
             </TransitionGroup>
         </>
     );
@@ -592,6 +635,7 @@ export default function CreateCourse() {
     const [activeStep, setActiveStep] = React.useState(0);
     const [previewImage, setPreviewImage] = React.useState(null);
     const [course, setCourse] = React.useState({
+        id: 0,
         title: '',
         difficulty: '',
         description: '',
@@ -601,7 +645,7 @@ export default function CreateCourse() {
 
     });
     const [courseContent, setCourseContent] = React.useState({
-        courseId: '',
+        id: 0,
         preview: '',
         overview: '',
 
@@ -616,20 +660,29 @@ export default function CreateCourse() {
 
     // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     React.useEffect(() => {
+        // continuously update real time 'IDs' of our state variables
         // !resonse.ok then there's a message
+        // optional chaining
         if (actionData?.message) {
             setIsError(true);
         }
-        // persist the courseId state so that we can use it to sent to our api (/course/courseId/course-content, note: this rest endpoint requires courseId)
-        else if (actionData?.course) {  // returned value of previous action.
-            setCourseContent({
-                ...courseContent,
-                courseId: actionData.course.id
+        // persist the IDs state so that we can use it to sent to our api (/course/courseId/course-content, note: this rest endpoint requires courseId)
+        else if (actionData?.course?.title && actionData?.course?.description && activeStep === 0) {  // returned value of previous action.
+            setCourse({
+                ...course,
+                id: actionData.course.id
             })
-            // because im assuming this is somewhere 200 status code so we move on to the next step
+            // im assuming this is somewhere 200 status code so we move on to the next step
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
-
+        else if (actionData?.course?.preview && actionData?.course?.overview && activeStep === 1) {  // returned value of previous action.
+            setCourseContent({
+                ...courseContent,
+                id: actionData.course.id
+            })
+            // im assuming this is somewhere 200 status code so we move on to the next step
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
 
     }, [actionData])
 
@@ -691,12 +744,6 @@ export default function CreateCourse() {
     //     }
     // }
 
-    function handleCourseOverviewSubmit() {
-        // TODO
-    }
-    function handleCourseContentSubmit() {
-
-    }
 
     return (
         <>
@@ -861,7 +908,7 @@ export default function CreateCourse() {
                     : activeStep === 1 ? (
                         <fetcher.Form method="post" encType="multipart/form-data" noValidate >
                             <input type="hidden" value={activeStep} name="activeStep" />
-                            <input type="hidden" value={courseContent.courseId} name="courseId" />
+                            <input type="hidden" value={course.id} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
                                 <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
                                     <ProgressMobileStepper isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
@@ -879,7 +926,7 @@ export default function CreateCourse() {
                                     </Grid>
                                     {isError && actionData?.message ?
                                         <Grid item>
-                                            <Typography variant='small' sx={{ color: 'red'}}>
+                                            <Typography variant='small' sx={{ color: 'red' }}>
 
                                                 {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
                                                     if (key === 'overview') {
@@ -930,7 +977,7 @@ export default function CreateCourse() {
                                     <br />
                                     {isError && actionData?.message ?
                                         <Grid item>
-                                            <Typography variant='small' sx={{ color: 'red'}}>
+                                            <Typography variant='small' sx={{ color: 'red' }}>
 
                                                 {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
                                                     if (key === 'preview') {
@@ -977,7 +1024,7 @@ export default function CreateCourse() {
                                         <Grid item>
                                             {getEmbedUrl(courseContent.preview) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowfullscreen></iframe>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
                                                 </Box>
                                                 :
                                                 <Box mb="5%" mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
@@ -992,34 +1039,37 @@ export default function CreateCourse() {
                             </Box>
                         </fetcher.Form>
                     ) : (
-                        <Form method="post" encType="multipart/form-data noValidate">
-
-                            <Box sx={{ m: '3vw' }}>
-                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                        <>
+                            <fetcher.Form method="post" encType="multipart/form-data" noValidate>
+                                <input type="hidden" value={activeStep} name="activeStep" />
+                                <Box sx={{ m: '3vw' }}>
+                                    <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                        <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    </Box>
                                 </Box>
-                            </Box>
-                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                                <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
 
-                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                    <Grid item>
-                                        <ThemeProvider theme={theme}>
-                                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                                Course content
-                                            </Typography>
-                                        </ThemeProvider>
+                                    <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                        <Grid item>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                                    Course content
+                                                </Typography>
+                                            </ThemeProvider>
+                                        </Grid>
+                                        <Grid item width={{ xs: '100%', md: '69%' }}>
+                                            <ControlledAccordions courseContentId={courseContent.id}></ControlledAccordions>
+                                        </Grid>
                                     </Grid>
-                                    <Grid item width={{ xs: '100%', md: '69%' }}>
-                                        <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
-                                    </Grid>
-                                </Grid>
-                                <Box display="flex" justifyContent={'flex-end'} position="absolute" bottom={0} right={0} left={0} p={2} mr={2}>
-                                    <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                                        Submit
-                                    </Button>
+                                    <Box display="flex" justifyContent={'flex-end'} position="absolute" bottom={0} right={0} left={0} p={2} mr={2}>
+                                        <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+                                            Submit
+                                        </Button>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </Form>
+                            </fetcher.Form>
+
+                        </>
                     )}
 
         </>
@@ -1095,14 +1145,10 @@ const initialSectionData = [{
     heading: section1.heading,
     items: [{
         id: 0,
-        heading: sectionItem1.heading,
-        description: sectionItem1.description,
-        lecture: sectionItem1.lecture
+        ...sectionItem1
     }, {
         id: 1,
-        heading: sectionItem2.heading,
-        description: sectionItem2.description,
-        lecture: sectionItem2.lecture
+        ...sectionItem2
     }]
 }]
 

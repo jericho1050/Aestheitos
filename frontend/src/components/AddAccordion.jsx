@@ -22,7 +22,7 @@ export default function AddAccordion({ onClick }) {
                         multiline
                         fullWidth
                         onChange={e => setHeading(e.target.value)}
-                        name="heading"
+                        // name="heading"
                     />
                 </Grid>
                 <Grid item xs={2} sm={1}>
