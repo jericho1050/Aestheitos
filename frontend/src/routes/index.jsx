@@ -22,7 +22,7 @@ export async function loader() {
 const MysteriousText = ({ children, ...props }) => {
     const matches = useMediaQuery(theme => theme.breakpoints.up('md'))
     const animation = i =>
-        useSpring({ opacity: 1, from: { opacity: 0 }, delay: Math.random() * 650 });
+        useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650 )});
     return (
         <Typography variant={matches ? 'h3' : 'h4'} sx={{ color: '#5A5A5A', fontWeight: 600, fontFamily: '"Helvetica Neue"', textAlign: 'left' }} {...props}>
             {children.split("").map((item, index) => (

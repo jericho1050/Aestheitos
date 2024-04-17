@@ -43,24 +43,52 @@ theme = responsiveFontSizes(theme)
 
 export async function action({ request }) {
     let formData = await request.formData();
-    // const courseData = Object.fromEntries(formData);
-    let course;
+    let course, courseContent;
+    let sections = []
+    let error = {}
+    let intent = formData.get('intent');
     if (parseInt(formData.get('activeStep')) === 0) {
         // create a course
-        formData.delete('activeStep');
-        course = await createCourse(formData);
+        if (intent === 'create') {
+            course = await createCourse(formData);
+        }
+        // update a course
+        if (intent === 'update') {
+            course = await updateCourse(formData.get('courseId'), formData);
+        }
+        // return error if there's an error
+        if (course?.statusCode) {
+            if (course.statusCode >= 400) {
+                error = { ...course };
+                return error;
+            }
+        }
+        // TODO
+        // HANDLE UPDATE AND CREATE METHODS HERE JUST LIKE ABOVE
     } else if (parseInt(formData.get('activeStep')) === 1) {
-        // create a course's overview (content)
+        // create a course's overview (course content)
         let courseId = formData.get('courseId')
-        formData.delete('courseId');
-        formData.delete('activeStep');
-        course = await createCourseContent(courseId, formData);
+        courseContent = await createCourseContent(courseId, formData);
+        if (courseContent?.statusCode) {
+            if (courseContent.statusCode >= 400) {
+                error = { ...courseContent };
+                return error;
+            }
+        }
     } else {
-        if (formData.get('heading') && formData.get('courseContentId')) {
+        // create a section / accordion (course's content)
+        if (formData.has('heading') && formData.get('courseContentId')) {
             let courseContentId = formData.get('courseContentId')
             formData.delete('activeStep');
             formData.delete('courseContentId');
-            course = await createSection(courseContentId, formData);
+            let newSection = await createSection(courseContentId, formData);
+            if (newSection?.statusCode) {
+                if (newSection.statusCode >= 400) {
+                    error = {...courseContent};
+                    return error;
+                }
+            }
+            sections.push(newSection);
         }
         `Yes, in JavaScript, if the value retrieved by formData.get('value') is an empty string, 
         it will be considered "falsy". This means that it will behave like false in a boolean context, 
@@ -68,24 +96,8 @@ export async function action({ request }) {
         returns an empty string, the if condition will not be satisfied and the code inside the if block 
         will not be executed. - ddb50`
     }
-    let error = {}
-    // if (course?.heading) {
-    //     console.log(`my course section data ${course.heading} and ${course.course_content}`);
-    // }
 
-    // console.log(`my course data ${courseData.title}`);
-    // console.log(`my course data ${courseData.name}`);
-    // console.log(`my course data ${courseData.price}`);
-    // console.log(`my course data ${courseData.difficulty}`);
-    // console.log(`my course data ${courseData.weeks}`);
-    // console.log(`my course data ${courseData.description}`);
-    if (course?.statusCode) {
-        if (course.statusCode >= 400) {
-            error = { ...course };
-            return error;
-        }
-    }
-    return { course };
+    return { course, courseContent, sections };
 }
 
 function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, onClick, workout, open }) {
@@ -575,26 +587,26 @@ function ControlledAccordions({ courseContentId }) {
             draft[accordionIndex].items.splice(accordionItemIndex, 1)
         })
     }
-    // TODO
-    // PLS ADD HANDLING OF ERROR AND FIX THE EMPTY HEADING.
     function handleAddAccordion(heading) {
         // adds  a new accordion  (section)
-        updateAccordions(draft => {
-            draft.push({
-                id: nextAccordionId++,
-                heading: heading,
-                items: [{
-                    id: nextItemId++,
-                    heading: sectionItem1.heading
-                }]
-            })
-        })
-        const index = accordions.length - 1;
-        fetcher.submit({ heading: accordions[index].heading, courseContentId: courseContentId }, {
+        fetcher.submit({ heading: heading, courseContentId: courseContentId }, {
             method: 'post',
             encType: "multipart/form-data"
         })
-
+        if (!heading) {
+            setIsError(true);
+        } else {
+            updateAccordions(draft => {
+                draft.push({
+                    id: nextAccordionId++,
+                    heading: heading,
+                    items: [{
+                        id: nextItemId++,
+                        heading: sectionItem1.heading
+                    }]
+                })
+            })
+        }
     }
 
     function handleEditAccordion(nextAccordion) {
@@ -613,7 +625,12 @@ function ControlledAccordions({ courseContentId }) {
     return (
         <>
             {/* Adds a new Accordion / Section  */}
-            <AddAccordion onClick={handleAddAccordion} />
+            <AddAccordion actionData={actionData} setIsError={setIsError} isError={isError} onClick={handleAddAccordion} />
+            <Box sx={{display: 'block', ml: 'auto', mr: 'auto'}}>
+                <ThemeProvider theme={theme}>
+                    <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
+                </ThemeProvider>
+            </Box>
             <TransitionGroup>
 
                 {
@@ -656,7 +673,7 @@ export default function CreateCourse() {
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
     const [isError, setIsError] = React.useState(false);
-    // const [status, setStatus] = React.useState('empty');
+    const [intent, setIntent] = React.useState('create');
 
     // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     React.useEffect(() => {
@@ -674,14 +691,16 @@ export default function CreateCourse() {
             })
             // im assuming this is somewhere 200 status code so we move on to the next step
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setIntent('create');
         }
-        else if (actionData?.course?.preview && actionData?.course?.overview && activeStep === 1) {  // returned value of previous action.
+        else if (actionData?.courseContent?.preview && actionData?.courseContent?.overview && activeStep === 1) {  // returned value of previous action.
             setCourseContent({
                 ...courseContent,
-                id: actionData.course.id
+                id: actionData.courseContent.id
             })
             // im assuming this is somewhere 200 status code so we move on to the next step
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setIntent('create');
         }
 
     }, [actionData])
@@ -709,9 +728,6 @@ export default function CreateCourse() {
         if (checkFields()) {
             setIsError(false);
         }
-        //  else {
-        //     setStatus('typing')
-        // }
     }, [course, courseContent]);
 
     function handleImageUpload(event) {
@@ -735,14 +751,6 @@ export default function CreateCourse() {
 
     }
 
-    // function handleSubmit() {
-    //     if (!isError && status === 'success') {
-    //         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    //         setStatus('empty');
-    //         //https://react.dev/learn/state-as-a-snapshot
-    //         //can't it's for the next render if we changed status to success in useEFFECT HOOK
-    //     }
-    // }
 
 
     return (
@@ -752,9 +760,10 @@ export default function CreateCourse() {
                 activeStep === 0 ? (
                     <fetcher.Form method="post" encType="multipart/form-data" noValidate >
                         <input type="hidden" value={activeStep} name="activeStep" />
+                        {actionData?.course?.id && <input type="hidden" value={course.id} name="courseId" />}
                         <Box sx={{ m: '3vw' }}>
                             <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                             </Box>
                             <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                                 {/* Paper starts here */}
@@ -779,7 +788,7 @@ export default function CreateCourse() {
                                                             {Object.entries(JSON.parse(actionData.message)).map(([key, value]) => (
                                                                 <Box key={key} component="div">
                                                                     <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left' }}>
-                                                                        {key}: {value[0]}
+                                                                        {key === 'difficulty' || key === 'price' || key === 'weeks' ? `${key}: ${value[0]}` : null}
                                                                     </Typography>
                                                                 </Box>
                                                             ))}
@@ -804,6 +813,7 @@ export default function CreateCourse() {
                                                                 ...course,
                                                                 difficulty: e.target.value
                                                             });
+                                                            setIsError(false);
                                                         }}
                                                         inputProps={{ name: "difficulty" }}
                                                         autoWidth
@@ -852,7 +862,18 @@ export default function CreateCourse() {
                                             <TextField
                                                 helperText=" "
                                                 id="demo-helper-text-aligned-no-helper"
-                                                label="Your Course's Title"
+                                                label={isError && actionData?.message ?
+
+                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                        if (key === 'title') {
+                                                            return `${key}: ${value}`;
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
+
+                                                    : "Your Course's Title"
+                                                }
                                                 fullWidth={true}
                                                 minRows={5}
                                                 maxRows={5}
@@ -878,7 +899,18 @@ export default function CreateCourse() {
                                                 data-cy="Course Description"
                                                 helperText=" "
                                                 id="demo-helper-text-aligned-no-helper"
-                                                label="Your Course's Description"
+                                                label={isError && actionData?.message ?
+
+                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                        if (key === 'description') {
+                                                            return `${key}: ${value}`;
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
+
+                                                    : "Your Course's Description"
+                                                }
                                                 fullWidth={true}
                                                 minRows={isSmallScreen ? 10 : 20}
                                                 maxRows={isSmallScreen ? 10 : 20}
@@ -911,7 +943,7 @@ export default function CreateCourse() {
                             <input type="hidden" value={course.id} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
                                 <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
                             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
@@ -924,21 +956,6 @@ export default function CreateCourse() {
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
-                                    {isError && actionData?.message ?
-                                        <Grid item>
-                                            <Typography variant='small' sx={{ color: 'red' }}>
-
-                                                {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                    if (key === 'overview') {
-                                                        return `${key}: ${value}`;
-                                                    } else {
-                                                        return null;
-                                                    }
-                                                })}
-                                            </Typography>
-                                        </Grid>
-                                        : null
-                                    }
                                     <Grid item container>
                                         {/* course overview textarea input */}
                                         <TextField
@@ -946,7 +963,18 @@ export default function CreateCourse() {
                                             data-cy="Course Overview"
                                             helperText=" "
                                             id="demo-helper-text-aligned-no-helper"
-                                            label="Your Course's Overview"
+                                            label={isError && actionData?.message ?
+
+                                                Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                    if (key === 'overview') {
+                                                        return `${key}: ${value}`;
+                                                    } else {
+                                                        return null;
+                                                    }
+                                                })
+
+                                                : `Your Course's Overview`
+                                            }
                                             fullWidth={true}
                                             minRows={10}
                                             maxRows={10}
@@ -975,21 +1003,6 @@ export default function CreateCourse() {
                                         </ThemeProvider>
                                     </Grid>
                                     <br />
-                                    {isError && actionData?.message ?
-                                        <Grid item>
-                                            <Typography variant='small' sx={{ color: 'red' }}>
-
-                                                {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                    if (key === 'preview') {
-                                                        return `${key}: ${value}`;
-                                                    } else {
-                                                        return null;
-                                                    }
-                                                })}
-                                            </Typography>
-                                        </Grid>
-                                        : null
-                                    }
                                     <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
                                         <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
                                             {/* course preview textarea input */}
@@ -1015,7 +1028,17 @@ export default function CreateCourse() {
                                                 }}
                                                 fullWidth={true}
                                                 id="lecture-url"
-                                                label="e.g https://www.youtube.com/watch?v=SOMEID"
+                                                label={isError && actionData?.message ?
+
+                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                        if (key === 'preview') {
+                                                            return `${key}: ${value}`;
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
+                                                    : 'e.g https://www.youtube.com/watch?v=SOMEID'
+                                                }
                                                 type="url"
                                                 name="preview"
                                                 error={isError}
@@ -1061,10 +1084,12 @@ export default function CreateCourse() {
                                             <ControlledAccordions courseContentId={courseContent.id}></ControlledAccordions>
                                         </Grid>
                                     </Grid>
-                                    <Box display="flex" justifyContent={'flex-end'} position="absolute" bottom={0} right={0} left={0} p={2} mr={2}>
-                                        <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                                            Submit
-                                        </Button>
+                                    <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between'}}>
+                                        <Box sx={{ display:"flex", justifyContent:'flex-end' }}>
+                                            <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+                                                Submit
+                                            </Button>
+                                        </Box>
                                     </Box>
                                 </Box>
                             </fetcher.Form>
@@ -1124,15 +1149,15 @@ const initialWorkoutData = {
 
 // For initial Data below this line
 const section1 = {
-    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)"
+    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)."
 }
 const sectionItem1 = {
-    lecture: null,
+    lecture: '',
     description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
-    heading: "Your own item header here: e.g., ReadMe Text"
+    heading: "Your own item header here: e.g., ReadMe or Lecture"
 }
 const sectionItem2 = {
-    lecture: null,
+    lecture: '',
     description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
     heading: "Workout Routine"
 }

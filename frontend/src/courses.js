@@ -111,6 +111,9 @@ export async function getCourses() {
         const message = await response.text();
         throw new HttpError(response.status, message)
       }
+
+      const data = await response.json();
+      return data;
     }
     catch (err) {
       console.error('An error occured', err)

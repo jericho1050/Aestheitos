@@ -7,17 +7,13 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { useFormAction } from 'react-router-dom';
 
 // stepper is responsible also for submission of our FORMS
-export default function ProgressMobileStepper({ isError, activeStep, setActiveStep }) {
+export default function ProgressMobileStepper({ intent, setIntent, isError, activeStep, setActiveStep }) {
   const theme = useTheme();
 
-  // const handleBack = () => { 
-  //   setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  //   if (actionData?.course ||  actionData?.courseContent) {
-  //     setIntent('edit');
-  //   } else {
-  //     setIntent('create');
-  //   } 
-  // };
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    setIntent('update')
+  };
 
   return (
     <MobileStepper
@@ -28,6 +24,8 @@ export default function ProgressMobileStepper({ isError, activeStep, setActiveSt
       sx={{ maxWidth: 400, flexGrow: 1 }}
       nextButton={
         <Button
+        name="intent"
+        value={intent}
           data-cy="nextButton"
           size="small"
           type="submit"
@@ -40,9 +38,17 @@ export default function ProgressMobileStepper({ isError, activeStep, setActiveSt
             <KeyboardArrowRight />
           )}
         </Button>
-      }
+      } 
       backButton={
-        <Button data-cy="prevButton" size="small" type="" disabled={true}>
+        <Button data-cy="prevButton" size="small" type="button" disabled={activeStep === 0} onClick={handleBack}>
+          Back
+          {theme.direction === 'rtl' ? (
+            <KeyboardArrowRight />
+
+          ) : (
+            <KeyboardArrowLeft />
+
+          )}
         </Button>
       }
     />
