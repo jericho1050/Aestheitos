@@ -10,9 +10,10 @@ import { useFormAction } from 'react-router-dom';
 export default function ProgressMobileStepper({ intent, setIntent, isError, activeStep, setActiveStep }) {
   const theme = useTheme();
 
-  const handleBack = () => {
+  function handleBack() {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    setIntent('update')
+    setIntent('update'); // The user's intent is always going to be edit mode when clicking the back button.
+
   };
 
   return (
@@ -40,7 +41,7 @@ export default function ProgressMobileStepper({ intent, setIntent, isError, acti
         </Button>
       } 
       backButton={
-        <Button data-cy="prevButton" size="small" type="button" disabled={activeStep === 0} onClick={handleBack}>
+        <Button data-cy="prevButton" size="small" type="button" disabled={activeStep === 0 || isError} onClick={handleBack}>
           Back
           {theme.direction === 'rtl' ? (
             <KeyboardArrowRight />

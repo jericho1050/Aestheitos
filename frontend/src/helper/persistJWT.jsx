@@ -7,7 +7,7 @@ import { SetIsLoadingContext } from "./IsLoadingContext";
  // handle jwt in state  when user refreshes page.
   // for PRESERVATION OF STATE (because state doesn't survive a refresh of page)
 // token is initialized to null when page loads, so this will run after a refresh.
-export default function persistToken() {
+export default function persistJWT() {
   const setIsLoading = useContext(SetIsLoadingContext);
 
     const {dispatch} = useAuthToken();

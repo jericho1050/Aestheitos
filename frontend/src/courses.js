@@ -102,11 +102,11 @@ export async function getCourses() {
 
   export async function updateCourse(id, updates){
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/course/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}course/${id}`, {
         method: 'PUT',
         credentials: 'include',
         body: updates 
-      })
+      });
       if (!response.ok) {
         const message = await response.text();
         throw new HttpError(response.status, message)
@@ -116,7 +116,27 @@ export async function getCourses() {
       return data;
     }
     catch (err) {
-      console.error('An error occured', err)
-      return err
+      console.error('An error occured', err);
+      return err;
+    }
+  }
+
+  export async function updateCourseContent(id, updates){ 
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}course/${id}/course-content`, {
+        method: 'PUT',
+        credentials: 'include',
+        body: updates
+      });
+      if (!response.ok) {
+        const message = await response.text();
+        throw new HttpError(response.status, message);
+      }
+      const data = await response.json();
+      return data;
+    }
+    catch (err) {
+      console.error('An error occured', err);
+      return err;
     }
   }

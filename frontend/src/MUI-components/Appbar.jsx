@@ -26,12 +26,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import validateJWTToken from '../helper/verifySignature';
-import { jwtDecode } from 'jwt-decode';
-import refreshAccessToken from '../helper/refreshAccessToken';
 import logo from '../static/images/aestheitoslogo.png';
-import persistToken from '../helper/persistToken';
-import useRefreshToken from '../helper/useRefreshToken';
+
 
 const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];

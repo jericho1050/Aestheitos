@@ -9,7 +9,8 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "cypress:open": "cypress open"
+    "cypress:open": "cypress open",
+    "test": "vitest"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -38,6 +39,8 @@
     "use-immer": "^0.9.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^15.0.2",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
@@ -46,7 +49,11 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "fetch-mock": "^9.11.0",
+    "jsdom": "^24.0.0",
     "react-router-dom": "^6.21.3",
-    "vite": "^5.0.8"
+    "resize-observer-polyfill": "^1.5.1",
+    "vite": "^5.2.9",
+    "vitest": "^1.5.0"
   }
 }

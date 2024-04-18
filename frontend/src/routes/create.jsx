@@ -34,8 +34,9 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, updateCourse } from "../courses";
+import { createCourse, createCourseContent, createSection, updateCourse, updateCourseContent } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
+import determineIntent from "../helper/determineIntent";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -47,57 +48,60 @@ export async function action({ request }) {
     let sections = []
     let error = {}
     let intent = formData.get('intent');
-    if (parseInt(formData.get('activeStep')) === 0) {
-        // create a course
-        if (intent === 'create') {
-            course = await createCourse(formData);
-        }
-        // update a course
-        if (intent === 'update') {
-            course = await updateCourse(formData.get('courseId'), formData);
-        }
-        // return error if there's an error
-        if (course?.statusCode) {
-            if (course.statusCode >= 400) {
-                error = { ...course };
-                return error;
+    switch(parseInt(formData.get('activeStep'))) {
+
+        case 0:         
+            // create a course
+            if (intent === 'create') {
+                course = await createCourse(formData);
             }
-        }
-        // TODO
-        // HANDLE UPDATE AND CREATE METHODS HERE JUST LIKE ABOVE
-    } else if (parseInt(formData.get('activeStep')) === 1) {
-        // create a course's overview (course content)
-        let courseId = formData.get('courseId')
-        courseContent = await createCourseContent(courseId, formData);
-        if (courseContent?.statusCode) {
-            if (courseContent.statusCode >= 400) {
-                error = { ...courseContent };
-                return error;
+            // update a course
+            if (intent === 'update') {
+                course = await updateCourse(formData.get('courseId'), formData);
             }
-        }
-    } else {
-        // create a section / accordion (course's content)
-        if (formData.has('heading') && formData.get('courseContentId')) {
-            let courseContentId = formData.get('courseContentId')
-            formData.delete('activeStep');
-            formData.delete('courseContentId');
-            let newSection = await createSection(courseContentId, formData);
-            if (newSection?.statusCode) {
-                if (newSection.statusCode >= 400) {
-                    error = {...courseContent};
+            // return error if there's an error
+            if (course?.statusCode) {
+                if (course.statusCode >= 400) {
+                    error = { ...course };
                     return error;
                 }
             }
-            sections.push(newSection);
-        }
-        `Yes, in JavaScript, if the value retrieved by formData.get('value') is an empty string, 
-        it will be considered "falsy". This means that it will behave like false in a boolean context, 
-        such as an if statement. So, if formData.get('heading') or formData.get('courseContentId') 
-        returns an empty string, the if condition will not be satisfied and the code inside the if block 
-        will not be executed. - ddb50`
+            break;
+        case 1: 
+            // create a course's overview (course content)
+            let courseId = formData.get('courseId');
+            if (intent === 'create') {
+                courseContent = await createCourseContent(courseId, formData);
+            }
+            if (intent === 'update') {
+                courseContent = await updateCourseContent(courseId, formData);
+            }
+            if (courseContent?.statusCode) {
+                if (courseContent.statusCode >= 400) {
+                    error = { ...courseContent };
+                    return error;
+                }
+            }
+            break;
+        case 2:
+            // create a section / accordion (course's content)
+            if (formData.has('heading') && formData.get('courseContentId')) {
+                let courseContentId = formData.get('courseContentId')
+                formData.delete('activeStep');
+                formData.delete('courseContentId');
+                let newSection = await createSection(courseContentId, formData);
+                if (newSection?.statusCode) {
+                    if (newSection.statusCode >= 400) {
+                        error = {...courseContent};
+                        return error;
+                    }
+                }
+                sections.push(newSection);
+            }
+            break;
     }
 
-    return { course, courseContent, sections };
+    return { course, courseContent, sections }; // only one obj property will persist i.e one returns a value other's are undefined 
 }
 
 function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, onClick, workout, open }) {
@@ -659,12 +663,14 @@ export default function CreateCourse() {
         thumbnail: image,
         price: 0,
         weeks: '',
+        isFirstView: true
 
     });
     const [courseContent, setCourseContent] = React.useState({
         id: 0,
         preview: '',
         overview: '',
+        isFirstView: true
 
     })
     const theme2 = useTheme();
@@ -687,16 +693,20 @@ export default function CreateCourse() {
         else if (actionData?.course?.title && actionData?.course?.description && activeStep === 0) {  // returned value of previous action.
             setCourse({
                 ...course,
-                id: actionData.course.id
+                id: actionData.course.id,
+                isFirstView: false
             })
             // im assuming this is somewhere 200 status code so we move on to the next step
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
-            setIntent('create');
+            const nextActiveStep = activeStep + 1;
+            setActiveStep(nextActiveStep); //  mew activeStep is queued for next rerender that's why we use a variable 'nextActiveStep'
+            // determineItent wether to update or create in which active step currently on and is first view for next render
+            setIntent(determineIntent(courseContent.isFirstView, nextActiveStep));
         }
         else if (actionData?.courseContent?.preview && actionData?.courseContent?.overview && activeStep === 1) {  // returned value of previous action.
             setCourseContent({
                 ...courseContent,
-                id: actionData.courseContent.id
+                id: actionData.courseContent.id,
+                isFirstView: false
             })
             // im assuming this is somewhere 200 status code so we move on to the next step
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -760,7 +770,7 @@ export default function CreateCourse() {
                 activeStep === 0 ? (
                     <fetcher.Form method="post" encType="multipart/form-data" noValidate >
                         <input type="hidden" value={activeStep} name="activeStep" />
-                        {actionData?.course?.id && <input type="hidden" value={course.id} name="courseId" />}
+                        <input type="hidden" value={course.id} name="courseId" />
                         <Box sx={{ m: '3vw' }}>
                             <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
                                 <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
@@ -1067,7 +1077,7 @@ export default function CreateCourse() {
                                 <input type="hidden" value={activeStep} name="activeStep" />
                                 <Box sx={{ m: '3vw' }}>
                                     <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                        <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
                                     </Box>
                                 </Box>
                                 <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>

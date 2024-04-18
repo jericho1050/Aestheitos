@@ -1,5 +1,4 @@
 import { useContext, useEffect } from "react";
-import refreshAccessToken from "./refreshAccessToken";
 import { AccessTokenExpContext, CurrentTimeContext, useAuthToken} from "./authContext";
 
 
@@ -37,3 +36,34 @@ export default function useRefreshToken() {
 
 
 }
+
+async function refreshAccessToken(refreshToken) {
+    //   refreshing access token when it's due.
+    
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}token/refresh`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                "refresh": refreshToken
+            })
+            })
+    
+            if (!response.ok) {
+                throw new Error(response.status)
+            }
+            
+            const data = await response.json()
+    
+            return data['access']
+    
+        } catch(error) {
+            console.error(`error code: ${error}`);
+            return false;
+        }
+    
+        
+    }
