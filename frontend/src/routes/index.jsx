@@ -20,7 +20,7 @@ export async function loader() {
 }
 
 const MysteriousText = ({ children, ...props }) => {
-    const matches = useMediaQuery(theme => theme.breakpoints.up('md'))
+    const matches = useMediaQuery(theme => theme.breakpoints.up('lg'))
     const animation = i =>
         useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650 )});
     return (

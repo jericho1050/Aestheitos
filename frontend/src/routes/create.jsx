@@ -34,7 +34,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, updateCourse, updateCourseContent } from "../courses";
+import { createCourse, createCourseContent, createSection, updateCourse, updateCourseContent, updateSection } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 
@@ -44,13 +44,13 @@ theme = responsiveFontSizes(theme)
 
 export async function action({ request }) {
     let formData = await request.formData();
-    let course, courseContent;
-    let sections = []
+    let course, courseContent, section;
     let error = {}
     let intent = formData.get('intent');
-    switch(parseInt(formData.get('activeStep'))) {
 
-        case 0:         
+    switch (parseInt(formData.get('activeStep'))) {
+
+        case 0:
             // create a course
             if (intent === 'create') {
                 course = await createCourse(formData);
@@ -67,7 +67,7 @@ export async function action({ request }) {
                 }
             }
             break;
-        case 1: 
+        case 1:
             // create a course's overview (course content)
             let courseId = formData.get('courseId');
             if (intent === 'create') {
@@ -85,23 +85,34 @@ export async function action({ request }) {
             break;
         case 2:
             // create a section / accordion (course's content)
-            if (formData.has('heading') && formData.get('courseContentId')) {
+            let sectionId = formData.get('sectionId');
+            if (intent === 'create') {
                 let courseContentId = formData.get('courseContentId')
-                formData.delete('activeStep');
-                formData.delete('courseContentId');
-                let newSection = await createSection(courseContentId, formData);
-                if (newSection?.statusCode) {
-                    if (newSection.statusCode >= 400) {
-                        error = {...courseContent};
+                section = await createSection(courseContentId, formData);
+                if (section?.statusCode) {
+                    if (section.statusCode >= 400) {
+                        error = { ...section };
                         return error;
                     }
                 }
-                sections.push(newSection);
+            }
+            if (intent === 'update') {
+                section = await updateSection(sectionId, formData);
+                if (section?.statusCode) {
+                    if (section.status >= 400) {
+                        error = { ...section };
+                        return error
+                    }
+                }
+            }
+            section = {
+                ...section,
+                intent: intent
             }
             break;
     }
 
-    return { course, courseContent, sections }; // only one obj property will persist i.e one returns a value other's are undefined 
+    return { course, courseContent, section }; // only one obj property will persist i.e one returns a value other's are undefined 
 }
 
 function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, onClick, workout, open }) {
@@ -298,6 +309,7 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
         })
 
     }
+
 
     function handleAddWorkoutCard() {
         updateWorkouts(draft => {
@@ -536,32 +548,41 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
 
 
 
-function ControlledAccordions({ courseContentId }) {
+function ControlledAccordions({ activeStep, courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
     const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
     const [isError, setIsError] = React.useState(false);
 
-    // continuously update real time 'IDs' of our state variables
-    React.useEffect(() => {
-        // continuously update real time 'IDs' of our state variables
 
+    React.useEffect(() => {
+        // continuously update our real 'IDs' and values of our state variables
         if (actionData?.message) {
             setIsError(true);
         }
-        else if (actionData?.course?.heading && actionData?.course?.course_content) {
-            updateAccordions(draft => {
-                const index = draft.length - 1;
-                draft[index].id = actionData.course.id;
-            })
+        else if (actionData?.section && actionData?.section?.intent) {
+            if (actionData.section.intent === 'create') {
+                const { intent, ...rest } = actionData.section;
+                updateAccordions(draft => {
+                    draft.push(rest)
+                })
+            }
+            if (actionData.section.intent === 'update') {
+                updateAccordions(draft => {
+                    const accordionIndex = draft.findIndex(accordion => accordion.id === actionData.section.id);
+                    const { intent, ...rest } = actionData.section;
+                    draft[accordionIndex] = rest;
+                })
+            }
+
         }
     }, [actionData])
+
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
-
 
     function handleAddAccordionItem(heading, accordionId) {
         // adds a new accordion item (sectionItem)
@@ -593,32 +614,20 @@ function ControlledAccordions({ courseContentId }) {
     }
     function handleAddAccordion(heading) {
         // adds  a new accordion  (section)
-        fetcher.submit({ heading: heading, courseContentId: courseContentId }, {
+        // imperatively submit the key/value pairs needed in action route
+
+        fetcher.submit({ heading: heading, activeStep: activeStep, courseContentId: courseContentId, intent: 'create' }, {
             method: 'post',
-            encType: "multipart/form-data"
         })
-        if (!heading) {
-            setIsError(true);
-        } else {
-            updateAccordions(draft => {
-                draft.push({
-                    id: nextAccordionId++,
-                    heading: heading,
-                    items: [{
-                        id: nextItemId++,
-                        heading: sectionItem1.heading
-                    }]
-                })
-            })
-        }
     }
 
     function handleEditAccordion(nextAccordion) {
         // edits accordion's heading
-        updateAccordions(draft => {
-            const accordionIndex = draft.findIndex(accordion => accordion.id === nextAccordion.id);
-            draft[accordionIndex] = nextAccordion;
+        // imperatively submit the key/value pairs needed in action route
+        fetcher.submit({ heading: nextAccordion.heading, activeStep: activeStep, sectionId: nextAccordion.id, intent: 'update' }, {
+            method: 'post',
         })
+
     }
 
     function handleDeleteAccordion(accordionId) {
@@ -630,7 +639,7 @@ function ControlledAccordions({ courseContentId }) {
         <>
             {/* Adds a new Accordion / Section  */}
             <AddAccordion actionData={actionData} setIsError={setIsError} isError={isError} onClick={handleAddAccordion} />
-            <Box sx={{display: 'block', ml: 'auto', mr: 'auto'}}>
+            <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
                 <ThemeProvider theme={theme}>
                     <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
                 </ThemeProvider>
@@ -640,7 +649,7 @@ function ControlledAccordions({ courseContentId }) {
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <Section onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                            <Section setIsError={setIsError} isError={isError} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
                         </Collapse>
 
                     ))
@@ -677,11 +686,10 @@ export default function CreateCourse() {
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
     const fetcher = useFetcher();
-    const actionData = fetcher.data; // returns the response from previous action 
+    const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     const [isError, setIsError] = React.useState(false);
     const [intent, setIntent] = React.useState('create');
 
-    // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
         // !resonse.ok then there's a message
@@ -953,7 +961,7 @@ export default function CreateCourse() {
                             <input type="hidden" value={course.id} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
                                 <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
                             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
@@ -1074,7 +1082,6 @@ export default function CreateCourse() {
                     ) : (
                         <>
                             <fetcher.Form method="post" encType="multipart/form-data" noValidate>
-                                <input type="hidden" value={activeStep} name="activeStep" />
                                 <Box sx={{ m: '3vw' }}>
                                     <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
                                         <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
@@ -1091,11 +1098,11 @@ export default function CreateCourse() {
                                             </ThemeProvider>
                                         </Grid>
                                         <Grid item width={{ xs: '100%', md: '69%' }}>
-                                            <ControlledAccordions courseContentId={courseContent.id}></ControlledAccordions>
+                                            <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
                                         </Grid>
                                     </Grid>
-                                    <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between'}}>
-                                        <Box sx={{ display:"flex", justifyContent:'flex-end' }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
+                                        <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
                                             <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
                                                 Submit
                                             </Button>

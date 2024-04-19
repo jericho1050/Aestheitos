@@ -3,36 +3,53 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddAccordionDetail from "../components/AddAccordionDetail";
 import { ResponsiveDialog } from "../routes/create";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 
-export default function Section({ onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
+export default function Section({setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
+    const [heading, setHeading] = useState(accordion.heading);
 
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            onChange({
+                ...accordion,
+                heading: heading
+            });
+        }, 300);
+    
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [heading]);
     let accordionHeadingContent;
-
 
     if (isEditing) {
         accordionHeadingContent = (
             <>
                 {/* Accordtion heading edit, Textarea input form */}
                 <TextField
+                    error={isError}
                     data-cy={`Accordion edit-${accordion.id}`}
                     id="standard-multiline-flexible"
-                    label="Accordion Heading"
+                    label={isError ? 'heading: This field is required': 'Accordion Heading'}
                     multiline
                     maxRows={4}
                     variant="standard"
-                    value={accordion.heading}
+                    value={heading}
                     fullWidth
-                    onChange={e => onChange({
-                        ...accordion,
-                        heading: e.target.value
-                    })}
+                    onChange={e => {
+                        setHeading(e.target.value);
+                        if (!e.target.value) {
+                            setIsError(true);
+                        } else {
+                            setIsError(false);
+                        }
+                    }}
                 />
-                <Button onClick={() => setIsEditing(false)}>
+                <Button onClick={() => setIsEditing(false)} disabled={isError}>
                     Save
                 </Button>
             </>

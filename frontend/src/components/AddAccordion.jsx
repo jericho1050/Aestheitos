@@ -35,7 +35,7 @@ export default function AddAccordion({ actionData, setIsError, isError, onClick 
                             setHeading(e.target.value)
                         }}
                         error={isError}
-                    // name="heading"
+                        name="heading"
                     />
                 </Grid>
                 <Grid item xs={2} sm={1}>
