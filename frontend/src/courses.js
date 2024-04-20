@@ -1,3 +1,18 @@
+class HttpError extends Error {
+  constructor(statusCode, message, ...params) {
+    super(...params);
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, HttpError);
+    }
+
+    this.statusCode = statusCode;
+    this.message = message;
+  }
+}
+
+
+
 // fetches the list of courses 
 export async function getCourses() {
   try {
@@ -11,27 +26,6 @@ export async function getCourses() {
   } catch (error) {
     console.error('An error occurred:', error);
     return null;
-  }
-}
-
-// export async function getCourse(id) {
-//   //TODO 
-//   try {
-//     const response = await fetch(`${import.meta.env.VITE_API_URL}course/${id}`);
-//   }
-// }
-
-
-class HttpError extends Error {
-  constructor(statusCode, message, ...params) {
-    super(...params);
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, HttpError);
-    }
-
-    this.statusCode = statusCode;
-    this.message = message;
   }
 }
 
@@ -54,6 +48,13 @@ export async function createCourse(courseFormData) {
     return err;
   }
 }
+
+// export async function getCourse(id) {
+//   //TODO 
+//   try {
+//     const response = await fetch(`${import.meta.env.VITE_API_URL}course/${id}`);
+//   }
+// }
 
 export async function updateCourse(id, updates) {
   try {
@@ -157,7 +158,25 @@ export async function updateSection(sectionId, updates) {
     return data;
   }
   catch (err) {
-    console.error('An error occured', err)
+    console.error('An error occured', err);
+    return err;
+  }
+}
+
+export async function deleteSection(sectionId) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
+      method: 'DELETE',
+      credentials: 'include',
+    }); 
+    
+    if (!response.ok) {
+      const message = await response.text();
+      throw new HttpError(response.status, message);
+    }
+  }
+  catch (err) {
+    console.error('An error occured', err);
     return err;
   }
 }

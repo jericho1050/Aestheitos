@@ -34,7 +34,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, updateCourse, updateCourseContent, updateSection } from "../courses";
+import { createCourse, createCourseContent, createSection, deleteSection, updateCourse, updateCourseContent, updateSection } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 
@@ -105,9 +105,19 @@ export async function action({ request }) {
                     }
                 }
             }
+            if (intent === 'delete') {
+                section = await deleteSection(sectionId);
+                if (section?.statusCode) {
+                    if (section.status >= 400) {
+                        error = { ...section };
+                        return error
+                    }
+                }
+            }
             section = {
                 ...section,
-                intent: intent
+                intent: intent,
+                ...(section ? {} : { id: sectionId })
             }
             break;
     }
@@ -557,7 +567,9 @@ function ControlledAccordions({ activeStep, courseContentId }) {
 
 
     React.useEffect(() => {
-        // continuously update our real 'IDs' and values of our state variables
+        // initially the accordion's IDs is not up to date with the database server,
+        // so we continuously update our real 'IDs' and values of our state variables
+        // that's we use a useEffect for this matter.
         if (actionData?.message) {
             setIsError(true);
         }
@@ -631,9 +643,14 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     }
 
     function handleDeleteAccordion(accordionId) {
-        updateAccordions(draft => {
-            return draft.filter(a => a.id !== accordionId)
+        // deletes accordion
+        // imperatively submit the key/value pairs needed in action route
+        fetcher.submit({ activeStep: activeStep, sectionId: accordionId, intent: 'delete' }, {
+            method: 'post',
         })
+        updateAccordions(
+            accordions.filter(a => a.id !== accordionId)
+        )
     }
     return (
         <>
@@ -1021,7 +1038,7 @@ export default function CreateCourse() {
                                         </ThemeProvider>
                                     </Grid>
                                     <br />
-                                    <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
+                                    <Grid item container justifyContent={'center'} width="100%">
                                         <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
                                             {/* course preview textarea input */}
                                             <TextField

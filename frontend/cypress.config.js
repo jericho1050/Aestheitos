@@ -12,11 +12,4 @@ export default defineConfig({
     REST_API_URL: "http://127.0.0.1:8000/",
     FRONTEND_API_URL: "http://localhost:5173/",
   },
-
-  component: {
-    devServer: {
-      framework: "react",
-      bundler: "vite",
-    },
-  },
 });
