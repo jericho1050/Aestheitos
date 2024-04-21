@@ -86,39 +86,71 @@ export async function action({ request }) {
         case 2:
             // create a section / accordion (course's content)
             let sectionId = formData.get('sectionId');
-            if (intent === 'create') {
-                let courseContentId = formData.get('courseContentId')
-                section = await createSection(courseContentId, formData);
-                if (section?.statusCode) {
-                    if (section.statusCode >= 400) {
-                        error = { ...section };
-                        return error;
+            let setionItemId = formData.get('sectionItemId');
+            switch (intent) {
+                case 'createAccordion':
+                    let courseContentId = formData.get('courseContentId')
+                    section = await createSection(courseContentId, formData);
+                    if (section?.statusCode) {
+                        if (section.statusCode >= 400) {
+                            error = { ...section };
+                            return error;
+                        }
                     }
-                }
-            }
-            if (intent === 'update') {
-                section = await updateSection(sectionId, formData);
-                if (section?.statusCode) {
-                    if (section.status >= 400) {
-                        error = { ...section };
-                        return error
+                    break;
+                case 'updateAccordion':
+                    section = await updateSection(sectionId, formData);
+                    if (section?.statusCode) {
+                        if (section.statusCode >= 400) {
+                            error = { ...section };
+                            return error
+                        }
                     }
-                }
-            }
-            if (intent === 'delete') {
-                section = await deleteSection(sectionId);
-                if (section?.statusCode) {
-                    if (section.status >= 400) {
-                        error = { ...section };
-                        return error
+                    break;
+                case 'deleteAccordion':
+                    section = await deleteSection(sectionId);
+                    if (section?.statusCode) {
+                        if (section.statusCode >= 400) {
+                            error = { ...section };
+                            return error
+                        }
                     }
-                }
+                    break;
             }
+            // if (intent === 'createAccordion') {
+            //     let courseContentId = formData.get('courseContentId')
+            //     section = await createSection(courseContentId, formData);
+            //     if (section?.statusCode) {
+            //         if (section.statusCode >= 400) {
+            //             error = { ...section };
+            //             return error;
+            //         }
+            //     }
+            // }
+            // if (intent === 'updateAccordion') {
+            //     section = await updateSection(sectionId, formData);
+            //     if (section?.statusCode) {
+            //         if (section.status >= 400) {
+            //             error = { ...section };
+            //             return error
+            //         }
+            //     }
+            // }
+            // if (intent === 'deleteAccordion') {
+            //     section = await deleteSection(sectionId);
+            //     if (section?.statusCode) {
+            //         if (section.status >= 400) {
+            //             error = { ...section };
+            //             return error
+            //         }
+            //     }
+            // }
             section = {
                 ...section,
                 intent: intent,
-                ...(section ? {} : { id: sectionId })
+                ...(section ? {} : { id: sectionId }) // adds an id if were deleting an accordion
             }
+
             break;
     }
 
@@ -569,18 +601,18 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     React.useEffect(() => {
         // initially the accordion's IDs is not up to date with the database server,
         // so we continuously update our real 'IDs' and values of our state variables
-        // that's we use a useEffect for this matter.
+        // that's why we use a useEffect for this matter.
         if (actionData?.message) {
             setIsError(true);
         }
         else if (actionData?.section && actionData?.section?.intent) {
-            if (actionData.section.intent === 'create') {
+            if (actionData.section.intent === 'createAccordion') {
                 const { intent, ...rest } = actionData.section;
                 updateAccordions(draft => {
                     draft.push(rest)
                 })
             }
-            if (actionData.section.intent === 'update') {
+            if (actionData.section.intent === 'updateAccordion') {
                 updateAccordions(draft => {
                     const accordionIndex = draft.findIndex(accordion => accordion.id === actionData.section.id);
                     const { intent, ...rest } = actionData.section;
@@ -628,7 +660,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
         // adds  a new accordion  (section)
         // imperatively submit the key/value pairs needed in action route
 
-        fetcher.submit({ heading: heading, activeStep: activeStep, courseContentId: courseContentId, intent: 'create' }, {
+        fetcher.submit({ heading: heading, activeStep: activeStep, courseContentId: courseContentId, intent: 'createAccordion' }, {
             method: 'post',
         })
     }
@@ -636,7 +668,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     function handleEditAccordion(nextAccordion) {
         // edits accordion's heading
         // imperatively submit the key/value pairs needed in action route
-        fetcher.submit({ heading: nextAccordion.heading, activeStep: activeStep, sectionId: nextAccordion.id, intent: 'update' }, {
+        fetcher.submit({ heading: nextAccordion.heading, activeStep: activeStep, sectionId: nextAccordion.id, intent: 'updateAccordion' }, {
             method: 'post',
         })
 
@@ -645,7 +677,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     function handleDeleteAccordion(accordionId) {
         // deletes accordion
         // imperatively submit the key/value pairs needed in action route
-        fetcher.submit({ activeStep: activeStep, sectionId: accordionId, intent: 'delete' }, {
+        fetcher.submit({ activeStep: activeStep, sectionId: accordionId, intent: 'deleteAccordion' }, {
             method: 'post',
         })
         updateAccordions(

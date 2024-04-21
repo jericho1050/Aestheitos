@@ -3,26 +3,36 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddAccordionDetail from "../components/AddAccordionDetail";
 import { ResponsiveDialog } from "../routes/create";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 
-export default function Section({setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
+export default function Section({ setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
     const [heading, setHeading] = useState(accordion.heading);
+    const isMounted = useRef(false);
+
+    // Scialli,. (2021). https://typeofnan.dev/how-to-prevent-useeffect-from-running-on-mount-in-react/
 
     useEffect(() => {
-        const handler = setTimeout(() => {
-            onChange({
-                ...accordion,
-                heading: heading
-            });
-        }, 300);
-    
-        return () => {
-            clearTimeout(handler);
-        };
+        // Stop useEffect from running on mount
+        if (isMounted.current && heading !== 'Your Own Heading Here: e.g., Phase 1 (Preparation).') {
+            // debounce event handler
+            const handler = setTimeout(() => {
+                onChange({
+                    ...accordion,
+                    heading: heading
+                });
+            }, 300);
+            return () => {
+                clearTimeout(handler);
+            };
+        } else {
+            isMounted.current = true;
+        }
+
+
     }, [heading]);
     let accordionHeadingContent;
 
@@ -34,7 +44,7 @@ export default function Section({setIsError, isError, onClickDeleteItem, onChang
                     error={isError}
                     data-cy={`Accordion edit-${accordion.id}`}
                     id="standard-multiline-flexible"
-                    label={isError ? 'heading: This field is required': 'Accordion Heading'}
+                    label={isError ? 'heading: This field is required' : 'Accordion Heading'}
                     multiline
                     maxRows={4}
                     variant="standard"
@@ -81,18 +91,18 @@ export default function Section({setIsError, isError, onClickDeleteItem, onChang
                 <AddAccordionDetail onClick={handleAddAccordionItem} accordionId={accordion.id} />
             </AccordionDetails>
             <ul ref={parent}>
-            {accordion.items ? accordion.items.map((item) => (
+                {accordion.items ? accordion.items.map((item) => (
 
-                <AccordionDetails
-                     key={item.id} sx={{ paddingLeft: '2%' }}>
-                    <ResponsiveDialog itemId={item.id} onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
-                        {item.heading}
-                    </ResponsiveDialog>
-                </AccordionDetails>
-            )) :
-                null
+                    <AccordionDetails
+                        key={item.id} sx={{ paddingLeft: '2%' }}>
+                        <ResponsiveDialog itemId={item.id} onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
+                            {item.heading}
+                        </ResponsiveDialog>
+                    </AccordionDetails>
+                )) :
+                    null
 
-            }
+                }
             </ul>
 
         </Accordion>

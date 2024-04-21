@@ -180,3 +180,25 @@ export async function deleteSection(sectionId) {
     return err;
   }
 }
+
+export async function createSectionItem(sectionId) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}section-item/section/${sectionId}`, {
+      method:'PUT',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new HttpError(response.status, message);
+    }
+
+    const data = await response.json();
+    return data;
+
+  }
+  catch(err) {
+    console.error('An error occured', err);
+    return err;
+  }
+}
