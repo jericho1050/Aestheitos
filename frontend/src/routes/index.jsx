@@ -24,7 +24,7 @@ const MysteriousText = ({ children, ...props }) => {
     const animation = i =>
         useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650 )});
     return (
-        <Typography variant={matches ? 'h3' : 'h4'} sx={{ color: '#5A5A5A', fontWeight: 600, fontFamily: '"Helvetica Neue"', textAlign: 'left' }} {...props}>
+        <Typography variant={matches ? 'h3' : 'h4'} sx={{ fontWeight: 600, fontFamily: '"Helvetica Neue"', textAlign: 'left' }} {...props}>
             {children.split("").map((item, index) => (
                 <animated.span key={index} style={animation(index)}>
                     {item}
@@ -52,7 +52,7 @@ export function Index() {
 
     return (<>
         <Box sx={{ margin: -1, padding: 0, position: 'relative' }}>
-            <img src="src/static/images/backgroundM.jpg" alt="pair of rings" className="background-image" />
+            <img src="src/static/images/newBackground.jpg" alt="pair of rings" className="background-image" />
             <animated.div style={{ ...springs }}>
                 <Container fixed={true} maxWidth={false} sx={{ display: 'flex', backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: { xs: '4%', sm: '6%' }, paddingLeft: { xs: '8%' }, paddingRight: { xs: '8%' }, width: { xs: '69%' } }} className="container-homepage">
                     <ThemeProvider theme={theme}>

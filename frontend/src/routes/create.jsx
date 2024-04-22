@@ -34,7 +34,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, deleteSection, updateCourse, updateCourseContent, updateSection } from "../courses";
+import { createCourse, createCourseContent, createSection, createSectionItem, deleteSection, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 
@@ -44,7 +44,8 @@ theme = responsiveFontSizes(theme)
 
 export async function action({ request }) {
     let formData = await request.formData();
-    let course, courseContent, section;
+    let course, courseContent, section, sectionItem;
+    let sectionItems = []
     let error = {}
     let intent = formData.get('intent');
 
@@ -91,6 +92,7 @@ export async function action({ request }) {
                 case 'createAccordion':
                     let courseContentId = formData.get('courseContentId')
                     section = await createSection(courseContentId, formData);
+                    sectionItems = await getSectionItems(section.id);
                     if (section?.statusCode) {
                         if (section.statusCode >= 400) {
                             error = { ...section };
@@ -100,6 +102,7 @@ export async function action({ request }) {
                     break;
                 case 'updateAccordion':
                     section = await updateSection(sectionId, formData);
+                    sectionItems = await getSectionItems(section.id);
                     if (section?.statusCode) {
                         if (section.statusCode >= 400) {
                             error = { ...section };
@@ -116,42 +119,26 @@ export async function action({ request }) {
                         }
                     }
                     break;
+                case 'createAccordionItem':
+                    section = await getSection(sectionId);
+                    sectionItem = await createSectionItem(sectionId, formData);
+                    if (sectionItem?.statusCode) {
+                        if (sectionItem.statusCode >= 400) {
+                            error = { ...sectionItem };
+                            return error
+                        }
+                    } 
+                    sectionItems.push(sectionItem);
+                    break;
             }
-            // if (intent === 'createAccordion') {
-            //     let courseContentId = formData.get('courseContentId')
-            //     section = await createSection(courseContentId, formData);
-            //     if (section?.statusCode) {
-            //         if (section.statusCode >= 400) {
-            //             error = { ...section };
-            //             return error;
-            //         }
-            //     }
-            // }
-            // if (intent === 'updateAccordion') {
-            //     section = await updateSection(sectionId, formData);
-            //     if (section?.statusCode) {
-            //         if (section.status >= 400) {
-            //             error = { ...section };
-            //             return error
-            //         }
-            //     }
-            // }
-            // if (intent === 'deleteAccordion') {
-            //     section = await deleteSection(sectionId);
-            //     if (section?.statusCode) {
-            //         if (section.status >= 400) {
-            //             error = { ...section };
-            //             return error
-            //         }
-            //     }
-            // }
+
             section = {
                 ...section,
                 intent: intent,
-                ...(section ? {} : { id: sectionId }) // adds an id if were deleting an accordion
+                items: sectionItems,
+                ...(section ? {} : { id: sectionId }) // adds an id if were deleting an accordion, because response will be empty for DELETE HTTP methods
             }
 
-            break;
     }
 
     return { course, courseContent, section }; // only one obj property will persist i.e one returns a value other's are undefined 
@@ -590,9 +577,8 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
 
 
 
-function ControlledAccordions({ activeStep, courseContentId }) {
+function ControlledAccordions({ accordions, updateAccordions, activeStep, courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
-    const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
     const [isError, setIsError] = React.useState(false);
@@ -612,12 +598,26 @@ function ControlledAccordions({ activeStep, courseContentId }) {
                     draft.push(rest)
                 })
             }
-            if (actionData.section.intent === 'updateAccordion') {
+            else if (actionData.section.intent === 'updateAccordion') {
                 updateAccordions(draft => {
                     const accordionIndex = draft.findIndex(accordion => accordion.id === actionData.section.id);
                     const { intent, ...rest } = actionData.section;
                     draft[accordionIndex] = rest;
                 })
+            }
+            else if (actionData.section.intent === 'createAccordionItem') {
+                updateAccordions(draft => {
+                    const accordion = draft.find(accordion => accordion.id === actionData.section.id);
+                    accordion.items.push(actionData.section);
+                });
+            }
+            else if (actionData.section.intent === 'updateAccordionItem') {
+                updateAccordions(draft => {
+                    const accordion = draft.find(accordion => accordion.id === actionData.section.id);
+                    const accordionItemIndex = accordion.items.findIndex(item => item.id === accordion.item[item.length - 1].id);
+                    const nextAccordionitem = actionData.section.items
+                    accordion.items[accordionItemIndex] = nextAccordionItem;
+                });
             }
 
         }
@@ -630,23 +630,15 @@ function ControlledAccordions({ activeStep, courseContentId }) {
 
     function handleAddAccordionItem(heading, accordionId) {
         // adds a new accordion item (sectionItem)
-        updateAccordions(draft => {
-            const accordion = draft.find(accordion => accordion.id === accordionId);
-            accordion.items.push({
-                id: nextItemId++,
-                heading: heading
-            });
-
+        fetcher.submit({ heading: heading, activeStep: activeStep, sectionId: accordionId, intent: 'createAccordionItem' }, {
+            method: 'post'
         })
+
     }
 
     function handleEditAccordionItem(nextAccordionItem, accordionId) {
         // edits an accordion item's heading / content (sectionItem)
-        updateAccordions(draft => {
-            const accordion = draft.find(accordion => accordion.id === accordionId);
-            const accordionItemIndex = accordion.items.findIndex(item => item.id === nextAccordionItem.id);
-            accordion.items[accordionItemIndex] = nextAccordionItem;
-        });
+
     }
 
     function handleDeleteAccordionItem(accordionId, accordionItemId) {
@@ -738,6 +730,7 @@ export default function CreateCourse() {
     const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     const [isError, setIsError] = React.useState(false);
     const [intent, setIntent] = React.useState('create');
+    const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
 
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
@@ -1147,7 +1140,7 @@ export default function CreateCourse() {
                                             </ThemeProvider>
                                         </Grid>
                                         <Grid item width={{ xs: '100%', md: '69%' }}>
-                                            <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
+                                            <ControlledAccordions accordions={accordions} updateAccordions={updateAccordions} activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
                                         </Grid>
                                     </Grid>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>

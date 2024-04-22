@@ -11,9 +11,6 @@ class HttpError extends Error {
   }
 }
 
-
-
-// fetches the list of courses 
 export async function getCourses() {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}courses`);
@@ -118,7 +115,26 @@ export async function updateCourseContent(id, updates) {
   }
 }
 
-// in which is called when user creates an accordion
+export async function getSection(sectionId) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
+      method: 'GET',
+      credentials: 'include',
+
+    });
+    if (!response.ok) {
+      const message = await response.text();
+      throw new HttpError(response.status, message);
+    }
+    const data = await response.json();
+    return data;
+  }
+  catch (err) {
+    console.error('An error occured', err);
+    return err;
+  }
+}
+
 export async function createSection(courseContentId, sectionFormData) {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}sections/course-content/${courseContentId}`, {
@@ -168,8 +184,8 @@ export async function deleteSection(sectionId) {
     const response = await fetch(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
       method: 'DELETE',
       credentials: 'include',
-    }); 
-    
+    });
+
     if (!response.ok) {
       const message = await response.text();
       throw new HttpError(response.status, message);
@@ -181,11 +197,32 @@ export async function deleteSection(sectionId) {
   }
 }
 
-export async function createSectionItem(sectionId) {
+export async function getSectionItems(sectionId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section-item/section/${sectionId}`, {
-      method:'PUT',
+    const response = await fetch(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new HttpError(response.status, message);
+    }
+    const data = await response.json();
+    return data;
+  }
+  catch (err) {
+    console.error('An error occured', err);
+    return err;
+  }
+}
+
+export async function createSectionItem(sectionId, sectionItemFormData) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
+      method: 'POST',
       credentials: 'include',
+      body: sectionItemFormData
     });
 
     if (!response.ok) {
@@ -197,8 +234,9 @@ export async function createSectionItem(sectionId) {
     return data;
 
   }
-  catch(err) {
+  catch (err) {
     console.error('An error occured', err);
     return err;
   }
 }
+

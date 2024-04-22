@@ -1,7 +1,7 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, TextField, Typography } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import AddAccordionDetail from "../components/AddAccordionDetail";
+import AddAccordionDetail from "./AddAccordionItem";
 import { ResponsiveDialog } from "../routes/create";
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
