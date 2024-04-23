@@ -34,9 +34,10 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, createSectionItem, deleteSection, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection } from "../courses";
+import { createCourse, createCourseContent, createSection, createSectionItem, deleteSection, deleteSectionItem, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection, updateSectionItem } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
+import isUrl from "is-url";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -87,7 +88,7 @@ export async function action({ request }) {
         case 2:
             // create a section / accordion (course's content)
             let sectionId = formData.get('sectionId');
-            let setionItemId = formData.get('sectionItemId');
+            let sectionItemId = formData.get('sectionItemId');
             switch (intent) {
                 case 'createAccordion':
                     let courseContentId = formData.get('courseContentId')
@@ -127,15 +128,35 @@ export async function action({ request }) {
                             error = { ...sectionItem };
                             return error
                         }
-                    } 
+                    }
                     sectionItems.push(sectionItem);
                     break;
-            }
+                case 'updateAccordionItem':
+                    section = await getSection(sectionId);
+                    sectionItem = await updateSectionItem(sectionItemId, formData);
+                    if (sectionItem?.statusCode) {
+                        if (sectionItem.statusCode >= 400) {
+                            error = { ...sectionItem };
+                            return error
+                        }
+                    }
+                    sectionItems.push(sectionItem);
+                    break;
+                case 'deleteAccordionItem':
+                    sectionItem = await deleteSectionItem(sectionItemId);
+                    if (sectionItem?.statusCode) {
+                        if (sectionItem.statusCode >= 400) {
+                            error = { ...sectionItem };
+                            return error
+                        }
+                    }
+                    break;
 
+            }
             section = {
                 ...section,
                 intent: intent,
-                items: sectionItems,
+                items: sectionItems, // Items will contain only '1' if it's either creating or updating an accordion item; if not, then it has more than 1.
                 ...(section ? {} : { id: sectionId }) // adds an id if were deleting an accordion, because response will be empty for DELETE HTTP methods
             }
 
@@ -299,13 +320,17 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
     );
 }
 
-export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accordionItem, children }) {
+export function ResponsiveDialog({ isError, setIsError,itemId, onClick, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true)
-
+    const [heading, setHeading] = React.useState('');
+    const [description, setDescription] = React.useState('');
+    const [lecture, setLecture] = React.useState('')
+    const fetcher = useFetcher();
+    const actionData = fetcher.data; // returns the response from previous action 
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
@@ -374,12 +399,52 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
         })
     }
 
+
     function handleDeleteWorkoutCard(workoutId) {
         updateWorkouts(draft => {
             const index = draft.findIndex(w => w.id === workoutId)
             draft.splice(index, 1);
         })
     }
+
+    React.useEffect(() => {
+        if (isEditing) {
+            if (!heading) {
+                setIsError(true);
+            }
+            // debounce event handler
+            const handler = setTimeout(() => {
+                onChange({
+                    ...accordionItem,
+                    heading: heading
+                }, accordionId);
+            }, 300);
+            return () => {
+                clearTimeout(handler);
+            }
+        }
+        if (!isWorkoutRoutine) {
+            if (!lecture || !description) {
+                setIsError(true);
+            }
+            // debounce event handler
+            const handler = setTimeout(() => {
+                onChange({
+                    ...accordionItem,
+                    description: description,
+                    lecture: lecture,
+                }, accordionId);
+            }, 300);
+            return () => {
+                clearTimeout(handler);
+            }
+        }
+    }, [heading, lecture, description, isError])
+
+
+    // React.useEffect(() => {
+
+    // }, [lecture, description])
 
     if (isEditing) {
         // show input form when edit btn is clicked
@@ -388,24 +453,24 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                 <Grid item xs={10} lg={11}>
                     {/* AccordtionDetail edit input form */}
                     <TextField
+                        error={isError}
                         data-cy={`Accordion item edit-${itemId}`}
                         id="standard-multiline-flexible"
                         label="Accordiong Item Heading"
                         multiline
                         maxRows={4}
                         variant="standard"
-                        value={accordionItem.heading}
+                        value={heading}
                         fullWidth
-                        onChange={e => onChange({
-                            ...accordionItem,
-                            heading: e.target.value
-                        },
-                            accordionId
-                        )}
+                        onChange={e => {
+                            setHeading(e.target.value);
+                            setIsError(false);
+                        }
+                        }
                     />
                 </Grid>
                 <Grid item xs={2} lg={1}>
-                    <Button onClick={() => setIsEditing(false)}>
+                    <Button onClick={() => setIsEditing(false)} disabled={isError}>
                         Save
                     </Button>
                 </Grid>
@@ -489,15 +554,9 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                                     </Grid> :
 
                                     <Grid justifyContent={{ xs: 'center' }} item container>
-                                        <Grid item mb={2}>
-                                            <ThemeProvider theme={theme}>
-                                                <Typography variant="h4">
-                                                    Your readme text here
-                                                </Typography>
-                                            </ThemeProvider>
-                                        </Grid>
                                         <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
                                             <TextField
+                                                error={isError}
                                                 InputProps={{
                                                     startAdornment: (
                                                         <InputAdornment position="start">
@@ -511,31 +570,38 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                                                 label="e.g https://www.youtube.com/watch?v=SOMEID"
                                                 type="url"
                                                 name="lecture"
-                                                value={accordionItem.lecture}
+                                                value={lecture}
                                                 onChange={e => {
-                                                    onChange({
-                                                        ...accordionItem,
-                                                        lecture: e.target.value
-                                                    },
-                                                        accordionId)
-                                                }}
+                                                setLecture(e.target.value)
+                                                setIsError(false);
+
+                                                }
+                                            }
                                             />
                                         </Box>
-                                        <Grid item>
+                                        <Grid item width={'81%'}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
                                                     <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
                                                 :
-                                                <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                     <Typography variant="body" align={'center'}>
                                                         Your video will show up here
                                                     </Typography>
                                                 </Box>
                                             }
                                         </Grid>
+                                        <Grid item mt={2}>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4">
+                                                    Your readme text here
+                                                </Typography>
+                                            </ThemeProvider>
+                                        </Grid>
                                         <Grid item xs={10} mt={4}>
                                             <TextField
                                                 data-cy="lecture textfield"
+                                                error={isError}
                                                 helperText=" "
                                                 id="demo-helper-text-aligned-no-helper"
                                                 label="Your lecture's description or Readme Text"
@@ -545,14 +611,12 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                                                 multiline
                                                 required={true}
                                                 name="overview"
-                                                value={accordionItem.description}
+                                                value={description}
                                                 onChange={e => {
-                                                    onChange({
-                                                        ...accordionItem,
-                                                        description: e.target.value
-                                                    },
-                                                        accordionId)
-                                                }}
+                                                    setDescription(e.target.value);
+                                                    setIsError(false);
+                                                }
+                                                }
                                             />
                                         </Grid>
                                     </Grid>
@@ -608,14 +672,14 @@ function ControlledAccordions({ accordions, updateAccordions, activeStep, course
             else if (actionData.section.intent === 'createAccordionItem') {
                 updateAccordions(draft => {
                     const accordion = draft.find(accordion => accordion.id === actionData.section.id);
-                    accordion.items.push(actionData.section);
+                    accordion.items.push(actionData.section.items[0]);
                 });
             }
             else if (actionData.section.intent === 'updateAccordionItem') {
                 updateAccordions(draft => {
                     const accordion = draft.find(accordion => accordion.id === actionData.section.id);
-                    const accordionItemIndex = accordion.items.findIndex(item => item.id === accordion.item[item.length - 1].id);
-                    const nextAccordionitem = actionData.section.items
+                    const accordionItemIndex = accordion.items.findIndex(item => item.id === actionData.section.items[0].id);
+                    const nextAccordionItem = actionData.section.items[0];
                     accordion.items[accordionItemIndex] = nextAccordionItem;
                 });
             }
@@ -630,7 +694,10 @@ function ControlledAccordions({ accordions, updateAccordions, activeStep, course
 
     function handleAddAccordionItem(heading, accordionId) {
         // adds a new accordion item (sectionItem)
-        fetcher.submit({ heading: heading, activeStep: activeStep, sectionId: accordionId, intent: 'createAccordionItem' }, {
+        fetcher.submit({
+            heading: heading, activeStep: activeStep, sectionId: accordionId,
+            intent: 'createAccordionItem'
+        }, {
             method: 'post'
         })
 
@@ -638,10 +705,32 @@ function ControlledAccordions({ accordions, updateAccordions, activeStep, course
 
     function handleEditAccordionItem(nextAccordionItem, accordionId) {
         // edits an accordion item's heading / content (sectionItem)
+        const data = {
+            heading: nextAccordionItem.heading,
+            description: nextAccordionItem.description, activeStep: activeStep, sectionItemId: nextAccordionItem.id,
+            sectionId: accordionId, intent: 'updateAccordionItem'
+        }
+        
+        if (nextAccordionItem.lecture) {
+            data.lecture = nextAccordionItem.lecture; 
+        } else {
+            delete data.lecture;
+        }
+
+
+
+        fetcher.submit(data, {
+            method: 'post'
+        })
 
     }
 
     function handleDeleteAccordionItem(accordionId, accordionItemId) {
+        // deletes accordion item
+        // imperatively submit the key/value pairs needed in action route
+        fetcher.submit({ activeStep: activeStep, sectionItemId: accordionItemId, intent: 'deleteAccordionItem' }, {
+            method: 'post',
+        })
         updateAccordions(draft => {
             const accordionIndex = draft.findIndex(accordion => accordion.id === accordionId)
             const accordionItemIndex = draft[accordionIndex].items.findIndex(a => a.id === accordionItemId); // find the item's index to remove
@@ -1006,7 +1095,7 @@ export default function CreateCourse() {
                                     <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
-                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                            <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={'69%'}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item>
@@ -1104,13 +1193,13 @@ export default function CreateCourse() {
                                                 error={isError}
                                             />
                                         </Box>
-                                        <Grid item>
+                                        <Grid item width={'100%'}>
                                             {getEmbedUrl(courseContent.preview) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
                                                     <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
                                                 </Box>
                                                 :
-                                                <Box mb="5%" mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                <Box mb="5%" mt="5%" component="div" height={200} className="course-lecture-container" alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                     <Typography variant="body" align={'center'}>
                                                         Your video will show up here
                                                     </Typography>
@@ -1177,7 +1266,14 @@ export default function CreateCourse() {
 
 
 
-
+function isUrlValid(string) {
+    try {
+      new URL(string);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
 
 // Initial data for workouts state in ResponsiveDialog
 const correctForm = {

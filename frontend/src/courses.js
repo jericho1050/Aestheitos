@@ -33,10 +33,8 @@ export async function createCourse(courseFormData) {
       credentials: 'include',
       body: courseFormData
     });
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
+
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -60,11 +58,8 @@ export async function updateCourse(id, updates) {
       credentials: 'include',
       body: updates
     });
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message)
-    }
 
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -81,11 +76,8 @@ export async function createCourseContent(courseId, courseContentFormData) {
       credentials: 'include',
       body: courseContentFormData
     });
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
 
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -102,10 +94,8 @@ export async function updateCourseContent(id, updates) {
       credentials: 'include',
       body: updates
     });
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
+
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -122,10 +112,8 @@ export async function getSection(sectionId) {
       credentials: 'include',
 
     });
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
+
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -143,11 +131,7 @@ export async function createSection(courseContentId, sectionFormData) {
       body: sectionFormData
     });
 
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
-
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -165,11 +149,7 @@ export async function updateSection(sectionId, updates) {
       body: updates
     });
 
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
-
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -186,10 +166,7 @@ export async function deleteSection(sectionId) {
       credentials: 'include',
     });
 
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
+    await checkResponse(response);
   }
   catch (err) {
     console.error('An error occured', err);
@@ -204,10 +181,7 @@ export async function getSectionItems(sectionId) {
       credentials: 'include'
     });
 
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
+    await checkResponse(response);
     const data = await response.json();
     return data;
   }
@@ -225,11 +199,7 @@ export async function createSectionItem(sectionId, sectionItemFormData) {
       body: sectionItemFormData
     });
 
-    if (!response.ok) {
-      const message = await response.text();
-      throw new HttpError(response.status, message);
-    }
-
+    await checkResponse(response);
     const data = await response.json();
     return data;
 
@@ -237,6 +207,48 @@ export async function createSectionItem(sectionId, sectionItemFormData) {
   catch (err) {
     console.error('An error occured', err);
     return err;
+  }
+}
+
+export async function updateSectionItem(sectionItemId, updates) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: updates
+    });
+
+    await checkResponse(response);
+    const data = await response.json();
+    return data;
+  }
+  catch(err) {
+    console.error('An error occured', err);
+    return err;
+  }
+}
+
+export async function deleteSectionItem(sectionItemId) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+    await checkResponse(response);
+    const data = await response.json();
+    return data;
+  }
+  catch(err) {
+    console.error('An error occured', err);
+    return err;
+  }
+}
+
+
+async function checkResponse(response) {
+  if (!response.ok) {
+    const message = await response.text();
+    throw new HttpError(response.status, message);
   }
 }
 

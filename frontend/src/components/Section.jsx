@@ -1,23 +1,19 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, TextField, Typography } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import AddAccordionDetail from "./AddAccordionItem";
 import { ResponsiveDialog } from "../routes/create";
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
+import AddAccordionItem from "./AddAccordionItem";
 
 
 export default function Section({ setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
     const [heading, setHeading] = useState(accordion.heading);
-    const isMounted = useRef(false);
-
-    // Scialli,. (2021). https://typeofnan.dev/how-to-prevent-useeffect-from-running-on-mount-in-react/
 
     useEffect(() => {
-        // Stop useEffect from running on mount
-        if (isMounted.current && heading !== 'Your Own Heading Here: e.g., Phase 1 (Preparation).') {
+        if (isEditing) {
             // debounce event handler
             const handler = setTimeout(() => {
                 onChange({
@@ -28,11 +24,7 @@ export default function Section({ setIsError, isError, onClickDeleteItem, onChan
             return () => {
                 clearTimeout(handler);
             };
-        } else {
-            isMounted.current = true;
-        }
-
-
+        } 
     }, [heading]);
     let accordionHeadingContent;
 
@@ -44,7 +36,7 @@ export default function Section({ setIsError, isError, onClickDeleteItem, onChan
                     error={isError}
                     data-cy={`Accordion edit-${accordion.id}`}
                     id="standard-multiline-flexible"
-                    label={isError ? 'heading: This field is required' : 'Accordion Heading'}
+                    label={'Accordion Heading'}
                     multiline
                     maxRows={4}
                     variant="standard"
@@ -88,14 +80,14 @@ export default function Section({ setIsError, isError, onClickDeleteItem, onChan
                 {accordionHeadingContent}
             </AccordionSummary>
             <AccordionDetails >
-                <AddAccordionDetail onClick={handleAddAccordionItem} accordionId={accordion.id} />
+                <AddAccordionItem isError={isError} setIsError={setIsError} onClick={handleAddAccordionItem} accordionId={accordion.id} />
             </AccordionDetails>
             <ul ref={parent}>
                 {accordion.items ? accordion.items.map((item) => (
 
                     <AccordionDetails
                         key={item.id} sx={{ paddingLeft: '2%' }}>
-                        <ResponsiveDialog itemId={item.id} onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
+                        <ResponsiveDialog isError={isError} setIsError={setIsError} itemId={item.id} onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
                             {item.heading}
                         </ResponsiveDialog>
                     </AccordionDetails>

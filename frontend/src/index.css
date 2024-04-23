@@ -36,7 +36,7 @@ html {
   }
 }
 
-@media (min-width: 575.98px) and (max-width: 767.98px) {
+@media (min-width: 575.98px) and (max-width: 1200px) {
   .background-image {
     width: 100%;
     height: 69vh;
@@ -46,7 +46,7 @@ html {
   }
 }
 
-@media (min-width: 767.98px) and (max-width: 2000px) {
+@media (min-width: 1200px) and (max-width: 2000px) {
   .background-image {
     width: 100%;
     height: 90vh;
@@ -105,27 +105,20 @@ html {
 }
 
 
-@media (max-width: 575.98px) {
-  .course-lecture-container {
+
+
+.course-lecture-container {
     display: flex;
     justify-content: center;
-    width: 85vw;
-}
+    width: '81%';
 }
 
-@media (min-width: 575.98px) {
-  .course-lecture-container {
-    display: flex;
-    justify-content: center;
-    width: 59vw;
-}
-}
 
 
 
 .course-lecture {
   aspect-ratio: 16 / 9;
-  width: 80% !important;
+  width: 100% !important;
 }
 
 .course-card:hover {
