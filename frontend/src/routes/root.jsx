@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import ResponsiveAppBar from "../MUI-components/Appbar";
+import ResponsiveAppBar from "../components/Appbar";
 import { useNavigation } from "react-router-dom";
 import persistJWT from "../helper/persistJWT";
 import useRefreshToken from "../helper/useRefreshToken";

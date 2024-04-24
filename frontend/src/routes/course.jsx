@@ -14,8 +14,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
-import WrongFormDialog from "../MUI-components/WrongFormDialog";
+import CorrectFormDialog from "../components/CorrectFormDialog";
+import WrongFormDialog from "../components/WrongFormDialog";
 
 
 let theme = createTheme()

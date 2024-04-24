@@ -5,12 +5,14 @@ import { ResponsiveDialog } from "../routes/create";
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import AddAccordionItem from "./AddAccordionItem";
+import { atom } from "jotai";
 
 
 export default function Section({ setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
     const [heading, setHeading] = useState(accordion.heading);
+    const createAtom = (initialValue) => atom(initialValue);
 
     useEffect(() => {
         if (isEditing) {
@@ -87,7 +89,13 @@ export default function Section({ setIsError, isError, onClickDeleteItem, onChan
 
                     <AccordionDetails
                         key={item.id} sx={{ paddingLeft: '2%' }}>
-                        <ResponsiveDialog isError={isError} setIsError={setIsError} itemId={item.id} onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} accordionItem={item}>
+                        <ResponsiveDialog 
+                        initialLecture={'Your Youtube URL Here'}
+                        initialDescription={'Your Information Here'}
+                        isError={isError} setIsError={setIsError} itemId={item.id} 
+                        onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} 
+                        accordionItem={item}
+                        >
                             {item.heading}
                         </ResponsiveDialog>
                     </AccordionDetails>

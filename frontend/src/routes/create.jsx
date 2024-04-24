@@ -14,8 +14,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
-import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
-import WrongFormDialog from "../MUI-components/WrongFormDialog";
+import CorrectFormDialog from "../components/CorrectFormDialog";
+import WrongFormDialog from "../components/WrongFormDialog";
 import image from '../static/images/noimg.png'
 import { styled } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
@@ -33,11 +33,15 @@ import { Send, WidthWide } from "@mui/icons-material";
 import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
+import ProgressMobileStepper from "../components/ProgressMobileStepper";
 import { createCourse, createCourseContent, createSection, createSectionItem, deleteSection, deleteSectionItem, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection, updateSectionItem } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import isUrl from "is-url";
+import { Provider, atom, useAtom } from "jotai";
+import { HydrateAtoms } from "../components/HydrateAtoms";
+import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
+import { createDescriptionAtom, createLectureAtom } from "../helper/atomFactory";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -320,15 +324,19 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
     );
 }
 
-export function ResponsiveDialog({ isError, setIsError,itemId, onClick, onChange, accordionId, accordionItem, children }) {
+
+
+export function ResponsiveDialog({ initialDescription, initialLecture, isError, setIsError, itemId, onClick, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true)
     const [heading, setHeading] = React.useState('');
-    const [description, setDescription] = React.useState('');
-    const [lecture, setLecture] = React.useState('')
+    const [lectureAtom] = React.useState(() => createLectureAtom(initialLecture));
+    const [descriptionAtom] = React.useState(() => createDescriptionAtom(initialDescription));
+    const [lecture, setLecture] = useAtom(lectureAtom);
+    const [description, setDescription] = useAtom(descriptionAtom);
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
     const theme2 = useTheme();
@@ -552,75 +560,35 @@ export function ResponsiveDialog({ isError, setIsError,itemId, onClick, onChange
                                             </Button>
                                         </Grid>
                                     </Grid> :
-
-                                    <Grid justifyContent={{ xs: 'center' }} item container>
-                                        <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
-                                            <TextField
-                                                error={isError}
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <YouTubeIcon />
-                                                        </InputAdornment>
-
-                                                    )
-                                                }}
-                                                fullWidth={true}
-                                                id="lecture-url"
-                                                label="e.g https://www.youtube.com/watch?v=SOMEID"
-                                                type="url"
-                                                name="lecture"
-                                                value={lecture}
-                                                onChange={e => {
-                                                setLecture(e.target.value)
-                                                setIsError(false);
-
+                                    <Provider>
+                                        <HydrateAtoms initialValues={[[lectureAtom, initialLecture], [descriptionAtom, initialDescription]]}>
+                                        <Grid justifyContent={{ xs: 'center' }} item container>
+                                            <YoutubeInput lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture}/>
+                                            <Grid item width={'81%'}>
+                                                {getEmbedUrl(accordionItem.lecture) ?
+                                                    <Box mt={4} className="course-lecture-container" component={'div'}>
+                                                        <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
+                                                    :
+                                                    <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                        <Typography variant="body" align={'center'}>
+                                                            Your video will show up here
+                                                        </Typography>
+                                                    </Box>
                                                 }
-                                            }
-                                            />
-                                        </Box>
-                                        <Grid item width={'81%'}>
-                                            {getEmbedUrl(accordionItem.lecture) ?
-                                                <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
-                                                :
-                                                <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                    <Typography variant="body" align={'center'}>
-                                                        Your video will show up here
+                                            </Grid>
+                                            <Grid item mt={2}>
+                                                <ThemeProvider theme={theme}>
+                                                    <Typography variant="h4">
+                                                        Your readme text here
                                                     </Typography>
-                                                </Box>
-                                            }
+                                                </ThemeProvider>
+                                            </Grid>
+                                            <Grid item xs={10} mt={4}>
+                                                <DescriptionInput description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
+                                            </Grid>
                                         </Grid>
-                                        <Grid item mt={2}>
-                                            <ThemeProvider theme={theme}>
-                                                <Typography variant="h4">
-                                                    Your readme text here
-                                                </Typography>
-                                            </ThemeProvider>
-                                        </Grid>
-                                        <Grid item xs={10} mt={4}>
-                                            <TextField
-                                                data-cy="lecture textfield"
-                                                error={isError}
-                                                helperText=" "
-                                                id="demo-helper-text-aligned-no-helper"
-                                                label="Your lecture's description or Readme Text"
-                                                fullWidth={true}
-                                                minRows={10}
-                                                maxRows={10}
-                                                multiline
-                                                required={true}
-                                                name="overview"
-                                                value={description}
-                                                onChange={e => {
-                                                    setDescription(e.target.value);
-                                                    setIsError(false);
-                                                }
-                                                }
-                                            />
-                                        </Grid>
-                                    </Grid>
-
+                                        </HydrateAtoms>
+                                    </Provider>
 
                             }
                         </DialogContent>
@@ -710,9 +678,9 @@ function ControlledAccordions({ accordions, updateAccordions, activeStep, course
             description: nextAccordionItem.description, activeStep: activeStep, sectionItemId: nextAccordionItem.id,
             sectionId: accordionId, intent: 'updateAccordionItem'
         }
-        
+
         if (nextAccordionItem.lecture) {
-            data.lecture = nextAccordionItem.lecture; 
+            data.lecture = nextAccordionItem.lecture;
         } else {
             delete data.lecture;
         }
@@ -1264,16 +1232,6 @@ export default function CreateCourse() {
 
 
 
-
-
-function isUrlValid(string) {
-    try {
-      new URL(string);
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
 
 // Initial data for workouts state in ResponsiveDialog
 const correctForm = {

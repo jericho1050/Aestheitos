@@ -1,0 +1,58 @@
+import { useAtom } from "jotai";
+import { Box, InputAdornment, TextField } from "@mui/material";
+import YouTubeIcon from '@mui/icons-material/YouTube';
+
+export function YoutubeInput({ lecture, onChange, isError, setIsError }) {
+    return (
+
+        <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
+        <TextField
+            error={isError}
+            InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                        <YouTubeIcon />
+                    </InputAdornment>
+
+                )
+            }}
+            fullWidth={true}
+            id="lecture-url"
+            label="e.g https://www.youtube.com/watch?v=SOMEID"
+            type="url"
+            name="lecture"
+            value={lecture}
+            onChange={e => {
+                onChange(e.target.value) // This is setLecture from the parent component, so  we are sending the values to our server.
+                setIsError(false);
+            }
+            }
+        />
+    </Box>
+    )
+}
+
+export function DescriptionInput({ description, onChange, isError, setIsError }) {
+    return (
+        <TextField
+        data-cy="lecture textfield"
+        error={isError}
+        helperText=" "
+        id="demo-helper-text-aligned-no-helper"
+        label="Your lecture's description or Readme Text"
+        fullWidth={true}
+        minRows={10}
+        maxRows={10}
+        multiline
+        required={true}
+        name="overview"
+        value={description}
+        onChange={e => {
+            onChange(e.target.value) // This is setDescription from the parent component, so  we are sending the values to our server.
+            setIsError(false);
+        }
+        }
+    />
+    )
+
+}
