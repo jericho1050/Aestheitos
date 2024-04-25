@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { AccessTokenExpContext, CurrentTimeContext, useAuthToken} from "./authContext";
+import { AccessTokenExpContext, CurrentTimeContext, useAuthToken} from "../contexts/authContext";
 
 
 //ACCESS/REFRESH LOGIC here

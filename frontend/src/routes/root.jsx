@@ -4,7 +4,7 @@ import { useNavigation } from "react-router-dom";
 import persistJWT from "../helper/persistJWT";
 import useRefreshToken from "../helper/useRefreshToken";
 import { useContext } from "react";
-import { IsLoadingContext } from "../helper/IsLoadingContext";
+import { IsLoadingContext } from "../contexts/IsLoadingContext";
 import Box from '@mui/material/Box';
 
 export default function Root() {

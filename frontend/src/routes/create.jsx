@@ -29,7 +29,6 @@ import Section from "../components/Section";
 import AddIcon from '@mui/icons-material/Add';
 import demoGif from "../static/images/chinupVecs.gif";
 import demoGif2 from '../static/images/pushupVecs.gif';
-import { Send, WidthWide } from "@mui/icons-material";
 import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -39,9 +38,9 @@ import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import isUrl from "is-url";
 import { Provider, atom, useAtom } from "jotai";
-import { HydrateAtoms } from "../components/HydrateAtoms";
 import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
-import { createDescriptionAtom, createLectureAtom } from "../helper/atomFactory";
+import { useImmerAtom } from "jotai-immer";
+import { accordionsAtom } from "../atoms/accordionsAtom";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -326,24 +325,18 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
 
 
 
-export function ResponsiveDialog({ initialDescription, initialLecture, isError, setIsError, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+export function ResponsiveDialog({actionData, isError, setIsError, itemId, onClick, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true)
     const [heading, setHeading] = React.useState('');
-    const [lectureAtom] = React.useState(() => createLectureAtom(initialLecture));
-    const [descriptionAtom] = React.useState(() => createDescriptionAtom(initialDescription));
-    const [lecture, setLecture] = useAtom(lectureAtom);
-    const [description, setDescription] = useAtom(descriptionAtom);
-    const fetcher = useFetcher();
-    const actionData = fetcher.data; // returns the response from previous action 
+    const [lecture, setLecture] = React.useState('')
+    const [description, setDescription] = React.useState('');
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
-
-
 
 
     function handleImageUpload(event, workoutId) {
@@ -417,7 +410,7 @@ export function ResponsiveDialog({ initialDescription, initialLecture, isError, 
 
     React.useEffect(() => {
         if (isEditing) {
-            if (!heading) {
+            if (actionData?.message) {
                 setIsError(true);
             }
             // debounce event handler
@@ -432,8 +425,8 @@ export function ResponsiveDialog({ initialDescription, initialLecture, isError, 
             }
         }
         if (!isWorkoutRoutine) {
-            if (!lecture || !description) {
-                setIsError(true);
+            if (!lecture && !description) {
+                setIsError(false);
             }
             // debounce event handler
             const handler = setTimeout(() => {
@@ -447,12 +440,8 @@ export function ResponsiveDialog({ initialDescription, initialLecture, isError, 
                 clearTimeout(handler);
             }
         }
-    }, [heading, lecture, description, isError])
+    }, [heading, lecture, description])
 
-
-    // React.useEffect(() => {
-
-    // }, [lecture, description])
 
     if (isEditing) {
         // show input form when edit btn is clicked
@@ -560,10 +549,8 @@ export function ResponsiveDialog({ initialDescription, initialLecture, isError, 
                                             </Button>
                                         </Grid>
                                     </Grid> :
-                                    <Provider>
-                                        <HydrateAtoms initialValues={[[lectureAtom, initialLecture], [descriptionAtom, initialDescription]]}>
                                         <Grid justifyContent={{ xs: 'center' }} item container>
-                                            <YoutubeInput lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture}/>
+                                            <YoutubeInput actionData={actionData} accordionItem={accordionItem} lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture}/>
                                             <Grid item width={'81%'}>
                                                 {getEmbedUrl(accordionItem.lecture) ?
                                                     <Box mt={4} className="course-lecture-container" component={'div'}>
@@ -584,12 +571,9 @@ export function ResponsiveDialog({ initialDescription, initialLecture, isError, 
                                                 </ThemeProvider>
                                             </Grid>
                                             <Grid item xs={10} mt={4}>
-                                                <DescriptionInput description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
+                                                <DescriptionInput actionData={actionData} accordionItem={accordionItem} description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
                                             </Grid>
                                         </Grid>
-                                        </HydrateAtoms>
-                                    </Provider>
-
                             }
                         </DialogContent>
                     </Grid>
@@ -609,12 +593,12 @@ export function ResponsiveDialog({ initialDescription, initialLecture, isError, 
 
 
 
-function ControlledAccordions({ accordions, updateAccordions, activeStep, courseContentId }) {
+function ControlledAccordions({  activeStep, courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
     const [isError, setIsError] = React.useState(false);
-
+    const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
 
     React.useEffect(() => {
         // initially the accordion's IDs is not up to date with the database server,
@@ -682,7 +666,8 @@ function ControlledAccordions({ accordions, updateAccordions, activeStep, course
         if (nextAccordionItem.lecture) {
             data.lecture = nextAccordionItem.lecture;
         } else {
-            delete data.lecture;
+            data.lecture = '';
+
         }
 
 
@@ -729,9 +714,7 @@ function ControlledAccordions({ accordions, updateAccordions, activeStep, course
         fetcher.submit({ activeStep: activeStep, sectionId: accordionId, intent: 'deleteAccordion' }, {
             method: 'post',
         })
-        updateAccordions(
-            accordions.filter(a => a.id !== accordionId)
-        )
+        updateAccordions(draft => draft.filter(a => a.id !== accordionId));
     }
     return (
         <>
@@ -747,7 +730,7 @@ function ControlledAccordions({ accordions, updateAccordions, activeStep, course
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <Section setIsError={setIsError} isError={isError} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                            <Section actionData={actionData} setIsError={setIsError} isError={isError} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
                         </Collapse>
 
                     ))
@@ -787,7 +770,9 @@ export default function CreateCourse() {
     const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     const [isError, setIsError] = React.useState(false);
     const [intent, setIntent] = React.useState('create');
-    const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
+    // const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
+
+
 
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
@@ -1063,7 +1048,7 @@ export default function CreateCourse() {
                                     <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
-                            <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={'69%'}>
+                            <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{xs: '85vw', md : '69vw'}}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item>
@@ -1197,7 +1182,7 @@ export default function CreateCourse() {
                                             </ThemeProvider>
                                         </Grid>
                                         <Grid item width={{ xs: '100%', md: '69%' }}>
-                                            <ControlledAccordions accordions={accordions} updateAccordions={updateAccordions} activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
+                                            <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
                                         </Grid>
                                     </Grid>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
@@ -1260,35 +1245,8 @@ const initialWorkoutData = {
     }]
 }
 
-// For initial Data below this line
-const section1 = {
-    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)."
-}
-const sectionItem1 = {
-    lecture: '',
-    description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
-    heading: "Your own item header here: e.g., ReadMe or Lecture"
-}
-const sectionItem2 = {
-    lecture: '',
-    description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-    heading: "Workout Routine"
-}
-
 let nextAccordionId = 1;
 let nextItemId = 2;
-// workout routine or the video lecture
-const initialSectionData = [{
-    id: 0,
-    heading: section1.heading,
-    items: [{
-        id: 0,
-        ...sectionItem1
-    }, {
-        id: 1,
-        ...sectionItem2
-    }]
-}]
 
 
 // const workouts2 = {

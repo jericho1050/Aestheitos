@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import validateJWTToken from "./verifySignature";
-import { useAuthToken } from "./authContext";
-import { SetIsLoadingContext } from "./IsLoadingContext";
+import { useAuthToken } from "../contexts/authContext";
+import { SetIsLoadingContext } from "../contexts/IsLoadingContext";
 
  
  // handle jwt in state  when user refreshes page.

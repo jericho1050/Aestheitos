@@ -8,12 +8,11 @@ import AddAccordionItem from "./AddAccordionItem";
 import { atom } from "jotai";
 
 
-export default function Section({ setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
+export default function Section({ actionData, setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
     const [heading, setHeading] = useState(accordion.heading);
-    const createAtom = (initialValue) => atom(initialValue);
-
+    
     useEffect(() => {
         if (isEditing) {
             // debounce event handler
@@ -90,8 +89,7 @@ export default function Section({ setIsError, isError, onClickDeleteItem, onChan
                     <AccordionDetails
                         key={item.id} sx={{ paddingLeft: '2%' }}>
                         <ResponsiveDialog 
-                        initialLecture={'Your Youtube URL Here'}
-                        initialDescription={'Your Information Here'}
+                        actionData={actionData}
                         isError={isError} setIsError={setIsError} itemId={item.id} 
                         onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} 
                         accordionItem={item}
@@ -104,7 +102,7 @@ export default function Section({ setIsError, isError, onClickDeleteItem, onChan
 
                 }
             </ul>
-
         </Accordion>
+
     )
 }

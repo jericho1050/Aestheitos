@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { AuthProvider } from './helper/authContext';
+import { AuthProvider } from './contexts/authContext';
 import { ThemeProvider, createTheme } from '@mui/material'
 import {
   createBrowserRouter,
@@ -16,8 +16,8 @@ import { Index, loader as indexLoader } from './routes/index';
 import Course from './routes/course';
 import CreateCourse from './routes/create';
 import {action as createAction} from './routes/create';
-import ProectedRoute from './helper/protectedRoute';
-import { IsLoadingProvider } from './helper/IsLoadingContext';
+import ProectedRoute from './components/protectedRoute';
+import { IsLoadingProvider } from './contexts/IsLoadingContext';
 
 const theme = createTheme({
   palette: {
