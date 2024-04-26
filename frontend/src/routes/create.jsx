@@ -330,10 +330,12 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
     const [isEditing, setIsEditing] = React.useState(false);
     const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
     const [parent, enableAnimations] = useAutoAnimate();
-    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true)
+    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
     const [heading, setHeading] = React.useState('');
-    const [lecture, setLecture] = React.useState('')
-    const [description, setDescription] = React.useState('');
+    // The `lecture` and `description` state variable holds the *first* value of `accordionItem.lecture` for lecture and `accordItem.description` for description.
+    // Further changes to both `accordionItem` prop are ignored.
+    const [lecture, setLecture] = React.useState(accordionItem.lecture);
+    const [description, setDescription] = React.useState(accordionItem.description);
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
@@ -425,9 +427,8 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
             }
         }
         if (!isWorkoutRoutine) {
-            if (!lecture && !description) {
-                setIsError(false);
-            }
+
+            
             // debounce event handler
             const handler = setTimeout(() => {
                 onChange({
@@ -439,7 +440,8 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
             return () => {
                 clearTimeout(handler);
             }
-        }
+        
+    }
     }, [heading, lecture, description])
 
 
@@ -550,7 +552,7 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
                                         </Grid>
                                     </Grid> :
                                         <Grid justifyContent={{ xs: 'center' }} item container>
-                                            <YoutubeInput actionData={actionData} accordionItem={accordionItem} lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture}/>
+                                            <YoutubeInput actionData={actionData} lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture}/>
                                             <Grid item width={'81%'}>
                                                 {getEmbedUrl(accordionItem.lecture) ?
                                                     <Box mt={4} className="course-lecture-container" component={'div'}>
@@ -571,7 +573,7 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
                                                 </ThemeProvider>
                                             </Grid>
                                             <Grid item xs={10} mt={4}>
-                                                <DescriptionInput actionData={actionData} accordionItem={accordionItem} description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
+                                                <DescriptionInput actionData={actionData} description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
                                             </Grid>
                                         </Grid>
                             }

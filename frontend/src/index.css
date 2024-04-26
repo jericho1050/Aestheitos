@@ -114,8 +114,6 @@ html {
 }
 
 
-
-
 .course-lecture {
   aspect-ratio: 16 / 9;
   width: 100% !important;
@@ -131,3 +129,5 @@ html {
   transition: opacity 200ms;
   transition-delay: 200ms;
 }
+
+

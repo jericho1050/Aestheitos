@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { Box, InputAdornment, TextField } from "@mui/material";
 import YouTubeIcon from '@mui/icons-material/YouTube';
 
-export function YoutubeInput({actionData, accordionItem, lecture, onChange, isError, setIsError }) {
+export function YoutubeInput({actionData, lecture, onChange, isError, setIsError }) {
     return (
 
         <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
@@ -31,7 +31,7 @@ export function YoutubeInput({actionData, accordionItem, lecture, onChange, isEr
             }
             type="url"
             name="lecture"
-            value={!lecture ? accordionItem.lecture : lecture}
+            value={lecture}
             onChange={e => {
                 onChange(e.target.value) // This is setLecture from the parent component, so  we are sending the values to our server.
                 setIsError(false);
@@ -42,7 +42,7 @@ export function YoutubeInput({actionData, accordionItem, lecture, onChange, isEr
     )
 }
 
-export function DescriptionInput({actionData, accordionItem, description, onChange, isError, setIsError }) {
+export function DescriptionInput({actionData,  description, onChange, isError, setIsError }) {
 
     return (
         <TextField
@@ -67,7 +67,7 @@ export function DescriptionInput({actionData, accordionItem, description, onChan
         multiline
         required={true}
         name="overview"
-        value={!description ? accordionItem.description : description}
+        value={description}
         onChange={e => {
             onChange(e.target.value) // This is setDescription from the parent component, so  we are sending the values to our server.
             setIsError(false);
