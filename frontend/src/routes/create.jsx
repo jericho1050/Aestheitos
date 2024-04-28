@@ -25,7 +25,7 @@ import getEmbedUrl from '../helper/getEmbedUrl';
 import FormattedInputs from "../components/FormattedInput";
 import AddAccordion from "../components/AddAccordion";
 import InputFileUpload from "../components/InputFileUpload";
-import Section from "../components/Section";
+import AccordionSection from "../components/Accordion";
 import AddIcon from '@mui/icons-material/Add';
 import demoGif from "../static/images/chinupVecs.gif";
 import demoGif2 from '../static/images/pushupVecs.gif';
@@ -33,7 +33,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, createSectionItem, deleteSection, deleteSectionItem, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection, updateSectionItem } from "../courses";
+import { createCourse, createCourseContent, createSection, createSectionItem, createWorkout, deleteSection, deleteSectionItem, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection, updateSectionItem } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import isUrl from "is-url";
@@ -325,7 +325,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
 
 
 
-export function ResponsiveDialog({actionData, isError, setIsError, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onClick, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
@@ -368,38 +368,61 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
     }
 
 
-    function handleAddWorkoutCard() {
-        updateWorkouts(draft => {
-            draft.push(
-                {
-                    id: nextWorkoutId++,
-                    exercise: "Your Description here",
-                    demo: demoGif,
-                    correctForm: [
+    function handleAddWorkoutCard(id) {
+        setIsError(false);
+        const workoutFormData = new FormData();
+        workoutFormData.append('exercise', "Your description here");
+        // append also a default example image
+        fetch(demoGif)
+            .then(res => res.blob())
+            .then(async (blob) => {
 
-                    ],
-                    wrongForm: [
-
-                    ]
+                const file = new File([blob], "chinUp.gif", {
+                    type: 'image/png'
+                });
+                workoutFormData.append('demo', file);
+                const workout = await createWorkout(id, workoutFormData);
+                if (workout.statusCode >= 400) {
+                    throw new Error(workout);
                 }
-            )
+                return workout
+            })
+            .then(workout => {
+                updateWorkouts(draft => {
+                    draft.push(
+                        {
+                            id: workout.id,
+                            exercise: "Your Description here",
+                            demo: demoGif,
+                            correctForm: [
 
-            const index = draft.length - 1;
+                            ],
+                            wrongForm: [
 
-            draft[index].correctForm.push(
-                {
-                    id: 0,
-                    ...correctForm
+                            ]
+                        }
+                    )
+                    const index = draft.length - 1;
 
+                    draft[index].correctForm.push(
+                        {
+                            id: 0,
+                            ...correctForm
+
+                        })
+
+                    draft[index].wrongForm.push(
+                        {
+                            id: 0,
+                            ...wrongForm
+                        })
                 })
+            })
+            .catch(err => {
+                console.error(`An error occured`, err);
+                setIsError(true);
+            })
 
-            draft[index].wrongForm.push(
-                {
-                    id: 0,
-                    ...wrongForm
-                })
-
-        })
     }
 
 
@@ -428,7 +451,7 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
         }
         if (!isWorkoutRoutine) {
 
-            
+
             // debounce event handler
             const handler = setTimeout(() => {
                 onChange({
@@ -440,8 +463,8 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
             return () => {
                 clearTimeout(handler);
             }
-        
-    }
+
+        }
     }, [heading, lecture, description])
 
 
@@ -495,7 +518,7 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
                 </Grid>
                 <Grid item xs={2} lg={1}>
                     <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
-                    <Button onClick={() => onClick(accordionId, accordionItem.id)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
+                    <Button onClick={() => onClick(accordionId, itemId)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
                 </Grid>
             </>
         )
@@ -537,45 +560,55 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
                         <DialogContent>
                             {
                                 isWorkoutRoutine ?
-                                    <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                        {workouts.map(workout => (
-                                            // Renders Workout instance
-                                            <Grid key={workout.id} item sm={6}>
-                                                <WorkoutMediaCard updateWorkouts={updateWorkouts} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                    <>
+
+
+                                        <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+                                            {workouts.map(workout => (
+                                                // Renders Workout instance
+                                                <Grid key={workout.id} item sm={6}>
+                                                    <WorkoutMediaCard updateWorkouts={updateWorkouts} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                                </Grid>
+                                            ))}
+                                            <Grid item sm={6}>
+                                                {/* add WorkoutMediaCard / Workout button */}
+                                                <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard(itemId)} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                                    <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
+                                                </Button>
                                             </Grid>
-                                        ))}
-                                        <Grid item sm={6}>
-                                            {/* add WorkoutMediaCard / Workout button */}
-                                            <Button data-cy={`Add icon`} onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
-                                                <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
-                                            </Button>
+                                            {isError &&
+                                                <Grid item sm={6} alignSelf={'center'}>
+                                                    <Typography sx={{ color: 'red', textAlign: 'center', mb: 3, mt: 3 }}>Something Happend.Please try again</Typography>
+                                                </Grid>
+                                            }
                                         </Grid>
-                                    </Grid> :
-                                        <Grid justifyContent={{ xs: 'center' }} item container>
-                                            <YoutubeInput actionData={actionData} lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture}/>
-                                            <Grid item width={'81%'}>
-                                                {getEmbedUrl(accordionItem.lecture) ?
-                                                    <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                        <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
-                                                    :
-                                                    <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                        <Typography variant="body" align={'center'}>
-                                                            Your video will show up here
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            </Grid>
-                                            <Grid item mt={2}>
-                                                <ThemeProvider theme={theme}>
-                                                    <Typography variant="h4">
-                                                        Your readme text here
+                                    </>
+                                    :
+                                    <Grid justifyContent={{ xs: 'center' }} item container>
+                                        <YoutubeInput actionData={actionData} lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture} />
+                                        <Grid item width={'81%'}>
+                                            {getEmbedUrl(accordionItem.lecture) ?
+                                                <Box mt={4} className="course-lecture-container" component={'div'}>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
+                                                :
+                                                <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                    <Typography variant="body" align={'center'}>
+                                                        Your video will show up here
                                                     </Typography>
-                                                </ThemeProvider>
-                                            </Grid>
-                                            <Grid item xs={10} mt={4}>
-                                                <DescriptionInput actionData={actionData} description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
-                                            </Grid>
+                                                </Box>
+                                            }
                                         </Grid>
+                                        <Grid item mt={4}>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4">
+                                                    Your readme text here
+                                                </Typography>
+                                            </ThemeProvider>
+                                        </Grid>
+                                        <Grid item xs={10} mt={4}>
+                                            <DescriptionInput actionData={actionData} description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
+                                        </Grid>
+                                    </Grid>
                             }
                         </DialogContent>
                     </Grid>
@@ -595,7 +628,7 @@ export function ResponsiveDialog({actionData, isError, setIsError, itemId, onCli
 
 
 
-function ControlledAccordions({  activeStep, courseContentId }) {
+function ControlledAccordions({ activeStep, courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
@@ -732,7 +765,7 @@ function ControlledAccordions({  activeStep, courseContentId }) {
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <Section actionData={actionData} setIsError={setIsError} isError={isError} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                            <AccordionSection actionData={actionData} setIsError={setIsError} isError={isError} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
                         </Collapse>
 
                     ))
@@ -872,7 +905,7 @@ export default function CreateCourse() {
                             <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                                 {/* Paper starts here */}
                                 <Grid item xs md={'auto'}>
-                                    <Paper elevation={4} sx={{ height: { xs: 'auto', m: 700 } }}>
+                                    <Paper elevation={4} sx={{ height: { xs: 'auto', m: 700, } }}>
                                         <Grid item container justifyContent={'center'}>
                                             <Grid item>
                                                 <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
@@ -1050,7 +1083,7 @@ export default function CreateCourse() {
                                     <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
-                            <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{xs: '85vw', md : '69vw'}}>
+                            <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item>

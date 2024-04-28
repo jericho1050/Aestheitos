@@ -23,7 +23,16 @@ export default function Root() {
                     <progress value={null} />
                     <p>Loading...</p>
                 </Box>)
-                    : <Outlet />}
+                    : 
+                    <Box id="detail"
+                    className={
+                      navigation.state === "loading" ? "loading" : ""
+                    }
+                  >
+                    <Outlet />
+                  </Box>
+                    
+                    }
             </>
 
         </>

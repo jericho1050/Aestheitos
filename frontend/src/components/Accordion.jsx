@@ -90,8 +90,12 @@ export default function AccordionSection({ actionData, setIsError, isError, onCl
                         key={item.id} sx={{ paddingLeft: '2%' }}>
                         <ResponsiveDialog 
                         actionData={actionData}
-                        isError={isError} setIsError={setIsError} itemId={item.id} 
-                        onClick={onClickDeleteItem} onChange={onChangeItem} accordionId={accordion.id} 
+                        isError={isError} 
+                        setIsError={setIsError} 
+                        itemId={item.id} 
+                        onClick={onClickDeleteItem} 
+                        onChange={onChangeItem} 
+                        accordionId={accordion.id} 
                         accordionItem={item}
                         >
                             {item.heading}

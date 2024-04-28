@@ -23,8 +23,11 @@ export default function CourseCard(props) {
             sx={{ aspectRatio: 16 / 9 }}
             src={props.thumbnail || defaultImage}
             alt="workout demo"
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src=defaultImage;
+          }}
           />
-
           <CardContent>
             <Typography sx={{ height: {xs: 'auto', md: 60}, mb: {xs: 2, md: 4,}}} align='justify' gutterBottom fontFamily={'Play'} fontSize={'1.2rem'} fontWeight={'bolder'}>
               {truncateText(props.title, 9)} {/* Replace 2nd argument with the maximum number of words you want */}

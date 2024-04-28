@@ -1,3 +1,5 @@
+import { FaceRetouchingNatural } from "@mui/icons-material";
+
 class HttpError extends Error {
   constructor(statusCode, message, ...params) {
     super(...params);
@@ -11,38 +13,46 @@ class HttpError extends Error {
   }
 }
 
-export async function getCourses() {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}courses`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('An error occurred:', error);
-    return null;
+async function checkResponse(response) {
+  if (!response.ok) {
+    const message = await response.text();
+    throw new HttpError(response.status, message);
   }
 }
 
-export async function createCourse(courseFormData) {
+
+async function sendRequest(url, options) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}courses`, {
-      method: 'POST',
+    const response = await fetch(url, {
       credentials: 'include',
-      body: courseFormData
+      ...options
     });
 
     await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occurred:', err)
+
+    if (options.method !== 'DELETE') {
+      const data = await response.json();
+      return data;
+    }
+  } catch (err) {
+    console.error('An error occured', err);
     return err;
   }
 }
+
+export async function getCourses() {
+  return sendRequest(`${import.meta.env.VITE_API_URL}courses`, {
+  });
+}
+
+export async function createCourse(courseFormData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}courses`, {
+    method: 'POST',
+    body: courseFormData
+  });
+}
+
+
 
 // export async function getCourse(id) {
 //   //TODO 
@@ -52,203 +62,80 @@ export async function createCourse(courseFormData) {
 // }
 
 export async function updateCourse(id, updates) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}course/${id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: updates
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}`, {
+    method: 'PUT',
+    body: updates
+  });
 }
 
 export async function createCourseContent(courseId, courseContentFormData) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}course/${courseId}/course-content`, {
-      method: 'POST',
-      credentials: 'include',
-      body: courseContentFormData
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occured', err)
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${courseId}/course-content`, {
+    method: 'POST',
+    body: courseContentFormData
+  });
 }
 
 export async function updateCourseContent(id, updates) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}course/${id}/course-content`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: updates
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/course-content`, {
+    method: 'PUT',
+    body: updates
+  });
 }
 
 export async function getSection(sectionId) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
-      method: 'GET',
-      credentials: 'include',
-
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {});
 }
 
 export async function createSection(courseContentId, sectionFormData) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}sections/course-content/${courseContentId}`, {
-      method: 'POST',
-      credentials: 'include',
-      body: sectionFormData
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occured', err)
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}sections/course-content/${courseContentId}`, {
+    method: 'POST',
+    body: sectionFormData
+  });
 }
 
 export async function updateSection(sectionId, updates) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: updates
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
+    method: 'PUT',
+    body: updates
+  });
 }
 
 export async function deleteSection(sectionId) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    await checkResponse(response);
-  }
-  catch (err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
+    method: 'DELETE',
+  });
 }
 
 export async function getSectionItems(sectionId) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
-      method: 'GET',
-      credentials: 'include'
-    });
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
 
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch (err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  });
 }
 
 export async function createSectionItem(sectionId, sectionItemFormData) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
-      method: 'POST',
-      credentials: 'include',
-      body: sectionItemFormData
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-
-  }
-  catch (err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
+    method: 'POST',
+    body: sectionItemFormData
+  });
 }
 
 export async function updateSectionItem(sectionItemId, updates) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: updates
-    });
-
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch(err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
+    method: 'PUT',
+    body: updates
+  });
 }
 
 export async function deleteSectionItem(sectionItemId) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-    await checkResponse(response);
-    const data = await response.json();
-    return data;
-  }
-  catch(err) {
-    console.error('An error occured', err);
-    return err;
-  }
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
+    method: 'DELETE',
+  })
 }
 
-
-async function checkResponse(response) {
-  if (!response.ok) {
-    const message = await response.text();
-    throw new HttpError(response.status, message);
-  }
+export async function createWorkout(sectionItemId, workoutFormData){
+  return sendRequest(`${import.meta.env.VITE_API_URL}workouts/section-item/${sectionItemId}`, {
+    method: 'POST',
+    body: workoutFormData
+  })
 }
 
