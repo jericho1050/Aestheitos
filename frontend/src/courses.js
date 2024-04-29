@@ -68,10 +68,10 @@ export async function updateCourse(id, updates) {
   });
 }
 
-export async function createCourseContent(courseId, courseContentFormData) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}course/${courseId}/course-content`, {
+export async function createCourseContent(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/course-content`, {
     method: 'POST',
-    body: courseContentFormData
+    body: formData
   });
 }
 
@@ -82,60 +82,66 @@ export async function updateCourseContent(id, updates) {
   });
 }
 
-export async function getSection(sectionId) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {});
+export async function getSection(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}section/${id}/course-content`, {});
 }
 
-export async function createSection(courseContentId, sectionFormData) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}sections/course-content/${courseContentId}`, {
+export async function createSection(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}sections/course-content/${id}`, {
     method: 'POST',
-    body: sectionFormData
+    body: formData
   });
 }
 
-export async function updateSection(sectionId, updates) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
+export async function updateSection(id, updates) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}section/${id}/course-content`, {
     method: 'PUT',
     body: updates
   });
 }
 
-export async function deleteSection(sectionId) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}section/${sectionId}/course-content`, {
+export async function deleteSection(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}section/${id}/course-content`, {
     method: 'DELETE',
   });
 }
 
-export async function getSectionItems(sectionId) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
+export async function getSectionItems(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-items/section/${id}`, {
 
   });
 }
 
-export async function createSectionItem(sectionId, sectionItemFormData) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}section-items/section/${sectionId}`, {
+export async function createSectionItem(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-items/section/${id}`, {
     method: 'POST',
-    body: sectionItemFormData
+    body: formData
   });
 }
 
-export async function updateSectionItem(sectionItemId, updates) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
+export async function updateSectionItem(id, updates) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-item/${id}/section`, {
     method: 'PUT',
     body: updates
   });
 }
 
-export async function deleteSectionItem(sectionItemId) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}section-item/${sectionItemId}/section`, {
+export async function deleteSectionItem(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}section-item/${id}/section`, {
     method: 'DELETE',
   })
 }
 
-export async function createWorkout(sectionItemId, workoutFormData){
-  return sendRequest(`${import.meta.env.VITE_API_URL}workouts/section-item/${sectionItemId}`, {
+export async function createWorkout(id, formData){
+  return sendRequest(`${import.meta.env.VITE_API_URL}workouts/section-item/${id}`, {
     method: 'POST',
-    body: workoutFormData
+    body: formData
   })
 }
 
+export async function updateWorkout(id, formData){
+    return sendRequest(`${import.meta.env.VITE_API_URL}workout/${id}/section-item`, {
+      method: 'PATCH',
+      body: formData
+    })
+}

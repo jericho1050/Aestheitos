@@ -33,7 +33,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, createSectionItem, createWorkout, deleteSection, deleteSectionItem, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection, updateSectionItem } from "../courses";
+import { createCourse, createCourseContent, createSection, createSectionItem, createWorkout, deleteSection, deleteSectionItem, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import isUrl from "is-url";
@@ -41,6 +41,10 @@ import { Provider, atom, useAtom } from "jotai";
 import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
 import { useImmerAtom } from "jotai-immer";
 import { accordionsAtom } from "../atoms/accordionsAtom";
+import { isErrorAtom } from "../atoms/isErrorAtom";
+import { correctForm, workoutsAtom, wrongForm } from "../atoms/workoutsAtom";
+import { workoutDescriptionAtom } from "../atoms/workoutDescriptionAtom";
+
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -168,11 +172,44 @@ export async function action({ request }) {
     return { course, courseContent, section }; // only one obj property will persist i.e one returns a value other's are undefined 
 }
 
-function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, onClick, workout, open }) {
+function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const [isError, setIsError] = useAtom(isErrorAtom);
+    const [, updateWorkouts] = useImmerAtom(workoutsAtom);
+    // The `workoutDescription` state variable is similar to `lecture` and `description` in ResponsiveDialog
+    // it's main purpose is for debouncing
+    const [workoutDescription, setWorkoutDescription] = useAtom(workoutDescriptionAtom);
+    const isFirstRender = React.useRef(true); const initialWorkoutDescription = React.useRef(workoutDescription);
+
+
+    // Handles HTTP request for updating workout's description for this component
+    React.useEffect(() => {
+        if (isFirstRender.current || workoutDescription === initialWorkoutDescription.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        // debounce event handler
+        const handler = setTimeout(async () => {
+            const formData = new FormData();
+            formData.append('exercise', workoutDescription);
+            try {
+                const w = await updateWorkout(workout.id, formData);
+                if (w.statusCode >= 400) {
+                    throw new Error(w);
+                }
+            }
+            catch (error) {
+                console.error('An Error Occured', error);
+                setIsError(true);
+            }
+        }, 300)
+        return () => {
+            clearTimeout(handler);
+        }
+    }, [workoutDescription])
 
     function handleImageUpload(event, workoutId, wrongFormId, correctFormId) {
         // update image for wrongForm and correctForm exercise demo
@@ -273,7 +310,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
     return (
         open &&
         <>
-            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
+            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 725 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
@@ -281,6 +318,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
                     alt="workout demo"
                 />
                 <InputFileUpload workoutId={workout.id} onChange={onChangeImage} name="demo" text="GIF File" />
+                {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
                 <CardContent>
                     <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                         {/* workout description textarea input */}
@@ -295,10 +333,13 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
                             required={true}
                             autoFocus
                             name="exercise"
-                            value={workout.exercise}
+                            value={workoutDescription}
                             onChange={event => {
                                 onChangeDescription(event, workout.id);
+                                setWorkoutDescription(event.target.value);
+                                setIsError(false);
                             }}
+                            error={isError}
 
                         />
                     </Box>
@@ -325,10 +366,10 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
 
 
 
-export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onClick, onChange, accordionId, accordionItem, children }) {
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
-    const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
+    const [workouts, updateWorkouts] = useImmerAtom(workoutsAtom);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
     const [heading, setHeading] = React.useState('');
@@ -340,13 +381,64 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
 
+    React.useEffect(() => {
+        if (isEditing) {
+            if (actionData?.message) {
+                console.log('bro wtf? should be true dawg')
+                setIsError(true);
+            }
+            // debounce event handler
+            const handler = setTimeout(() => {
+                onChange({
+                    ...accordionItem,
+                    heading: heading
+                }, accordionId);
+                setIsError(false);
+            }, 300);
+            return () => {
+                clearTimeout(handler);
+            }
+        }
+        if (!isWorkoutRoutine) {
+
+
+            // debounce event handler
+            const handler = setTimeout(() => {
+                onChange({
+                    ...accordionItem,
+                    description: description,
+                    lecture: lecture,
+                }, accordionId);
+                setIsError(false);
+
+            }, 300);
+            return () => {
+                clearTimeout(handler);
+            }
+
+        }
+    }, [heading, lecture, description])
+
 
     function handleImageUpload(event, workoutId) {
         // update image for workout demo
         const file = event.target.files[0];
         const reader = new FileReader();
-
-        reader.onloadend = () => {
+        const formData = new FormData()
+        reader.onloadend = async () => {
+            try {
+                formData.append('demo', file);
+                const workoutRes = await updateWorkout(workoutId, formData);
+                // throw an error if !response.ok
+                if (workoutRes.statusCode >= 400) {
+                    throw new Error(workoutRes);
+                }
+                setIsError(false)
+            }
+            catch (err) {
+                console.error('An error occured', err);
+                setIsError(true);
+            }
             updateWorkouts(draft => {
                 const workout = draft.find(w => w.id === workoutId);
                 workout.demo = reader.result;
@@ -359,6 +451,7 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
     }
 
     function handleChangeWorkoutDescription(e, workoutId) {
+
         updateWorkouts(draft => {
             const workout = draft.find(w => w.id === workoutId);
             workout.exercise = e.target.value;
@@ -367,8 +460,7 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
 
     }
 
-
-    function handleAddWorkoutCard(id) {
+    function handleAddWorkoutCard(itemId) {
         setIsError(false);
         const workoutFormData = new FormData();
         workoutFormData.append('exercise', "Your description here");
@@ -381,7 +473,7 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
                     type: 'image/png'
                 });
                 workoutFormData.append('demo', file);
-                const workout = await createWorkout(id, workoutFormData);
+                const workout = await createWorkout(itemId, workoutFormData);
                 if (workout.statusCode >= 400) {
                     throw new Error(workout);
                 }
@@ -433,39 +525,6 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
         })
     }
 
-    React.useEffect(() => {
-        if (isEditing) {
-            if (actionData?.message) {
-                setIsError(true);
-            }
-            // debounce event handler
-            const handler = setTimeout(() => {
-                onChange({
-                    ...accordionItem,
-                    heading: heading
-                }, accordionId);
-            }, 300);
-            return () => {
-                clearTimeout(handler);
-            }
-        }
-        if (!isWorkoutRoutine) {
-
-
-            // debounce event handler
-            const handler = setTimeout(() => {
-                onChange({
-                    ...accordionItem,
-                    description: description,
-                    lecture: lecture,
-                }, accordionId);
-            }, 300);
-            return () => {
-                clearTimeout(handler);
-            }
-
-        }
-    }, [heading, lecture, description])
 
 
     if (isEditing) {
@@ -486,7 +545,6 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
                         fullWidth
                         onChange={e => {
                             setHeading(e.target.value);
-                            setIsError(false);
                         }
                         }
                     />
@@ -567,25 +625,29 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
                                             {workouts.map(workout => (
                                                 // Renders Workout instance
                                                 <Grid key={workout.id} item sm={6}>
-                                                    <WorkoutMediaCard updateWorkouts={updateWorkouts} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                                    {/* Provider will provide context in which WorkoutMediaCard, can access an independent atom that it can be use */}
+                                                    <Provider>
+                                                        <WorkoutMediaCard onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                                    </Provider>
+
                                                 </Grid>
                                             ))}
                                             <Grid item sm={6}>
                                                 {/* add WorkoutMediaCard / Workout button */}
-                                                <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard(itemId)} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                                <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard(itemId)} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                                 </Button>
                                             </Grid>
-                                            {isError &&
+                                            {/* {isError &&
                                                 <Grid item sm={6} alignSelf={'center'}>
                                                     <Typography sx={{ color: 'red', textAlign: 'center', mb: 3, mt: 3 }}>Something Happend.Please try again</Typography>
                                                 </Grid>
-                                            }
+                                            } */}
                                         </Grid>
                                     </>
                                     :
                                     <Grid justifyContent={{ xs: 'center' }} item container>
-                                        <YoutubeInput actionData={actionData} lecture={lecture} setIsError={setIsError} isError={isError} onChange={setLecture} />
+                                        <YoutubeInput setIsError={setIsError} isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} />
                                         <Grid item width={'81%'}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
@@ -606,7 +668,7 @@ export function ResponsiveDialog({ actionData, isError, setIsError, itemId, onCl
                                             </ThemeProvider>
                                         </Grid>
                                         <Grid item xs={10} mt={4}>
-                                            <DescriptionInput actionData={actionData} description={description} setIsError={setIsError} isError={isError} onChange={setDescription} />
+                                            <DescriptionInput setIsError={setIsError} isError={isError} actionData={actionData} description={description} onChange={setDescription} />
                                         </Grid>
                                     </Grid>
                             }
@@ -632,7 +694,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
-    const [isError, setIsError] = React.useState(false);
+    const [isError, setIsError] = useAtom(isErrorAtom);
     const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
 
     React.useEffect(() => {
@@ -754,7 +816,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     return (
         <>
             {/* Adds a new Accordion / Section  */}
-            <AddAccordion actionData={actionData} setIsError={setIsError} isError={isError} onClick={handleAddAccordion} />
+            <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
             <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
                 <ThemeProvider theme={theme}>
                     <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
@@ -765,7 +827,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <AccordionSection actionData={actionData} setIsError={setIsError} isError={isError} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                            <AccordionSection actionData={actionData} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
                         </Collapse>
 
                     ))
@@ -803,7 +865,7 @@ export default function CreateCourse() {
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
     const fetcher = useFetcher();
     const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
-    const [isError, setIsError] = React.useState(false);
+    const [isError, setIsError] = useAtom(isErrorAtom)
     const [intent, setIntent] = React.useState('create');
     // const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
 
@@ -900,7 +962,7 @@ export default function CreateCourse() {
                         <input type="hidden" value={course.id} name="courseId" />
                         <Box sx={{ m: '3vw' }}>
                             <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
                             </Box>
                             <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                                 {/* Paper starts here */}
@@ -916,7 +978,7 @@ export default function CreateCourse() {
                                         <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
                                             <Grid item>
                                                 {/* Uploading  image file button  here */}
-                                                <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" setIsError={setIsError} onChange={handleImageUpload} />
+                                                <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" onChange={handleImageUpload} />
                                             </Grid>
                                             <Grid item>
                                                 {isError &&
@@ -933,7 +995,7 @@ export default function CreateCourse() {
                                                     )}
                                             </Grid>
                                             <Grid item>
-                                                <FormattedInputs setIsError={setIsError} error={isError} course={course} setCourse={setCourse} />
+                                                <FormattedInputs error={isError} course={course} setCourse={setCourse} />
                                             </Grid>
                                             <Grid item xs paddingBottom={4}>
                                                 {/* Select menu form */}
@@ -1080,7 +1142,7 @@ export default function CreateCourse() {
                             <input type="hidden" value={course.id} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
                                 <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
                             <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
@@ -1253,32 +1315,6 @@ export default function CreateCourse() {
 
 
 
-// Initial data for workouts state in ResponsiveDialog
-const correctForm = {
-    demo: demoGif2,
-    description: "Correct exercise form description: e.g., Shoulder blades are depressed downwards"
-}
-const wrongForm = {
-    demo: demoGif2,
-    description: "Wrong exercise form description: e.g., Shoulder blades not retracting"
-}
-let nextWorkoutId = 1;
-let nextCorrectFormId = 1;
-let nextWrongFormId = 1;
-
-const initialWorkoutData = {
-    id: 0,
-    exercise: "Your Description here ",
-    demo: demoGif,
-    correctForm: [{
-        id: 0,
-        ...correctForm
-    }],
-    wrongForm: [{
-        id: 0,
-        ...wrongForm
-    }]
-}
 
 let nextAccordionId = 1;
 let nextItemId = 2;

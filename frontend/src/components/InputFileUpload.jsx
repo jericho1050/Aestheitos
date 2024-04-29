@@ -2,6 +2,8 @@ import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Button } from '@mui/material';
 import { Typography } from '@mui/material';
+import { useAtom } from 'jotai';
+import { isErrorAtom } from '../atoms/isErrorAtom';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -16,7 +18,8 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 
-export default function InputFileUpload({name, text, setIsError, onChange, workoutId, wrongFormId, correctFormId }) {
+export default function InputFileUpload({name, text, onChange, workoutId, wrongFormId, correctFormId }) {
+    const [,setIsError] = useAtom(isErrorAtom);
     return (
         <>
         <Button

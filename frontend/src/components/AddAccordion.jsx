@@ -2,10 +2,13 @@ import { Box, Grid, IconButton, TextField } from "@mui/material";
 import { useState } from "react";
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
+import { useAtom } from "jotai";
+import { isErrorAtom } from "../atoms/isErrorAtom";
 
 const headingDefault = 'Add an accordion, e.g., Phase 1'
-export default function AddAccordion({ actionData, setIsError, isError, onClick }) {
+export default function AddAccordion({ actionData, onClick }) {
     // This component represents the input field for adding a section / accordion
+    const [isError, setIsError] = useAtom(isErrorAtom);
 
     const [heading, setHeading] = useState(headingDefault);
 

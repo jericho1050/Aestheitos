@@ -34,7 +34,6 @@ export function YoutubeInput({actionData, lecture, onChange, isError, setIsError
             value={lecture}
             onChange={e => {
                 onChange(e.target.value) // This is setLecture from the parent component, so  we are sending the values to our server.
-                setIsError(false);
             }
             }
         />
@@ -53,7 +52,7 @@ export function DescriptionInput({actionData,  description, onChange, isError, s
         label={isError && actionData?.message ?
             
             Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                if (key === 'lecture') {
+                if (key === 'description') {
                     return `${key}: ${value}`;
                 } else {
                     return null;
@@ -70,7 +69,6 @@ export function DescriptionInput({actionData,  description, onChange, isError, s
         value={description}
         onChange={e => {
             onChange(e.target.value) // This is setDescription from the parent component, so  we are sending the values to our server.
-            setIsError(false);
         }
         }
     />

@@ -5,14 +5,16 @@ import { ResponsiveDialog } from "../routes/create";
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import AddAccordionItem from "./AddAccordionItem";
-import { atom } from "jotai";
+import { Provider, atom, useAtom } from "jotai";
+import { isErrorAtom } from "../atoms/isErrorAtom";
 
 
-export default function AccordionSection({ actionData, setIsError, isError, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
+export default function AccordionSection({ actionData, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
     const [heading, setHeading] = useState(accordion.heading);
-    
+    const [isError, setIsError] = useAtom(isErrorAtom);
+
     useEffect(() => {
         if (isEditing) {
             // debounce event handler
@@ -25,7 +27,7 @@ export default function AccordionSection({ actionData, setIsError, isError, onCl
             return () => {
                 clearTimeout(handler);
             };
-        } 
+        }
     }, [heading]);
     let accordionHeadingContent;
 
@@ -81,25 +83,28 @@ export default function AccordionSection({ actionData, setIsError, isError, onCl
                 {accordionHeadingContent}
             </AccordionSummary>
             <AccordionDetails >
-                <AddAccordionItem isError={isError} setIsError={setIsError} onClick={handleAddAccordionItem} accordionId={accordion.id} />
+                <AddAccordionItem onClick={handleAddAccordionItem} accordionId={accordion.id} />
             </AccordionDetails>
             <ul ref={parent}>
                 {accordion.items ? accordion.items.map((item) => (
 
                     <AccordionDetails
                         key={item.id} sx={{ paddingLeft: '2%' }}>
-                        <ResponsiveDialog 
-                        actionData={actionData}
-                        isError={isError} 
-                        setIsError={setIsError} 
-                        itemId={item.id} 
-                        onClick={onClickDeleteItem} 
-                        onChange={onChangeItem} 
-                        accordionId={accordion.id} 
-                        accordionItem={item}
-                        >
-                            {item.heading}
-                        </ResponsiveDialog>
+                        <Provider>
+                            <ResponsiveDialog
+                            setIsError={setIsError}
+                            isError={isError}
+                                actionData={actionData}
+                                itemId={item.id}
+                                onClick={onClickDeleteItem}
+                                onChange={onChangeItem}
+                                accordionId={accordion.id}
+                                accordionItem={item}
+                            >
+                                {item.heading}
+
+                            </ResponsiveDialog>
+                        </Provider>
                     </AccordionDetails>
                 )) :
                     null

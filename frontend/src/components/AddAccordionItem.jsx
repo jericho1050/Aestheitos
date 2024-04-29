@@ -2,6 +2,8 @@ import { Box, Grid, IconButton, TextField } from "@mui/material";
 import { useState } from "react";
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
+import { useAtom } from "jotai";
+import { isErrorAtom } from "../atoms/isErrorAtom";
 
 
 
@@ -11,10 +13,11 @@ import AddIcon from '@mui/icons-material/Add';
 
 const headingDefault = 'Add an item, e.g., week 1-4: workout routine.'
 
-export default function AddAccordionItem({ isError, setIsError, accordionId, onClick }) {
+export default function AddAccordionItem({ accordionId, onClick }) {
     // This component represents the input field for adding a section / accordion
 
     const [heading, setHeading] = useState(headingDefault);
+    const [isError, setIsError] = useAtom(isErrorAtom);
 
     return (
         <Box pl={4} mr={0} component="div" mb={4}>

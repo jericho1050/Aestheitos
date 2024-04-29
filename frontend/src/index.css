@@ -133,3 +133,14 @@ html {
   clear: both;
   content: "";
 }
+@media (max-width: 576px) {
+  .MuiMobileStepper-progress	{
+    width: 49% !important;
+  }
+}
+
+@media (min-width: 576px){
+  .MuiMobileStepper-progress	{
+    width: 69% !important;
+  }
+}

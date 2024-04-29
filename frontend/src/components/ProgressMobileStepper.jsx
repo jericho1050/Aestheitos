@@ -5,9 +5,12 @@ import Button from '@mui/material/Button';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { useFormAction } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { isErrorAtom } from '../atoms/isErrorAtom';
 
 // stepper is responsible also for submission of our FORMS
-export default function ProgressMobileStepper({ intent, setIntent, isError, activeStep, setActiveStep }) {
+export default function ProgressMobileStepper({ intent, setIntent, activeStep, setActiveStep }) {
+  const [isError,] = useAtom(isErrorAtom);
   const theme = useTheme();
 
   function handleBack() {
@@ -22,7 +25,7 @@ export default function ProgressMobileStepper({ intent, setIntent, isError, acti
       steps={3}
       position="static"
       activeStep={activeStep}
-      sx={{ maxWidth: 400, flexGrow: 1 }}
+      sx={{ maxWidth: 'inherit', flexGrow: 1 }}
       nextButton={
         <Button
         name="intent"
