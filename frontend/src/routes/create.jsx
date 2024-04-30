@@ -137,7 +137,7 @@ export async function action({ request }) {
                             return error
                         }
                     }
-                    sectionItem.workout = workouts;
+                    sectionItem.workouts = workouts;
                     sectionItems.push(sectionItem);
                     break;
                 case 'updateAccordionItem':
@@ -150,7 +150,7 @@ export async function action({ request }) {
                             return error
                         }
                     }
-                    sectionItem.workout = workouts;
+                    sectionItem.workouts = workouts;
                     sectionItems.push(sectionItem);
                     break;
                 case 'deleteAccordionItem':
@@ -176,6 +176,7 @@ export async function action({ request }) {
     return { course, courseContent, section }; // only one obj property will persist i.e one returns a value other's are undefined 
 }
 
+// TODO finish UP the workoutMedia card CRUD shit. and this project!!!
 function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
@@ -369,15 +370,14 @@ function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout
 }
 
 
-//TODO update the Accordions Not only the workouts. so that we could persist the workouts in accordionItems... when rerendering it.
 export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange, accordionId, accordionItem, children }) {
     const {setIsError, isError, actionData} = error;
     const [accordions, updateAccordions] = immerAtom; // lol this is just a prop from the parent component (AccordionSection) 
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     // const [workouts, updateWorkouts] = useImmerAtom(workoutsAtom);
-    const accordionIndex = accordions.findIndex(a => a.id === accordionId);
-    const accordionItemIndex = accordions[accordionIndex].items.findIndex(i => i.id === itemId);
+    const accordionIndex = accordions?.findIndex(a => a.id === accordionId);
+    const accordionItemIndex = accordions[accordionIndex]?.items.findIndex(i => i.id === itemId);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
     const [heading, setHeading] = React.useState('');
@@ -390,11 +390,14 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
     let accordionItemHeadingContent;
 
     React.useEffect(() => {
+        if (actionData?.message) { // if there's a message from action server. then there's an error
+            setIsError(true);
+        }
+    }, [actionData])
+    
+    React.useEffect(() => {
         if (isEditing) {
-            if (actionData?.message) {
-                console.log('bro wtf? should be true dawg')
-                setIsError(true);
-            }
+
             // debounce event handler
             const handler = setTimeout(() => {
                 onChange({
@@ -408,7 +411,6 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
             }
         }
         if (!isWorkoutRoutine) {
-
 
             // debounce event handler
             const handler = setTimeout(() => {
@@ -425,7 +427,9 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
             }
 
         }
-    }, [heading, lecture, description])
+    }, [ heading, lecture, description]);
+
+
 
 
     function handleImageUpload(event, workoutId) {
@@ -492,16 +496,19 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
                 updateAccordions(draft => {
                     const accordion = draft.find(a => a.id === accordionId);
                     const accordionItem = accordion.items.find(item => item.id === itemId); 
-                    console.log(`why are fkin empty`)
                     accordionItem.workouts.push({                                                
                             id: workout.id,
                             exercise: "Your Description here",
                             demo: demoGif,
                             correctForm: [
+                                {
                                 ...correctForm
+                                }
                             ],
                             wrongForm: [
+                                {
                                 ...wrongForm
+                                }
                             ]
                     })
                 })
