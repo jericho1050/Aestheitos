@@ -33,7 +33,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, createSectionItem, createWorkout, deleteSection, deleteSectionItem, getSection, getSectionItems, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout } from "../courses";
+import { createCourse, createCourseContent, createSection, createSectionItem, createWorkout, deleteSection, deleteSectionItem, getSection, getSectionItems, getWorkouts, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import isUrl from "is-url";
@@ -52,7 +52,7 @@ theme = responsiveFontSizes(theme)
 
 export async function action({ request }) {
     let formData = await request.formData();
-    let course, courseContent, section, sectionItem;
+    let course, courseContent, section, sectionItem, workouts;
     let sectionItems = []
     let error = {}
     let intent = formData.get('intent');
@@ -130,23 +130,27 @@ export async function action({ request }) {
                 case 'createAccordionItem':
                     section = await getSection(sectionId);
                     sectionItem = await createSectionItem(sectionId, formData);
+                    workouts = await getWorkouts(sectionItem.id);
                     if (sectionItem?.statusCode) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
                             return error
                         }
                     }
+                    sectionItem.workout = workouts;
                     sectionItems.push(sectionItem);
                     break;
                 case 'updateAccordionItem':
                     section = await getSection(sectionId);
                     sectionItem = await updateSectionItem(sectionItemId, formData);
+                    workouts = await getWorkouts(sectionItemId);
                     if (sectionItem?.statusCode) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
                             return error
                         }
                     }
+                    sectionItem.workout = workouts;
                     sectionItems.push(sectionItem);
                     break;
                 case 'deleteAccordionItem':
@@ -365,11 +369,15 @@ function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout
 }
 
 
-
-export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+//TODO update the Accordions Not only the workouts. so that we could persist the workouts in accordionItems... when rerendering it.
+export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+    const {setIsError, isError, actionData} = error;
+    const [accordions, updateAccordions] = immerAtom; // lol this is just a prop from the parent component (AccordionSection) 
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
-    const [workouts, updateWorkouts] = useImmerAtom(workoutsAtom);
+    // const [workouts, updateWorkouts] = useImmerAtom(workoutsAtom);
+    const accordionIndex = accordions.findIndex(a => a.id === accordionId);
+    const accordionItemIndex = accordions[accordionIndex].items.findIndex(i => i.id === itemId);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
     const [heading, setHeading] = React.useState('');
@@ -439,9 +447,10 @@ export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onCl
                 console.error('An error occured', err);
                 setIsError(true);
             }
-            updateWorkouts(draft => {
-                const workout = draft.find(w => w.id === workoutId);
-                workout.demo = reader.result;
+            updateAccordions(draft => {
+                const accordionItem = draft[accordionIndex].items[accordionItemIndex]
+                const workout = accordionItem.workout.find(w => w.id === workoutId);
+                workout.demo = e.reader.result;
             })
         };
 
@@ -452,15 +461,15 @@ export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onCl
 
     function handleChangeWorkoutDescription(e, workoutId) {
 
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
+        updateAccordions(draft => {
+            const accordionItem = draft[accordionIndex].items[accordionItemIndex]
+            const workout = accordionItem.workout.find(w => w.id === workoutId);
             workout.exercise = e.target.value;
-
         })
 
     }
 
-    function handleAddWorkoutCard(itemId) {
+    function handleAddWorkoutCard() {
         setIsError(false);
         const workoutFormData = new FormData();
         workoutFormData.append('exercise', "Your description here");
@@ -480,34 +489,21 @@ export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onCl
                 return workout
             })
             .then(workout => {
-                updateWorkouts(draft => {
-                    draft.push(
-                        {
+                updateAccordions(draft => {
+                    const accordion = draft.find(a => a.id === accordionId);
+                    const accordionItem = accordion.items.find(item => item.id === itemId); 
+                    console.log(`why are fkin empty`)
+                    accordionItem.workouts.push({                                                
                             id: workout.id,
                             exercise: "Your Description here",
                             demo: demoGif,
                             correctForm: [
-
+                                ...correctForm
                             ],
                             wrongForm: [
-
+                                ...wrongForm
                             ]
-                        }
-                    )
-                    const index = draft.length - 1;
-
-                    draft[index].correctForm.push(
-                        {
-                            id: 0,
-                            ...correctForm
-
-                        })
-
-                    draft[index].wrongForm.push(
-                        {
-                            id: 0,
-                            ...wrongForm
-                        })
+                    })
                 })
             })
             .catch(err => {
@@ -519,9 +515,10 @@ export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onCl
 
 
     function handleDeleteWorkoutCard(workoutId) {
-        updateWorkouts(draft => {
-            const index = draft.findIndex(w => w.id === workoutId)
-            draft.splice(index, 1);
+        updateAccordions(draft => {
+            const accordionItem = draft[accordionIndex].items[accordionItemIndex];
+            const workout = accordionItem.workouts.filter(w => w.id === workoutId);
+            return workout
         })
     }
 
@@ -622,7 +619,7 @@ export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onCl
 
 
                                         <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                            {workouts.map(workout => (
+                                            {accordionItem.workouts?.map(workout => (
                                                 // Renders Workout instance
                                                 <Grid key={workout.id} item sm={6}>
                                                     {/* Provider will provide context in which WorkoutMediaCard, can access an independent atom that it can be use */}
@@ -634,7 +631,7 @@ export function ResponsiveDialog({ setIsError, isError, actionData, itemId, onCl
                                             ))}
                                             <Grid item sm={6}>
                                                 {/* add WorkoutMediaCard / Workout button */}
-                                                <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard(itemId)} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                                <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard()} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                                 </Button>
                                             </Grid>
@@ -694,6 +691,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
+    // actionData will be pass to this component's childrens. because we are using fetcher here but for components up they don't
     const [isError, setIsError] = useAtom(isErrorAtom);
     const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
 
@@ -701,10 +699,8 @@ function ControlledAccordions({ activeStep, courseContentId }) {
         // initially the accordion's IDs is not up to date with the database server,
         // so we continuously update our real 'IDs' and values of our state variables
         // that's why we use a useEffect for this matter.
-        if (actionData?.message) {
-            setIsError(true);
-        }
-        else if (actionData?.section && actionData?.section?.intent) {
+
+        if (actionData?.section && actionData?.section?.intent) {
             if (actionData.section.intent === 'createAccordion') {
                 const { intent, ...rest } = actionData.section;
                 updateAccordions(draft => {
@@ -816,7 +812,9 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     return (
         <>
             {/* Adds a new Accordion / Section  */}
-            <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
+            <Provider>
+                <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
+            </Provider>
             <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
                 <ThemeProvider theme={theme}>
                     <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
@@ -827,7 +825,8 @@ function ControlledAccordions({ activeStep, courseContentId }) {
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <AccordionSection actionData={actionData} onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                            
+                            <AccordionSection actionData={actionData} itemActions={{handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem}} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
                         </Collapse>
 
                     ))

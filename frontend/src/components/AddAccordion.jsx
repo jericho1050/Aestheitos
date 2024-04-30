@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import { useAtom } from "jotai";
@@ -9,8 +9,16 @@ const headingDefault = 'Add an accordion, e.g., Phase 1'
 export default function AddAccordion({ actionData, onClick }) {
     // This component represents the input field for adding a section / accordion
     const [isError, setIsError] = useAtom(isErrorAtom);
-
+    const [buttonClicked, setButtonClicked] = useState(false);
     const [heading, setHeading] = useState(headingDefault);
+
+    useEffect(() => {
+        // means there is an error message from action server
+        if (actionData?.message && buttonClicked) {
+            setIsError(true);
+            setButtonClicked(false);
+        }
+    }, [actionData, buttonClicked])
 
     return (
         <Box component="div" mb={4}>
@@ -45,6 +53,7 @@ export default function AddAccordion({ actionData, onClick }) {
                     <IconButton data-cy="Add Accordion Button" sx={{ border: '1px solid #1976D2' }} onClick={() => {
                         setHeading('');
                         onClick(heading);
+                        setButtonClicked(true);
                     }} color="primary" aria-label="add">
                         <AddIcon />
                     </IconButton>

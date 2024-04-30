@@ -195,7 +195,7 @@ class Workouts(models.Model):
 
     def __str__(self):
         return (
-            f"( pk: { self.pk } ) Course: {self.section_item.section.course.title} Workout: {self.exercise}"
+            f"( pk: { self.pk } ) Course: {self.section_item.section.course_content.course.title} Workout: {self.exercise}"
         )
 
     def delete_with_auth_user(self, user):

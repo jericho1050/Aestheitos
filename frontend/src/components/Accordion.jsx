@@ -7,13 +7,18 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 import AddAccordionItem from "./AddAccordionItem";
 import { Provider, atom, useAtom } from "jotai";
 import { isErrorAtom } from "../atoms/isErrorAtom";
+import { useImmerAtom } from "jotai-immer";
+import { accordionsAtom } from "../atoms/accordionsAtom";
 
 
-export default function AccordionSection({ actionData, onClickDeleteItem, onChangeItem, onClickDelete, onChange, handleChange, expanded, accordion, handleAddAccordionItem }) {
+export default function AccordionSection({ actionData, itemActions, onClickDelete, onChange, handleChange, expanded, accordion}) {
+    const {handleDeleteAccordionItem : onClickDeleteItem, handleEditAccordionItem: onChangeItem, handleAddAccordionItem: onClickAddItem } = itemActions
+
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
     const [heading, setHeading] = useState(accordion.heading);
     const [isError, setIsError] = useAtom(isErrorAtom);
+    const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
 
     useEffect(() => {
         if (isEditing) {
@@ -83,18 +88,20 @@ export default function AccordionSection({ actionData, onClickDeleteItem, onChan
                 {accordionHeadingContent}
             </AccordionSummary>
             <AccordionDetails >
-                <AddAccordionItem onClick={handleAddAccordionItem} accordionId={accordion.id} />
+                <Provider>
+                    <AddAccordionItem actionData={actionData} onClick={onClickAddItem} accordionId={accordion.id} />
+                </Provider>
             </AccordionDetails>
             <ul ref={parent}>
                 {accordion.items ? accordion.items.map((item) => (
 
                     <AccordionDetails
-                        key={item.id} sx={{ paddingLeft: '2%' }}>
+                        sx={{ paddingLeft: '2%' }}>
                         <Provider>
                             <ResponsiveDialog
-                            setIsError={setIsError}
-                            isError={isError}
-                                actionData={actionData}
+                                 key={item.id}
+                                error={{setIsError, isError, actionData}}
+                                immerAtom={[accordions, updateAccordions]}
                                 itemId={item.id}
                                 onClick={onClickDeleteItem}
                                 onChange={onChangeItem}

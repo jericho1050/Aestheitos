@@ -132,6 +132,12 @@ export async function deleteSectionItem(id) {
   })
 }
 
+export async function getWorkouts(id){
+  return sendRequest(`${import.meta.env.VITE_API_URL}workouts/section-item/${id}`, {
+
+  });
+}
+
 export async function createWorkout(id, formData){
   return sendRequest(`${import.meta.env.VITE_API_URL}workouts/section-item/${id}`, {
     method: 'POST',
