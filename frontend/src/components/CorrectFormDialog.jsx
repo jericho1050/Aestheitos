@@ -30,7 +30,7 @@ function WorkoutMediaCorrectFormCard({ onChangeImage, onClick, onChange, workout
         <Card data-cy="Correct Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
             <CardMedia
                 component="img"
-                sx={{ aspectRatio: 16 / 9, }}
+                sx={{ aspectRatio: 16 / 9, width: {xs: 350, sm: 'auto'}}}
                 src={correctForm.demo}
                 alt="workout demo"
             />
@@ -96,7 +96,7 @@ export default function CorrectFormDialog({ handleImageUpload, handleDeleteCard,
                 maxWidth={'md'}
             >
                 <Grid container >
-                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
+                    <Grid item container justifyContent={'flex-start'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
                         <DialogTitle id="responsive-dialog-title">
                             {"Correct Exercise Form"}
                         </DialogTitle>
@@ -106,7 +106,7 @@ export default function CorrectFormDialog({ handleImageUpload, handleDeleteCard,
 
 
                             {
-                                correctFormExercises.map(exercise => {
+                                correctFormExercises?.map(exercise => {
 
 
                                     return (

@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { Box, InputAdornment, TextField } from "@mui/material";
 import YouTubeIcon from '@mui/icons-material/YouTube';
 
-export function YoutubeInput({actionData, lecture, onChange, isError, setIsError }) {
+export function YoutubeInput({actionData, lecture, onChange, isError}) {
     return (
 
         <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
@@ -41,7 +41,7 @@ export function YoutubeInput({actionData, lecture, onChange, isError, setIsError
     )
 }
 
-export function DescriptionInput({actionData,  description, onChange, isError, setIsError }) {
+export function DescriptionInput({actionData,  description, onChange, isError}) {
 
     return (
         <TextField

@@ -33,7 +33,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
-import { createCourse, createCourseContent, createSection, createSectionItem, createWorkout, deleteSection, deleteSectionItem, getSection, getSectionItems, getWorkouts, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout } from "../courses";
+import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import isUrl from "is-url";
@@ -168,25 +168,25 @@ export async function action({ request }) {
                 ...section,
                 intent: intent,
                 items: sectionItems, // Items will contain only '1' if it's either creating or updating an accordion item; if not, then it has more than 1.
-                ...(section ? {} : { id: sectionId }) // adds an id if were deleting an accordion, because response will be empty for DELETE HTTP methods
-            }
+                ...(section ? {} : { id: sectionId }) // adds an ID if we are deleting an accordion because the response will be empty for DELETE HTTP methods, i.e., 204 status code. And some of our logic depends on the section ID. so ActionData will only return an ID when an accordion is deleted.
 
+            }
     }
 
     return { course, courseContent, section }; // only one obj property will persist i.e one returns a value other's are undefined 
 }
 
-// TODO finish UP the workoutMedia card CRUD shit. and this project!!!
-function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout, open }) {
+function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, onClick, workout, open }) {
+    const { accordionId, itemId } = ids;
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-    const [isError, setIsError] = useAtom(isErrorAtom);
-    const [, updateWorkouts] = useImmerAtom(workoutsAtom);
+    const [isError, setIsError] = React.useState(false);
+    const [, updateAccordions] = immerAtom
     // The `workoutDescription` state variable is similar to `lecture` and `description` in ResponsiveDialog
     // it's main purpose is for debouncing
-    const [workoutDescription, setWorkoutDescription] = useAtom(workoutDescriptionAtom);
+    const [workoutDescription, setWorkoutDescription] = React.useState(workout.exercise)
     const isFirstRender = React.useRef(true); const initialWorkoutDescription = React.useRef(workoutDescription);
 
 
@@ -220,11 +220,28 @@ function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout
         // update image for wrongForm and correctForm exercise demo
         const file = event.target.files[0];
         const reader = new FileReader();
-
-        reader.onloadend = () => {
-            updateWorkouts(draft => {
-                const workout = draft.find(w => w.id === workoutId);
-
+        const formData = new FormData();
+        let response;
+        reader.onloadend = async () => {
+            formData.append('demo', file);
+            try {
+                if (wrongFormId != null) {
+                    response = await updateWrongExerciseForm(wrongFormId, formData);
+                } else {
+                    response = await updateCorrectExerciseForm(correctFormId, formData);
+                }
+                if (response.statusCode >= 400) {
+                    throw new Error(response);
+                }
+            }
+            catch (error) {
+                console.error('An error occured', error);
+                setIsError(true);
+            }
+            updateAccordions(draft => {
+                const accordion = draft.find(a => a.id === accordionId);
+                const accordionItem = accordion.items.find(i => i.id === itemId);
+                const workout = accordionItem.workouts.find(w => w.id === workoutId);
                 // check if it's from a wrongForm card
                 if (wrongFormId != null) {
                     const wrongForm = workout.wrongForm.find(w => w.id === wrongFormId);
@@ -234,8 +251,8 @@ function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout
                     const correctForm = workout.correctForm.find(w => w.id === correctFormId);
                     correctForm.demo = reader.result;
                 }
-
             })
+
         };
 
         if (file) {
@@ -243,6 +260,8 @@ function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout
         }
     }
 
+    // TODO FINISH UP HANDLE DELETE CARD AND HANDLE CHANGE DESRIPTION...
+    //  change your background image in Index with 
     function handleDeleteCard(workoutId, wrongFormId, correctFormId) {
         updateWorkouts(draft => {
             const workout = draft.find(w => w.id === workoutId);
@@ -279,27 +298,53 @@ function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout
     }
 
     //handles the addition of correctForm and wrongForm cards in their respective dialogs.
-    function handleAddCard(formDialog, workoutId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
+    async function handleAddCard(formDialog, workoutId) {
+        setIsError(false);
+        const formData = new FormData();
+        let response;
+        // append also a default example image
+        fetch(demoGif2)
+            .then(res => res.blob())
+            .then(async (blob) => {
 
-            // we check if this came from WrongFormDialog 
-            if (formDialog === 'wrongForm') {
-                workout.wrongForm.push({
-                    id: nextWrongFormId++,
-                    ...wrongForm
+                const file = new File([blob], "chinUp.gif", {
+                    type: 'image/png'
+                });
+                formData.append('demo', file);
+                if (formDialog === 'wrongForm') {
+                    formData.append('description', "Wrong exercise form description: e.g., Shoulder blades not retracting")
+                    response = await createWrongExerciseForm(workoutId, formData)
+                } else {
+                    formData.append('description', "Correct exercise form description: e.g., Shoulder blades are depressed downwards")
+                    response = await createCorrectExerciseForm(workoutId, formData);
+                }
+
+
+                if (response.statusCode >= 400) {
+                    throw new Error(workout);
+                }
+                return response;
+            })
+            .then(response => {
+                updateAccordions(draft => {
+                    const accordion = draft.find(a => a.id === accordionId);
+                    const accordionItem = accordion.items.find(i => i.id === itemId);
+                    const workout = accordionItem.workouts.find(w => w.id === workoutId);
+
+                    // we check if this came from WrongformDialog
+                    if (formDialog === 'wrongForm') {
+                        workout.wrongForm.push(response);
+                        // if not, its from CorrectFormDialog
+                    } else {
+                        workout.correctForm.push(response);
+                    }
                 })
-                // if not, its from CorrectFormDialog
-            } else {
-                workout.correctForm.push({
-                    id: nextCorrectFormId++,
-                    ...correctForm
-                })
+            })
+            .catch(err => {
+                console.error(`An error occured`, err);
+                setIsError(true);
+            })
 
-            }
-
-
-        })
     }
 
 
@@ -369,15 +414,12 @@ function WorkoutMediaCard({ onChangeImage, onChangeDescription, onClick, workout
     );
 }
 
-
-export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange, accordionId, accordionItem, children }) {
-    const {setIsError, isError, actionData} = error;
-    const [accordions, updateAccordions] = immerAtom; // lol this is just a prop from the parent component (AccordionSection) 
+// Event handlers in RepsonsiveDialog don't use the Submit hook anymore (because I am lazy about refactoring the logic, and it's added complexity to revise and use the Effect hook for it) to send it to our action server. Instead, it just now calls the function that makes the HTTP request inside the event handler.
+export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+    const [isError, setIsError] = React.useState(false);
+    const [, updateAccordions] = immerAtom; // lol this is just a prop from the parent component (AccordionSection) 
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
-    // const [workouts, updateWorkouts] = useImmerAtom(workoutsAtom);
-    const accordionIndex = accordions?.findIndex(a => a.id === accordionId);
-    const accordionItemIndex = accordions[accordionIndex]?.items.findIndex(i => i.id === itemId);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
     const [heading, setHeading] = React.useState('');
@@ -394,7 +436,7 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
             setIsError(true);
         }
     }, [actionData])
-    
+
     React.useEffect(() => {
         if (isEditing) {
 
@@ -427,7 +469,7 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
             }
 
         }
-    }, [ heading, lecture, description]);
+    }, [heading, lecture, description]);
 
 
 
@@ -452,9 +494,10 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
                 setIsError(true);
             }
             updateAccordions(draft => {
-                const accordionItem = draft[accordionIndex].items[accordionItemIndex]
-                const workout = accordionItem.workout.find(w => w.id === workoutId);
-                workout.demo = e.reader.result;
+                const accordion = draft.find(a => a.id === accordionId);
+                const accordionItem = accordion.items.find(i => i.id === itemId);
+                const workout = accordionItem.workouts.find(w => w.id === workoutId);
+                workout.demo = reader.result;
             })
         };
 
@@ -465,9 +508,11 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
 
     function handleChangeWorkoutDescription(e, workoutId) {
 
+        // The HTTP request for this event handler is in the workoutMediaCard's useEffect hook because of its dependency and debounce logic.
         updateAccordions(draft => {
-            const accordionItem = draft[accordionIndex].items[accordionItemIndex]
-            const workout = accordionItem.workout.find(w => w.id === workoutId);
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            const workout = accordionItem.workouts.find(w => w.id === workoutId);
             workout.exercise = e.target.value;
         })
 
@@ -495,21 +540,17 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
             .then(workout => {
                 updateAccordions(draft => {
                     const accordion = draft.find(a => a.id === accordionId);
-                    const accordionItem = accordion.items.find(item => item.id === itemId); 
-                    accordionItem.workouts.push({                                                
-                            id: workout.id,
-                            exercise: "Your Description here",
-                            demo: demoGif,
-                            correctForm: [
-                                {
-                                ...correctForm
-                                }
-                            ],
-                            wrongForm: [
-                                {
-                                ...wrongForm
-                                }
-                            ]
+                    const accordionItem = accordion.items.find(item => item.id === itemId);
+                    accordionItem.workouts.push({
+                        id: workout.id,
+                        exercise: "Your Description here",
+                        demo: demoGif,
+                        correctForm: [
+
+                        ],
+                        wrongForm: [
+
+                        ]
                     })
                 })
             })
@@ -521,11 +562,19 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
     }
 
 
-    function handleDeleteWorkoutCard(workoutId) {
+    async function handleDeleteWorkoutCard(workoutId) {
+        try {
+            const workout = await deleteWorkout(workoutId);
+            if (workout.statusCode >= 400) {
+                throw new Error(workout);
+            }
+        } catch (error) {
+            console.error(error);
+        }
         updateAccordions(draft => {
-            const accordionItem = draft[accordionIndex].items[accordionItemIndex];
-            const workout = accordionItem.workouts.filter(w => w.id === workoutId);
-            return workout
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            accordionItem.workouts = accordionItem.workouts.filter(w => w.id !== workoutId);
         })
     }
 
@@ -630,10 +679,7 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
                                                 // Renders Workout instance
                                                 <Grid key={workout.id} item sm={6}>
                                                     {/* Provider will provide context in which WorkoutMediaCard, can access an independent atom that it can be use */}
-                                                    <Provider>
-                                                        <WorkoutMediaCard onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
-                                                    </Provider>
-
+                                                    <WorkoutMediaCard ids={{ accordionId, itemId }} immerAtom={immerAtom} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
                                                 </Grid>
                                             ))}
                                             <Grid item sm={6}>
@@ -651,7 +697,7 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
                                     </>
                                     :
                                     <Grid justifyContent={{ xs: 'center' }} item container>
-                                        <YoutubeInput setIsError={setIsError} isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} />
+                                        <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} />
                                         <Grid item width={'81%'}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
@@ -672,7 +718,7 @@ export function ResponsiveDialog({ error , immerAtom, itemId, onClick, onChange,
                                             </ThemeProvider>
                                         </Grid>
                                         <Grid item xs={10} mt={4}>
-                                            <DescriptionInput setIsError={setIsError} isError={isError} actionData={actionData} description={description} onChange={setDescription} />
+                                            <DescriptionInput isError={isError} actionData={actionData} description={description} onChange={setDescription} />
                                         </Grid>
                                     </Grid>
                             }
@@ -699,7 +745,6 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
     // actionData will be pass to this component's childrens. because we are using fetcher here but for components up they don't
-    const [isError, setIsError] = useAtom(isErrorAtom);
     const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
 
     React.useEffect(() => {
@@ -757,6 +802,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
 
     function handleEditAccordionItem(nextAccordionItem, accordionId) {
         // edits an accordion item's heading / content (sectionItem)
+
         const data = {
             heading: nextAccordionItem.heading,
             description: nextAccordionItem.description, activeStep: activeStep, sectionItemId: nextAccordionItem.id,
@@ -819,9 +865,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     return (
         <>
             {/* Adds a new Accordion / Section  */}
-            <Provider>
-                <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
-            </Provider>
+            <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
             <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
                 <ThemeProvider theme={theme}>
                     <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
@@ -832,8 +876,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            
-                            <AccordionSection actionData={actionData} itemActions={{handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem}} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
+                            <AccordionSection actionData={actionData} itemActions={{ handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem }} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
                         </Collapse>
 
                     ))
@@ -1324,7 +1367,8 @@ export default function CreateCourse() {
 
 let nextAccordionId = 1;
 let nextItemId = 2;
-
+let nextCorrectFormId = 0;
+let nextWrongFormId = 0;
 
 // const workouts2 = {
 //     intesity: "H",

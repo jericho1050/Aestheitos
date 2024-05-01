@@ -8,7 +8,7 @@ import { isErrorAtom } from "../atoms/isErrorAtom";
 const headingDefault = 'Add an accordion, e.g., Phase 1'
 export default function AddAccordion({ actionData, onClick }) {
     // This component represents the input field for adding a section / accordion
-    const [isError, setIsError] = useAtom(isErrorAtom);
+    const [isError, setIsError] = useState(false);
     const [buttonClicked, setButtonClicked] = useState(false);
     const [heading, setHeading] = useState(headingDefault);
 
@@ -18,7 +18,7 @@ export default function AddAccordion({ actionData, onClick }) {
             setIsError(true);
             setButtonClicked(false);
         }
-    }, [actionData, buttonClicked])
+    }, [actionData])
 
     return (
         <Box component="div" mb={4}>

@@ -30,7 +30,7 @@ function WorkoutMediaWrongFormCard({ onChangeImage, onClick, onChange, wrongForm
         <Card data-cy="Wrong Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid red' }}>
             <CardMedia
                 component="img"
-                sx={{ aspectRatio: 16 / 9, }}
+                sx={{ aspectRatio: 16 / 9, width: {xs: 350, sm: 'auto'} }}
                 src={wrongForm.demo}
                 alt="workout demo"
             />
@@ -99,7 +99,7 @@ export default function WrongFormDialog({ handleImageUpload, handleDeleteCard, h
                 maxWidth={'md'}
             >
                 <Grid container >
-                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
+                    <Grid item container justifyContent={'flex-start'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
                         <DialogTitle id="responsive-dialog-title">
                             {"Wrong Exercise Form"}
                         </DialogTitle>
@@ -108,7 +108,7 @@ export default function WrongFormDialog({ handleImageUpload, handleDeleteCard, h
                         <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
 
                             {
-                                wrongFormExercises.map(exercise => {
+                                wrongFormExercises?.map(exercise => {
 
                                     return (
                                         <Grid key={exercise.id} item sm={6}>

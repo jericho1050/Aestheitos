@@ -1,4 +1,5 @@
 import { atom } from "jotai";
+import demoGif from "../static/images/chinupVecs.gif";
 
 
 
@@ -12,7 +13,7 @@ const sectionItem1 = {
     heading: "Your own item header here: e.g., ReadMe or Lecture",
     workouts: [
         {
-            demo: '',
+            demo: demoGif,
             exercise: '',
             correctForm : [],
             wrongForm: []
@@ -25,7 +26,7 @@ const sectionItem2 = {
     heading: "Workout Routine",
     workouts: [
         {
-            demo: '',
+            demo: demoGif,
             exercise: '',
             correctForm : [],
             wrongForm: []

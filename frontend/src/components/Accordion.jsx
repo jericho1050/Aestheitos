@@ -17,7 +17,7 @@ export default function AccordionSection({ actionData, itemActions, onClickDelet
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()
     const [heading, setHeading] = useState(accordion.heading);
-    const [isError, setIsError] = useAtom(isErrorAtom);
+    const [isError, setIsError] = useState(false);
     const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
 
     useEffect(() => {
@@ -88,19 +88,18 @@ export default function AccordionSection({ actionData, itemActions, onClickDelet
                 {accordionHeadingContent}
             </AccordionSummary>
             <AccordionDetails >
-                <Provider>
                     <AddAccordionItem actionData={actionData} onClick={onClickAddItem} accordionId={accordion.id} />
-                </Provider>
             </AccordionDetails>
             <ul ref={parent}>
                 {accordion.items ? accordion.items.map((item) => (
 
                     <AccordionDetails
-                        sx={{ paddingLeft: '2%' }}>
-                        <Provider>
+                        sx={{ paddingLeft: '2%' }}
+                        key={item.id}
+
+                        >
                             <ResponsiveDialog
-                                 key={item.id}
-                                error={{setIsError, isError, actionData}}
+                                actionData={actionData}
                                 immerAtom={[accordions, updateAccordions]}
                                 itemId={item.id}
                                 onClick={onClickDeleteItem}
@@ -111,7 +110,6 @@ export default function AccordionSection({ actionData, itemActions, onClickDelet
                                 {item.heading}
 
                             </ResponsiveDialog>
-                        </Provider>
                     </AccordionDetails>
                 )) :
                     null

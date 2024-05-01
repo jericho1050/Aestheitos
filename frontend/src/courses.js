@@ -33,7 +33,10 @@ async function sendRequest(url, options) {
     if (options.method !== 'DELETE') {
       const data = await response.json();
       return data;
+    } else {
+      return response;
     }
+
   } catch (err) {
     console.error('An error occured', err);
     return err;
@@ -150,4 +153,37 @@ export async function updateWorkout(id, formData){
       method: 'PATCH',
       body: formData
     })
+}
+
+export async function deleteWorkout(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}workout/${id}/section-item`, {
+    method: 'DELETE',
+  })
+}
+
+export async function createCorrectExerciseForm(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercises/course/workout/${id}`, {
+    method: 'POST',
+    body: formData
+  })
+}
+export async function updateCorrectExerciseForm(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercise/${id}/course/workout`, {
+    method: 'PATCH',
+    body: formData
+  })
+}
+
+export async function createWrongExerciseForm(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercises/course/workout/${id}`, {
+    method: 'POST',
+    body: formData
+  })
+}
+
+export async function updateWrongExerciseForm(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercise/${id}/course/workout`, {
+    method: 'PATCH',
+    body: formData
+  })
 }

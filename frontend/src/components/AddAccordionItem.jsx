@@ -17,7 +17,7 @@ export default function AddAccordionItem({ actionData, accordionId, onClick }) {
     // This component represents the input field for adding a section / accordion
 
     const [heading, setHeading] = useState(headingDefault);
-    const [isError, setIsError] = useAtom(isErrorAtom);
+    const [isError, setIsError] = useState(false);
     const [buttonClicked, setButtonClicked] = useState(false);
 
     useEffect(() => {
@@ -26,7 +26,7 @@ export default function AddAccordionItem({ actionData, accordionId, onClick }) {
             setIsError(true);
             setButtonClicked(false);
         }
-    }, [actionData, buttonClicked])
+    }, [actionData])
 
     return (
         <Box pl={4} mr={0} component="div" mb={4}>
