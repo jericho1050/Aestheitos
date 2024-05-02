@@ -13,7 +13,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useNavigate, Link } from 'react-router-dom';
-import { AuthDispatchContext } from '../helper/authContext';
+import { AuthDispatchContext } from '../contexts/authContext';
 // import axios from 'axios';
 
 

@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
@@ -90,6 +90,12 @@ class LogoutView(APIView):
     """
 
     def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         response = Response()
         response.delete_cookie("access")
         response.delete_cookie("refresh")
@@ -187,7 +193,7 @@ class SectionList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = SectionSerializer
 
     def get_queryset(self):
-        return Section.objects.filter(course=self.kwargs["pk"])
+        return Section.objects.filter(course_content=self.kwargs["pk"])
 
 
 class SectionDetail(

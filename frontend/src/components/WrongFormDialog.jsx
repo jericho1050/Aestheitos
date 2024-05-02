@@ -10,7 +10,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import DeleteIcon from '@mui/icons-material/Delete';
-import InputFileUpload from "../components/InputFileUpload";
+import InputFileUpload from "./InputFileUpload";
 
 
 let theme = createTheme()
@@ -21,22 +21,36 @@ const wrongForm2 = {
     description: "scapula not moving"
 }
 
-function WorkoutMediaWrongFormCard({ onChangeImage, onClick, onChange, wrongForm, workoutId, open }) {
+function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChange, wrongForm, workoutId, open }) {
+    const {isError, setIsError} = errorState;
+
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const [description, setDescription] = React.useState(wrongForm.description || '');
+    console.log(isError);
+    React.useEffect(() => {
+        const handler = setTimeout(() => {
+            onChange(description, 'wrongForm', workoutId, wrongForm.id);
+        }, 300);
+
+        return () => {
+            clearTimeout(handler);
+        }
+    }, [description])
 
     return (
         open &&
-        <Card data-cy="Wrong Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: '4px solid red' }}>
+        <Card data-cy="Wrong Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid red' }}>
             <CardMedia
                 component="img"
-                sx={{ aspectRatio: 16 / 9, }}
+                sx={{ aspectRatio: 16 / 9, width: { xs: 350, sm: 'auto' } }}
                 src={wrongForm.demo}
                 alt="workout demo"
             />
             <InputFileUpload wrongFormId={wrongForm.id} workoutId={workoutId} onChange={onChangeImage} name="demo" text="GIF File" />
+            {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
 
-            <CardContent sx={{ width: { xs: 320, sm: 'inherit', md: 320 } }}>
+            <CardContent>
                 <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                     {/* workout description textarea input */}
                     <TextField
@@ -50,10 +64,12 @@ function WorkoutMediaWrongFormCard({ onChangeImage, onClick, onChange, wrongForm
                         required
                         autoFocus
                         name="exercise"
-                        value={wrongForm.description}
+                        value={description}
                         onChange={e => {
-                            onChange(e, 'wrongForm', workoutId, wrongForm.id)
+                            setDescription(e.target.value);
+                            setIsError(false);
                         }}
+                        error={isError}
 
 
                     />
@@ -61,8 +77,8 @@ function WorkoutMediaWrongFormCard({ onChangeImage, onClick, onChange, wrongForm
             </CardContent>
             <CardActions sx={{ marginTop: 'auto' }}>
                 <Grid container justifyContent={'center'}>
-                    <Grid item>
-                        <Button onClick={() => onClick(workoutId, wrongForm.id, null)} startIcon={<DeleteIcon />}>
+                    <Grid item xs={12}>
+                        <Button fullWidth={true} onClick={() => onClick(workoutId, wrongForm.id, null)} startIcon={<DeleteIcon />}>
                             Delete
                         </Button>
                     </Grid>
@@ -75,20 +91,20 @@ function WorkoutMediaWrongFormCard({ onChangeImage, onClick, onChange, wrongForm
 }
 
 
-export default function WrongFormDialog({ handleImageUpload, handleDeleteCard, handleChangeDescription, onClick, workoutId, wrongFormExercises, open, setOpen }) {
+export default function WrongFormDialog({ errorState, eventHandlers, workoutId, wrongFormExercises, open, setOpen }) { 
+    const {handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard: onClick} = eventHandlers;
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const [parent, enableAnimations] = useAutoAnimate();
 
-
+    console.log(errorState)
 
     const handleClose = () => {
         setOpen(false);
     };
 
     return (
-        // TODO
-        //REPLCAE THE FIXED TEXT WITH AN TEXTAREA AND ADD A DELETE ICON
+
         <React.Fragment>
             <Dialog
                 fullScreen={fullScreen}
@@ -99,8 +115,8 @@ export default function WrongFormDialog({ handleImageUpload, handleDeleteCard, h
                 maxWidth={'md'}
             >
                 <Grid container >
-                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
-                        <DialogTitle id="responsive-dialog-title">
+                    <Grid item container justifyContent={'flex-start'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
+                        <DialogTitle id="responsive-dialog-title" sx={{color: 'red'}}>
                             {"Wrong Exercise Form"}
                         </DialogTitle>
                     </Grid>
@@ -108,11 +124,11 @@ export default function WrongFormDialog({ handleImageUpload, handleDeleteCard, h
                         <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
 
                             {
-                                wrongFormExercises.map(exercise => {
+                                wrongFormExercises?.map(exercise => {
 
                                     return (
                                         <Grid key={exercise.id} item sm={6}>
-                                            <WorkoutMediaWrongFormCard onChangeImage={handleImageUpload} onClick={handleDeleteCard} onChange={handleChangeDescription} workoutId={workoutId} wrongForm={exercise} open={open}> </WorkoutMediaWrongFormCard>
+                                            <WorkoutMediaWrongFormCard errorState={errorState} onChangeImage={handleImageUpload} onClick={handleDeleteCard} onChange={handleChangeDescription} workoutId={workoutId} wrongForm={exercise} open={open}> </WorkoutMediaWrongFormCard>
                                         </Grid>
                                     )
                                 })

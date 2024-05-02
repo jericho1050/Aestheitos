@@ -23,17 +23,19 @@ export default function CourseCard(props) {
             sx={{ aspectRatio: 16 / 9 }}
             src={props.thumbnail || defaultImage}
             alt="workout demo"
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src=defaultImage;
+          }}
           />
-
           <CardContent>
-            <Typography sx={{ height: 60, mb: {xs: 3, md: 5}}} align='justify' gutterBottom variant='h5'>
-              {truncateText(props.title, 10)} {/* Replace 2nd argument with the maximum number of words you want */}
+            <Typography sx={{ height: {xs: 'auto', md: 60}, mb: {xs: 2, md: 4,}}} align='justify' gutterBottom fontFamily={'Play'} fontSize={'1.2rem'} fontWeight={'bolder'}>
+              {truncateText(props.title, 9)} {/* Replace 2nd argument with the maximum number of words you want */}
             </Typography>
 
-            <Typography sx={{ height: 40}} variant='body2' color={"text.secondary"}>
+            <Typography sx={{ height: 40, mb: {xs: 1, md: 2} }} variant='body2' color={"text.secondary"}>
               Description: {truncateText(props.description, 10)}
             </Typography>
-
 
           </CardContent>
           <Box sx={{ marginLeft: 2, marginRight: 2}} component={'div'}>

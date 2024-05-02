@@ -51,12 +51,12 @@ class Login_LogoutAPITestCase(APITestCase):
         response1 = client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         response2 = client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "wrongpass"},
-            format="json",
+            
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -67,7 +67,7 @@ class Login_LogoutAPITestCase(APITestCase):
         response = client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -96,7 +96,7 @@ class CourseListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         token = response.json()
         self.authenticated_client.force_authenticate(
@@ -230,7 +230,7 @@ class CourseDetailAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         token = response.json()
 
@@ -264,7 +264,7 @@ class CourseDetailAPITestCase(APITestCase):
                 "difficulty": "AD",
                 "weeks": 1
             },
-            format="json",
+            
         )
         # test update instance with an authenticated client and invalid fields
         response_2 = self.authenticated_client.put(
@@ -275,7 +275,7 @@ class CourseDetailAPITestCase(APITestCase):
                 "difficulty": "abc",
                 "weeks": 2
             },
-            format="json",
+            
         )
         # test update instance with an invalid course id
         response_3 = self.authenticated_client.put(
@@ -287,7 +287,7 @@ class CourseDetailAPITestCase(APITestCase):
                 "weeks": 2
 
             },
-            format="json",
+            
         )
 
         # test update course with an authenticated client
@@ -300,7 +300,7 @@ class CourseDetailAPITestCase(APITestCase):
                 "weeks": 2
 
             },
-            format="json",
+            
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -387,7 +387,7 @@ class CourseContentDetailAPITestCase(APITestCase):
                 "preview": "https://www.youtube.com",
                 "overview": "testing post method",
             },
-            format="json",
+            
         )
         # test create content with an unauthenticated client
         response_2 = self.unauthenticated_client.post(
@@ -396,7 +396,7 @@ class CourseContentDetailAPITestCase(APITestCase):
                 "preview": "https://www.youtube.com",
                 "overview": "testing post method",
             },
-            format="json",
+            
         )
 
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
@@ -412,7 +412,7 @@ class CourseContentDetailAPITestCase(APITestCase):
                 "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
             },
-            format="json",
+            
         )
 
         # test update instance with an unanthenticated client
@@ -422,7 +422,7 @@ class CourseContentDetailAPITestCase(APITestCase):
                 "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
             },
-            format="json",
+            
         )
 
         # test update CourseContent instance that doesn't exist
@@ -432,7 +432,7 @@ class CourseContentDetailAPITestCase(APITestCase):
                 "preview": "https://www.youtube.com",
                 "overview": "testing Put method brah",
             },
-            format="json",
+            
         )
 
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
@@ -447,7 +447,13 @@ class WorkoutListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.course = Course.objects.create(title="Test Course", created_by=self.user,             weeks=18,
 )
-        self.section = Section.objects.create(course=self.course, heading="testing")
+        
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(course_content=self.course_content, heading="testing")
         self.section_item = SectionItem.objects.create(
             section=self.section, description="go to this and that and that "
         )
@@ -467,7 +473,7 @@ class WorkoutListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         token = response.json()
 
@@ -590,9 +596,14 @@ class WorkoutDetailAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
 
         self.course = Course.objects.create(title="Test Course", created_by=self.user,             weeks=18,
-)
+)        
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
         self.section = Section.objects.create(
-            heading="Testing section", course=self.course
+            heading="Testing section", course_content=self.course_content
         )
         self.section_item = SectionItem.objects.create(
             section=self.section, lecture="https://www.youtube.com"
@@ -612,7 +623,7 @@ class WorkoutDetailAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         token = response.json()
 
@@ -766,12 +777,12 @@ class CourseCommentListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "secret"},
-            format="json",
+            
         )
 
         token = response.json()
@@ -792,7 +803,7 @@ class CourseCommentListAPITestCase(APITestCase):
         self.authenticated_client.post(
             reverse("learn:course-comments", args=[1]),
             {"comment": "testing for retrieval"},
-            format="json",
+            
         )
 
         client = APIClient(enforce_csrf_checks=True)
@@ -820,27 +831,27 @@ class CourseCommentListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:course-comments", args=[1]),
             {"comment": "testing authenticated client to comment"},
-            format="json",
+            
         )
         # test create comment with an unauthenticated client
         response_2 = self.unathenticated_client.post(
             reverse("learn:course-comments", args=[1]),
             {"comment": "testing unauthenticated client to comment"},
-            format="json",
+            
         )
 
         # test create comment with an invalid key or field
         response_3 = self.authenticated_client.post(
             reverse("learn:course-comments", args=[1]),
             {"wrongField": "testing authenticated client to comment"},
-            format="json",
+            
         )
 
         # test create comment with an authenticated client 2 and have it reply to authenticated client 1's comment
         response_4 = self.authenticated_client_2.post(
             reverse("learn:course-comments", args=[1]),
             {"comment": "testing authenticated client to comment", "parent_comment": 1},
-            format="json",
+            
         )
 
         # test create comment with an empty field / data
@@ -880,12 +891,12 @@ class CourseCommentDetailAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "secret"},
-            format="json",
+            
         )
 
         token = response.json()
@@ -928,14 +939,14 @@ class CourseCommentDetailAPITestCase(APITestCase):
         response = self.authenticated_client.put(
             reverse("learn:course-comment", args=[1]),
             {"comment": "modified"},
-            format="json",
+            
         )
 
         # test update instance with an authenticated user's own comment and change comment by
         response_2 = self.authenticated_client.put(
             reverse("learn:course-comment", args=[1]),
             {"comment": "modified comment_by", "comment_by": 2},
-            format="json",
+            
         )
 
         # test update instance that doesn't exist
@@ -952,14 +963,14 @@ class CourseCommentDetailAPITestCase(APITestCase):
         response_5 = self.authenticated_client_2.put(
             reverse("learn:course-comment", args=[1]),
             {"comment": "modifiying"},
-            format="json",
+            
         )
 
         # test update instance with unathenticated client != comment_by
         response_6 = self.unauthenticated_client.put(
             reverse("learn:course-comment", args=[1]),
             {"comment": "modifiying"},
-            format="json",
+            
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1013,7 +1024,13 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
 )
-        section = Section.objects.create(heading="week 5", course=course)
+        
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=course,
+        )
+        section = Section.objects.create(heading="week 5", course_content=self.course_content)
         section_item = SectionItem.objects.create(
             section=section, lecture="https://www.youtube.com"
         )
@@ -1040,12 +1057,12 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "secret"},
-            format="json",
+            
         )
 
         token = response.json()
@@ -1153,8 +1170,13 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
 )
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=course,
+        )
         section = Section.objects.create(
-            course=course, heading="idk just section testing"
+            course_content=self.course_content, heading="idk just section testing"
         )
         section_item = SectionItem.objects.create(
             section=section, description="nothing just go on after this set go on"
@@ -1182,12 +1204,12 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "secret"},
-            format="json",
+            
         )
 
         token = response.json()
@@ -1332,8 +1354,13 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         self.user = User.objects.create_user(username="testuser", password="secret")
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
-)
-        section = Section.objects.create(course=course, heading="WEEK 4")
+)       
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=course,
+        )
+        section = Section.objects.create(course_content=self.course_content, heading="WEEK 4")
         section_item = SectionItem.objects.create(
             section=section, description="GO ON GO GO GO GO GO"
         )
@@ -1360,12 +1387,12 @@ class WrongExerciseFormListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "secret"},
-            format="json",
+            
         )
 
         token = response.json()
@@ -1473,7 +1500,12 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         self.user_2 = User.objects.create_user(username="testuser2", password="secret")
         course = Course.objects.create(title="test", created_by=self.user,             weeks=18,
 )
-        section = Section.objects.create(heading="week 60", course=course)
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=course,
+        )
+        section = Section.objects.create(heading="week 60", course_content=self.course_content)
         section_item = SectionItem.objects.create(
             section=section, lecture="https://www.youtube.com/watchme"
         )
@@ -1500,12 +1532,12 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "secret"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "secret"},
-            format="json",
+            
         )
 
         token = response.json()

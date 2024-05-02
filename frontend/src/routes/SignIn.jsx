@@ -11,7 +11,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useContext, useState } from 'react';
-import { AuthDispatchContext } from '../helper/authContext';
+import { AuthDispatchContext } from '../contexts/authContext';
 import { useNavigate, Link } from 'react-router-dom';
 
 

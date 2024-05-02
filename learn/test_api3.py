@@ -24,9 +24,15 @@ class SectionListAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
-        self.section = Section.objects.create(heading="test week 5", course=self.course)
+
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(heading="test week 5", course_content=self.course_content)
         self.section_2 = Section.objects.create(
-            heading="test week 6", course=self.course
+            heading="test week 6", course_content=self.course_content
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -36,12 +42,12 @@ class SectionListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "123"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "123"},
-            format="json",
+            
         )
         token = response.json()
         token_2 = response_2.json()
@@ -79,7 +85,7 @@ class SectionListAPITestCase(APITestCase):
             {
                 "heading": "testing creation",
             },
-            format="json",
+            
         )
 
         # test create section with an empty field
@@ -91,21 +97,21 @@ class SectionListAPITestCase(APITestCase):
         response_3 = self.authenticated_client_2.post(
             reverse("learn:course-section-list", args=[1]),
             {"heading": "not my own course"},
-            format="json",
+            
         )
 
         # test create section with an unauthenticated client
         response_4 = self.unauthenticated_client.post(
             reverse("learn:course-section-list", args=[1]),
             {"heading": "try adding section"},
-            format="json",
+            
         )
 
         # test create section with an authenticated client and a course that doesn't exist
         response_5 = self.authenticated_client.post(
             reverse("learn:course-section-list", args=[2]),
             {"heading": "testing no course"},
-            format="json",
+            
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -127,7 +133,12 @@ class SectionDetailAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
-        self.section = Section.objects.create(heading="test week 1", course=self.course)
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(heading="test week 1", course_content=self.course_content)
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
@@ -136,12 +147,12 @@ class SectionDetailAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "123"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "123"},
-            format="json",
+            
         )
         token = response.json()
         token_2 = response_2.json()
@@ -181,14 +192,14 @@ class SectionDetailAPITestCase(APITestCase):
         response = self.authenticated_client.put(
             reverse("learn:course-section-detail", args=[1]),
             {"heading": "testing new heading"},
-            format="json",
+            
         )
 
         # test update instance that doesn't exist with an auth client
         response_2 = self.authenticated_client.put(
             reverse("learn:course-section-detail", args=[6]),
             {"heading": "testing new heading"},
-            format="json",
+            
         )
 
         # test update instance with an empty field and authenticated client
@@ -205,7 +216,7 @@ class SectionDetailAPITestCase(APITestCase):
         response_5 = self.unauthenticated_client.put(
             reverse("learn:course-section-detail", args=[1]),
             {"heading": "nothing"},
-            format="json",
+            
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -262,7 +273,12 @@ class SectionItemListAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
-        self.section = Section.objects.create(heading="test week 5", course=self.course)
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
+        self.section = Section.objects.create(heading="test week 5", course_content=self.course_content)
         self.section_item = SectionItem.objects.create(
             section=self.section,
             description="testing just testing just testing",
@@ -283,12 +299,12 @@ class SectionItemListAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "123"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "123"},
-            format="json",
+            
         )
         token = response.json()
         token_2 = response_2.json()
@@ -334,7 +350,7 @@ class SectionItemListAPITestCase(APITestCase):
                 "description": "go move here",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         # test create section item with an authenticated client and section that doesn't exist
@@ -345,7 +361,7 @@ class SectionItemListAPITestCase(APITestCase):
                 "description": "noope",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         # test create section item with an authenticated client != course's created by
@@ -356,7 +372,7 @@ class SectionItemListAPITestCase(APITestCase):
                 "description": "lol",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         # test create section item with an empty field and auth client
@@ -370,7 +386,7 @@ class SectionItemListAPITestCase(APITestCase):
             {
                 "lecture": "https://youtube.com/stillokay",
             },
-            format="json",
+            
         )
 
         response_6 = self.unauthenticated_client.post(
@@ -380,7 +396,7 @@ class SectionItemListAPITestCase(APITestCase):
                 "description": "still error",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -403,8 +419,13 @@ class SectionItemDetailAPITestCase(APITestCase):
             created_by=self.user,
             weeks=18,
         )
+        self.course_content = CourseContent.objects.create(
+            preview="https://www.youtube.com/watch?v=eTJQOi_xlTo&t=102s",
+            overview="API TESTING",
+            course=self.course,
+        )
         self.section = Section.objects.create(
-            heading="test week 100", course=self.course
+            heading="test week 100", course_content=self.course_content
         )
         self.section_item = SectionItem.objects.create(
             section=self.section,
@@ -426,12 +447,12 @@ class SectionItemDetailAPITestCase(APITestCase):
         response = self.authenticated_client.post(
             reverse("learn:login"),
             {"username": "testuser", "password": "123"},
-            format="json",
+            
         )
         response_2 = self.authenticated_client_2.post(
             reverse("learn:login"),
             {"username": "testuser2", "password": "123"},
-            format="json",
+            
         )
         token = response.json()
         token_2 = response_2.json()
@@ -487,7 +508,7 @@ class SectionItemDetailAPITestCase(APITestCase):
                 "lecture": "https://youtube.com/calisthenics",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         # test update section item instance with authenticated  client
@@ -498,7 +519,7 @@ class SectionItemDetailAPITestCase(APITestCase):
                 "lecture": "https://instagram.com/video",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         # test update section item instance that doesn't exist with auth client
@@ -509,7 +530,7 @@ class SectionItemDetailAPITestCase(APITestCase):
                 "lecture": "https://youtube.com/calime",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         # test update section item instance wtih an empty field and auth client
@@ -525,14 +546,14 @@ class SectionItemDetailAPITestCase(APITestCase):
                 "lecture": "https://udemy.com/lolno",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         # test update section item instance with an empty field and auth client 2 -> forbidden anyway
         response_6 = self.authenticated_client_2.put(
             reverse("learn:section-item-detail", args=[1]),
             {"heading": "nothing just test heading for a section item"},
-            format="json",
+            
         )
 
         # test update section item instance with an unauthenticated client
@@ -543,7 +564,7 @@ class SectionItemDetailAPITestCase(APITestCase):
                 "lecture": "https://idk.com/anymore",
                 "heading": "nothing just test heading for a section item",
             },
-            format="json",
+            
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

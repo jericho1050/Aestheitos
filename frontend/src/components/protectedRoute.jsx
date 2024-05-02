@@ -1,7 +1,7 @@
 import {useEffect } from "react";
 import { Outlet, useNavigate, useNavigation, } from "react-router-dom";
-import { useAuthToken } from "./authContext";
-import validateJWTToken from "./verifySignature";
+import { useAuthToken } from "../contexts/authContext";
+import validateJWTToken from "../helper/verifySignature";
 
 
 export default function ProectedRoute() {

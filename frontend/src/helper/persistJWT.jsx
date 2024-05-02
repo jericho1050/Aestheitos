@@ -1,13 +1,13 @@
 import { useContext, useEffect } from "react";
 import validateJWTToken from "./verifySignature";
-import { useAuthToken } from "./authContext";
-import { SetIsLoadingContext } from "./IsLoadingContext";
+import { useAuthToken } from "../contexts/authContext";
+import { SetIsLoadingContext } from "../contexts/IsLoadingContext";
 
  
  // handle jwt in state  when user refreshes page.
   // for PRESERVATION OF STATE (because state doesn't survive a refresh of page)
 // token is initialized to null when page loads, so this will run after a refresh.
-export default function persistToken() {
+export default function persistJWT() {
   const setIsLoading = useContext(SetIsLoadingContext);
 
     const {dispatch} = useAuthToken();

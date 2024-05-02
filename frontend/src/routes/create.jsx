@@ -14,8 +14,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
-import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
-import WrongFormDialog from "../MUI-components/WrongFormDialog";
+import CorrectFormDialog from "../components/CorrectFormDialog";
+import WrongFormDialog from "../components/WrongFormDialog";
 import image from '../static/images/noimg.png'
 import { styled } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
@@ -25,17 +25,26 @@ import getEmbedUrl from '../helper/getEmbedUrl';
 import FormattedInputs from "../components/FormattedInput";
 import AddAccordion from "../components/AddAccordion";
 import InputFileUpload from "../components/InputFileUpload";
-import Section from "../components/Section";
+import AccordionSection from "../components/Accordion";
 import AddIcon from '@mui/icons-material/Add';
 import demoGif from "../static/images/chinupVecs.gif";
 import demoGif2 from '../static/images/pushupVecs.gif';
-import { Send, WidthWide } from "@mui/icons-material";
 import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import ProgressMobileStepper from "../MUI-components/ProgressMobileStepper";
-import { createCourse, createCourseContent, updateCourse } from "../courses";
+import ProgressMobileStepper from "../components/ProgressMobileStepper";
+import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
+import determineIntent from "../helper/determineIntent";
+import isUrl from "is-url";
+import { Provider, atom, useAtom } from "jotai";
+import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
+import { useImmerAtom } from "jotai-immer";
+import { accordionsAtom } from "../atoms/accordionsAtom";
+import { isErrorAtom } from "../atoms/isErrorAtom";
+import { correctForm, workoutsAtom, wrongForm } from "../atoms/workoutsAtom";
+import { workoutDescriptionAtom } from "../atoms/workoutDescriptionAtom";
+
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -43,48 +52,186 @@ theme = responsiveFontSizes(theme)
 
 export async function action({ request }) {
     let formData = await request.formData();
-    // const courseData = Object.fromEntries(formData);
-    let course;
-    if (parseInt(formData.get('activeStep')) === 0) {
-        formData.delete('activeStep');
-        course = await createCourse(formData);
-    } else {
-        let courseId = formData.get('courseId')
-        formData.delete('courseId');
-        formData.delete('activeStep');
-        course = await createCourseContent(courseId, formData);
-    }
+    let course, courseContent, section, sectionItem, workouts;
+    let sectionItems = []
     let error = {}
-    // console.log(`my course data ${courseData.title}`);
-    // console.log(`my course data ${courseData.name}`);
-    // console.log(`my course data ${courseData.price}`);
-    // console.log(`my course data ${courseData.difficulty}`);
-    // console.log(`my course data ${courseData.weeks}`);
-    // console.log(`my course data ${courseData.description}`);
-    if (course?.statusCode) {
-        if (course.statusCode >= 400) {
-            error = { ...course };
-            return error;
-        }
+    let intent = formData.get('intent');
+
+    switch (parseInt(formData.get('activeStep'))) {
+
+        case 0:
+            // create a course
+            if (intent === 'create') {
+                course = await createCourse(formData);
+            }
+            // update a course
+            if (intent === 'update') {
+                course = await updateCourse(formData.get('courseId'), formData);
+            }
+            // return error if there's an error
+            if (course?.statusCode) {
+                if (course.statusCode >= 400) {
+                    error = { ...course };
+                    return error;
+                }
+            }
+            break;
+        case 1:
+            // create a course's overview (course content)
+            let courseId = formData.get('courseId');
+            if (intent === 'create') {
+                courseContent = await createCourseContent(courseId, formData);
+            }
+            if (intent === 'update') {
+                courseContent = await updateCourseContent(courseId, formData);
+            }
+            if (courseContent?.statusCode) {
+                if (courseContent.statusCode >= 400) {
+                    error = { ...courseContent };
+                    return error;
+                }
+            }
+            break;
+        case 2:
+            // create a section / accordion (course's content)
+            let sectionId = formData.get('sectionId');
+            let sectionItemId = formData.get('sectionItemId');
+            switch (intent) {
+                case 'createAccordion':
+                    let courseContentId = formData.get('courseContentId')
+                    section = await createSection(courseContentId, formData);
+                    sectionItems = await getSectionItems(section.id);
+                    if (section?.statusCode) {
+                        if (section.statusCode >= 400) {
+                            error = { ...section };
+                            error.accordion = true;
+                            return error;
+                        }
+                    }
+                    break;
+                case 'updateAccordion':
+                    section = await updateSection(sectionId, formData);
+                    sectionItems = await getSectionItems(section.id);
+                    if (section?.statusCode) {
+                        if (section.statusCode >= 400) {
+                            error = { ...section };
+                            return error
+                        }
+                    }
+                    break;
+                case 'deleteAccordion':
+                    section = await deleteSection(sectionId);
+                    if (section?.statusCode) {
+                        if (section.statusCode >= 400) {
+                            error = { ...section };
+                            return error
+                        }
+                    }
+                    break;
+                case 'createAccordionItem':
+                    section = await getSection(sectionId);
+                    sectionItem = await createSectionItem(sectionId, formData);
+                    workouts = await getWorkouts(sectionItem.id);
+                    if (sectionItem?.statusCode) {
+                        if (sectionItem.statusCode >= 400) {
+                            error = { ...sectionItem };
+                            error.accordionItem = true;
+                            return error
+                        }
+                    }
+                    sectionItem.workouts = workouts;
+                    sectionItems.push(sectionItem);
+                    break;
+                case 'updateAccordionItem':
+                    section = await getSection(sectionId);
+                    sectionItem = await updateSectionItem(sectionItemId, formData);
+                    workouts = await getWorkouts(sectionItemId);
+                    if (sectionItem?.statusCode) {
+                        if (sectionItem.statusCode >= 400) {
+                            error = { ...sectionItem };
+                            return error
+                        }
+                    }
+                    sectionItem.workouts = workouts;
+                    sectionItems.push(sectionItem);
+                    break;
+                case 'deleteAccordionItem':
+                    sectionItem = await deleteSectionItem(sectionItemId);
+                    if (sectionItem?.statusCode) {
+                        if (sectionItem.statusCode >= 400) {
+                            error = { ...sectionItem };
+                            return error
+                        }
+                    }
+                    break;
+
+            }
+            section = {
+                ...section,
+                intent: intent,
+                items: sectionItems, // Items will contain only '1' if it's either creating or updating an accordion item; if not, then it has more than 1.
+                ...(section ? {} : { id: sectionId }) // adds an ID if we are deleting an accordion because the response will be empty for DELETE HTTP methods, i.e., 204 status code. And some of our logic depends on the section ID. so ActionData will only return an ID when an accordion is deleted.
+
+            }
     }
-    return { course };
+
+    return { course, courseContent, section }; // only one obj property will persist i.e one returns a value other's are undefined 
 }
 
-function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, onClick, workout, open }) {
+function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, onClick, workout, open }) {
+    const { accordionId, itemId } = ids;
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const [isError, setIsError] = React.useState(false);
+    const [, updateAccordions] = immerAtom
+    // The `workoutDescription` state variable is similar to `lecture` and `description` in ResponsiveDialog
+    // it's main purpose is for debouncing
+    const [workoutDescription, setWorkoutDescription] = React.useState(workout.exercise)
+    const isFirstRender = React.useRef(true); const initialWorkoutDescription = React.useRef(workoutDescription);
+    console.log(isError);
+    // Handles HTTP request for updating workout's description for this component
+    React.useEffect(() => {
+        if (isFirstRender.current || workoutDescription === initialWorkoutDescription.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        // debounce event handler
+        const handler = setTimeout(() => {
+            onChangeDescription(workoutDescription, workout.id);
+        }, 300)
+        return () => {
+            clearTimeout(handler);
+        }
+    }, [workoutDescription])
 
     function handleImageUpload(event, workoutId, wrongFormId, correctFormId) {
         // update image for wrongForm and correctForm exercise demo
         const file = event.target.files[0];
         const reader = new FileReader();
-
-        reader.onloadend = () => {
-            updateWorkouts(draft => {
-                const workout = draft.find(w => w.id === workoutId);
-
+        const formData = new FormData();
+        let response;
+        reader.onloadend = async () => {
+            formData.append('demo', file);
+            try {
+                if (wrongFormId != null) {
+                    response = await updateWrongExerciseForm(wrongFormId, formData);
+                } else {
+                    response = await updateCorrectExerciseForm(correctFormId, formData);
+                }
+                if (response.statusCode >= 400) {
+                    throw new Error(response);
+                }
+            }
+            catch (error) {
+                console.error('An error occured', error);
+                setIsError(true);
+            }
+            updateAccordions(draft => {
+                const accordion = draft.find(a => a.id === accordionId);
+                const accordionItem = accordion.items.find(i => i.id === itemId);
+                const workout = accordionItem.workouts.find(w => w.id === workoutId);
                 // check if it's from a wrongForm card
                 if (wrongFormId != null) {
                     const wrongForm = workout.wrongForm.find(w => w.id === wrongFormId);
@@ -94,8 +241,8 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
                     const correctForm = workout.correctForm.find(w => w.id === correctFormId);
                     correctForm.demo = reader.result;
                 }
-
             })
+
         };
 
         if (file) {
@@ -103,63 +250,122 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
         }
     }
 
-    function handleDeleteCard(workoutId, wrongFormId, correctFormId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
+    async function handleDeleteCard(workoutId, wrongFormId, correctFormId) {
+        let response;
+        try {
+            if (wrongFormId != null) {
+                response = await deleteWrongExerciseForm(wrongFormId);
+            } else {
+                response = await deleteCorrectExerciseForm(correctFormId);
+            }
 
-            // we check if this came from WorkoutMediaWrongFormCard
+            if (response.statusCode >= 400) {
+                throw new Error(response);
+            }
+        }
+        catch (error) {
+            console.error(error);
+            setIsError(true);
+        }
+        updateAccordions(draft => {
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            const workout = accordionItem.workouts.find(w => w.id === workoutId);
+
             if (wrongFormId != null) {
                 workout.wrongForm = workout.wrongForm.filter(w => w.id !== wrongFormId);
-
-                // if not, its from WorkoutMediaCorrectFormCard
             } else {
-                workout.correctForm = workout.correctForm.filter(w => w.id !== correctFormId)
+                workout.correctForm = workout.correctForm.filter(w => w.id !== correctFormId);
             }
         })
     }
 
     // handles the description change of correctFrom and wrongForm in their respective cards.
-    function handleChangeDescription(e, card, workoutId, wrongFormId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
+    async function handleChangeDescription(description, card, workoutId, id) {
+        let response;
+        try {
+            const formData = new FormData();
+            formData.append('description', description);
+            // if it comes from wrongFormMediaCard
+            if (card === 'wrongForm') {
+                response = await updateWrongExerciseForm(id, formData);
+                // if it comes from correctFormMediaCard
+            } else {
+                response = await updateCorrectExerciseForm(id, formData);
+            }
+            if (response.statusCode >= 400) {
+                throw new Error(response);
+            }
+        }
+        catch (error) {
+            console.error('An error occured', error);
+            setIsError(true);
+        }
+        updateAccordions(draft => {
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            const workout = accordionItem.workouts.find(w => w.id === workoutId);
 
             // we check if this came from WorkoutMediaWrongFormCard
             if (card === 'wrongForm') {
-                const wrongForm = workout.wrongForm.find(w => w.id === wrongFormId)
-                wrongForm.description = e.target.value
+                const wrongForm = workout.wrongForm.find(w => w.id === id);
+                wrongForm.description = description;
                 // if not, its from WorkoutMediaCorrectFormCard
             } else {
-                const correctForm = workout.correctForm.find(w => w.id === wrongFormId)
-                correctForm.description = e.target.value
+                const correctForm = workout.correctForm.find(w => w.id === id);
+                correctForm.description = description;
             }
-
-
 
         })
     }
 
     //handles the addition of correctForm and wrongForm cards in their respective dialogs.
     function handleAddCard(formDialog, workoutId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
+        const formData = new FormData();
+        let response;
+        // append also a default example image
+        fetch(demoGif2)
+            .then(res => res.blob())
+            .then(async (blob) => {
 
-            // we check if this came from WrongFormDialog 
-            if (formDialog === 'wrongForm') {
-                workout.wrongForm.push({
-                    id: nextWrongFormId++,
-                    ...wrongForm
+                const file = new File([blob], "chinUp.gif", {
+                    type: 'image/png'
+                });
+                formData.append('demo', file);
+                if (formDialog === 'wrongForm') {
+                    formData.append('description', "Wrong exercise form description: e.g., Shoulder blades not retracting")
+                    response = await createWrongExerciseForm(workoutId, formData)
+                } else {
+                    formData.append('description', "Correct exercise form description: e.g., Shoulder blades are depressed downwards")
+                    response = await createCorrectExerciseForm(workoutId, formData);
+                }
+
+
+                if (response.statusCode >= 400) {
+                    throw new Error(workout);
+                }
+                return response;
+            })
+            .then(response => {
+                updateAccordions(draft => {
+                    const accordion = draft.find(a => a.id === accordionId);
+                    const accordionItem = accordion.items.find(i => i.id === itemId);
+                    const workout = accordionItem.workouts.find(w => w.id === workoutId);
+
+                    // we check if this came from WrongformDialog
+                    if (formDialog === 'wrongForm') {
+                        workout.wrongForm.push(response);
+                        // if not, its from CorrectFormDialog
+                    } else {
+                        workout.correctForm.push(response);
+                    }
                 })
-                // if not, its from CorrectFormDialog
-            } else {
-                workout.correctForm.push({
-                    id: nextCorrectFormId++,
-                    ...correctForm
-                })
+            })
+            .catch(err => {
+                console.error(`An error occured`, err);
+                setIsError(true);
+            })
 
-            }
-
-
-        })
     }
 
 
@@ -175,7 +381,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
     return (
         open &&
         <>
-            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
+            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 725 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
@@ -183,6 +389,7 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
                     alt="workout demo"
                 />
                 <InputFileUpload workoutId={workout.id} onChange={onChangeImage} name="demo" text="GIF File" />
+                {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
                 <CardContent>
                     <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                         {/* workout description textarea input */}
@@ -197,10 +404,12 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
                             required={true}
                             autoFocus
                             name="exercise"
-                            value={workout.exercise}
+                            value={workoutDescription}
                             onChange={event => {
-                                onChangeDescription(event, workout.id);
+                                setWorkoutDescription(event.target.value);
+                                setIsError(false);
                             }}
+                            error={isError}
 
                         />
                     </Box>
@@ -209,14 +418,20 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <CorrectFormDialog handleImageUpload={handleImageUpload} handleDeleteCard={handleDeleteCard} handleChangeDescription={handleChangeDescription} onClick={handleAddCard} workoutId={workout.id} correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                            <CorrectFormDialog
+                                errorState={{ isError, setIsError }}
+                                eventHandlers={{ handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard }}
+                                workoutId={workout.id} correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <WrongFormDialog handleImageUpload={handleImageUpload} handleDeleteCard={handleDeleteCard} handleChangeDescription={handleChangeDescription} onClick={handleAddCard} workoutId={workout.id} wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
+                            <WrongFormDialog
+                                errorState={{ isError, setIsError }}
+                                eventHandlers={{ handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard }}
+                                workoutId={workout.id} wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
-                        <Grid item >
-                            <Button onClick={() => onClick(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
+                        <Grid item sm={8}>
+                            <Button fullWidth={true} onClick={() => onClick(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -225,16 +440,62 @@ function WorkoutMediaCard({ updateWorkouts, onChangeImage, onChangeDescription, 
     );
 }
 
-export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accordionItem, children }) {
+// Event handlers in RepsonsiveDialog don't use the Submit hook anymore (because I am lazy about refactoring the logic, and it's added complexity to revise and use the Effect hook for it) to send it to our action server. Instead, it just now calls the function that makes the HTTP request inside the event handler.
+export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+    const [isError, setIsError] = React.useState(false);
+    const [, updateAccordions] = immerAtom; // lol this is just a prop from the parent component (AccordionSection) 
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
-    const [workouts, updateWorkouts] = useImmer([initialWorkoutData]);
     const [parent, enableAnimations] = useAutoAnimate();
-    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true)
-
+    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
+    const [heading, setHeading] = React.useState('');
+    // The `lecture` and `description` state variable holds the *first* value of `accordionItem.lecture` for lecture and `accordItem.description` for description.
+    // Further changes to both `accordionItem` prop are ignored.
+    const [lecture, setLecture] = React.useState(accordionItem.lecture || '');
+    const [description, setDescription] = React.useState(accordionItem.description || '');
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
+
+    React.useEffect(() => {
+        if (actionData?.message) { // if there's a message from action server. then there's an error
+            setIsError(true);
+        }
+    }, [actionData])
+
+    React.useEffect(() => {
+        if (isEditing) {
+
+            // debounce event handler
+            const handler = setTimeout(() => {
+                onChange({
+                    ...accordionItem,
+                    heading: heading
+                }, accordionId);
+                setIsError(false);
+            }, 300);
+            return () => {
+                clearTimeout(handler);
+            }
+        }
+        if (!isWorkoutRoutine) {
+
+            // debounce event handler
+            const handler = setTimeout(() => {
+                onChange({
+                    ...accordionItem,
+                    description: description,
+                    lecture: lecture,
+                }, accordionId);
+                setIsError(false);
+
+            }, 300);
+            return () => {
+                clearTimeout(handler);
+            }
+
+        }
+    }, [heading, lecture, description]);
 
 
 
@@ -243,10 +504,25 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
         // update image for workout demo
         const file = event.target.files[0];
         const reader = new FileReader();
-
-        reader.onloadend = () => {
-            updateWorkouts(draft => {
-                const workout = draft.find(w => w.id === workoutId);
+        const formData = new FormData()
+        reader.onloadend = async () => {
+            try {
+                formData.append('demo', file);
+                const workoutRes = await updateWorkout(workoutId, formData);
+                // throw an error if !response.ok
+                if (workoutRes.statusCode >= 400) {
+                    throw new Error(workoutRes);
+                }
+                setIsError(false)
+            }
+            catch (err) {
+                console.error('An error occured', err);
+                setIsError(true);
+            }
+            updateAccordions(draft => {
+                const accordion = draft.find(a => a.id === accordionId);
+                const accordionItem = accordion.items.find(i => i.id === itemId);
+                const workout = accordionItem.workouts.find(w => w.id === workoutId);
                 workout.demo = reader.result;
             })
         };
@@ -256,55 +532,89 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
         }
     }
 
-    function handleChangeWorkoutDescription(e, workoutId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
-            workout.exercise = e.target.value;
+    async function handleChangeWorkoutDescription(workoutDescription, workoutId) {
 
+        const formData = new FormData();
+        formData.append('exercise', workoutDescription);
+        try {
+            const w = await updateWorkout(workoutId, formData);
+            if (w.statusCode >= 400) {
+                throw new Error(w);
+            }
+        }
+        catch (error) {
+            console.error('An Error Occured', error);
+        }
+        updateAccordions(draft => {
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            const workout = accordionItem.workouts.find(w => w.id === workoutId);
+            workout.exercise = workoutDescription;
         })
 
     }
 
     function handleAddWorkoutCard() {
-        updateWorkouts(draft => {
-            draft.push(
-                {
-                    id: nextWorkoutId++,
-                    exercise: "Your Description here",
-                    demo: demoGif,
-                    correctForm: [
+        setIsError(false);
+        const workoutFormData = new FormData();
+        workoutFormData.append('exercise', "Your description here");
+        // append also a default example image
+        fetch(demoGif)
+            .then(res => res.blob())
+            .then(async (blob) => {
 
-                    ],
-                    wrongForm: [
-
-                    ]
+                const file = new File([blob], "chinUp.gif", {
+                    type: 'image/png'
+                });
+                workoutFormData.append('demo', file);
+                const workout = await createWorkout(itemId, workoutFormData);
+                if (workout.statusCode >= 400) {
+                    throw new Error(workout);
                 }
-            )
+                return workout
+            })
+            .then(workout => {
+                updateAccordions(draft => {
+                    const accordion = draft.find(a => a.id === accordionId);
+                    const accordionItem = accordion.items.find(item => item.id === itemId);
+                    accordionItem.workouts.push({
+                        id: workout.id,
+                        exercise: "Your Description here",
+                        demo: demoGif,
+                        correctForm: [
 
-            const index = draft.length - 1;
+                        ],
+                        wrongForm: [
 
-            draft[index].correctForm.push(
-                {
-                    id: 0,
-                    ...correctForm
-
+                        ]
+                    })
                 })
+            })
+            .catch(err => {
+                console.error(`An error occured`, err);
+                setIsError(true);
+            })
 
-            draft[index].wrongForm.push(
-                {
-                    id: 0,
-                    ...wrongForm
-                })
+    }
 
+
+    async function handleDeleteWorkoutCard(workoutId) {
+        try {
+            const workout = await deleteWorkout(workoutId);
+            if (workout.statusCode >= 400) {
+                throw new Error(workout);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        updateAccordions(draft => {
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            accordionItem.workouts = accordionItem.workouts.filter(w => w.id !== workoutId);
         })
     }
 
-    function handleDeleteWorkoutCard(workoutId) {
-        updateWorkouts(draft => {
-            const index = draft.findIndex(w => w.id === workoutId)
-            draft.splice(index, 1);
-        })
-    }
+
 
     if (isEditing) {
         // show input form when edit btn is clicked
@@ -313,24 +623,23 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                 <Grid item xs={10} lg={11}>
                     {/* AccordtionDetail edit input form */}
                     <TextField
+                        error={isError}
                         data-cy={`Accordion item edit-${itemId}`}
                         id="standard-multiline-flexible"
                         label="Accordiong Item Heading"
                         multiline
                         maxRows={4}
                         variant="standard"
-                        value={accordionItem.heading}
+                        value={heading}
                         fullWidth
-                        onChange={e => onChange({
-                            ...accordionItem,
-                            heading: e.target.value
-                        },
-                            accordionId
-                        )}
+                        onChange={e => {
+                            setHeading(e.target.value);
+                        }
+                        }
                     />
                 </Grid>
                 <Grid item xs={2} lg={1}>
-                    <Button onClick={() => setIsEditing(false)}>
+                    <Button onClick={() => setIsEditing(false)} disabled={isError}>
                         Save
                     </Button>
                 </Grid>
@@ -356,7 +665,7 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                 </Grid>
                 <Grid item xs={2} lg={1}>
                     <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
-                    <Button onClick={() => onClick(accordionId, accordionItem.id)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
+                    <Button onClick={() => onClick(accordionId, itemId)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
                 </Grid>
             </>
         )
@@ -398,91 +707,56 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
                         <DialogContent>
                             {
                                 isWorkoutRoutine ?
-                                    <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                        {workouts.map(workout => (
-                                            // Renders Workout instance
-                                            <Grid key={workout.id} item sm={6}>
-                                                <WorkoutMediaCard updateWorkouts={updateWorkouts} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                    <>
+
+
+                                        <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+                                            {accordionItem.workouts?.map(workout => (
+                                                // Renders Workout instance
+                                                <Grid key={workout.id} item sm={6}>
+                                                    {/* Provider will provide context in which WorkoutMediaCard, can access an independent atom that it can be use */}
+                                                    <WorkoutMediaCard ids={{ accordionId, itemId }} immerAtom={immerAtom} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
+                                                </Grid>
+                                            ))}
+                                            <Grid item sm={6}>
+                                                {/* add WorkoutMediaCard / Workout button */}
+                                                <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard()} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                                    <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
+                                                </Button>
                                             </Grid>
-                                        ))}
-                                        <Grid item sm={6}>
-                                            {/* add WorkoutMediaCard / Workout button */}
-                                            <Button data-cy={`Add icon`} onClick={handleAddWorkoutCard} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
-                                                <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
-                                            </Button>
+                                            {/* {isError &&
+                                                <Grid item sm={6} alignSelf={'center'}>
+                                                    <Typography sx={{ color: 'red', textAlign: 'center', mb: 3, mt: 3 }}>Something Happend.Please try again</Typography>
+                                                </Grid>
+                                            } */}
                                         </Grid>
-                                    </Grid> :
-
+                                    </>
+                                    :
                                     <Grid justifyContent={{ xs: 'center' }} item container>
-                                        <Grid item mb={2}>
-                                            <ThemeProvider theme={theme}>
-                                                <Typography variant="h4">
-                                                    Your readme text here
-                                                </Typography>
-                                            </ThemeProvider>
-                                        </Grid>
-                                        <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
-                                            <TextField
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <YouTubeIcon />
-                                                        </InputAdornment>
-
-                                                    )
-                                                }}
-                                                fullWidth={true}
-                                                id="lecture-url"
-                                                label="e.g https://www.youtube.com/watch?v=SOMEID"
-                                                type="url"
-                                                name="lecture"
-                                                value={accordionItem.lecture}
-                                                onChange={e => {
-                                                    onChange({
-                                                        ...accordionItem,
-                                                        lecture: e.target.value
-                                                    },
-                                                        accordionId)
-                                                }}
-                                            />
-                                        </Box>
-                                        <Grid item>
+                                        <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} />
+                                        <Grid item width={'81%'}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowfullscreen></iframe>                                    </Box>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
                                                 :
-                                                <Box mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                     <Typography variant="body" align={'center'}>
                                                         Your video will show up here
                                                     </Typography>
                                                 </Box>
                                             }
                                         </Grid>
+                                        <Grid item mt={4}>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4">
+                                                    Your readme text here
+                                                </Typography>
+                                            </ThemeProvider>
+                                        </Grid>
                                         <Grid item xs={10} mt={4}>
-                                            <TextField
-                                                data-cy="lecture textfield"
-                                                helperText=" "
-                                                id="demo-helper-text-aligned-no-helper"
-                                                label="Your lecture's description or Readme Text"
-                                                fullWidth={true}
-                                                minRows={10}
-                                                maxRows={10}
-                                                multiline
-                                                required={true}
-                                                name="overview"
-                                                value={accordionItem.description}
-                                                onChange={e => {
-                                                    onChange({
-                                                        ...accordionItem,
-                                                        description: e.target.value
-                                                    },
-                                                        accordionId)
-                                                }}
-                                            />
+                                            <DescriptionInput isError={isError} actionData={actionData} description={description} onChange={setDescription} />
                                         </Grid>
                                     </Grid>
-
-
                             }
                         </DialogContent>
                     </Grid>
@@ -502,85 +776,147 @@ export function ResponsiveDialog({ itemId, onClick, onChange, accordionId, accor
 
 
 
-function ControlledAccordions() {
+function ControlledAccordions({ activeStep, courseContentId }) {
     const [expanded, setExpanded] = React.useState(false);
-    const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend)
+    const fetcher = useFetcher();
+    const actionData = fetcher.data; // returns the response from previous action 
+    // actionData will be pass to this component's childrens. because we are using fetcher here but for components up they don't
+    const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
+
+    React.useEffect(() => {
+        // initially the accordion's IDs is not up to date with the database server,
+        // so we continuously update our real 'IDs' and values of our state variables
+        // that's why we use a useEffect for this matter.
+
+        if (actionData?.section && actionData?.section?.intent) {
+            if (actionData.section.intent === 'createAccordion') {
+                const { intent, ...rest } = actionData.section;
+                updateAccordions(draft => {
+                    draft.push(rest)
+                })
+            }
+            else if (actionData.section.intent === 'updateAccordion') {
+                updateAccordions(draft => {
+                    const accordionIndex = draft.findIndex(accordion => accordion.id === actionData.section.id);
+                    const { intent, ...rest } = actionData.section;
+                    draft[accordionIndex] = rest;
+                })
+            }
+            else if (actionData.section.intent === 'createAccordionItem') {
+                updateAccordions(draft => {
+                    const accordion = draft.find(accordion => accordion.id === actionData.section.id);
+                    accordion.items.push(actionData.section.items[0]);
+                });
+            }
+            else if (actionData.section.intent === 'updateAccordionItem') {
+                updateAccordions(draft => {
+                    const accordion = draft.find(accordion => accordion.id === actionData.section.id);
+                    const accordionItemIndex = accordion.items.findIndex(item => item.id === actionData.section.items[0].id);
+                    const nextAccordionItem = actionData.section.items[0];
+                    accordion.items[accordionItemIndex] = nextAccordionItem;
+                });
+            }
+
+        }
+    }, [actionData])
+
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
 
-
     function handleAddAccordionItem(heading, accordionId) {
         // adds a new accordion item (sectionItem)
-        updateAccordions(draft => {
-            const accordion = draft.find(accordion => accordion.id === accordionId);
-            accordion.items.push({
-                id: nextItemId++,
-                heading: heading
-            });
-
+        fetcher.submit({
+            heading: heading, activeStep: activeStep, sectionId: accordionId,
+            intent: 'createAccordionItem'
+        }, {
+            method: 'post'
         })
+
     }
 
     function handleEditAccordionItem(nextAccordionItem, accordionId) {
         // edits an accordion item's heading / content (sectionItem)
-        updateAccordions(draft => {
-            const accordion = draft.find(accordion => accordion.id === accordionId);
-            const accordionItemIndex = accordion.items.findIndex(item => item.id === nextAccordionItem.id);
-            accordion.items[accordionItemIndex] = nextAccordionItem;
-        });
+
+        const data = {
+            heading: nextAccordionItem.heading,
+            description: nextAccordionItem.description, activeStep: activeStep, sectionItemId: nextAccordionItem.id,
+            sectionId: accordionId, intent: 'updateAccordionItem'
+        }
+
+        if (nextAccordionItem.lecture) {
+            data.lecture = nextAccordionItem.lecture;
+        } else {
+            data.lecture = '';
+
+        }
+
+
+
+        fetcher.submit(data, {
+            method: 'post'
+        })
+
     }
 
     function handleDeleteAccordionItem(accordionId, accordionItemId) {
+        // deletes accordion item
+        // imperatively submit the key/value pairs needed in action route
+        fetcher.submit({ activeStep: activeStep, sectionItemId: accordionItemId, intent: 'deleteAccordionItem' }, {
+            method: 'post',
+        })
         updateAccordions(draft => {
             const accordionIndex = draft.findIndex(accordion => accordion.id === accordionId)
             const accordionItemIndex = draft[accordionIndex].items.findIndex(a => a.id === accordionItemId); // find the item's index to remove
             draft[accordionIndex].items.splice(accordionItemIndex, 1)
         })
     }
-
     function handleAddAccordion(heading) {
         // adds  a new accordion  (section)
-        updateAccordions(draft => {
-            draft.push({
-                id: nextAccordionId++,
-                heading: heading,
-                items: [{
-                    id: nextItemId++,
-                    heading: sectionItem1.heading
-                }]
-            })
+        // imperatively submit the key/value pairs needed in action route
+
+        fetcher.submit({ heading: heading, activeStep: activeStep, courseContentId: courseContentId, intent: 'createAccordion' }, {
+            method: 'post',
         })
     }
 
     function handleEditAccordion(nextAccordion) {
         // edits accordion's heading
-        updateAccordions(draft => {
-            const accordionIndex = draft.findIndex(accordion => accordion.id === nextAccordion.id);
-            draft[accordionIndex] = nextAccordion;
+        // imperatively submit the key/value pairs needed in action route
+        fetcher.submit({ heading: nextAccordion.heading, activeStep: activeStep, sectionId: nextAccordion.id, intent: 'updateAccordion' }, {
+            method: 'post',
         })
+
     }
 
     function handleDeleteAccordion(accordionId) {
-        updateAccordions(draft => {
-            return draft.filter(a => a.id !== accordionId)
+        // deletes accordion
+        // imperatively submit the key/value pairs needed in action route
+        fetcher.submit({ activeStep: activeStep, sectionId: accordionId, intent: 'deleteAccordion' }, {
+            method: 'post',
         })
+        updateAccordions(draft => draft.filter(a => a.id !== accordionId));
     }
     return (
         <>
             {/* Adds a new Accordion / Section  */}
-            <AddAccordion onClick={handleAddAccordion} />
+            <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
+            <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
+                <ThemeProvider theme={theme}>
+                    <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
+                </ThemeProvider>
+            </Box>
             <TransitionGroup>
+
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <Section onClickDeleteItem={handleDeleteAccordionItem} onChangeItem={handleEditAccordionItem} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} handleAddAccordionItem={handleAddAccordionItem} />
+                            <AccordionSection actionData={actionData} eventHandlers={{ handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem }} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
                         </Collapse>
 
                     ))
                 }
-
             </TransitionGroup>
         </>
     );
@@ -592,44 +928,64 @@ export default function CreateCourse() {
     const [activeStep, setActiveStep] = React.useState(0);
     const [previewImage, setPreviewImage] = React.useState(null);
     const [course, setCourse] = React.useState({
+        id: 0,
         title: '',
         difficulty: '',
         description: '',
         thumbnail: image,
         price: 0,
         weeks: '',
+        isFirstView: true
 
     });
     const [courseContent, setCourseContent] = React.useState({
-        courseId: '',
+        id: 0,
         preview: '',
         overview: '',
+        isFirstView: true
 
     })
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
     const fetcher = useFetcher();
-    const actionData = fetcher.data; // returns the response from previous action 
-    const [isError, setIsError] = React.useState(false);
-    // const [status, setStatus] = React.useState('empty');
+    const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
+    const [isError, setIsError] = useAtom(isErrorAtom)
+    const [intent, setIntent] = React.useState('create');
+    // const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
 
-    // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
+
+
     React.useEffect(() => {
+        // continuously update real time 'IDs' of our state variables
         // !resonse.ok then there's a message
+        // optional chaining
         if (actionData?.message) {
             setIsError(true);
         }
-        // persist the courseId state so that we can use it to sent to our api (/course/courseId/course-content, note: this rest endpoint requires courseId)
-        else if (actionData?.course) {  // returned value of previous action.
+        // persist the IDs state so that we can use it to sent to our api (/course/courseId/course-content, note: this rest endpoint requires courseId)
+        else if (actionData?.course?.title && actionData?.course?.description && activeStep === 0) {  // returned value of previous action.
+            setCourse({
+                ...course,
+                id: actionData.course.id,
+                isFirstView: false
+            })
+            // im assuming this is somewhere 200 status code so we move on to the next step
+            const nextActiveStep = activeStep + 1;
+            setActiveStep(nextActiveStep); //  mew activeStep is queued for next rerender that's why we use a variable 'nextActiveStep'
+            // determineItent wether to update or create in which active step currently on and is first view for next render
+            setIntent(determineIntent(courseContent.isFirstView, nextActiveStep));
+        }
+        else if (actionData?.courseContent?.preview && actionData?.courseContent?.overview && activeStep === 1) {  // returned value of previous action.
             setCourseContent({
                 ...courseContent,
-                courseId: actionData.course.id
+                id: actionData.courseContent.id,
+                isFirstView: false
             })
-            // because im assuming this is somewhere 200 status code so we move on to the next step
+            // im assuming this is somewhere 200 status code so we move on to the next step
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setIntent('create');
         }
-
 
     }, [actionData])
 
@@ -656,9 +1012,6 @@ export default function CreateCourse() {
         if (checkFields()) {
             setIsError(false);
         }
-        //  else {
-        //     setStatus('typing')
-        // }
     }, [course, courseContent]);
 
     function handleImageUpload(event) {
@@ -682,21 +1035,7 @@ export default function CreateCourse() {
 
     }
 
-    // function handleSubmit() {
-    //     if (!isError && status === 'success') {
-    //         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    //         setStatus('empty');
-    //         //https://react.dev/learn/state-as-a-snapshot
-    //         //can't it's for the next render if we changed status to success in useEFFECT HOOK
-    //     }
-    // }
 
-    function handleCourseOverviewSubmit() {
-        // TODO
-    }
-    function handleCourseContentSubmit() {
-
-    }
 
     return (
         <>
@@ -705,14 +1044,15 @@ export default function CreateCourse() {
                 activeStep === 0 ? (
                     <fetcher.Form method="post" encType="multipart/form-data" noValidate >
                         <input type="hidden" value={activeStep} name="activeStep" />
+                        <input type="hidden" value={course.id} name="courseId" />
                         <Box sx={{ m: '3vw' }}>
                             <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
                             </Box>
                             <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
                                 {/* Paper starts here */}
                                 <Grid item xs md={'auto'}>
-                                    <Paper elevation={4} sx={{ height: { xs: 'auto', m: 700 } }}>
+                                    <Paper elevation={4} sx={{ height: { xs: 'auto', m: 700, } }}>
                                         <Grid item container justifyContent={'center'}>
                                             <Grid item>
                                                 <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
@@ -723,7 +1063,7 @@ export default function CreateCourse() {
                                         <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
                                             <Grid item>
                                                 {/* Uploading  image file button  here */}
-                                                <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" setIsError={setIsError} onChange={handleImageUpload} />
+                                                <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" onChange={handleImageUpload} />
                                             </Grid>
                                             <Grid item>
                                                 {isError &&
@@ -732,7 +1072,7 @@ export default function CreateCourse() {
                                                             {Object.entries(JSON.parse(actionData.message)).map(([key, value]) => (
                                                                 <Box key={key} component="div">
                                                                     <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left' }}>
-                                                                        {key}: {value[0]}
+                                                                        {key === 'difficulty' || key === 'price' || key === 'weeks' ? `${key}: ${value[0]}` : null}
                                                                     </Typography>
                                                                 </Box>
                                                             ))}
@@ -740,7 +1080,7 @@ export default function CreateCourse() {
                                                     )}
                                             </Grid>
                                             <Grid item>
-                                                <FormattedInputs setIsError={setIsError} error={isError} course={course} setCourse={setCourse} />
+                                                <FormattedInputs error={isError} course={course} setCourse={setCourse} />
                                             </Grid>
                                             <Grid item xs paddingBottom={4}>
                                                 {/* Select menu form */}
@@ -757,6 +1097,7 @@ export default function CreateCourse() {
                                                                 ...course,
                                                                 difficulty: e.target.value
                                                             });
+                                                            setIsError(false);
                                                         }}
                                                         inputProps={{ name: "difficulty" }}
                                                         autoWidth
@@ -805,7 +1146,18 @@ export default function CreateCourse() {
                                             <TextField
                                                 helperText=" "
                                                 id="demo-helper-text-aligned-no-helper"
-                                                label="Your Course's Title"
+                                                label={isError && actionData?.message ?
+
+                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                        if (key === 'title') {
+                                                            return `${key}: ${value}`;
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
+
+                                                    : "Your Course's Title"
+                                                }
                                                 fullWidth={true}
                                                 minRows={5}
                                                 maxRows={5}
@@ -831,7 +1183,18 @@ export default function CreateCourse() {
                                                 data-cy="Course Description"
                                                 helperText=" "
                                                 id="demo-helper-text-aligned-no-helper"
-                                                label="Your Course's Description"
+                                                label={isError && actionData?.message ?
+
+                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                        if (key === 'description') {
+                                                            return `${key}: ${value}`;
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
+
+                                                    : "Your Course's Description"
+                                                }
                                                 fullWidth={true}
                                                 minRows={isSmallScreen ? 10 : 20}
                                                 maxRows={isSmallScreen ? 10 : 20}
@@ -861,13 +1224,13 @@ export default function CreateCourse() {
                     : activeStep === 1 ? (
                         <fetcher.Form method="post" encType="multipart/form-data" noValidate >
                             <input type="hidden" value={activeStep} name="activeStep" />
-                            <input type="hidden" value={courseContent.courseId} name="courseId" />
+                            <input type="hidden" value={course.id} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
                                 <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper isError={isError} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
                                 </Box>
                             </Box>
-                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                            <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item>
@@ -877,21 +1240,6 @@ export default function CreateCourse() {
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
-                                    {isError && actionData?.message ?
-                                        <Grid item>
-                                            <Typography variant='small' sx={{ color: 'red'}}>
-
-                                                {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                    if (key === 'overview') {
-                                                        return `${key}: ${value}`;
-                                                    } else {
-                                                        return null;
-                                                    }
-                                                })}
-                                            </Typography>
-                                        </Grid>
-                                        : null
-                                    }
                                     <Grid item container>
                                         {/* course overview textarea input */}
                                         <TextField
@@ -899,7 +1247,18 @@ export default function CreateCourse() {
                                             data-cy="Course Overview"
                                             helperText=" "
                                             id="demo-helper-text-aligned-no-helper"
-                                            label="Your Course's Overview"
+                                            label={isError && actionData?.message ?
+
+                                                Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                    if (key === 'overview') {
+                                                        return `${key}: ${value}`;
+                                                    } else {
+                                                        return null;
+                                                    }
+                                                })
+
+                                                : `Your Course's Overview`
+                                            }
                                             fullWidth={true}
                                             minRows={10}
                                             maxRows={10}
@@ -928,22 +1287,7 @@ export default function CreateCourse() {
                                         </ThemeProvider>
                                     </Grid>
                                     <br />
-                                    {isError && actionData?.message ?
-                                        <Grid item>
-                                            <Typography variant='small' sx={{ color: 'red'}}>
-
-                                                {Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                    if (key === 'preview') {
-                                                        return `${key}: ${value}`;
-                                                    } else {
-                                                        return null;
-                                                    }
-                                                })}
-                                            </Typography>
-                                        </Grid>
-                                        : null
-                                    }
-                                    <Grid item container justifyContent={'center'} width={{ xs: '100%', md: '69%' }}>
+                                    <Grid item container justifyContent={'center'} width="100%">
                                         <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
                                             {/* course preview textarea input */}
                                             <TextField
@@ -968,19 +1312,29 @@ export default function CreateCourse() {
                                                 }}
                                                 fullWidth={true}
                                                 id="lecture-url"
-                                                label="e.g https://www.youtube.com/watch?v=SOMEID"
+                                                label={isError && actionData?.message ?
+
+                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                        if (key === 'preview') {
+                                                            return `${key}: ${value}`;
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
+                                                    : 'e.g https://www.youtube.com/watch?v=SOMEID'
+                                                }
                                                 type="url"
                                                 name="preview"
                                                 error={isError}
                                             />
                                         </Box>
-                                        <Grid item>
+                                        <Grid item width={'100%'}>
                                             {getEmbedUrl(courseContent.preview) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowfullscreen></iframe>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
                                                 </Box>
                                                 :
-                                                <Box mb="5%" mt="5%" component="div" height={200} width={'50vw'} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                <Box mb="5%" mt="5%" component="div" height={200} className="course-lecture-container" alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                     <Typography variant="body" align={'center'}>
                                                         Your video will show up here
                                                     </Typography>
@@ -992,34 +1346,38 @@ export default function CreateCourse() {
                             </Box>
                         </fetcher.Form>
                     ) : (
-                        <Form method="post" encType="multipart/form-data noValidate">
-
-                            <Box sx={{ m: '3vw' }}>
-                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper activeStep={activeStep} setActiveStep={setActiveStep} />
+                        <>
+                            <fetcher.Form method="post" encType="multipart/form-data" noValidate>
+                                <Box sx={{ m: '3vw' }}>
+                                    <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    </Box>
                                 </Box>
-                            </Box>
-                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                                <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
 
-                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                    <Grid item>
-                                        <ThemeProvider theme={theme}>
-                                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                                Course content
-                                            </Typography>
-                                        </ThemeProvider>
+                                    <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                        <Grid item>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                                    Course content
+                                                </Typography>
+                                            </ThemeProvider>
+                                        </Grid>
+                                        <Grid item width={{ xs: '100%', md: '69%' }}>
+                                            <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
+                                        </Grid>
                                     </Grid>
-                                    <Grid item width={{ xs: '100%', md: '69%' }}>
-                                        <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
-                                    </Grid>
-                                </Grid>
-                                <Box display="flex" justifyContent={'flex-end'} position="absolute" bottom={0} right={0} left={0} p={2} mr={2}>
-                                    <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                                        Submit
-                                    </Button>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
+                                        <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
+                                            <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+                                                Submit
+                                            </Button>
+                                        </Box>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </Form>
+                            </fetcher.Form>
+
+                        </>
                     )}
 
         </>
@@ -1043,69 +1401,10 @@ export default function CreateCourse() {
 
 
 
-
-
-// Initial data for workouts state in ResponsiveDialog
-const correctForm = {
-    demo: demoGif2,
-    description: "Correct exercise form description: e.g., Shoulder blades are depressed downwards"
-}
-const wrongForm = {
-    demo: demoGif2,
-    description: "Wrong exercise form description: e.g., Shoulder blades not retracting"
-}
-let nextWorkoutId = 1;
-let nextCorrectFormId = 1;
-let nextWrongFormId = 1;
-
-const initialWorkoutData = {
-    id: 0,
-    exercise: "Your Description here ",
-    demo: demoGif,
-    correctForm: [{
-        id: 0,
-        ...correctForm
-    }],
-    wrongForm: [{
-        id: 0,
-        ...wrongForm
-    }]
-}
-
-// For initial Data below this line
-const section1 = {
-    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)"
-}
-const sectionItem1 = {
-    lecture: null,
-    description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
-    heading: "Your own item header here: e.g., ReadMe Text"
-}
-const sectionItem2 = {
-    lecture: null,
-    description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-    heading: "Workout Routine"
-}
-
 let nextAccordionId = 1;
 let nextItemId = 2;
-// workout routine or the video lecture
-const initialSectionData = [{
-    id: 0,
-    heading: section1.heading,
-    items: [{
-        id: 0,
-        heading: sectionItem1.heading,
-        description: sectionItem1.description,
-        lecture: sectionItem1.lecture
-    }, {
-        id: 1,
-        heading: sectionItem2.heading,
-        description: sectionItem2.description,
-        lecture: sectionItem2.lecture
-    }]
-}]
-
+let nextCorrectFormId = 0;
+let nextWrongFormId = 0;
 
 // const workouts2 = {
 //     intesity: "H",

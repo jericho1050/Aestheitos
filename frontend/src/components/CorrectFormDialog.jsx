@@ -10,7 +10,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import InputFileUpload from "../components/InputFileUpload";
+import InputFileUpload from "./InputFileUpload";
 
 
 let theme = createTheme()
@@ -21,48 +21,65 @@ const correctForm2 = {
     description: " Aenean leo liguleget."
 }
 
-function WorkoutMediaCorrectFormCard({ onChangeImage, onClick, onChange, workoutId, correctForm, open }) {
+function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onChange, workoutId, correctForm, open }) {
+    const {isError, setIsError} = errorState;
+
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const [description, setDescription] = React.useState(correctForm.description || '');
+
+    React.useEffect(() => {
+
+        // debounce event handler
+        const handler = setTimeout(() => {
+            onChange(description, 'correctForm', workoutId, correctForm.id);
+        }, 300)
+
+        return () => {
+            clearTimeout(handler);
+        }
+    }, [description]);
 
     return (
         open &&
         <Card data-cy="Correct Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
             <CardMedia
                 component="img"
-                sx={{ aspectRatio: 16 / 9, }}
+                sx={{ aspectRatio: 16 / 9, width: { xs: 350, sm: 'auto' } }}
                 src={correctForm.demo}
                 alt="workout demo"
             />
             <InputFileUpload correctFormId={correctForm.id} workoutId={workoutId} onChange={onChangeImage} name="demo" text="GIF File" />
-
+            {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
             <CardContent>
-            <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
-                        {/* workout description textarea input */}
-                        <TextField
-                            helperText=" "
-                            id="demo-helper-text-aligned-no-helper"
-                            label="Your Workout's Description"
-                            fullWidth={true}
-                            minRows={isSmallScreen ? 7 : 10}
-                            maxRows={isSmallScreen ? 7 : 10}
-                            multiline
-                            required
-                            autoFocus
-                            name="exercise"
-                            value={correctForm.description}
-                            onChange={e => {
-                                onChange(e, 'correctForm', workoutId, correctForm.id)
-                            }} 
+                <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+                    {/* workout description textarea input */}
+                    <TextField
+                        helperText=" "
+                        id="demo-helper-text-aligned-no-helper"
+                        label="Your Workout's Description"
+                        fullWidth={true}
+                        minRows={isSmallScreen ? 7 : 10}
+                        maxRows={isSmallScreen ? 7 : 10}
+                        multiline
+                        required
+                        autoFocus
+                        name="exercise"
+                        value={description}
+                        onChange={e => {
+                            setDescription(e.target.value);
+                            setIsError(false);
+                        }}
+                        error={isError}
 
-                            
-                        />
-                    </Box>
+
+                    />
+                </Box>
             </CardContent>
             <CardActions sx={{ marginTop: 'auto' }}>
                 <Grid container justifyContent={'center'}>
                     <Grid item>
-                        <Button onClick={() => {onClick(workoutId, null, correctForm.id)}} startIcon={<DeleteIcon />}>
+                        <Button onClick={() => { onClick(workoutId, null, correctForm.id) }} startIcon={<DeleteIcon />}>
                             Delete
                         </Button>
                     </Grid>
@@ -74,7 +91,8 @@ function WorkoutMediaCorrectFormCard({ onChangeImage, onClick, onChange, workout
 }
 
 
-export default function CorrectFormDialog({ handleImageUpload, handleDeleteCard, handleChangeDescription, onClick, workoutId, correctFormExercises, open, setOpen }) {
+export default function CorrectFormDialog({ errorState, eventHandlers, workoutId, correctFormExercises, open, setOpen }) {
+    const { handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard: onClick } = eventHandlers;
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const [parent, enableAnimations] = useAutoAnimate();
@@ -96,8 +114,8 @@ export default function CorrectFormDialog({ handleImageUpload, handleDeleteCard,
                 maxWidth={'md'}
             >
                 <Grid container >
-                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
-                        <DialogTitle id="responsive-dialog-title">
+                    <Grid item container justifyContent={'flex-start'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
+                        <DialogTitle id="responsive-dialog-title" sx={{color: 'green'}}>
                             {"Correct Exercise Form"}
                         </DialogTitle>
                     </Grid>
@@ -106,12 +124,12 @@ export default function CorrectFormDialog({ handleImageUpload, handleDeleteCard,
 
 
                             {
-                                correctFormExercises.map(exercise => {
+                                correctFormExercises?.map(exercise => {
 
 
                                     return (
                                         <Grid key={exercise.id} item sm={6}>
-                                            <WorkoutMediaCorrectFormCard onChangeImage={handleImageUpload} onClick={handleDeleteCard} onChange={handleChangeDescription} workoutId={workoutId} correctForm={exercise} open={open}> </WorkoutMediaCorrectFormCard>
+                                            <WorkoutMediaCorrectFormCard errorState={errorState} onChangeImage={handleImageUpload} onClick={handleDeleteCard} onChange={handleChangeDescription} workoutId={workoutId} correctForm={exercise} open={open}> </WorkoutMediaCorrectFormCard>
                                         </Grid>
                                     )
                                 })

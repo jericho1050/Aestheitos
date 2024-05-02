@@ -16,7 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthToken } from '../helper/authContext';
+import { useAuthToken } from '../contexts/authContext';
 import SearchIcon from '@mui/icons-material/Search';
 import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
@@ -26,12 +26,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import validateJWTToken from '../helper/verifySignature';
-import { jwtDecode } from 'jwt-decode';
-import refreshAccessToken from '../helper/refreshAccessToken';
 import logo from '../static/images/aestheitoslogo.png';
-import persistToken from '../helper/persistToken';
-import useRefreshToken from '../helper/useRefreshToken';
+
 
 const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -121,7 +117,7 @@ function ResponsiveAppBar() {
 
 
   async function handleLogout(dispatch) {
-    await signOutAPI();
+    await signOutAPI(token['refresh']);
     await dispatch({
       type: 'removeToken',
     })
@@ -135,11 +131,10 @@ function ResponsiveAppBar() {
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <Avatar alt="logo" src={logo} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
+            <Link to='/' style={{color: 'inherit', textDecoration: 'none'}}>
             <Typography
               variant="h6"
               noWrap
-              component="a"
-              href="http://localhost:5173/"
               sx={{
                 mr: 2,
                 display: { xs: 'none', md: 'flex' },
@@ -152,7 +147,7 @@ function ResponsiveAppBar() {
             >
               Aestheitos
             </Typography>
-
+            </Link>
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
               <IconButton
                 size="large"
@@ -193,7 +188,7 @@ function ResponsiveAppBar() {
               variant="h6"
               noWrap
               component="a"
-              href="http://localhost:5173/"
+              href="/"
               sx={{
                 ml: 4,
                 mr: 0,
@@ -431,14 +426,17 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 
-function signOutAPI() {
+function signOutAPI(refreshToken) {
   // ask the backend server to delete the httpOnly jwt cookie
   const response = fetch(`${import.meta.env.VITE_API_URL}logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
     },
-    credentials: 'include'
+    credentials: 'include',
+    body: JSON.stringify({
+      refresh: refreshToken
+    })
   }).then(response => {
     if (!response.ok) {
       throw new Error(response.status_code)

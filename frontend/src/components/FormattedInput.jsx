@@ -5,8 +5,11 @@ import { NumericFormat } from 'react-number-format';
 import { TextField } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import {Box} from "@mui/material";
+import { useAtom } from 'jotai';
+import { isErrorAtom } from '../atoms/isErrorAtom';
 
-export default function FormattedInputs({setIsError, error, course, setCourse}) {
+export default function FormattedInputs({course, setCourse}) {
+    const [isError, setIsError] = useAtom(isErrorAtom);
     
     const handleChange = (event) => {
         setCourse({
@@ -31,7 +34,7 @@ export default function FormattedInputs({setIsError, error, course, setCourse}) 
             }}
             variant="standard"
             sx={{ml: 'auto', width: 69 }}
-            error={error}
+            error={isError}
         />
     </Box>
     );

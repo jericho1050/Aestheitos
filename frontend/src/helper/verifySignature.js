@@ -1,7 +1,7 @@
 export default async function validateJWTToken() {
   
     // GET request 
-    // ask the server to check or verify the access cookie's signature. and for user authentication purposes
+    // ask the server to check or verify the access cookie's signature. and user's payload for authentication purposes
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}user`, { headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
   
