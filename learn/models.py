@@ -183,7 +183,7 @@ class Workouts(models.Model):
     section_item = models.ForeignKey(
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
-    exercise = models.CharField(max_length=400) # this is suppose to be description but im too lazy to change the field for my test cases too
+    exercise = models.TextField(null=True, blank=True) # this is suppose to be description but im too lazy to change the field for my test cases too
     demo = models.ImageField()
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True
@@ -210,7 +210,7 @@ class CorrectExerciseForm(models.Model):
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="correct_exercise_form"
     )
-    description = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"( pk: { self.pk } )Course: {self.workout.section_item.section.course_content.course.title}. Workout: {self.workout.exercise}"
@@ -228,7 +228,7 @@ class WrongExerciseForm(models.Model):
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="wrong_exercise_form"
     )
-    description = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.workout.section_item.section.course_content.course.title} Workout: {self.workout.exercise}"

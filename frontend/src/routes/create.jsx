@@ -33,7 +33,7 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
-import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
+import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import isUrl from "is-url";
@@ -104,6 +104,7 @@ export async function action({ request }) {
                     if (section?.statusCode) {
                         if (section.statusCode >= 400) {
                             error = { ...section };
+                            error.accordion = true;
                             return error;
                         }
                     }
@@ -134,6 +135,7 @@ export async function action({ request }) {
                     if (sectionItem?.statusCode) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
+                            error.accordionItem = true;
                             return error
                         }
                     }
@@ -188,8 +190,7 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
     // it's main purpose is for debouncing
     const [workoutDescription, setWorkoutDescription] = React.useState(workout.exercise)
     const isFirstRender = React.useRef(true); const initialWorkoutDescription = React.useRef(workoutDescription);
-
-
+    console.log(isError);
     // Handles HTTP request for updating workout's description for this component
     React.useEffect(() => {
         if (isFirstRender.current || workoutDescription === initialWorkoutDescription.current) {
@@ -197,19 +198,8 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
             return;
         }
         // debounce event handler
-        const handler = setTimeout(async () => {
-            const formData = new FormData();
-            formData.append('exercise', workoutDescription);
-            try {
-                const w = await updateWorkout(workout.id, formData);
-                if (w.statusCode >= 400) {
-                    throw new Error(w);
-                }
-            }
-            catch (error) {
-                console.error('An Error Occured', error);
-                setIsError(true);
-            }
+        const handler = setTimeout(() => {
+            onChangeDescription(workoutDescription, workout.id);
         }, 300)
         return () => {
             clearTimeout(handler);
@@ -260,46 +250,77 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
         }
     }
 
-    // TODO FINISH UP HANDLE DELETE CARD AND HANDLE CHANGE DESRIPTION...
-    //  change your background image in Index with 
-    function handleDeleteCard(workoutId, wrongFormId, correctFormId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
+    async function handleDeleteCard(workoutId, wrongFormId, correctFormId) {
+        let response;
+        try {
+            if (wrongFormId != null) {
+                response = await deleteWrongExerciseForm(wrongFormId);
+            } else {
+                response = await deleteCorrectExerciseForm(correctFormId);
+            }
 
-            // we check if this came from WorkoutMediaWrongFormCard
+            if (response.statusCode >= 400) {
+                throw new Error(response);
+            }
+        }
+        catch (error) {
+            console.error(error);
+            setIsError(true);
+        }
+        updateAccordions(draft => {
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            const workout = accordionItem.workouts.find(w => w.id === workoutId);
+
             if (wrongFormId != null) {
                 workout.wrongForm = workout.wrongForm.filter(w => w.id !== wrongFormId);
-
-                // if not, its from WorkoutMediaCorrectFormCard
             } else {
-                workout.correctForm = workout.correctForm.filter(w => w.id !== correctFormId)
+                workout.correctForm = workout.correctForm.filter(w => w.id !== correctFormId);
             }
         })
     }
 
     // handles the description change of correctFrom and wrongForm in their respective cards.
-    function handleChangeDescription(e, card, workoutId, wrongFormId) {
-        updateWorkouts(draft => {
-            const workout = draft.find(w => w.id === workoutId);
+    async function handleChangeDescription(description, card, workoutId, id) {
+        let response;
+        try {
+            const formData = new FormData();
+            formData.append('description', description);
+            // if it comes from wrongFormMediaCard
+            if (card === 'wrongForm') {
+                response = await updateWrongExerciseForm(id, formData);
+                // if it comes from correctFormMediaCard
+            } else {
+                response = await updateCorrectExerciseForm(id, formData);
+            }
+            if (response.statusCode >= 400) {
+                throw new Error(response);
+            }
+        }
+        catch (error) {
+            console.error('An error occured', error);
+            setIsError(true);
+        }
+        updateAccordions(draft => {
+            const accordion = draft.find(a => a.id === accordionId);
+            const accordionItem = accordion.items.find(i => i.id === itemId);
+            const workout = accordionItem.workouts.find(w => w.id === workoutId);
 
             // we check if this came from WorkoutMediaWrongFormCard
             if (card === 'wrongForm') {
-                const wrongForm = workout.wrongForm.find(w => w.id === wrongFormId)
-                wrongForm.description = e.target.value
+                const wrongForm = workout.wrongForm.find(w => w.id === id);
+                wrongForm.description = description;
                 // if not, its from WorkoutMediaCorrectFormCard
             } else {
-                const correctForm = workout.correctForm.find(w => w.id === wrongFormId)
-                correctForm.description = e.target.value
+                const correctForm = workout.correctForm.find(w => w.id === id);
+                correctForm.description = description;
             }
-
-
 
         })
     }
 
     //handles the addition of correctForm and wrongForm cards in their respective dialogs.
-    async function handleAddCard(formDialog, workoutId) {
-        setIsError(false);
+    function handleAddCard(formDialog, workoutId) {
         const formData = new FormData();
         let response;
         // append also a default example image
@@ -385,7 +406,6 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
                             name="exercise"
                             value={workoutDescription}
                             onChange={event => {
-                                onChangeDescription(event, workout.id);
                                 setWorkoutDescription(event.target.value);
                                 setIsError(false);
                             }}
@@ -398,14 +418,20 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <CorrectFormDialog handleImageUpload={handleImageUpload} handleDeleteCard={handleDeleteCard} handleChangeDescription={handleChangeDescription} onClick={handleAddCard} workoutId={workout.id} correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                            <CorrectFormDialog
+                                errorState={{ isError, setIsError }}
+                                eventHandlers={{ handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard }}
+                                workoutId={workout.id} correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <WrongFormDialog handleImageUpload={handleImageUpload} handleDeleteCard={handleDeleteCard} handleChangeDescription={handleChangeDescription} onClick={handleAddCard} workoutId={workout.id} wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
+                            <WrongFormDialog
+                                errorState={{ isError, setIsError }}
+                                eventHandlers={{ handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard }}
+                                workoutId={workout.id} wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
-                        <Grid item >
-                            <Button onClick={() => onClick(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
+                        <Grid item sm={8}>
+                            <Button fullWidth={true} onClick={() => onClick(workout.id)} startIcon={<DeleteIcon />}>Delete</Button>
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -425,8 +451,8 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
     const [heading, setHeading] = React.useState('');
     // The `lecture` and `description` state variable holds the *first* value of `accordionItem.lecture` for lecture and `accordItem.description` for description.
     // Further changes to both `accordionItem` prop are ignored.
-    const [lecture, setLecture] = React.useState(accordionItem.lecture);
-    const [description, setDescription] = React.useState(accordionItem.description);
+    const [lecture, setLecture] = React.useState(accordionItem.lecture || '');
+    const [description, setDescription] = React.useState(accordionItem.description || '');
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
@@ -506,14 +532,24 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
         }
     }
 
-    function handleChangeWorkoutDescription(e, workoutId) {
+    async function handleChangeWorkoutDescription(workoutDescription, workoutId) {
 
-        // The HTTP request for this event handler is in the workoutMediaCard's useEffect hook because of its dependency and debounce logic.
+        const formData = new FormData();
+        formData.append('exercise', workoutDescription);
+        try {
+            const w = await updateWorkout(workoutId, formData);
+            if (w.statusCode >= 400) {
+                throw new Error(w);
+            }
+        }
+        catch (error) {
+            console.error('An Error Occured', error);
+        }
         updateAccordions(draft => {
             const accordion = draft.find(a => a.id === accordionId);
             const accordionItem = accordion.items.find(i => i.id === itemId);
             const workout = accordionItem.workouts.find(w => w.id === workoutId);
-            workout.exercise = e.target.value;
+            workout.exercise = workoutDescription;
         })
 
     }
@@ -876,7 +912,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
                 {
                     accordions.map(accordion => (
                         <Collapse key={accordion.id}>
-                            <AccordionSection actionData={actionData} itemActions={{ handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem }} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
+                            <AccordionSection actionData={actionData} eventHandlers={{ handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem }} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
                         </Collapse>
 
                     ))

@@ -14,10 +14,9 @@ export default function AddAccordion({ actionData, onClick }) {
 
     useEffect(() => {
         // means there is an error message from action server
-        if (actionData?.message && buttonClicked) {
+        if (actionData?.accordion) {
             setIsError(true);
-            setButtonClicked(false);
-        }
+        } 
     }, [actionData])
 
     return (
@@ -53,7 +52,6 @@ export default function AddAccordion({ actionData, onClick }) {
                     <IconButton data-cy="Add Accordion Button" sx={{ border: '1px solid #1976D2' }} onClick={() => {
                         setHeading('');
                         onClick(heading);
-                        setButtonClicked(true);
                     }} color="primary" aria-label="add">
                         <AddIcon />
                     </IconButton>

@@ -19,7 +19,7 @@ export default function useRefreshToken() {
             if (hasToken) {
                 // console.log(`current time: ${currentTime}`);
                 // console.log(`expiration: ${accessTokenExp.exp}`);
-                if (currentTime > accessTokenExp.exp - refreshBuffer) { // Refresh 30 seconds before token expires
+                if (currentTime > accessTokenExp?.exp - refreshBuffer) { // Refresh 30 seconds before token expires
                     // console.log("expires!");
                     const accessToken = await refreshAccessToken(token['refresh'])
                     // console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);

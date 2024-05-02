@@ -18,14 +18,13 @@ export default function AddAccordionItem({ actionData, accordionId, onClick }) {
 
     const [heading, setHeading] = useState(headingDefault);
     const [isError, setIsError] = useState(false);
-    const [buttonClicked, setButtonClicked] = useState(false);
 
     useEffect(() => {
         // means there is an error message from action server
-        if (actionData?.message && buttonClicked) {
+        if (actionData?.accordionItem) {
             setIsError(true);
-            setButtonClicked(false);
         }
+        
     }, [actionData])
 
     return (
@@ -61,7 +60,6 @@ export default function AddAccordionItem({ actionData, accordionId, onClick }) {
                     <IconButton data-cy="Add Accordion Item" sx={{ border: '1px solid #1976D2' }} onClick={() => {
                         setHeading('');
                         onClick(heading, accordionId);
-                        setButtonClicked(true);
                     }} size="medium" color="primary" aria-label="add">
                         <AddIcon />
                     </IconButton>

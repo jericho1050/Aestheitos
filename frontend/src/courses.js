@@ -135,24 +135,24 @@ export async function deleteSectionItem(id) {
   })
 }
 
-export async function getWorkouts(id){
+export async function getWorkouts(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}workouts/section-item/${id}`, {
 
   });
 }
 
-export async function createWorkout(id, formData){
+export async function createWorkout(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}workouts/section-item/${id}`, {
     method: 'POST',
     body: formData
   })
 }
 
-export async function updateWorkout(id, formData){
-    return sendRequest(`${import.meta.env.VITE_API_URL}workout/${id}/section-item`, {
-      method: 'PATCH',
-      body: formData
-    })
+export async function updateWorkout(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}workout/${id}/section-item`, {
+    method: 'PATCH',
+    body: formData
+  })
 }
 
 export async function deleteWorkout(id) {
@@ -174,6 +174,13 @@ export async function updateCorrectExerciseForm(id, formData) {
   })
 }
 
+export async function deleteCorrectExerciseForm(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercise/${id}/course/workout`, {
+    method: 'DELETE',
+
+  })
+}
+
 export async function createWrongExerciseForm(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercises/course/workout/${id}`, {
     method: 'POST',
@@ -185,5 +192,11 @@ export async function updateWrongExerciseForm(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercise/${id}/course/workout`, {
     method: 'PATCH',
     body: formData
+  })
+}
+
+export async function deleteWrongExerciseForm(id){ 
+  return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercise/${id}/course/workout`, {
+    method: 'DELETE',
   })
 }

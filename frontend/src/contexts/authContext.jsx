@@ -14,8 +14,8 @@ export function AuthProvider({ children }) {
     const [token, dispatch] = useReducer(authReducer, { access: null, refresh: null });
     const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000))
     const access = token['access'];
-    let decoded = null;
-    if (access !== null) {
+    let decoded;
+    if (typeof access === 'string') {
       decoded = jwtDecode(access);
     }
 

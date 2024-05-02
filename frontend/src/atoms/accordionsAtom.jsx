@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import demoGif from "../static/images/chinupVecs.gif";
-
+import { correctForm, wrongForm } from "./workoutsAtom";
 
 
 
@@ -12,12 +12,19 @@ const sectionItem1 = {
     description: " Your Description here: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor.",
     heading: "Your own item header here: e.g., ReadMe or Lecture",
     workouts: [
-        {
-            demo: demoGif,
-            exercise: '',
-            correctForm : [],
-            wrongForm: []
-        }
+        // {
+        //     id : Math.floor(Math.random() * 501),
+        //     demo: demoGif,
+        //     exercise: '',
+        //     correctForm : [{
+        //         id : Math.floor(Math.random() * 501),
+        //         ...correctForm
+        //     }],
+        //     wrongForm: [{
+        //         id : Math.floor(Math.random() * 501),
+        //         ...wrongForm
+        //     }]
+        // }
     ]
 }
 const sectionItem2 = {
@@ -26,8 +33,13 @@ const sectionItem2 = {
     heading: "Workout Routine",
     workouts: [
         {
+            id : 3,
             demo: demoGif,
-            exercise: '',
+            exercise: `e.g., Chin Ups
+            setsXreps: 3x8
+            tempo: 1 sec concentric (upward movement) 2 sec eccentric (downward movement)
+            etc
+            `,
             correctForm : [],
             wrongForm: []
         }
@@ -39,10 +51,10 @@ const initialSectionData = [{
     id: 0,
     heading: section1.heading,
     items: [{
-        id: 0,
+        id: 1,
         ...sectionItem1
     }, {
-        id: 1,
+        id: 2,
         ...sectionItem2
     }]
 }]

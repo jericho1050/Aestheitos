@@ -11,8 +11,8 @@ import { useImmerAtom } from "jotai-immer";
 import { accordionsAtom } from "../atoms/accordionsAtom";
 
 
-export default function AccordionSection({ actionData, itemActions, onClickDelete, onChange, handleChange, expanded, accordion}) {
-    const {handleDeleteAccordionItem : onClickDeleteItem, handleEditAccordionItem: onChangeItem, handleAddAccordionItem: onClickAddItem } = itemActions
+export default function AccordionSection({ actionData, eventHandlers, onClickDelete, onChange, handleChange, expanded, accordion}) {
+    const {handleDeleteAccordionItem : onClickDeleteItem, handleEditAccordionItem: onChangeItem, handleAddAccordionItem: onClickAddItem } = eventHandlers;
 
     const [isEditing, setIsEditing] = useState(false);
     const [parent, enableAnimations] = useAutoAnimate()

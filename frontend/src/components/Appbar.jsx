@@ -117,7 +117,7 @@ function ResponsiveAppBar() {
 
 
   async function handleLogout(dispatch) {
-    await signOutAPI();
+    await signOutAPI(token['refresh']);
     await dispatch({
       type: 'removeToken',
     })
@@ -426,14 +426,17 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 
-function signOutAPI() {
+function signOutAPI(refreshToken) {
   // ask the backend server to delete the httpOnly jwt cookie
   const response = fetch(`${import.meta.env.VITE_API_URL}logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
     },
-    credentials: 'include'
+    credentials: 'include',
+    body: JSON.stringify({
+      refresh: refreshToken
+    })
   }).then(response => {
     if (!response.ok) {
       throw new Error(response.status_code)
