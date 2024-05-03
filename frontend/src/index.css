@@ -144,3 +144,29 @@ html {
     width: 69% !important;
   }
 }
+
+
+.ql-description .ql-container.ql-snow { 
+  height: 400px;
+  overflow: auto;
+}
+
+.ql-overview .ql-container.ql-snow {
+  height: 200px;
+  overflow: auto;
+}
+
+.error-editor {
+  border: 1px solid red;
+}
+
+
+.ql-toolbar.ql-snow {
+  padding-top: 20px !important;
+}
+
+.ql-editor-container {
+  padding: 0 !important;
+  width: '100%';
+  overflow: auto;
+}

@@ -36,7 +36,6 @@ import ProgressMobileStepper from "../components/ProgressMobileStepper";
 import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
 import { Form, useActionData, useFetcher } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
-import isUrl from "is-url";
 import { Provider, atom, useAtom } from "jotai";
 import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
 import { useImmerAtom } from "jotai-immer";
@@ -44,11 +43,13 @@ import { accordionsAtom } from "../atoms/accordionsAtom";
 import { isErrorAtom } from "../atoms/isErrorAtom";
 import { correctForm, workoutsAtom, wrongForm } from "../atoms/workoutsAtom";
 import { workoutDescriptionAtom } from "../atoms/workoutDescriptionAtom";
-
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { modules } from "../helper/quillModule";
+import { red } from "@mui/material/colors";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
-
 
 export async function action({ request }) {
     let formData = await request.formData();
@@ -1176,42 +1177,37 @@ export default function CreateCourse() {
                                                 }}
                                                 error={isError}
                                             />
+
                                         </Grid>
                                         <Grid item xs>
-                                            {/* course description textarea input */}
-                                            <TextField
-                                                data-cy="Course Description"
-                                                helperText=" "
-                                                id="demo-helper-text-aligned-no-helper"
-                                                label={isError && actionData?.message ?
+                                            {/* Course Description input here */}
+                                            <Container className="ql-editor-container">
+                                                {isError && actionData?.message ?
 
                                                     Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
                                                         if (key === 'description') {
-                                                            return `${key}: ${value}`;
+                                                            return <label style={{ color: 'red', position: "absolute", margin: '10px 0 10px 10px', fontSize: '12px' }}>{key}: {value}</label>;
                                                         } else {
                                                             return null;
                                                         }
                                                     })
 
-                                                    : "Your Course's Description"
+                                                    : ''
                                                 }
-                                                fullWidth={true}
-                                                minRows={isSmallScreen ? 10 : 20}
-                                                maxRows={isSmallScreen ? 10 : 20}
-                                                multiline
-                                                required={true}
-                                                autoFocus
-                                                name="description"
-                                                value={course.description}
-                                                onChange={e => {
+                                                <ReactQuill onChange={value => {
                                                     setCourse({
                                                         ...course,
-                                                        description: e.target.value
+                                                        description: value
                                                     });
                                                     setIsError(false);
                                                 }}
-                                                error={isError}
-                                            />
+                                                    data-cy="Course Description"
+                                                    value={course.description}
+                                                    modules={modules}
+                                                    className={isError ? 'ql-description error-editor' : 'ql-description'}
+                                                    placeholder="Your Course's Description" />
+                                                <TextField type="hidden" value={course.description} name="description" />
+                                            </Container>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -1241,8 +1237,7 @@ export default function CreateCourse() {
                                         </ThemeProvider>
                                     </Grid>
                                     <Grid item container>
-                                        {/* course overview textarea input */}
-                                        <TextField
+                                        {/* <TextField
 
                                             data-cy="Course Overview"
                                             helperText=" "
@@ -1274,7 +1269,37 @@ export default function CreateCourse() {
                                                 setIsError(false);
                                             }}
                                             error={isError}
-                                        />
+                                        /> */}
+                                        {/* course overview textarea input */}
+
+                                        <Container className="ql-editor-container">
+                                            {isError && actionData?.message ?
+
+                                                Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                    if (key === 'overview') {
+                                                        return <label style={{ color: 'red', position: "absolute", margin: '10px 0 10px 10px', fontSize: '12px' }}>{key}: {value}</label>;
+                                                    } else {
+                                                        return null;
+                                                    }
+                                                })
+
+                                                : ''
+                                            }
+                                            <ReactQuill onChange={value => {
+                                                setCourseContent({
+                                                    ...courseContent,
+                                                    overview: value
+                                                });
+                                                setIsError(false);
+                                            }}
+                                                data-cy="Course Overview"
+                                                value={courseContent.overview}
+                                                modules={modules}
+                                                className={isError ? 'ql-overview error-editor' : 'ql-overview'}
+                                                placeholder="Your Course's Overview" />
+                                            <TextField type="hidden" value={courseContent.overview} name="overview" />
+                                        </Container>
+
                                     </Grid>
                                     <Grid item>
                                         <ThemeProvider theme={theme}>
