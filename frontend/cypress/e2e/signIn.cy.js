@@ -11,7 +11,7 @@ describe('User Signs In', () => {
     const password = '123'
 
     beforeEach(() => {
-        cy.visit(`http://localhost:5173/signin`);
+        cy.visit(`${Cypress.env('FRONTEND_API_URL')}signin`);
     });
 
     it('has a title', () => {
@@ -30,15 +30,15 @@ describe('User Signs In', () => {
     cy.get('input[name=password]').type(password);
 
     // stub a response to POST login
-    // cy.intercept('POST', `${Cypress.env('VITE_API_URL')}login`, {
-    //     statusCode: 401,
-    //     body: {'invalid': 'incorrect username and password'},
-    // }).as('postLogin');
+    cy.intercept('POST', `${Cypress.env('VITE_API_URL')}login`, {
+        statusCode: 401,
+        body: {'invalid': 'incorrect username and password'},
+    }).as('postLogin');
 
     // when sign in button is clicked
     cy.contains('button', 'Sign In').click();
 
-    // cy.wait('@postLogin');
+    cy.wait('@postLogin');
 
     // then assert
     cy.contains('p', 'Invalid Username and Password').should('be.visible')

@@ -13,8 +13,9 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
-import CorrectFormDialog from "../MUI-components/CorrectFormDialog";
-import WrongFormDialog from "../MUI-components/WrongFormDialog";
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CorrectFormDialog from "../components/CorrectFormDialog";
+import WrongFormDialog from "../components/WrongFormDialog";
 
 
 let theme = createTheme()
@@ -66,14 +67,14 @@ const workouts2 = {
     reps: 10,
     excertion: 8,
 }
-const correctForm = {
+const correctForm = [{
     demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
     description: "Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum."
-}
-const wrongForm = {
+}]
+const wrongForm = [{
     demo: 'https://www.youtube.com/embed/yQEx9OC2C3E',
     description: "scapula not moving"
-}
+}]
 
 const section1 = {
     title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
@@ -92,48 +93,48 @@ const sectionItem2 = {
 
 
 // responsible for the 'workout' demo card
-function VideoMediaCard({ workout, correctForm, wrongForm, open }) {
+function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
 
     const handleClickOpen = (btn) => {
-        if (btn === 'correct'){
+        if (btn === 'correct') {
             setisOpenCorrect(true);
         } else {
             setisOpenWrong(true);
         }
     };
-    
+
 
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth:{xs: 500, sm: 400}, maxHeight:{xs: 700, md: 645}, height: '100%' }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%' }}>
                 <CardMedia
                     component="iframe"
-                    sx={{ aspectRatio: 16 / 9}}
+                    sx={{ aspectRatio: 16 / 9 }}
                     src={workout.demo}
                     alt="workout demo"
                     allowFullScreen
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
-                    
+
                 />
-                <CardContent>
+                <CardContent sx={{ width: 320 }}>
                     <ThemeProvider theme={theme}>
-                        <Typography maxHeight={{xs:200, sm: 250}} height={{xs:200, sm: 250}} width={{xs: 420, sm: 'inherit'}} overflow={'auto'} gutterBottom variant="h5" component="div">
+                        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} overflow={'auto'} gutterBottom variant="h5" component="div">
                             {workout.exercise}
                         </Typography>
                     </ThemeProvider>
                 </CardContent>
                 <CardActions sx={{ marginTop: 'auto' }}>
-                    <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }}spacing={2}>
+                    <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
-                            <Button onClick={()=> handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <CorrectFormDialog correctForm={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
+                            <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
+                            <CorrectFormDialog correctFormExercises={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
-                            <Button onClick={()=> handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            <WrongFormDialog wrongForm={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
+                            <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
+                            <WrongFormDialog wrongFormExercises={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                         <Grid item >
                             <Button startIcon={<EditIcon />}>Edit</Button>
@@ -175,28 +176,29 @@ function ResponsiveDialog({ children }) {
                 aria-labelledby="responsive-dialog-title"
                 fullWidth={true}
                 maxWidth={'md'}
+
             >
                 <Grid container>
-                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2}} marginRight={{ md: 2}}>
+                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
                         <DialogTitle id="responsive-dialog-title">
                             {"Workout Routine"}
                         </DialogTitle>
-                        <DialogContent>
-                            <Grid  justifyContent={{xs:'center', sm:'flex-start'}} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}> </VideoMediaCard>
-                                </Grid>
-                                <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts2} correctForm={correctForm} wrongForm={wrongForm} open={open}>
-                                    </VideoMediaCard>
-                                </Grid>
-                                <Grid item sm={6}>
-                                    <VideoMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}>
-                                    </VideoMediaCard>
-                                </Grid>
-                            </Grid>
-                        </DialogContent>
                     </Grid>
+                    <DialogContent >
+                        <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+                            <Grid item sm={6}>
+                                <WorkoutMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}> </WorkoutMediaCard>
+                            </Grid>
+                            <Grid item sm={6}>
+                                <WorkoutMediaCard workout={workouts2} correctForm={correctForm} wrongForm={wrongForm} open={open}>
+                                </WorkoutMediaCard>
+                            </Grid>
+                            <Grid item sm={6}>
+                                <WorkoutMediaCard workout={workouts1} correctForm={correctForm} wrongForm={wrongForm} open={open}>
+                                </WorkoutMediaCard>
+                            </Grid>
+                        </Grid>
+                    </DialogContent>
                 </Grid>
 
                 <DialogActions>
@@ -284,125 +286,115 @@ function ControlledAccordions({ section, sectionItem }) {
 }
 
 export default function Course() {
+    const theme2 = useTheme();
+    const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
 
 
     return (
         <>
             <br></br>
-            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
-                <Grid container mb={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
-                    <Grid item>
-                        <Button>
-                            <EditIcon sx={{ marginRight: 1 }} />
-                            Edit
-                        </Button>
-                    </Grid>
-                </Grid>
-                <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
-                    {/* Paper starts here */}
-                    <Grid item xs md={'auto'}>
-                        <Paper elevation={4}>
-                            <Grid item container justifyContent={'center'}>
-                                <Grid item>
-                                    <Container sx={{ padding: '5%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                        <img src={course.thumbnail} className="course-thumbnail" />
-                                    </Container>
-                                </Grid>
-                            </Grid>
-                            <Grid item container wrap="nowrap" mt={1} alignItems={'center'} direction="column" spacing={4}>
-                                <Grid item xs>
-                                    <Typography sx={{ maxWidth: { md: 250, xs: 300, sm: 400 } }} noWrap>Instructor: {user.firstName} {user.lastName} yawayadfadsfgadsgfadsfgdfagadgfadsfadsfadsfadsfadsfadsadsfadsfadsfads</Typography>
-                                </Grid>
-                                <Grid item>
-                                    <Button variant="contained">
+            <Container maxWidth="xl">
+                <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
+                    <Box mb={2} >
+                    <Button fullWidth={isSmallScreen ? true : false}>
+                    <EditIcon  sx={{ marginRight: 1 }} />
+                                Edit
+                    </Button>
+                    </Box>
+                    <Box className="clearfix" component={'div'}>
+                        <Paper elevation={4} sx={{ padding: {xs: '10%', md: '5%'}, float: 'left', margin: '0 20px 20px 0' }}>
+                            <ThemeProvider theme={theme}>
+
+                                <img src={course.thumbnail} className="course-thumbnail" />
+
+                                <Typography sx={{ maxWidth: { md: 250, xs: 300, sm: 400 }, mt: 2 }} noWrap>
+                                    <b>Instructor:</b> {user.firstName}  {user.lastName} yawayadfadsfgadsgfadsfgdfagadgfadsfadsfadsfadsfadsfadsadsfadsfadsfads</Typography>
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
+                                    <AttachMoneyIcon fontSize="large" />
+                                    <Typography fontWeight="bolder" sx={{ fontSize: '2em' }}>
+                                        69
+                                    </Typography>
+
+                                </Box>
+                                <Box display='flex' justifyContent={'center'} mt={2}>
+                                    <Button fullWidth variant="contained">
                                         Enroll now!
                                     </Button>
-                                </Grid>
-                            </Grid>
-                            <Grid container justifyContent={'flex-start'} alignItems={"flex-end"} mt={4}>
-                                <Grid item container padding={2} justifyContent={'space-between'}>
-                                    <Grid item>
+                                </Box>
+                                <Grid container columns={{ xs: 6, md: 12 }} mt={2}>
+                                    <Grid item xs={3} md={6}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
-                                            Created on: {course.courseCreated}
+                                            <b>Created on:</b> {course.courseCreated}
+                                        </Typography>                               
+                                    </Grid>
+                                    <Grid item xs={3} md={6} >
+                                        <Typography fontSize="small" variant="small" color={'text.secondary'}>
+                                             <b>Last updated:</b> {course.courseUpdated}
                                         </Typography>
                                     </Grid>
-                                    <Grid item>
-                                        <Typography fontSize="small" variant="small" color={'text.secondary'}>
-                                            Last updated: {course.courseUpdated}
+                                    <Grid item  xs={3} md={6}>
+                                    <Typography fontSize="small" variant="small" color={'text.secondary'}>
+                                        <b>Rating:</b> {course.average_rating}
+                                    </Typography>
+                                    </Grid>
+                                    <Grid item xs={3} md={6}>
+                                     <Typography fontSize="small" variant="small" color={'text.secondary'}>
+                                        <b>Weeks:</b> {courseContent.weeks}
                                         </Typography>
                                     </Grid>
                                 </Grid>
-                                <Grid paddingLeft={2} paddingBottom={2} item variant="small" fontSize={'small'}>
-                                    Rating: 3.5
-                                </Grid>
-                            </Grid>
+                            </ThemeProvider>
                         </Paper>
-                    </Grid>
-                    {/* Paper ends here */}
-                    {/* title  & description starts here */}
-                    <Grid item xs={12} sm={12} md lg>
-                        <Grid item container wrap="nowrap" direction="column">
-                            <Grid item xs>
-                                <ThemeProvider theme={theme}>
-                                    <Typography fontWeight="bold" variant="h2">
-                                        {course.title}
-                                    </Typography>
-                                </ThemeProvider>
-                            </Grid>
-                            <Grid item xs>
-                                <ThemeProvider theme={theme} >
-
-                                    <Typography align="justify" variant="body1">
-                                        {course.description}
-                                    </Typography>
-
-                                </ThemeProvider>
-                            </Grid>
+                        <Typography  fontWeight="bold" variant="h3">
+                            {course.title}
+                        </Typography>
+                        <Typography align="justify" variant="body1">
+                            {course.description}
+                        </Typography>
+                    </Box>
+                    <br></br>
+                    <hr></hr>
+                    <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                        <Grid item>
+                            <ThemeProvider theme={theme} >
+                                <Typography variant="h3">
+                                    Overview
+                                </Typography>
+                            </ThemeProvider>
+                        </Grid>
+                        <Grid item>
+                            <ThemeProvider theme={theme}>
+                                <Typography align="justify" variant="body2">
+                                    {courseContent.overview}
+                                </Typography>
+                            </ThemeProvider>
+                        </Grid>
+                        <Grid item>
+                            <ThemeProvider theme={theme}>
+                                <Typography sx={{ textAlign: 'center' }} variant="h4">
+                                    Preview this course
+                                </Typography>
+                            </ThemeProvider>
+                            <br />
+                            <Box className="course-lecture-container" sx={{ width: { xs: '69vw' } }} component={'div'}>
+                                <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
+                            </Box>
+                        </Grid>
+                        <br />
+                        <Grid item>
+                            <ThemeProvider theme={theme}>
+                                <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                    Course content
+                                </Typography>
+                            </ThemeProvider>
+                        </Grid>
+                        <Grid item>
+                            <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
                         </Grid>
                     </Grid>
-                </Grid>
-                {/* title  & description ends here */}
-                <br></br>
-                <hr></hr>
-                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                    <Grid item>
-                        <ThemeProvider theme={theme} >
-                            <Typography variant="h3">
-                                Overview
-                            </Typography>
-                        </ThemeProvider>
-                    </Grid>
-                    <Grid item>
-                        <ThemeProvider theme={theme}>
-                            <Typography align="justify" variant="body2">
-                                {courseContent.overview}
-                            </Typography>
-                        </ThemeProvider>
-                    </Grid>
-                    <Grid item>
-                        <ThemeProvider theme={theme}>
-                            <Typography sx={{ textAlign: 'center' }} variant="h4">
-                                lecture for the entire course
-                            </Typography>
-                        </ThemeProvider>
-                        <br />
-                        <Box className="course-lecture-container" component={'div'}>
-                            <iframe className="course-lecture" src={courseContent.lecture} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowfullscreen></iframe>
-                        </Box>
-                    </Grid>
-                    <br />
-                    <Grid item>
-                        <ThemeProvider theme={theme}>
-                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                Course content
-                            </Typography>
-                        </ThemeProvider>
-                    </Grid>
-                    <Grid item>
-                        <ControlledAccordions section={section1} sectionItem={sectionItem1} ></ControlledAccordions>
-                    </Grid>
-                </Grid>
-            </Box>
+                </Box>
+            </Container>
         </>
     )
 }

@@ -24,8 +24,8 @@ urlpatterns = [
     path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='course-content'),
 
     # Course's section
-    path('sections/course/<int:pk>', SectionList.as_view(), name="course-section-list"),
-    path('section/<int:pk>/course', SectionDetail.as_view(), name="course-section-detail"),
+    path('sections/course-content/<int:pk>', SectionList.as_view(), name="course-section-list"),
+    path('section/<int:pk>/course-content', SectionDetail.as_view(), name="course-section-detail"),
     path('section-items/section/<int:pk>', SectionItemList.as_view(), name="section-item-list"),
     path('section-item/<int:pk>/section', SectionItemDetail.as_view(), name="section-item-detail"),
 

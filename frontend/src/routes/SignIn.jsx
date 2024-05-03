@@ -11,7 +11,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useContext, useState } from 'react';
-import { AuthDispatchContext } from '../helper/authContext';
+import { AuthDispatchContext } from '../contexts/authContext';
 import { useNavigate, Link } from 'react-router-dom';
 
 
@@ -38,7 +38,7 @@ export default function SignIn() {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const token = await signInAPI(data);
-        console.log(token)
+        // console.log(token['access'])
         if (token['invalid']) {
             setIsInvalidCredentials(1);
         } else {

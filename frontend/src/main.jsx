@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { AuthProvider } from './helper/authContext';
+import { AuthProvider } from './contexts/authContext';
 import { ThemeProvider, createTheme } from '@mui/material'
 import {
   createBrowserRouter,
@@ -14,7 +14,10 @@ import SignIn from './routes/signin';
 import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
 import Course from './routes/course';
-
+import CreateCourse from './routes/create';
+import {action as createAction} from './routes/create';
+import ProectedRoute from './components/protectedRoute';
+import { IsLoadingProvider } from './contexts/IsLoadingContext';
 
 const theme = createTheme({
   palette: {
@@ -38,13 +41,29 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        index: true, element: <Index />,
+        index: true,
+        element: <Index />,
         loader: indexLoader,
       },
       {
         path: "courses/:courseId",
         element: <Course />
       },
+      {
+       
+        element: <ProectedRoute />,
+        children: [
+          {
+          path: "course/create",
+          element: <CreateCourse />,
+          action: createAction
+          },
+          // {
+          //   path: "course/create/edit",
+          //   action: createAction
+          // }
+        ]
+      }
     ],
   },
   {
@@ -61,7 +80,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <AuthProvider>
+        <IsLoadingProvider>
         <RouterProvider router={router} />
+        </IsLoadingProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>

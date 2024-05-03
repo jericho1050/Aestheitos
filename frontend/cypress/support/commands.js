@@ -25,18 +25,42 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 Cypress.Commands.add('login', (username, password) => {
-    cy.visit(`http://localhost:5173/signin`);
-    cy.get('input[name=username]').type('test');
-    cy.get('input[name=password').type('123');
-    cy.contains('button', 'Sign In').click();
-    cy.url().should('include','http://localhost:5173/');
+  cy.visit(`${Cypress.env('FRONTEND_API_URL')}signin`);
+  cy.get('input[name=username]').type(username);
+  cy.get('input[name=password').type(password);
+
+
+  // stub a response to POST login
+  cy.intercept('POST', `${Cypress.env('REST_API_URL')}login`, {
+    statusCode: 200,
+    body: {
+      'access': `${Cypress.env('REFRESH_TOKEN_TEST')}`,
+      'refresh': `${Cypress.env('ACCESS_TOKEN_TEST')}`
+    },
+  }).as('postLogin');
+
+  cy.contains('button', 'Sign In').click();
+
+  cy.wait('@postLogin');
+
+  cy.url().should('include', 'http://localhost:5173/');
+})
+
+Cypress.Commands.add('setToken', ()=> {
+  cy.intercept('GET',`${Cypress.env('REST_API_URL')}user`, {
+    statusCode: 200,
+    body: {
+      'access' : `${Cypress.env('REFRESH_TOKEN_TEST')}`,
+      'refresh': `${Cypress.env('ACCESS_TOKEN_TEST')}`
+    }
+  } ).as('validateJWTToken')
 })
 
 
 Cypress.Commands.add('checkNotVisible', (selector) => {
-    cy.get('body').then((body) => {
-      if (body.find(selector).length > 0) {
-        cy.get(selector).should('not.be.visible');
-      }
-    });
+  cy.get('body').then((body) => {
+    if (body.find(selector).length > 0) {
+      cy.get(selector).should('not.be.visible');
+    }
   });
+});
