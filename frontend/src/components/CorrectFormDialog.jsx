@@ -78,8 +78,8 @@ function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onCha
             </CardContent>
             <CardActions sx={{ marginTop: 'auto' }}>
                 <Grid container justifyContent={'center'}>
-                    <Grid item>
-                        <Button onClick={() => { onClick(workoutId, null, correctForm.id) }} startIcon={<DeleteIcon />}>
+                    <Grid item xs={12}>
+                        <Button fullWidth={true} onClick={() => { onClick(workoutId, null, correctForm.id) }} startIcon={<DeleteIcon />}>
                             Delete
                         </Button>
                     </Grid>
