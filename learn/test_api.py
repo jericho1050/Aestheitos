@@ -484,15 +484,15 @@ class WorkoutListAPITestCase(APITestCase):
 
     def tearDown(self):
         # prevents accumulating picture/image (i.e deletes files that were created by this test case)
-        for filename in glob.glob("images/images/picture_*.gif"):
+        for filename in glob.glob("images/workouts/picture_*.gif"):
             os.remove(filename)
 
-        for filename in glob.glob("images/picture_*.gif"):
-            os.remove(filename)
+        # for filename in glob.glob("images/picture_*.gif"):
+        #     os.remove(filename)
 
         # remove the specific 'picture.gif' file
-        if os.path.exists("images/picture.gif"):
-            os.remove("images/picture.gif")
+        if os.path.exists("images/workouts/picture.gif"):
+            os.remove("images/workouts/picture.gif")
 
     def test_retrieve_workout_list(self):
         """
@@ -634,15 +634,15 @@ class WorkoutDetailAPITestCase(APITestCase):
 
     def tearDown(self):
         # prevents accumulating picture/image (i.e deletes files that were created by this test case)
-        for filename in glob.glob("images/images/picture_*.gif"):
+        for filename in glob.glob("images/workouts/picture_*.gif"):
             os.remove(filename)
 
-        for filename in glob.glob("images/picture_*.gif"):
-            os.remove(filename)
+        # for filename in glob.glob("images/picture_*.gif"):
+        #     os.remove(filename)
 
         # remove the specific 'picture.gif' file
-        if os.path.exists("images/picture.gif"):
-            os.remove("images/picture.gif")
+        if os.path.exists("images/workouts/picture.gif"):
+            os.remove("images/workouts/picture.gif")
 
     def test_retrieve_workout(self):
         """
@@ -1078,15 +1078,15 @@ class CorrectExerciseFormListAPITestCase(APITestCase):
 
     def tearDown(self):
         # prevents accumulating picture/image (i.e deletes files that were created by this test case)
-        for filename in glob.glob("images/images/picture_*.gif"):
+        for filename in glob.glob("images/correct_exercise_form/picture_*.gif"):
             os.remove(filename)
 
-        for filename in glob.glob("images/picture_*.gif"):
-            os.remove(filename)
+        # for filename in glob.glob("images/correct_exercise_form/picture_*.gif"):
+        #     os.remove(filename)
 
         # remove the specific 'picture.gif' file
-        if os.path.exists("images/picture.gif"):
-            os.remove("images/picture.gif")
+        if os.path.exists("images/correct_exercise_form/picture.gif"):
+            os.remove("images/correct_exercise_form/picture.gif")
 
     def test_retrieve_correct_exercise_list(self):
         """
@@ -1225,15 +1225,15 @@ class CorrectExerciseFormDetailAPITestCase(APITestCase):
 
     def tearDown(self):
         # prevents accumulating picture/image (i.e deletes files that were created by this test case)
-        for filename in glob.glob("images/images/picture_*.gif"):
+        for filename in glob.glob("images/correct_exercise_form/picture_*.gif"):
             os.remove(filename)
 
-        for filename in glob.glob("images/picture_*.gif"):
-            os.remove(filename)
+        # for filename in glob.glob("images/picture_*.gif"):
+        #     os.remove(filename)
 
         # remove the specific 'picture.gif' file
-        if os.path.exists("images/picture.gif"):
-            os.remove("images/picture.gif")
+        if os.path.exists("images/correct_exercise_form/picture.gif"):
+            os.remove("images/correct_exercise_form/picture.gif")
 
     def test_retrieve_correct_exercise_demo(self):
         """
@@ -1408,15 +1408,15 @@ class WrongExerciseFormListAPITestCase(APITestCase):
 
     def tearDown(self):
         # prevents accumulating picture/image (i.e deletes files that were created by this test case)
-        for filename in glob.glob("images/images/picture_*.gif"):
+        for filename in glob.glob("images/wrong_exercise_form/picture_*.gif"):
             os.remove(filename)
 
-        for filename in glob.glob("images/picture_*.gif"):
-            os.remove(filename)
+        # for filename in glob.glob("images/wrong_exercise_form/picture_*.gif"):
+        #     os.remove(filename)
 
             # remove the specific 'picture.gif' file
-        if os.path.exists("images/picture.gif"):
-            os.remove("images/picture.gif")
+        if os.path.exists("images/wrong_exercise_form/picture.gif"):
+            os.remove("images/wrong_exercise_form/picture.gif")
 
     def test_retrieve_wrong_exercise_list(self):
         """
@@ -1553,15 +1553,15 @@ class WrongExerciseFormDetailAPITestCase(APITestCase):
 
     def tearDown(self):
         # prevents accumulating picture/image (i.e deletes files that were created by this test case)
-        for filename in glob.glob("images/images/picture_*.gif"):
+        for filename in glob.glob("images/wrong_exercise_form/picture_*.gif"):
             os.remove(filename)
 
-        for filename in glob.glob("images/picture_*.gif"):
-            os.remove(filename)
+        # for filename in glob.glob("images/picture_*.gif"):
+        #     os.remove(filename)
 
         # remove the specific 'picture.gif' file
-        if os.path.exists("images/picture.gif"):
-            os.remove("images/picture.gif")
+        if os.path.exists("images/wrong_exercise_form/picture.gif"):
+            os.remove("images/wrong_exercise_form/picture.gif")
 
     def test_retrieve_wrong_exercise_demo(self):
         """

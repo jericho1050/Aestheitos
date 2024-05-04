@@ -141,12 +141,14 @@ html {
 
 @media (min-width: 576px){
   .MuiMobileStepper-progress	{
-    width: 69% !important;
+    width: 69vw !important;
   }
 }
+.ql-error {
+  border: 1px solid red;
+}
 
-
-.ql-description .ql-container.ql-snow { 
+.ql-description .ql-container.ql-snow, .ql-read-me .ql-container.ql-snow { 
   height: 400px;
   overflow: auto;
 }
@@ -156,9 +158,21 @@ html {
   overflow: auto;
 }
 
-.error-editor {
-  border: 1px solid red;
+
+@media (max-width: 900px) {
+  .ql-workout .ql-container.ql-snow, .ql-correct-form .ql-container.ql-snow, .ql-wrong-form .ql-container.ql-snow {
+    height: 150px;
+    overflow: auto;
+  }
+  
 }
+@media (min-width: 900px) {
+  .ql-workout .ql-container.ql-snow, .ql-correct-form .ql-container.ql-snow, .ql-wrong-form .ql-container.ql-snow {
+    height: 220px;
+    overflow: auto;
+  }
+}
+
 
 
 .ql-toolbar.ql-snow {
@@ -170,3 +184,4 @@ html {
   width: '100%';
   overflow: auto;
 }
+

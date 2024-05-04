@@ -51,6 +51,8 @@ import { red } from "@mui/material/colors";
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
+// There's only Four CORE COMPONENTS here. one is in a file called Accordion.
+
 export async function action({ request }) {
     let formData = await request.formData();
     let course, courseContent, section, sectionItem, workouts;
@@ -191,7 +193,6 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
     // it's main purpose is for debouncing
     const [workoutDescription, setWorkoutDescription] = React.useState(workout.exercise)
     const isFirstRender = React.useRef(true); const initialWorkoutDescription = React.useRef(workoutDescription);
-    console.log(isError);
     // Handles HTTP request for updating workout's description for this component
     React.useEffect(() => {
         if (isFirstRender.current || workoutDescription === initialWorkoutDescription.current) {
@@ -390,29 +391,20 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
                     alt="workout demo"
                 />
                 <InputFileUpload workoutId={workout.id} onChange={onChangeImage} name="demo" text="GIF File" />
-                {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
+                {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mt: 1 }}>Something Happend.Please try again</Typography>}
                 <CardContent>
-                    <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
-                        {/* workout description textarea input */}
-                        <TextField
-                            helperText=" "
-                            id="demo-helper-text-aligned-no-helper"
-                            label="Your Workout's Description"
-                            fullWidth={true}
-                            minRows={isSmallScreen ? 7 : 10}
-                            maxRows={isSmallScreen ? 7 : 10}
-                            multiline
-                            required={true}
-                            autoFocus
-                            name="exercise"
-                            value={workoutDescription}
-                            onChange={event => {
-                                setWorkoutDescription(event.target.value);
+                    <Box width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+                        {/* workout description editor */}
+                        <ReactQuill
+                            modules={modules}
+                            onChange={value => {
+                                setWorkoutDescription(value);
                                 setIsError(false);
                             }}
-                            error={isError}
-
+                            value={workoutDescription}
+                            className={isError ? "ql-workout ql-error" : "ql-workout"}
                         />
+
                     </Box>
                 </CardContent>
                 <CardActions sx={{ marginTop: 'auto' }}>
@@ -448,7 +440,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [parent, enableAnimations] = useAutoAnimate();
-    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
+    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(accordionItem?.workouts?.length > 0);
     const [heading, setHeading] = React.useState('');
     // The `lecture` and `description` state variable holds the *first* value of `accordionItem.lecture` for lecture and `accordItem.description` for description.
     // Further changes to both `accordionItem` prop are ignored.
@@ -457,6 +449,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
+    const isFirstRender = React.useRef(true); const initialDescription = React.useRef(description); const initialLecture = React.useRef(lecture); // necessary variables to avoid this side effect from running on the first render
 
     React.useEffect(() => {
         if (actionData?.message) { // if there's a message from action server. then there's an error
@@ -480,7 +473,10 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
             }
         }
         if (!isWorkoutRoutine) {
-
+            if (isFirstRender.current || (description === initialDescription.current && lecture === initialLecture.current)) {
+                isFirstRender.current = false;
+                return;
+            }
             // debounce event handler
             const handler = setTimeout(() => {
                 onChange({
@@ -664,10 +660,12 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                         </Typography>
                     </ThemeProvider>
                 </Grid>
-                <Grid item xs={2} lg={1}>
-                    <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
-                    <Button onClick={() => onClick(accordionId, itemId)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
-                </Grid>
+                {(itemId !== 1 && itemId !== 2) && (
+                    <Grid item xs={2} lg={1}>
+                        <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
+                        <Button onClick={() => onClick(accordionId, itemId)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
+                    </Grid>
+                )}
             </>
         )
     }
@@ -750,7 +748,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                         <Grid item mt={4}>
                                             <ThemeProvider theme={theme}>
                                                 <Typography variant="h4">
-                                                    Your readme text here
+                                                    Read me info.
                                                 </Typography>
                                             </ThemeProvider>
                                         </Grid>
@@ -1204,9 +1202,10 @@ export default function CreateCourse() {
                                                     data-cy="Course Description"
                                                     value={course.description}
                                                     modules={modules}
-                                                    className={isError ? 'ql-description error-editor' : 'ql-description'}
+                                                    className={isError ? 'ql-description ql-error' : 'ql-description'}
                                                     placeholder="Your Course's Description" />
-                                                <TextField type="hidden" value={course.description} name="description" />
+                                                <TextField type="hidden" value={course.description} name="description" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
+
                                             </Container>
                                         </Grid>
                                     </Grid>
@@ -1231,45 +1230,13 @@ export default function CreateCourse() {
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item>
                                         <ThemeProvider theme={theme} >
-                                            <Typography variant="h3">
+                                            <Typography variant="h4">
                                                 Overview
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
                                     <Grid item container>
-                                        {/* <TextField
 
-                                            data-cy="Course Overview"
-                                            helperText=" "
-                                            id="demo-helper-text-aligned-no-helper"
-                                            label={isError && actionData?.message ?
-
-                                                Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                    if (key === 'overview') {
-                                                        return `${key}: ${value}`;
-                                                    } else {
-                                                        return null;
-                                                    }
-                                                })
-
-                                                : `Your Course's Overview`
-                                            }
-                                            fullWidth={true}
-                                            minRows={10}
-                                            maxRows={10}
-                                            multiline
-                                            required={true}
-                                            name="overview"
-                                            value={courseContent.overview}
-                                            onChange={e => {
-                                                setCourseContent({
-                                                    ...courseContent,
-                                                    overview: e.target.value
-                                                })
-                                                setIsError(false);
-                                            }}
-                                            error={isError}
-                                        /> */}
                                         {/* course overview textarea input */}
 
                                         <Container className="ql-editor-container">
@@ -1295,9 +1262,9 @@ export default function CreateCourse() {
                                                 data-cy="Course Overview"
                                                 value={courseContent.overview}
                                                 modules={modules}
-                                                className={isError ? 'ql-overview error-editor' : 'ql-overview'}
+                                                className={isError ? 'ql-overview ql-error' : 'ql-overview'}
                                                 placeholder="Your Course's Overview" />
-                                            <TextField type="hidden" value={courseContent.overview} name="overview" />
+                                            <TextField type="hidden" value={courseContent.overview} name="overview" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
                                         </Container>
 
                                     </Grid>

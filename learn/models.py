@@ -10,7 +10,7 @@ from django.utils import timezone
 # Create your models here.
 class User(AbstractUser):
     profile_pic = models.ImageField(
-        upload_to="images/", height_field=None, width_field=None, null=True, blank=True
+        upload_to="profile_pictures/", height_field=None, width_field=None, null=True, blank=True
     )
     is_instructor = models.BooleanField(default=False)
 
@@ -81,6 +81,7 @@ class Course(models.Model):
     def delete_with_auth_user(self, user):
         if self.created_by != user:
             raise AuthenticationFailed("Not allowed to delete")
+        self.thumbnail.delete(save=False)
         self.delete()
 
     def course_rating_average(self):
@@ -123,6 +124,7 @@ class Section(models.Model):
     def delete_with_auth_user(self, user):
         if self.course_content.course.created_by != user:
             raise AuthenticationFailed("Not allowed to delete")
+        
         self.delete()
         
 
@@ -135,6 +137,7 @@ class SectionItem(models.Model):
     section = models.ForeignKey("Section", on_delete=models.CASCADE, related_name="contents")
     lecture = models.URLField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    description_image = models.ImageField(blank=True, null=True)
     heading = models.CharField(max_length=200)
 
     def delete_with_auth_user(self, user):
@@ -184,7 +187,7 @@ class Workouts(models.Model):
         "SectionItem", on_delete=models.CASCADE, related_name="workouts"
     )
     exercise = models.TextField(null=True, blank=True) # this is suppose to be description but im too lazy to change the field for my test cases too
-    demo = models.ImageField()
+    demo = models.ImageField(upload_to='workouts/')
     intensity = models.CharField(
         max_length=1, choices=INTENSITY_CHOICES, blank=True, null=True
     )
@@ -202,11 +205,12 @@ class Workouts(models.Model):
         from .helpers import is_valid_ownership
         if not is_valid_ownership(user, self.section_item.section.course_content.course.id):
             raise AuthenticationFailed("Not allowed to delete")
+        self.demo.delete(save=False)
         self.delete()
 
 
 class CorrectExerciseForm(models.Model):
-    demo = models.ImageField()
+    demo = models.ImageField(upload_to='correct_exercise_form/')
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="correct_exercise_form"
     )
@@ -220,11 +224,12 @@ class CorrectExerciseForm(models.Model):
 
         if not is_valid_ownership(user, self.workout.section_item.section.course_content.course.id):
             raise AuthenticationFailed("Not allowed to delete")
+        self.demo.delete(save=False)
         self.delete()
 
 
 class WrongExerciseForm(models.Model):
-    demo = models.ImageField()
+    demo = models.ImageField(upload_to='wrong_exercise_form/')
     workout = models.ForeignKey(
         "Workouts", on_delete=models.CASCADE, related_name="wrong_exercise_form"
     )
@@ -238,6 +243,7 @@ class WrongExerciseForm(models.Model):
 
         if not is_valid_ownership(user, self.workout.section_item.section.course_content.course.id):
             raise AuthenticationFailed("Not allowed to delete")
+        self.demo.delete(save=False)
         self.delete()
 
 

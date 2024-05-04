@@ -97,8 +97,6 @@ export default function WrongFormDialog({ errorState, eventHandlers, workoutId, 
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const [parent, enableAnimations] = useAutoAnimate();
 
-    console.log(errorState)
-
     const handleClose = () => {
         setOpen(false);
     };
