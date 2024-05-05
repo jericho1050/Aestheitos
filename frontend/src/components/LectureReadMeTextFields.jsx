@@ -48,7 +48,7 @@ export function DescriptionInput({ actionData, description, onChange, isError })
     return (
 
         <Container className="ql-editor-container">
-            {isError && actionData?.message ?
+            {/* {isError && actionData?.message ?
 
                 Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
                     if (key === 'lecture') {
@@ -65,7 +65,29 @@ export function DescriptionInput({ actionData, description, onChange, isError })
                 value={description}
                 onChange={value => { onChange(value); }}
                 className={isError ? 'ql-read-me ql-error' : 'ql-read-me'}
-            />
+            /> */}
+            <fieldset className="quill-fieldset">
+                {isError && actionData?.message ?
+
+                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                        if (key === 'lecture') {
+                            return <legend style={{ color: 'red', visibility: 'visible', bottom: '96%' }}>{key}: {value}</legend>;
+                        } else {
+                            return null;
+                        }
+                    })
+
+                    : <legend style={{ bottom: '96%' }}>Your Course's Description</legend>
+                }
+                <ReactQuill
+                    modules={modules}
+                    placeholder="Your information or lecture's description."
+                    value={description}
+                    onChange={value => { onChange(value); }}
+                    className={isError ? 'ql-read-me ql-error' : 'ql-read-me'}
+                    style={{ border: isError ? '1px solid red' : '' }}
+                />
+            </fieldset>
         </Container>
     )
 }

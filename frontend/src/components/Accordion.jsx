@@ -5,8 +5,6 @@ import { ResponsiveDialog } from "../routes/create";
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import AddAccordionItem from "./AddAccordionItem";
-import { Provider, atom, useAtom } from "jotai";
-import { isErrorAtom } from "../atoms/isErrorAtom";
 import { useImmerAtom } from "jotai-immer";
 import { accordionsAtom } from "../atoms/accordionsAtom";
 
@@ -91,11 +89,20 @@ export default function AccordionSection({ actionData, eventHandlers, onClickDel
 
                 {accordionHeadingContent}
             </AccordionSummary>
-            <AccordionDetails >
-                <AddAccordionItem actionData={actionData} onClick={onClickAddItem} accordionId={accordion.id} />
-            </AccordionDetails>
+            {
+                /* don't render the first accordion item's buttons (they are just examples) */
+                accordion.id !== 0 &&
+                 <>
+                    <AccordionDetails >
+                        <AddAccordionItem actionData={actionData} onClick={onClickAddItem} accordionId={accordion.id} />
+                    </AccordionDetails>
+
+                </>
+            }
+
             <ul ref={parent}>
                 {accordion.items ? accordion.items.map((item) => (
+                /* don't render the first accordion (they are just examples) */
 
                     <AccordionDetails
                         sx={{ paddingLeft: '2%' }}
