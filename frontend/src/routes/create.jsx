@@ -1061,7 +1061,7 @@ export default function CreateCourse() {
                                 <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={2}>
                                     {/* Paper starts here */}
                                     <Grid item xs sm md={5}>
-                                        <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, }} >
+                                        <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%'}}  >
                                             <Grid item container justifyContent={'center'}>
                                                 <Grid item>
                                                     <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">

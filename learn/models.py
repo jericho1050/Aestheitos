@@ -66,13 +66,14 @@ class Course(models.Model):
     thumbnail = models.ImageField(upload_to="images/", null=True, blank=True)
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES)
     course_created = models.DateField(null=True, blank=True)
-    course_updated = models.DateField(auto_now=True)
+    course_updated = models.DateTimeField(null=True, blank=True, auto_now=True)
     created_by = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="creator"
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
     price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00) 
     weeks = models.IntegerField()
+    is_draft = models.BooleanField(default=True)
   
 
     def __str__(self):
