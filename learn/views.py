@@ -51,10 +51,13 @@ class RegisterView(APIView):
         token = RefreshToken.for_user(user)
         # print(token)
         response = Response()
+
         response.data = {
             "refresh": str(token),
             "access": str(token.access_token),
         }
+        response.set_cookie(key="refresh", value=response.data['refresh'], httponly=True)
+        response.set_cookie(key="access", value=response.data['access'], httponly=True)
         return response
 
 

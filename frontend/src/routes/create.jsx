@@ -81,11 +81,12 @@ export async function action({ request }) {
             }
             break;
         case 1:
-            // create a course's overview (course content)
+            // create a course's overview
             let courseId = formData.get('courseId');
             if (intent === 'create') {
                 courseContent = await createCourseContent(courseId, formData);
             }
+            // update a course's overview
             if (intent === 'update') {
                 courseContent = await updateCourseContent(courseId, formData);
             }
@@ -97,7 +98,7 @@ export async function action({ request }) {
             }
             break;
         case 2:
-            // create a section / accordion (course's content)
+            // create/update a section / accordion (course's content)
             let sectionId = formData.get('sectionId');
             let sectionItemId = formData.get('sectionItemId');
             switch (intent) {
@@ -1222,6 +1223,7 @@ export default function CreateCourse() {
                                                     />
                                                 </fieldset>
                                                 <TextField type="hidden" value={course.description} name="description" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
+                                                <TextField type="hidden" name="is_draft" />
                                             </Container>
                                         </Grid>
                                     </Grid>

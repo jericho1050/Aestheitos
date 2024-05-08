@@ -11,9 +11,15 @@ export default function getEmbedUrl(youtubeUrl) {
     ) {
         return youtubeUrl;
     }
-    let url = new URL(youtubeUrl);
-    let videoId = url.searchParams.get('v');
-    let embedUrl = "https://www.youtube.com/embed/" + videoId;
-    return embedUrl;
+    try {
+        let url = new URL(youtubeUrl);
+        let videoId = url.searchParams.get('v');
+        let embedUrl = "https://www.youtube.com/embed/" + videoId;
+        return embedUrl; 
+    }
+    catch(error) {
+        console.error('An error occured', error);
+    }
+
 }
 

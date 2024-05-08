@@ -19,8 +19,11 @@ logger = logging.getLogger(__name__)
 
 # The purpose of this is that
 # We delete a course if it's still in draft. because the user has to click submit on the frontend when creating their own course for it to be NOT in draft mode.
-# Thus we have this task scheduler
+# Thus, we have this task scheduler to reduce unwanted courses.
 def my_job():
+    """
+    Schedules deletion of unwanted courses
+    """
     courses = Course.objects.filter(is_draft=True)
     now = timezone.now()
     for course in courses:

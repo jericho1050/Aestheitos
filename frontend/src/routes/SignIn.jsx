@@ -29,25 +29,32 @@ function Copyright(props) {
 }
 
 export default function SignIn() {
-    const [isInvalidCredentials, setIsInvalidCredentials] = useState(0);
+    const [isInvalidCredentials, setIsInvalidCredentials] = useState(false);
+    const [status, setStatus] = useState('typing');
     const dispatch = useContext(AuthDispatchContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         // when sign in button is click. handles authentication, if valid redirect and set cookie
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const token = await signInAPI(data);
-        // console.log(token['access'])
-        if (token['invalid']) {
-            setIsInvalidCredentials(1);
-        } else {
-            dispatch({
-                type: 'setToken',
-                access: token['access'],
-                refresh: token['refresh']
-            })
-            navigate("/");
+        try {
+            setStatus('submitting')
+            const data = new FormData(event.currentTarget);
+            const token = await signInAPI(data);
+            if (token['invalid']) {
+                setIsInvalidCredentials(true);
+                throw new Error(token);
+            } else {
+                dispatch({
+                    type: 'setToken',
+                    access: token['access'],
+                    refresh: token['refresh']
+                })
+                navigate("/");
+            }
+        } catch (error) {
+            console.error('An error occured', error);
+            setStatus('typing');
         }
     };
 
@@ -70,7 +77,7 @@ export default function SignIn() {
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                     <TextField
-                        onChange={() => setIsInvalidCredentials(0)}
+                        onChange={() => setIsInvalidCredentials(false)}
                         margin="normal"
                         required
                         fullWidth
@@ -79,9 +86,13 @@ export default function SignIn() {
                         name="username"
                         autoComplete="username"
                         autoFocus
+                        error={isInvalidCredentials}
+                        disabled={status === 'submitting'}
+
+
                     />
                     <TextField
-                        onChange={() => setIsInvalidCredentials(0)}
+                        onChange={() => setIsInvalidCredentials(false)}
                         margin="normal"
                         required
                         fullWidth
@@ -90,12 +101,16 @@ export default function SignIn() {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        error={isInvalidCredentials}
+                        disabled={status === 'submitting'}
+
+
                     />
                     {/* <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}
                         label="Remember me"
                     /> */}
-                    {isInvalidCredentials === 1 ?
+                    {isInvalidCredentials ?
                         <Typography sx={{
                             color: 'red', fontSize: 'medium'
 
@@ -110,6 +125,7 @@ export default function SignIn() {
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
+                        disabled={status === 'submitting'}
                     >
                         Sign In
                     </Button>
@@ -152,7 +168,7 @@ function signInAPI(data) {
             if (response.status === 400 || response.status === 401) {
                 return { "invalid": "incorrect username and password" };
             }
-            throw new Error(response);
+            throw new Error(response); // may'be another different error 
         }
         return response.json();
     }).catch(err => console.error(err));
