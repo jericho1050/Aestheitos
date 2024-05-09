@@ -18,7 +18,6 @@ import CorrectFormDialog from "../components/CorrectFormDialog";
 import WrongFormDialog from "../components/WrongFormDialog";
 import image from '../static/images/noimg.png'
 import { styled } from '@mui/material/styles';
-import SendIcon from '@mui/icons-material/Send';
 import { useImmer } from "use-immer";
 import DeleteIcon from '@mui/icons-material/Delete';
 import getEmbedUrl from '../helper/getEmbedUrl';
@@ -34,26 +33,24 @@ import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
 import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
-import { Form, useActionData, useFetcher } from "react-router-dom";
+import { Form, redirect, useActionData, useFetcher, useNavigation } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import { Provider, atom, useAtom } from "jotai";
 import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
 import { useImmerAtom } from "jotai-immer";
 import { accordionsAtom } from "../atoms/accordionsAtom";
 import { isErrorAtom } from "../atoms/isErrorAtom";
-import { correctForm, workoutsAtom, wrongForm } from "../atoms/workoutsAtom";
-import { workoutDescriptionAtom } from "../atoms/workoutDescriptionAtom";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { modules } from "../helper/quillModule";
-import { red } from "@mui/material/colors";
+import { modules, modulesCard } from "../helper/quillModule";
+import { snackbarReducerAtom } from "../atoms/snackbarAtom";
+import AlertDialog from "../components/AreYouSureDialog";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
 // There's only Four CORE COMPONENTS here. one is in a file called Accordion. so there's FIVE CORE components.
-// TODO: conditional rendering for the example. and then we now implement the submit logic for this.
-
+// TODO SNACKBAR 
 export async function action({ request }) {
     let formData = await request.formData();
     let course, courseContent, section, sectionItem, workouts;
@@ -120,7 +117,7 @@ export async function action({ request }) {
                     if (section?.statusCode) {
                         if (section.statusCode >= 400) {
                             error = { ...section };
-                            return error
+                            return error;
                         }
                     }
                     break;
@@ -129,7 +126,7 @@ export async function action({ request }) {
                     if (section?.statusCode) {
                         if (section.statusCode >= 400) {
                             error = { ...section };
-                            return error
+                            return error;
                         }
                     }
                     break;
@@ -141,7 +138,7 @@ export async function action({ request }) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
                             error.accordionItem = true;
-                            return error
+                            return error;
                         }
                     }
                     sectionItem.workouts = workouts;
@@ -154,7 +151,7 @@ export async function action({ request }) {
                     if (sectionItem?.statusCode) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
-                            return error
+                            return error;
                         }
                     }
                     sectionItem.workouts = workouts;
@@ -165,10 +162,20 @@ export async function action({ request }) {
                     if (sectionItem?.statusCode) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
-                            return error
+                            return error;
                         }
                     }
                     break;
+                case 'submit':
+                    let courseId = formData.get('courseId');
+                    formData.append('is_draft', false);
+                    course = await updateCourse(courseId, formData);
+                    if (course?.statusCode >= 400) {
+                        error = { ...course };
+                        return error;
+                    }
+                    return redirect('/');
+
 
             }
             section = {
@@ -398,7 +405,7 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
                     <Box width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                         {/* workout description editor */}
                         <ReactQuill
-                            modules={modules}
+                            modules={modulesCard}
                             onChange={value => {
                                 setWorkoutDescription(value);
                                 setIsError(false);
@@ -689,96 +696,95 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
             </Grid>
 
             {/* don't render the first accordion items (they are just examples) */}
-            {(itemId !== 1 && itemId !== 2) && (
-                <Dialog
-                    fullScreen={fullScreen}
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="responsive-dialog-title"
-                    fullWidth={true}
-                    maxWidth={'md'}
-                >
 
-                    <Grid container>
-                        <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
-                            <DialogTitle id="responsive-dialog-title">
-                                <ButtonGroup
-                                    disableElevation
-                                    aria-label="button group"
-                                >
-                                    <Button onClick={() => setIsWorkoutRoutine(true)} variant={isWorkoutRoutine ? 'contained' : 'outlined'}>Workout Routine</Button>
-                                    <Button onClick={() => setIsWorkoutRoutine(false)} variant={isWorkoutRoutine ? 'outlined' : 'contained'}>Video Lecture / Readme</Button>
-                                </ButtonGroup>
-                            </DialogTitle>
-                        </Grid>
-                        <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
-                            <DialogContent>
-                                {
-                                    isWorkoutRoutine ?
-                                        <>
+            <Dialog
+                fullScreen={fullScreen}
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="responsive-dialog-title"
+                fullWidth={true}
+                maxWidth={'md'}
+            >
+
+                <Grid container>
+                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
+                        <DialogTitle id="responsive-dialog-title">
+                            <ButtonGroup
+                                disableElevation
+                                aria-label="button group"
+                            >
+                                <Button onClick={() => setIsWorkoutRoutine(true)} variant={isWorkoutRoutine ? 'contained' : 'outlined'}>Workout Routine</Button>
+                                <Button onClick={() => setIsWorkoutRoutine(false)} variant={isWorkoutRoutine ? 'outlined' : 'contained'}>Video Lecture / Readme</Button>
+                            </ButtonGroup>
+                        </DialogTitle>
+                    </Grid>
+                    <Grid item container justifyContent={'center'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
+                        <DialogContent>
+                            {
+                                isWorkoutRoutine ?
+                                    <>
 
 
-                                            <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                                {accordionItem.workouts?.map(workout => (
-                                                    // Renders Workout instance
-                                                    <Grid key={workout.id} item sm={6}>
-                                                        {/* Provider will provide context in which WorkoutMediaCard, can access an independent atom that it can be use */}
-                                                        <WorkoutMediaCard ids={{ accordionId, itemId }} immerAtom={immerAtom} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
-                                                    </Grid>
-                                                ))}
-                                                <Grid item sm={6}>
-                                                    {/* add WorkoutMediaCard / Workout button */}
-                                                    <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard()} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
-                                                        <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
-                                                    </Button>
+                                        <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
+                                            {accordionItem.workouts?.map(workout => (
+                                                // Renders Workout instance
+                                                <Grid key={workout.id} item sm={6}>
+                                                    {/* Provider will provide context in which WorkoutMediaCard, can access an independent atom that it can be use */}
+                                                    <WorkoutMediaCard ids={{ accordionId, itemId }} immerAtom={immerAtom} onChangeImage={handleImageUpload} onChangeDescription={handleChangeWorkoutDescription} onClick={handleDeleteWorkoutCard} workout={workout} open={open}> </WorkoutMediaCard>
                                                 </Grid>
-                                                {/* {isError &&
+                                            ))}
+                                            <Grid item sm={6}>
+                                                {/* add WorkoutMediaCard / Workout button */}
+                                                <Button disabled={itemId === 1 || itemId === 2} data-cy={`Add icon`} onClick={() => handleAddWorkoutCard()} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                                    <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
+                                                </Button>
+                                            </Grid>
+                                            {/* {isError &&
                                                 <Grid item sm={6} alignSelf={'center'}>
                                                     <Typography sx={{ color: 'red', textAlign: 'center', mb: 3, mt: 3 }}>Something Happend.Please try again</Typography>
                                                 </Grid>
                                             } */}
-                                            </Grid>
-                                        </>
-                                        :
-                                        <Grid justifyContent={{ xs: 'center' }} item container>
-                                            <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} />
-                                            <Grid item width={'81%'}>
-                                                {getEmbedUrl(accordionItem.lecture) ?
-                                                    <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                        <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
-                                                    :
-                                                    <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                        <Typography variant="body" align={'center'}>
-                                                            Your video will show up here
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            </Grid>
-                                            <Grid item mt={4}>
-                                                <ThemeProvider theme={theme}>
-                                                    <Typography variant="h4">
-                                                        Read me info.
-                                                    </Typography>
-                                                </ThemeProvider>
-                                            </Grid>
-                                            <Grid item xs={10} mt={4}>
-                                                <DescriptionInput isError={isError} actionData={actionData} description={description} onChange={setDescription} />
-                                            </Grid>
                                         </Grid>
-                                }
-                            </DialogContent>
-                        </Grid>
+                                    </>
+                                    :
+                                    <Grid justifyContent={{ xs: 'center' }} item container>
+                                        <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} itemId={itemId} />
+                                        <Grid item width={'81%'}>
+                                            {getEmbedUrl(accordionItem.lecture) ?
+                                                <Box mt={4} className="course-lecture-container" component={'div'}>
+                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
+                                                :
+                                                <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                    <Typography variant="body" align={'center'}>
+                                                        Your video will show up here
+                                                    </Typography>
+                                                </Box>
+                                            }
+                                        </Grid>
+                                        <Grid item mt={4}>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4">
+                                                    Read me info.
+                                                </Typography>
+                                            </ThemeProvider>
+                                        </Grid>
+                                        <Grid item xs={10} mt={4}>
+                                            <DescriptionInput isError={isError} actionData={actionData} description={description} onChange={setDescription} itemId={itemId} />
+                                        </Grid>
+                                    </Grid>
+                            }
+                        </DialogContent>
                     </Grid>
-                    <DialogActions>
-                        <Button autoFocus onClick={handleClose}>
-                            Close
-                        </Button>
-                        {/* <Button onClick={handleClose} autoFocus>
+                </Grid>
+                <DialogActions>
+                    <Button autoFocus onClick={handleClose}>
+                        Close
+                    </Button>
+                    {/* <Button onClick={handleClose} autoFocus>
                         Agree
                     </Button> */}
-                    </DialogActions>
-                </Dialog>
-            )}
+                </DialogActions>
+            </Dialog>
         </React.Fragment>
     );
 }
@@ -913,7 +919,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
             <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
             <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
                 <ThemeProvider theme={theme}>
-                    <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
+                    <Typography variant="small">Note: The examples here are not part of your content.Please ignore them to avoid confusion.</Typography>
                 </ThemeProvider>
             </Box>
             <TransitionGroup>
@@ -954,16 +960,15 @@ export default function CreateCourse() {
         isFirstView: true
 
     })
-    const theme2 = useTheme();
-    const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
-    const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
+
     const fetcher = useFetcher();
     const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     const [isError, setIsError] = useAtom(isErrorAtom)
     const [intent, setIntent] = React.useState('create');
-    // const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
+    const navigation = useNavigation();
+    const [, dispatch] = useAtom(snackbarReducerAtom);
 
-
+    console.log(`in creatCourse ${navigation.state === "submitting"} yawa kaa ${fetcher.state === "submitting"}`)
 
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
@@ -1044,6 +1049,17 @@ export default function CreateCourse() {
 
     }
 
+    function handleSubmit() {
+        fetcher.submit({
+            intent: 'submit',
+            courseId: course.id,
+            activeStep: activeStep
+        }, {method:'post'})
+        dispatch({
+            type: 'submitting'
+        })
+    }
+
 
 
     return (
@@ -1062,7 +1078,7 @@ export default function CreateCourse() {
                                 <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={2}>
                                     {/* Paper starts here */}
                                     <Grid item xs sm md={5}>
-                                        <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%'}}  >
+                                        <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%' }}  >
                                             <Grid item container justifyContent={'center'}>
                                                 <Grid item>
                                                     <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
@@ -1197,13 +1213,13 @@ export default function CreateCourse() {
 
                                                         Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
                                                             if (key === 'description') {
-                                                                return <legend style={{ color: 'red', visibility: 'visible', bottom: '96%'}}>{key}: {value}</legend>;
+                                                                return <legend style={{ color: 'red', visibility: 'visible', bottom: '96%' }}>{key}: {value}</legend>;
                                                             } else {
                                                                 return null;
                                                             }
                                                         })
 
-                                                        : <legend style={{bottom: '96%'}}>Your Course's Description</legend>
+                                                        : <legend style={{ bottom: '96%' }}>Your Course's Description</legend>
 
                                                     }
                                                     <ReactQuill
@@ -1219,7 +1235,7 @@ export default function CreateCourse() {
                                                         modules={modules}
                                                         className={isError ? 'ql-description ql-error' : 'ql-description'}
                                                         placeholder="Your Course's Description"
-                                                        style={{border: isError ? '1px solid red': ''}}
+                                                        style={{ border: isError ? '1px solid red' : '' }}
                                                     />
                                                 </fieldset>
                                                 <TextField type="hidden" value={course.description} name="description" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
@@ -1236,13 +1252,13 @@ export default function CreateCourse() {
                 )
                     : activeStep === 1 ? (
                         <fetcher.Form method="post" encType="multipart/form-data" noValidate >
-                            <input type="hidden" value={activeStep} name="activeStep" />
-                            <input type="hidden" value={course.id} name="courseId" />
+                            <TextField type="hidden" value={activeStep} name="activeStep" />
+                            <TextField type="hidden" value={course.id} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
                                 <Container>
-                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
-                                </Box>
+                                    <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    </Box>
                                 </Container>
                             </Box>
                             <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
@@ -1265,13 +1281,13 @@ export default function CreateCourse() {
 
                                                     Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
                                                         if (key === 'overview') {
-                                                            return <legend style={{ color: 'red', visibility: 'visible', bottom: '94%'}}>{key}: {value}</legend>;
+                                                            return <legend style={{ color: 'red', visibility: 'visible', bottom: '94%' }}>{key}: {value}</legend>;
                                                         } else {
                                                             return null;
                                                         }
                                                     })
 
-                                                    : <legend style={{bottom: '94%'}}>Your Course's Overview</legend>
+                                                    : <legend style={{ bottom: '94%' }}>Your Course's Overview</legend>
 
                                                 }
                                                 <ReactQuill
@@ -1287,9 +1303,9 @@ export default function CreateCourse() {
                                                     modules={modules}
                                                     className={isError ? 'ql-overview ql-error' : 'ql-overview'}
                                                     placeholder="Your Course's Overview"
-                                                    style={{border: isError ? '1px solid red': ''}}
-                                                    />
-                                                
+                                                    style={{ border: isError ? '1px solid red' : '' }}
+                                                />
+
                                             </fieldset>
                                             <TextField type="hidden" value={courseContent.overview} name="overview" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
                                         </Container>
@@ -1366,37 +1382,36 @@ export default function CreateCourse() {
                         </fetcher.Form>
                     ) : (
                         <>
-                            <fetcher.Form method="post" encType="multipart/form-data" noValidate>
-                                <Box sx={{ m: '3vw' }}>
-                                    <Container>
-                                        <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                            <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
-                                        </Box>
-                                    </Container>
-                                </Box>
-                                <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
 
-                                    <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                        <Grid item>
-                                            <ThemeProvider theme={theme}>
-                                                <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                                    Course content
-                                                </Typography>
-                                            </ThemeProvider>
-                                        </Grid>
-                                        <Grid item width={{ xs: '100%', md: '69%' }}>
-                                            <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
-                                        </Grid>
+                            <Box sx={{ m: '3vw' }}>
+                                <Container>
+                                    <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    </Box>
+                                </Container>
+                            </Box>
+                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                    <Grid item>
+                                        <ThemeProvider theme={theme}>
+                                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                                Course content
+                                            </Typography>
+                                        </ThemeProvider>
                                     </Grid>
+                                    <Grid item width={{ xs: '100%', md: '69%' }}>
+                                        <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
+                                    </Grid>
+                                </Grid>
+                                    {/* <TextField type="hidden" value={activeStep} name="activeStep" />
+                                    <TextField type="hidden" value={course.id} name="courseId" /> */}
                                     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
                                         <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
-                                            <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                                                Submit
-                                            </Button>
+                                            <AlertDialog onClickSubmit={handleSubmit}/>
                                         </Box>
                                     </Box>
-                                </Box>
-                            </fetcher.Form>
+
+                            </Box>
 
                         </>
                     )}

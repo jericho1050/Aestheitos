@@ -35,10 +35,12 @@ const sectionItem2 = {
         {
             id : 3,
             demo: demoGif,
-            exercise: `e.g., Chin Ups
-            setsXreps: 3x8
-            tempo: 1 sec concentric (upward movement) 2 sec eccentric (downward movement)
-            etc
+            exercise: `
+            <p>e.g., Chin Ups</p> <br>
+            <p>setsXreps: 3x8 </p> <br>
+            <p> tempo: 1 sec concentric (upward movement) <p> <br>
+            <p>2 sec eccentric (downward movement) etc</p>
+            
             `,
             correctForm : [],
             wrongForm: []

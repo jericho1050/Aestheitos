@@ -4,11 +4,12 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ReactQuill from "react-quill";
 import { modules } from "../helper/quillModule";
 
-export function YoutubeInput({ actionData, lecture, onChange, isError }) {
+export function YoutubeInput({ actionData, lecture, onChange, isError, itemId }) {
     return (
 
         <Box className="course-lecture-container" sx={{ width: '81%' }} component={'div'}>
             <TextField
+            disabled={itemId === 1 || itemId === 2}
                 error={isError}
                 InputProps={{
                     startAdornment: (
@@ -43,29 +44,12 @@ export function YoutubeInput({ actionData, lecture, onChange, isError }) {
     )
 }
 
-export function DescriptionInput({ actionData, description, onChange, isError }) {
+export function DescriptionInput({ actionData, description, onChange, isError, itemId }) {
 
     return (
 
         <Container className="ql-editor-container">
-            {/* {isError && actionData?.message ?
 
-                Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                    if (key === 'lecture') {
-                        return <label style={{ color: 'red', position: "absolute", margin: '10px 0 10px 10px', fontSize: '12px' }}>{key}: {value}</label>;
-                    } else {
-                        return null;
-                    }
-                })
-                : ""
-            }
-            <ReactQuill
-                modules={modules}
-                placeholder="Your information or lecture's description."
-                value={description}
-                onChange={value => { onChange(value); }}
-                className={isError ? 'ql-read-me ql-error' : 'ql-read-me'}
-            /> */}
             <fieldset className="quill-fieldset">
                 {isError && actionData?.message ?
 
@@ -80,6 +64,7 @@ export function DescriptionInput({ actionData, description, onChange, isError })
                     : <legend style={{ bottom: '96%' }}>Your Course's Description</legend>
                 }
                 <ReactQuill
+                readOnly={itemId === 1 || itemId === 2}
                     modules={modules}
                     placeholder="Your information or lecture's description."
                     value={description}

@@ -11,7 +11,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InputFileUpload from "./InputFileUpload";
-import { modules } from "../helper/quillModule";
+import { modules, modulesCard } from "../helper/quillModule";
 import ReactQuill from "react-quill";
 
 
@@ -75,7 +75,7 @@ function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onCha
                         error={isError}
                     /> */}
                     <ReactQuill 
-                        modules={modules}
+                        modules={modulesCard}
                             onChange={value => {
                                 setDescription(value);
                                 setIsError(false);
@@ -146,7 +146,7 @@ export default function CorrectFormDialog({ errorState, eventHandlers, workoutId
 
                             <Grid item sm={6}>
                                 {/* add WorkoutMediaCard / Workout button */}
-                                <Button onClick={() => onClick('correctForm', workoutId)} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                <Button disabled={workoutId === 3} onClick={() => onClick('correctForm', workoutId)} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                 </Button>
                             </Grid>
