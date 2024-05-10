@@ -214,3 +214,16 @@ html {
     height: 220px;
   }
 }
+
+
+.second-image {
+  position: absolute;
+  z-index: -1;
+
+}
+
+.third-image {
+  position: absolute;
+  z-index: -2;
+}
+

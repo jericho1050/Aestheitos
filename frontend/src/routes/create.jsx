@@ -49,8 +49,7 @@ import AlertDialog from "../components/AreYouSureDialog";
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-// There's only Four CORE COMPONENTS here. one is in a file called Accordion. so there's FIVE CORE components.
-// TODO SNACKBAR 
+// There's only Four CORE COMPONENTS here. one is in a file called Accordion. so there's actually FIVE CORE components for this route.
 export async function action({ request }) {
     let formData = await request.formData();
     let course, courseContent, section, sectionItem, workouts;

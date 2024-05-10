@@ -1,11 +1,11 @@
 import { Box, Container, Grid, ThemeProvider, Typography, colors, createTheme, responsiveFontSizes, useMediaQuery } from "@mui/material";
-import { useSpring, animated } from "@react-spring/web";
+import { useSpring, animated, useSprings } from "@react-spring/web";
 import { useEffect, useState } from "react";
 import CourseCard from "../components/CourseCard";
-import pic from "../static/images/test.jpg"
-import pic2 from "../static/images/what.jpg"
+
 import { getCourses } from "../courses";
 import { useLoaderData } from "react-router-dom";
+import { transform } from "lodash";
 
 
 
@@ -13,7 +13,11 @@ import { useLoaderData } from "react-router-dom";
 // https://codesandbox.io/p/sandbox/mysterious-text-animation-with-react-spring-vhj66
 // By imhuyqn
 
-
+const images = [
+    "src/static/images/firstBG.png",
+    "src/static/images/secondBG.png",
+    "src/static/images/thirdBG.png"
+]
 export async function loader() {
     const courses = await getCourses();
     return { courses };
@@ -22,14 +26,15 @@ export async function loader() {
 const MysteriousText = ({ children, ...props }) => {
     const matches = useMediaQuery(theme => theme.breakpoints.up('lg'))
     const animation = i =>
-        useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650 )});
+        useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650) });
     const certainIndex = 43;
 
 
     return (
         <Typography variant={matches ? 'h3' : 'h4'} sx={{ textAlign: 'left', }} {...props}>
             {children.split("").map((item, index) => (
-                <animated.span key={index} style={{...animation(index), 
+                <animated.span key={index} style={{
+                    ...animation(index),
                     fontFamily: index <= certainIndex ? '"Anta"' : '"Rem"',
                 }}>
                     {item}
@@ -44,7 +49,7 @@ export function Index() {
     const { courses } = useLoaderData();
     let theme = createTheme();
     theme = responsiveFontSizes(theme);
-    const springs = useSpring({
+    const spring = useSpring({
         from: { x: -1000, y: -window.innerHeight * 0.35 },
         to: async (next, cancel) => {
             await next({ x: 0, y: -window.innerHeight * 0.35 });
@@ -52,13 +57,28 @@ export function Index() {
         },
         onRest: () => setAnimationFinished(true)
 
-
     })
+
+    const [springs, api] = useSprings(3, index => ({
+        from: { x: '100%'},
+        to: { x: '0%'},
+        delay: index * 200
+    }));
 
     return (<>
         <Box sx={{ margin: -1, padding: 0, position: 'relative' }}>
-            <img src="src/static/images/newBackground.jpg" alt="pair of rings" className="background-image" />
-            <animated.div style={{ ...springs }}>
+            <Box display={'flex'}>
+                {/* staggering effect */}
+                {springs.map((props, index) => {
+                    let className = "background-image";
+                    if (index === 1) className += " second-image";
+                    else if (index === 2) className += " third-image";
+                    return <animated.img style={props} src={images[index]} className={className} />
+                })}
+            </Box>
+        
+
+            <animated.div style={{ ...spring }}>
                 <Container fixed={true} maxWidth={false} sx={{ display: 'flex', backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: { xs: '4%', sm: '6%' }, paddingLeft: { xs: '8%' }, paddingRight: { xs: '8%' }, width: { xs: '69%' } }} className="container-homepage">
                     <ThemeProvider theme={theme}>
                         {/* <Typography variant={matches ? 'h3' : 'h4'} sx={{ color: '#5A5A5A', fontWeight: 600, fontFamily: '"Helvetica Neue"', textAlign: 'left' }}>
