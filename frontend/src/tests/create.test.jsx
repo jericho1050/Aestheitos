@@ -21,6 +21,11 @@ import {action as createAction} from '../routes/create';
 import ProectedRoute from '../helper/protectedRoute';
 import { IsLoadingProvider } from '../helper/IsLoadingContext';
 
+// IDK HOW TO USE VITEST LMAO
+// HAHA SO THERE'S NOTHING HERE 
+// THIS WON'T EVEN RUN LOL
+// I actually wanted to do some unit/component testing but
+// nah im tired already.
 const routesArray = [
     {
       path: "/",
@@ -74,5 +79,3 @@ test('renders without crashing', () => {
   expect(container).toBeTruthy()
 })
 
-//TODO 
-// UNIT TEST --> FUNCTIONS IN COURSE.JS

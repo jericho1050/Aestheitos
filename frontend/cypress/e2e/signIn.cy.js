@@ -30,7 +30,7 @@ describe('User Signs In', () => {
     cy.get('input[name=password]').type(password);
 
     // stub a response to POST login
-    cy.intercept('POST', `${Cypress.env('VITE_API_URL')}login`, {
+    cy.intercept('POST', `${Cypress.env('REST_API_URL')}login`, {
         statusCode: 401,
         body: {'invalid': 'incorrect username and password'},
     }).as('postLogin');

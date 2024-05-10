@@ -967,7 +967,7 @@ export default function CreateCourse() {
     const navigation = useNavigation();
     const [, dispatch] = useAtom(snackbarReducerAtom);
 
-    console.log(`in creatCourse ${navigation.state === "submitting"} yawa kaa ${fetcher.state === "submitting"}`)
+    // console.log(`in creatCourse ${navigation.state === "submitting"} ${fetcher.state === "submitting"}`)
 
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
@@ -1229,7 +1229,6 @@ export default function CreateCourse() {
                                                             });
                                                             setIsError(false);
                                                         }}
-                                                        data-cy="Course Description"
                                                         value={course.description}
                                                         modules={modules}
                                                         className={isError ? 'ql-description ql-error' : 'ql-description'}
