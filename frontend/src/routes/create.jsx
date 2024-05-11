@@ -676,7 +676,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                 </Grid>
                 {(itemId !== 1 && itemId !== 2) && (
                     <Grid item xs={2} lg={1}>
-                        <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
+                        <Button data-cy={`accordionItem edit-${itemId}`} onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
                         <Button onClick={() => onClick(accordionId, itemId)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
                     </Grid>
                 )}

@@ -57,7 +57,7 @@ export default function AccordionSection({ actionData, eventHandlers, onClickDel
                         }
                     }}
                 />
-                <Button onClick={() => setIsEditing(false)} disabled={isError}>
+                <Button data-cy="Accordion save-btn" onClick={() => setIsEditing(false)} disabled={isError}>
                     Save
                 </Button>
             </>
