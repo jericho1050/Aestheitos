@@ -241,8 +241,16 @@ describe('Create Course Route', () => {
       expect(response.body).to.have.property('course_content', 814);
     });
 
-    cy.intercept('GET', `${Cypress.env('REST_API_URL')}section/941/course-content`);
-    cy.intercept('POST', `${Cypress.env('REST_API_URL')}sections/course-content/814`, {
+
+    cy.intercept('GET', `${Cypress.env('REST_API_URL')}/section/941/course-content`, {
+      statusCode: 200,
+      body: {
+        "id": 941,
+        "heading": "Add an accordion, e.g., Phase 1",
+        "course_content": 814
+      }
+    }).as('get-section-941');
+      cy.intercept('POST', `${Cypress.env('REST_API_URL')}sections/course-content/814`, {
       statusCode: 400,
       body: {
         "heading": [
@@ -321,6 +329,7 @@ describe('Create Course Route', () => {
 
 
     cy.wait(500);
+    cy.wait('@get-section-941')
     cy.wait('@add-accordion-item-1').should(({ request, response }) => {
       expect(response.body).to.have.property('heading');
       expect(response.body).to.have.property('section');
@@ -516,7 +525,14 @@ describe('Create Course Route', () => {
         "course_content": 814
       }
     }).as('add-accordion');
-
+    cy.intercept('GET', `${Cypress.env('REST_API_URL')}/section/941/course-content`, {
+      statusCode: 200,
+      body: {
+        "id": 941,
+        "heading": "Add an accordion, e.g., Phase 1",
+        "course_content": 814
+      }
+    }).as('get-section-941');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-10 > .MuiFormControl-root > .MuiInputBase-root > #outlined-textarea').should('be.visible');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root > [data-testid="AddIcon"]').should('be.visible');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root > [data-testid="AddIcon"] > path').click();
@@ -524,7 +540,6 @@ describe('Create Course Route', () => {
     cy.wait(500);
     cy.wait('@add-accordion');
 
-    cy.intercept('GET', `${Cypress.env('REST_API_URL')}section/941/course-content`);
     cy.intercept('POST', `${Cypress.env('REST_API_URL')}sections/course-content/814`, {
       statusCode: 400,
       body: {
@@ -552,6 +567,7 @@ describe('Create Course Route', () => {
 
 
     cy.wait(500);
+    cy.wait('@get-section-941');
     cy.wait('@add-accordion-item-1').should(({ request, response }) => {
       expect(response.body).to.have.property('heading');
       expect(response.body).to.have.property('section');
@@ -842,16 +858,47 @@ describe('Create Course Route', () => {
 
     cy.get(':nth-child(2) > [data-cy="Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').should('have.text', 'TEST NEW WORKOUT');
     cy.get(':nth-child(2) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(1) > .MuiButtonBase-root').click();
-    cy.get(':nth-child(1) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(2) > .MuiButtonBase-root').click();
-    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-root > .MuiDialogActions-root > .MuiButtonBase-root').click();
-    cy.get('[data-cy="Add Icon Correct-Dialog"] > [data-testid="AddIcon"]').click();
-    cy.get('[data-cy="Add Icon Correct-Dialog"] > [data-testid="AddIcon"]').click();
-    /* ==== End Cypress Studio ==== */
-
-
-
-    // will continue later on
-    // tired af
+    cy.get(':nth-child(1) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(2) > .MuiButtonBase-root').click({force: true});
+    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-root > .MuiDialogActions-root > .MuiButtonBase-root').click({force: true});
+    for (let i = 0; i < 6; i++) {
+      cy.intercept('POST', `${Cypress.env('REST_API_URL')}wrong-exercises/course/workout/465`, {
+        statusCode: 201,
+        body: {
+          "id": 20 + i,
+          "demo": "http://127.0.0.1:8000/images/correct_exercise_form/pushupVecs.gif",
+          "workout": 465 + i,
+          "description": "Wrong exercise form description: e.g., Shoulder blades not retracting",
+        }
+      }).as('add-wrong-form-workout-card');
+      cy.intercept('PATCH', `${Cypress.env('REST_API_URL')}wrong-exercise/${20 + i}/course/workout`, {
+        statusCode: 201,
+        body: {
+          "id": 20 + i,
+          "demo": "http://127.0.0.1:8000/images/correct_exercise_form/pushupVecs.gif",
+          "workout": 465 + i,
+          "description": "Wrong exercise form description: e.g., Shoulder blades not retracting",
+        }
+      });
+      cy.get('[data-cy="Add Icon Wrong-Dialog"] > [data-testid="AddIcon"] > path').click();
+      cy.wait(500);
+      cy.wait('@add-wrong-form-workout-card');
+    }
+    cy.get('[data-cy="Wrong Form Workout Card"]').should('have.length', 6);    
+    for (let i = 0; i < 6; i++) {
+      cy.intercept('DELETE', `${Cypress.env('REST_API_URL')}wrong-exercise/${20 + i}/course/workout`, {
+        statusCode: 204,
+      });
+    }
+    cy.get(':nth-child(6) > [data-cy="Wrong Form Workout Card"] > .MuiCardActions-root > .MuiGrid-container > .MuiGrid-root > .MuiButtonBase-root').click();
+    cy.get(':nth-child(5) > [data-cy="Wrong Form Workout Card"] > .MuiCardActions-root > .MuiGrid-container > .MuiGrid-root > .MuiButtonBase-root').click();
+    cy.get(':nth-child(4) > [data-cy="Wrong Form Workout Card"] > .MuiCardActions-root > .MuiGrid-container > .MuiGrid-root > .MuiButtonBase-root').click();
+    cy.get(':nth-child(3) > [data-cy="Wrong Form Workout Card"] > .MuiCardActions-root > .MuiGrid-container > .MuiGrid-root > .MuiButtonBase-root').click();
+    cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardActions-root > .MuiGrid-container > .MuiGrid-root > .MuiButtonBase-root').click();
+    cy.get(':nth-child(1) > [data-cy="Wrong Form Workout Card"] > .MuiCardActions-root > .MuiGrid-container > .MuiGrid-root > .MuiButtonBase-root').click();
+    cy.get('[data-cy="Add Icon Wrong-Dialog"] > [data-testid="AddIcon"] > path').click();
+    cy.get('[data-cy="Wrong Form Workout Card"]').should('have.length', 1);
+    cy.get('[data-cy="Wrong Form Workout Card"] > .MuiButton-outlined').click().selectFile('src/static/images/test.jpg', { force: true });
+    cy.get('[data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').click();
   });
 
 

@@ -125,7 +125,7 @@ export default function WrongFormDialog({ errorState, eventHandlers, workoutId, 
 
                             <Grid item sm={6}>
                                 {/* add WorkoutMediaCard / Workout button */}
-                                <Button disabled={workoutId === 3} onClick={() => { onClick('wrongForm', workoutId) }} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                <Button data-cy="Add Icon Wrong-Dialog" disabled={workoutId === 3} onClick={() => { onClick('wrongForm', workoutId) }} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                 </Button>
                             </Grid>
