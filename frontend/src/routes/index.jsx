@@ -1,11 +1,14 @@
 import { Box, Container, Grid, ThemeProvider, Typography, colors, createTheme, responsiveFontSizes, useMediaQuery } from "@mui/material";
 import { useSpring, animated, useSprings } from "@react-spring/web";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CourseCard from "../components/CourseCard";
 
 import { getCourses } from "../courses";
 import { useLoaderData } from "react-router-dom";
 import { transform } from "lodash";
+import CustomizedSnackbar from "../components/Snackbar";
+import { useAtom } from "jotai";
+import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 
 
 
@@ -28,8 +31,6 @@ const MysteriousText = ({ children, ...props }) => {
     const animation = i =>
         useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650) });
     const certainIndex = 43;
-
-
     return (
         <Typography variant={matches ? 'h3' : 'h4'} sx={{ textAlign: 'left', }} {...props}>
             {children.split("").map((item, index) => (
@@ -58,14 +59,15 @@ export function Index() {
         onRest: () => setAnimationFinished(true)
 
     })
-
     const [springs, api] = useSprings(3, index => ({
         from: { x: '100%'},
         to: { x: '0%'},
         delay: index * 200
     }));
+    const [snackbar,] = useAtom(snackbarReducerAtom);
 
     return (<>
+    {snackbar.open && <CustomizedSnackbar />}
         <Box sx={{ margin: -1, padding: 0, position: 'relative' }}>
             <Box display={'flex'}>
                 {/* staggering effect */}
@@ -73,7 +75,7 @@ export function Index() {
                     let className = "background-image";
                     if (index === 1) className += " second-image";
                     else if (index === 2) className += " third-image";
-                    return <animated.img style={props} src={images[index]} className={className} />
+                    return <animated.img key={index} style={props} src={images[index]} className={className} />
                 })}
             </Box>
         

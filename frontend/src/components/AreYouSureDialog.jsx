@@ -8,12 +8,15 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { useMediaQuery, useTheme } from '@mui/material';
 import { useNavigation } from 'react-router-dom';
 import SendIcon from '@mui/icons-material/Send';
+import { useAtom } from 'jotai';
+import { snackbarReducerAtom } from '../atoms/snackbarAtom';
 
 export default function AlertDialog({onClickSubmit}) {
     const theme2 = useTheme();
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
     const [open, setOpen] = React.useState(false);
     const navigation = useNavigation();
+    const[, dispatch] = useAtom(snackbarReducerAtom);
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -45,7 +48,12 @@ export default function AlertDialog({onClickSubmit}) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button autoFocus onClick={onClickSubmit}>
+                    <Button autoFocus onClick={() => {
+                        onClickSubmit();
+                        dispatch({
+                            type: 'submitting'
+                        })
+                        }}>
                         Submit
                     </Button>
                 </DialogActions>
