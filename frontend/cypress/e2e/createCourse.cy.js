@@ -883,7 +883,7 @@ describe('Create Course Route', () => {
       cy.wait(500);
       cy.wait('@add-wrong-form-workout-card');
     }
-    cy.get('[data-cy="Wrong Form Workout Card"]').should('have.length', 6);    
+    cy.get('[data-cy="Wrong Form Workout Card"]').should('have.length', 6);
     for (let i = 0; i < 6; i++) {
       cy.intercept('DELETE', `${Cypress.env('REST_API_URL')}wrong-exercise/${20 + i}/course/workout`, {
         statusCode: 204,
@@ -899,6 +899,58 @@ describe('Create Course Route', () => {
     cy.get('[data-cy="Wrong Form Workout Card"]').should('have.length', 1);
     cy.get('[data-cy="Wrong Form Workout Card"] > .MuiButton-outlined').click().selectFile('src/static/images/test.jpg', { force: true });
     cy.get('[data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').click();
+    cy.get('[data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').clear();
+    cy.get('[data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').type('testing the wrong form workout cards textarea');
+
+
+
+
+
+    cy.get('[data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').should('have.text', 'testing the wrong form workout cards textarea');
+    cy.get('[data-cy="Add Icon Wrong-Dialog"] > [data-testid="AddIcon"]').click();
+    cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').click();
+    cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').clear();
+    cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').type('testing the second wrong form workout card\'s textarea');
+    cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiButton-outlined').click().selectFile('src/static/images/test.jpg', { force: true });
+
+
+    /* ==== Generated with Cypress Studio ==== */
+    cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor > p').click();
+    cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').should('have.text', 'testing the second wrong form workout card\'s textarea');
+    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-elevation24 > .MuiDialogActions-root > .MuiButtonBase-root').click();
+    cy.get('.MuiDialogActions-root > .MuiButtonBase-root').click();
+    cy.get('.css-517uf5 > .MuiBox-root > .MuiButtonBase-root').should('be.enabled');
+    cy.get('.css-517uf5 > .MuiBox-root > .MuiButtonBase-root').click();
+
+
+    cy.intercept('PATCH', `${Cypress.env('REST_API_URL')}course/1044`, {
+      statusCode: 200,
+      body: {
+        "id": 1044,
+        "average_rating": null,
+        "created_by_name": "test",
+        "difficulty_display": "Beginner",
+        "enrollee_count": 0,
+        "title": "Testing new course title",
+        "description": "there's change",
+        "thumbnail": null,
+        "difficulty": "BG",
+        "course_created": "2024-05-10",
+        "course_updated": "2024-05-11T02:01:02.032021+08:00",
+        "status": "P",
+        "price": "1.00",
+        "weeks": 6,
+        "is_draft": false,
+        "created_by": 2
+      }
+    }).as('submit-course')
+    cy.get('#alert-dialog-title').should('be.visible');
+    cy.get('.MuiDialogContent-root').should('be.visible');
+    cy.get('.MuiDialogActions-root > :nth-child(2)').should('be.enabled');
+    cy.get('.MuiDialogActions-root > :nth-child(2)').click();
+    cy.wait(500);
+    cy.wait('@submit-course');
+    /* ==== End Cypress Studio ==== */
   });
 
 
