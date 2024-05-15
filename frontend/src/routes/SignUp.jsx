@@ -32,11 +32,13 @@ function Copyright(props) {
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const [isInvalid, setIsInvalid] = React.useState(0);
+  const [isInvalid, setIsInvalid] = React.useState(false);
+  const [status, setStatus] = React.useState('typing');
   const dispatch = React.useContext(AuthDispatchContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setStatus('submitting');
 
     // Get form elements
     const form = event.currentTarget;
@@ -46,24 +48,32 @@ export default function SignUp() {
     for (let i = 0; i < inputs.length; i++) {
       if (inputs[i].required && !inputs[i].value) {
         alert('Please fill all required fields');
+        setStatus('typing')
         return;
       }
     }
+    try {
+      const data = new FormData(event.currentTarget);
 
-    const data = new FormData(event.currentTarget);
-
-    const token = await signUpAPI(data);
-
-    if (token['invalid']) {
-      setIsInvalid(1);
-    } else {
-      dispatch({
-        type: 'setToken',
-        access: token['access'],
-        refresh: token['refresh']
-    });
-      navigate('/');
+      const token = await signUpAPI(data);
+  
+      if (token['invalid']) {
+        setIsInvalid(true);
+        throw new Error(token);
+      } else {
+        dispatch({
+          type: 'setToken',
+          access: token['access'],
+          refresh: token['refresh']
+      });
+        navigate('/');
+      }
     }
+    catch (error) {
+      console.error('An error occured', error);
+      setStatus('typing');
+    }
+
 
   }
 
@@ -95,6 +105,10 @@ export default function SignUp() {
                 id="firstName"
                 label="First Name"
                 autoFocus
+                onChange={() => setIsInvalid(false)} 
+                error={isInvalid}
+                disabled={status === 'submitting'}
+
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -105,6 +119,11 @@ export default function SignUp() {
                 label="Last Name"
                 name="lastName"
                 autoComplete="family-name"
+                onChange={() => setIsInvalid(false)}
+                error={isInvalid}
+                disabled={status === 'submitting'}
+
+
               />
             </Grid>
             <Grid item xs={12}>
@@ -115,6 +134,11 @@ export default function SignUp() {
                 label="Username"
                 name="username"
                 autoComplete='username'
+                onChange={() => setIsInvalid(false)} 
+                error={isInvalid}
+                disabled={status === 'submitting'}
+
+
               />
             </Grid>
             <Grid item xs={12}>
@@ -125,6 +149,10 @@ export default function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                onChange={() => setIsInvalid(false)} 
+                error={isInvalid}
+                disabled={status === 'submitting'}
+
               />
             </Grid>
             <Grid item xs={12}>
@@ -136,6 +164,10 @@ export default function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="new-password"
+                onChange={() => setIsInvalid(false)}
+                error={isInvalid}
+                disabled={status === 'submitting'}
+
               />
             </Grid>
             {/* <Grid item xs={12}>
@@ -148,7 +180,7 @@ export default function SignUp() {
           <Grid>
             <Grid item>
               {
-                isInvalid === 1 ?
+                isInvalid ?
                   <Typography sx={{ mt: 3, color: "red", fontSize: { s: "x-small", m: "medium" } }}>
                     Username Taken and Invalid Email Address
                   </Typography>
@@ -161,6 +193,7 @@ export default function SignUp() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={status === 'submitting'}
           >
             Sign Up
           </Button>
@@ -179,7 +212,7 @@ export default function SignUp() {
 }
 
 // sends a POST request to our /signup route 
-function signUpAPI(data) {
+async function signUpAPI(data) {
   return fetch(`${import.meta.env.VITE_API_URL}register`, {
     method: "POST",
     headers: {
@@ -200,7 +233,7 @@ function signUpAPI(data) {
         if (response.status === 403 || response.status === 400) {
           return {"invalid": "username taken and invalid email"};
         }
-        throw new Error(response);
+        throw new Error(response); // may'be another different error 
       }
       return response.json();
     })

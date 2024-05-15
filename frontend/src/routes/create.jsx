@@ -18,7 +18,6 @@ import CorrectFormDialog from "../components/CorrectFormDialog";
 import WrongFormDialog from "../components/WrongFormDialog";
 import image from '../static/images/noimg.png'
 import { styled } from '@mui/material/styles';
-import SendIcon from '@mui/icons-material/Send';
 import { useImmer } from "use-immer";
 import DeleteIcon from '@mui/icons-material/Delete';
 import getEmbedUrl from '../helper/getEmbedUrl';
@@ -34,22 +33,23 @@ import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
 import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
-import { Form, useActionData, useFetcher } from "react-router-dom";
+import { Form, redirect, useActionData, useFetcher, useNavigation } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
-import isUrl from "is-url";
 import { Provider, atom, useAtom } from "jotai";
 import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
 import { useImmerAtom } from "jotai-immer";
 import { accordionsAtom } from "../atoms/accordionsAtom";
 import { isErrorAtom } from "../atoms/isErrorAtom";
-import { correctForm, workoutsAtom, wrongForm } from "../atoms/workoutsAtom";
-import { workoutDescriptionAtom } from "../atoms/workoutDescriptionAtom";
-
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { modules, modulesCard } from "../helper/quillModule";
+import { snackbarReducerAtom } from "../atoms/snackbarAtom";
+import AlertDialog from "../components/AreYouSureDialog";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-
+// There's only Four CORE COMPONENTS here. one is in a file called Accordion. so there's actually FIVE CORE components for this route.
 export async function action({ request }) {
     let formData = await request.formData();
     let course, courseContent, section, sectionItem, workouts;
@@ -77,11 +77,12 @@ export async function action({ request }) {
             }
             break;
         case 1:
-            // create a course's overview (course content)
+            // create a course's overview
             let courseId = formData.get('courseId');
             if (intent === 'create') {
                 courseContent = await createCourseContent(courseId, formData);
             }
+            // update a course's overview
             if (intent === 'update') {
                 courseContent = await updateCourseContent(courseId, formData);
             }
@@ -93,7 +94,7 @@ export async function action({ request }) {
             }
             break;
         case 2:
-            // create a section / accordion (course's content)
+            // create/update a section / accordion (course's content)
             let sectionId = formData.get('sectionId');
             let sectionItemId = formData.get('sectionItemId');
             switch (intent) {
@@ -115,7 +116,7 @@ export async function action({ request }) {
                     if (section?.statusCode) {
                         if (section.statusCode >= 400) {
                             error = { ...section };
-                            return error
+                            return error;
                         }
                     }
                     break;
@@ -124,7 +125,7 @@ export async function action({ request }) {
                     if (section?.statusCode) {
                         if (section.statusCode >= 400) {
                             error = { ...section };
-                            return error
+                            return error;
                         }
                     }
                     break;
@@ -136,7 +137,7 @@ export async function action({ request }) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
                             error.accordionItem = true;
-                            return error
+                            return error;
                         }
                     }
                     sectionItem.workouts = workouts;
@@ -149,7 +150,7 @@ export async function action({ request }) {
                     if (sectionItem?.statusCode) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
-                            return error
+                            return error;
                         }
                     }
                     sectionItem.workouts = workouts;
@@ -160,10 +161,20 @@ export async function action({ request }) {
                     if (sectionItem?.statusCode) {
                         if (sectionItem.statusCode >= 400) {
                             error = { ...sectionItem };
-                            return error
+                            return error;
                         }
                     }
                     break;
+                case 'submit':
+                    let courseId = formData.get('courseId');
+                    formData.append('is_draft', false);
+                    course = await updateCourse(courseId, formData);
+                    if (course?.statusCode >= 400) {
+                        error = { ...course };
+                        return error;
+                    }
+                    return redirect('/');
+
 
             }
             section = {
@@ -190,7 +201,6 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
     // it's main purpose is for debouncing
     const [workoutDescription, setWorkoutDescription] = React.useState(workout.exercise)
     const isFirstRender = React.useRef(true); const initialWorkoutDescription = React.useRef(workoutDescription);
-    console.log(isError);
     // Handles HTTP request for updating workout's description for this component
     React.useEffect(() => {
         if (isFirstRender.current || workoutDescription === initialWorkoutDescription.current) {
@@ -389,29 +399,20 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
                     alt="workout demo"
                 />
                 <InputFileUpload workoutId={workout.id} onChange={onChangeImage} name="demo" text="GIF File" />
-                {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
+                {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mt: 1 }}>Something Happend.Please try again</Typography>}
                 <CardContent>
-                    <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
-                        {/* workout description textarea input */}
-                        <TextField
-                            helperText=" "
-                            id="demo-helper-text-aligned-no-helper"
-                            label="Your Workout's Description"
-                            fullWidth={true}
-                            minRows={isSmallScreen ? 7 : 10}
-                            maxRows={isSmallScreen ? 7 : 10}
-                            multiline
-                            required={true}
-                            autoFocus
-                            name="exercise"
-                            value={workoutDescription}
-                            onChange={event => {
-                                setWorkoutDescription(event.target.value);
+                    <Box width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+                        {/* workout description editor */}
+                        <ReactQuill
+                            modules={modulesCard}
+                            onChange={value => {
+                                setWorkoutDescription(value);
                                 setIsError(false);
                             }}
-                            error={isError}
-
+                            value={workoutDescription}
+                            className={isError ? "ql-workout ql-error" : "ql-workout"}
                         />
+
                     </Box>
                 </CardContent>
                 <CardActions sx={{ marginTop: 'auto' }}>
@@ -447,7 +448,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [parent, enableAnimations] = useAutoAnimate();
-    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(true);
+    const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(accordionItem?.workouts?.length > 0);
     const [heading, setHeading] = React.useState('');
     // The `lecture` and `description` state variable holds the *first* value of `accordionItem.lecture` for lecture and `accordItem.description` for description.
     // Further changes to both `accordionItem` prop are ignored.
@@ -456,6 +457,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
+    const isFirstRender = React.useRef(true); const initialDescription = React.useRef(description); const initialLecture = React.useRef(lecture); // necessary variables to avoid this side effect from running on the first render
 
     React.useEffect(() => {
         if (actionData?.message) { // if there's a message from action server. then there's an error
@@ -479,7 +481,10 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
             }
         }
         if (!isWorkoutRoutine) {
-
+            if (isFirstRender.current || (description === initialDescription.current && lecture === initialLecture.current)) {
+                isFirstRender.current = false;
+                return;
+            }
             // debounce event handler
             const handler = setTimeout(() => {
                 onChange({
@@ -579,7 +584,13 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                     const accordionItem = accordion.items.find(item => item.id === itemId);
                     accordionItem.workouts.push({
                         id: workout.id,
-                        exercise: "Your Description here",
+                        exercise: `
+                        <h3> Your description here e.g., </h3><br>
+                        <p> Chin Ups setsXreps: 3x8 </p> <br>
+                        <p> Rest: 2 minutes </p> <br>
+                        <p> tempo: 1 sec concentric (upward movement)</p> <br>
+                        <p> 2 sec eccentric (downward movement) </p>
+                        <p> exertion: 8 </p> etc`,
                         demo: demoGif,
                         correctForm: [
 
@@ -663,10 +674,12 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                         </Typography>
                     </ThemeProvider>
                 </Grid>
-                <Grid item xs={2} lg={1}>
-                    <Button onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
-                    <Button onClick={() => onClick(accordionId, itemId)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
-                </Grid>
+                {(itemId !== 1 && itemId !== 2) && (
+                    <Grid item xs={2} lg={1}>
+                        <Button data-cy={`accordionItem edit-${itemId}`} onClick={() => setIsEditing(true)} size="small" endIcon={!isEditing ? <EditIcon /> : null}></Button>
+                        <Button onClick={() => onClick(accordionId, itemId)} size="small" endIcon={!isEditing ? <DeleteIcon /> : null}></Button>
+                    </Grid>
+                )}
             </>
         )
     }
@@ -681,6 +694,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                 {accordionItemHeadingContent}
             </Grid>
 
+            {/* don't render the first accordion items (they are just examples) */}
 
             <Dialog
                 fullScreen={fullScreen}
@@ -720,7 +734,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                             ))}
                                             <Grid item sm={6}>
                                                 {/* add WorkoutMediaCard / Workout button */}
-                                                <Button data-cy={`Add icon`} onClick={() => handleAddWorkoutCard()} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                                <Button disabled={itemId === 1 || itemId === 2} data-cy={`Add icon`} onClick={() => handleAddWorkoutCard()} sx={{ height: { xs: 250, sm: 622, md: 700 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                                 </Button>
                                             </Grid>
@@ -733,7 +747,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                     </>
                                     :
                                     <Grid justifyContent={{ xs: 'center' }} item container>
-                                        <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} />
+                                        <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} itemId={itemId} />
                                         <Grid item width={'81%'}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
@@ -749,12 +763,12 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                         <Grid item mt={4}>
                                             <ThemeProvider theme={theme}>
                                                 <Typography variant="h4">
-                                                    Your readme text here
+                                                    Read me info.
                                                 </Typography>
                                             </ThemeProvider>
                                         </Grid>
                                         <Grid item xs={10} mt={4}>
-                                            <DescriptionInput isError={isError} actionData={actionData} description={description} onChange={setDescription} />
+                                            <DescriptionInput isError={isError} actionData={actionData} description={description} onChange={setDescription} itemId={itemId} />
                                         </Grid>
                                     </Grid>
                             }
@@ -904,7 +918,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
             <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
             <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
                 <ThemeProvider theme={theme}>
-                    <Typography variant="small">Note: The examples here are not part of your content.Please delete them to avoid confusion.</Typography>
+                    <Typography variant="small">Note: The examples here are not part of your content.Please ignore them to avoid confusion.</Typography>
                 </ThemeProvider>
             </Box>
             <TransitionGroup>
@@ -945,16 +959,15 @@ export default function CreateCourse() {
         isFirstView: true
 
     })
-    const theme2 = useTheme();
-    const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
-    const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
+
     const fetcher = useFetcher();
     const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     const [isError, setIsError] = useAtom(isErrorAtom)
     const [intent, setIntent] = React.useState('create');
-    // const [accordions, updateAccordions] = useImmer(initialSectionData) // accordion is basically a Section ,and accordionItem is a Section item (in the Backend code)
+    const navigation = useNavigation();
+    const [, dispatch] = useAtom(snackbarReducerAtom);
 
-
+    // console.log(`in creatCourse ${navigation.state === "submitting"} ${fetcher.state === "submitting"}`)
 
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
@@ -1035,6 +1048,17 @@ export default function CreateCourse() {
 
     }
 
+    function handleSubmit() {
+        fetcher.submit({
+            intent: 'submit',
+            courseId: course.id,
+            activeStep: activeStep
+        }, {method:'post'})
+        dispatch({
+            type: 'submitting'
+        })
+    }
+
 
 
     return (
@@ -1046,101 +1070,102 @@ export default function CreateCourse() {
                         <input type="hidden" value={activeStep} name="activeStep" />
                         <input type="hidden" value={course.id} name="courseId" />
                         <Box sx={{ m: '3vw' }}>
-                            <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
-                            </Box>
-                            <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={5}>
-                                {/* Paper starts here */}
-                                <Grid item xs md={'auto'}>
-                                    <Paper elevation={4} sx={{ height: { xs: 'auto', m: 700, } }}>
-                                        <Grid item container justifyContent={'center'}>
-                                            <Grid item>
-                                                <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                                    <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
-                                                </Container>
+                            <Container>
+                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                </Box>
+                                <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={2}>
+                                    {/* Paper starts here */}
+                                    <Grid item xs sm md={5}>
+                                        <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%' }}  >
+                                            <Grid item container justifyContent={'center'}>
+                                                <Grid item>
+                                                    <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
+                                                        <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
+                                                    </Container>
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                        <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
-                                            <Grid item>
-                                                {/* Uploading  image file button  here */}
-                                                <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" onChange={handleImageUpload} />
-                                            </Grid>
-                                            <Grid item>
-                                                {isError &&
-                                                    actionData?.message && ( // this is equivalent to saying if there's an error and actionData returns an error message
-                                                        <>
-                                                            {Object.entries(JSON.parse(actionData.message)).map(([key, value]) => (
-                                                                <Box key={key} component="div">
-                                                                    <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left' }}>
-                                                                        {key === 'difficulty' || key === 'price' || key === 'weeks' ? `${key}: ${value[0]}` : null}
-                                                                    </Typography>
-                                                                </Box>
-                                                            ))}
-                                                        </>
-                                                    )}
-                                            </Grid>
-                                            <Grid item>
-                                                <FormattedInputs error={isError} course={course} setCourse={setCourse} />
-                                            </Grid>
-                                            <Grid item xs paddingBottom={4}>
-                                                {/* Select menu form */}
-                                                <FormControl required={true} sx={{ width: 200 }} error={isError}>
-                                                    <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
-                                                    <Select
-                                                        data-cy="Select Difficulty"
-                                                        labelId="demo-simple-select-label"
-                                                        id="demo-simple-select"
-                                                        value={course.difficulty}
-                                                        label="Difficulty"
+                                            <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
+                                                <Grid item>
+                                                    {/* Uploading  image file button  here */}
+                                                    <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" onChange={handleImageUpload} />
+                                                </Grid>
+                                                <Grid item>
+                                                    {isError &&
+                                                        actionData?.message && ( // this is equivalent to saying if there's an error and actionData returns an error message
+                                                            <>
+                                                                {Object.entries(JSON.parse(actionData.message)).map(([key, value]) => (
+                                                                    <Box key={key} component="div">
+                                                                        <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left', }}>
+                                                                            {key === 'difficulty' || key === 'price' || key === 'weeks' ? `${key}: ${value[0]}` : null}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                ))}
+                                                            </>
+                                                        )}
+                                                </Grid>
+                                                <Grid item>
+                                                    <FormattedInputs error={isError} course={course} setCourse={setCourse} />
+                                                </Grid>
+                                                <Grid item xs pb={4}>
+                                                    {/* Select menu form */}
+                                                    <FormControl required={true} sx={{ width: 200 }} error={isError}>
+                                                        <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
+                                                        <Select
+                                                            data-cy="Select Difficulty"
+                                                            labelId="demo-simple-select-label"
+                                                            id="demo-simple-select"
+                                                            value={course.difficulty}
+                                                            label="Difficulty"
+                                                            onChange={e => {
+                                                                setCourse({
+                                                                    ...course,
+                                                                    difficulty: e.target.value
+                                                                });
+                                                                setIsError(false);
+                                                            }}
+                                                            inputProps={{ name: "difficulty" }}
+                                                            autoWidth
+                                                        >
+                                                            <MenuItem value={'BG'} >Beginner</MenuItem>
+                                                            <MenuItem value={'IN'} >Intermediate</MenuItem>
+                                                            <MenuItem value={'AD'} >Advanced</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <TextField
+                                                        name="weeks"
+                                                        id="outlined-number"
+                                                        label="Weeks"
+                                                        type="number"
+                                                        InputLabelProps={{
+                                                            shrink: true,
+                                                        }}
+                                                        sx={{ width: 100 }}
+                                                        inputProps={{
+                                                            min: "0",
+                                                        }}
+                                                        value={course.weeks}
                                                         onChange={e => {
-                                                            setCourse({
-                                                                ...course,
-                                                                difficulty: e.target.value
-                                                            });
+                                                            setCourse(
+                                                                {
+                                                                    ...course,
+                                                                    weeks: e.target.value
+                                                                }
+                                                            );
                                                             setIsError(false);
                                                         }}
-                                                        inputProps={{ name: "difficulty" }}
-                                                        autoWidth
-                                                    >
-                                                        <MenuItem value={'BG'} >Beginner</MenuItem>
-                                                        <MenuItem value={'IN'} >Intermediate</MenuItem>
-                                                        <MenuItem value={'AD'} >Advanced</MenuItem>
-                                                    </Select>
-                                                </FormControl>
-                                                <TextField
-                                                    name="weeks"
-                                                    id="outlined-number"
-                                                    label="Weeks"
-                                                    type="number"
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    sx={{ width: 100 }}
-                                                    inputProps={{
-                                                        min: "0",
-                                                    }}
-                                                    value={course.weeks}
-                                                    onChange={e => {
-                                                        setCourse(
-                                                            {
-                                                                ...course,
-                                                                weeks: e.target.value
-                                                            }
-                                                        );
-                                                        setIsError(false);
-                                                    }}
-                                                    error={isError}
+                                                        error={isError}
 
-                                                />
+                                                    />
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </Paper>
-                                </Grid>
-                                {/* Paper ends here */}
-                                {/* title  & description starts here */}
+                                        </Paper>
+                                    </Grid>
+                                    {/* Paper ends here */}
+                                    {/* title  & description starts here */}
 
-                                <Grid item xs={12} sm={12} md lg>
-                                    <Grid item container wrap="nowrap" direction="column">
+                                    {/* <Grid item xs={12} sm={12} md lg> */}
+                                    <Grid item xs={12} sm={12} md container wrap="nowrap" direction="column">
                                         <Grid item xs>
                                             {/* Course title textarea input */}
                                             <TextField
@@ -1176,105 +1201,113 @@ export default function CreateCourse() {
                                                 }}
                                                 error={isError}
                                             />
+
                                         </Grid>
-                                        <Grid item xs>
-                                            {/* course description textarea input */}
-                                            <TextField
-                                                data-cy="Course Description"
-                                                helperText=" "
-                                                id="demo-helper-text-aligned-no-helper"
-                                                label={isError && actionData?.message ?
+                                        <Grid item xs={12}>
+                                            {/* Course Description input here */}
+                                            <Container className="ql-editor-container">
 
-                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                        if (key === 'description') {
-                                                            return `${key}: ${value}`;
-                                                        } else {
-                                                            return null;
-                                                        }
-                                                    })
+                                                <fieldset className="quill-fieldset">
+                                                    {isError && actionData?.message ?
 
-                                                    : "Your Course's Description"
-                                                }
-                                                fullWidth={true}
-                                                minRows={isSmallScreen ? 10 : 20}
-                                                maxRows={isSmallScreen ? 10 : 20}
-                                                multiline
-                                                required={true}
-                                                autoFocus
-                                                name="description"
-                                                value={course.description}
-                                                onChange={e => {
-                                                    setCourse({
-                                                        ...course,
-                                                        description: e.target.value
-                                                    });
-                                                    setIsError(false);
-                                                }}
-                                                error={isError}
-                                            />
+                                                        Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                            if (key === 'description') {
+                                                                return <legend style={{ color: 'red', visibility: 'visible', bottom: '96%' }}>{key}: {value}</legend>;
+                                                            } else {
+                                                                return null;
+                                                            }
+                                                        })
+
+                                                        : <legend style={{ bottom: '96%' }}>Your Course's Description</legend>
+
+                                                    }
+                                                    <ReactQuill
+                                                        onChange={value => {
+                                                            setCourse({
+                                                                ...course,
+                                                                description: value
+                                                            });
+                                                            setIsError(false);
+                                                        }}
+                                                        value={course.description}
+                                                        modules={modules}
+                                                        className={isError ? 'ql-description ql-error' : 'ql-description'}
+                                                        placeholder="Your Course's Description"
+                                                        style={{ border: isError ? '1px solid red' : '' }}
+                                                    />
+                                                </fieldset>
+                                                <TextField type="hidden" value={course.description} name="description" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
+                                                <TextField type="hidden" name="is_draft" />
+                                            </Container>
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                            </Grid>
-
+                                {/* </Grid> */}
+                            </Container>
                         </Box>
                     </fetcher.Form>
                     /* title  & description ends here */
                 )
                     : activeStep === 1 ? (
                         <fetcher.Form method="post" encType="multipart/form-data" noValidate >
-                            <input type="hidden" value={activeStep} name="activeStep" />
-                            <input type="hidden" value={course.id} name="courseId" />
+                            <TextField type="hidden" value={activeStep} name="activeStep" />
+                            <TextField type="hidden" value={course.id} name="courseId" />
                             <Box sx={{ m: '3vw' }}>
-                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
-                                </Box>
+                                <Container>
+                                    <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    </Box>
+                                </Container>
                             </Box>
                             <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item>
                                         <ThemeProvider theme={theme} >
-                                            <Typography variant="h3">
+                                            <Typography variant="h4">
                                                 Overview
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
                                     <Grid item container>
+
                                         {/* course overview textarea input */}
-                                        <TextField
 
-                                            data-cy="Course Overview"
-                                            helperText=" "
-                                            id="demo-helper-text-aligned-no-helper"
-                                            label={isError && actionData?.message ?
+                                        <Container className="ql-editor-container">
+                                            <fieldset className="quill-fieldset">
+                                                {isError && actionData?.message ?
 
-                                                Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                    if (key === 'overview') {
-                                                        return `${key}: ${value}`;
-                                                    } else {
-                                                        return null;
-                                                    }
-                                                })
+                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
+                                                        if (key === 'overview') {
+                                                            return <legend style={{ color: 'red', visibility: 'visible', bottom: '94%' }}>{key}: {value}</legend>;
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
 
-                                                : `Your Course's Overview`
-                                            }
-                                            fullWidth={true}
-                                            minRows={10}
-                                            maxRows={10}
-                                            multiline
-                                            required={true}
-                                            name="overview"
-                                            value={courseContent.overview}
-                                            onChange={e => {
-                                                setCourseContent({
-                                                    ...courseContent,
-                                                    overview: e.target.value
-                                                })
-                                                setIsError(false);
-                                            }}
-                                            error={isError}
-                                        />
+                                                    : <legend style={{ bottom: '94%' }}>Your Course's Overview</legend>
+
+                                                }
+                                                <ReactQuill
+                                                    onChange={value => {
+                                                        setCourseContent({
+                                                            ...courseContent,
+                                                            overview: value
+                                                        });
+                                                        setIsError(false);
+                                                    }}
+                                                    data-cy="Course Overview"
+                                                    value={courseContent.overview}
+                                                    modules={modules}
+                                                    className={isError ? 'ql-overview ql-error' : 'ql-overview'}
+                                                    placeholder="Your Course's Overview"
+                                                    style={{ border: isError ? '1px solid red' : '' }}
+                                                />
+
+                                            </fieldset>
+                                            <TextField type="hidden" value={courseContent.overview} name="overview" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
+                                        </Container>
+
                                     </Grid>
                                     <Grid item>
                                         <ThemeProvider theme={theme}>
@@ -1347,35 +1380,36 @@ export default function CreateCourse() {
                         </fetcher.Form>
                     ) : (
                         <>
-                            <fetcher.Form method="post" encType="multipart/form-data" noValidate>
-                                <Box sx={{ m: '3vw' }}>
+
+                            <Box sx={{ m: '3vw' }}>
+                                <Container>
                                     <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
                                         <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
                                     </Box>
-                                </Box>
-                                <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
-
-                                    <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                        <Grid item>
-                                            <ThemeProvider theme={theme}>
-                                                <Typography variant="h4" sx={{ textAlign: 'center' }}>
-                                                    Course content
-                                                </Typography>
-                                            </ThemeProvider>
-                                        </Grid>
-                                        <Grid item width={{ xs: '100%', md: '69%' }}>
-                                            <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
-                                        </Grid>
+                                </Container>
+                            </Box>
+                            <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
+                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                    <Grid item>
+                                        <ThemeProvider theme={theme}>
+                                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                                Course content
+                                            </Typography>
+                                        </ThemeProvider>
                                     </Grid>
+                                    <Grid item width={{ xs: '100%', md: '69%' }}>
+                                        <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
+                                    </Grid>
+                                </Grid>
+                                    {/* <TextField type="hidden" value={activeStep} name="activeStep" />
+                                    <TextField type="hidden" value={course.id} name="courseId" /> */}
                                     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
                                         <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
-                                            <Button sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
-                                                Submit
-                                            </Button>
+                                            <AlertDialog onClickSubmit={handleSubmit}/>
                                         </Box>
                                     </Box>
-                                </Box>
-                            </fetcher.Form>
+
+                            </Box>
 
                         </>
                     )}

@@ -66,7 +66,7 @@ export async function createCourse(courseFormData) {
 
 export async function updateCourse(id, updates) {
   return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     body: updates
   });
 }

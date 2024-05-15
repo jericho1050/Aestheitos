@@ -101,7 +101,7 @@ describe("User Signs up ", () => {
         cy.get('#email').type('test@gmail.com');
         cy.get('#password').clear();
         cy.get('#password').type('123');
-        cy.get('.MuiButtonBase-root').click();
+        cy.get('button').click();
 
         cy.wait('@register').should(({ request, response }) => { // this line is the problem the 'cy.wait()!'
 

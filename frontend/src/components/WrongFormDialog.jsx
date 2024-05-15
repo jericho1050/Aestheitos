@@ -11,6 +11,8 @@ import AddIcon from '@mui/icons-material/Add';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import InputFileUpload from "./InputFileUpload";
+import ReactQuill from "react-quill";
+import { modulesCard } from "../helper/quillModule";
 
 
 let theme = createTheme()
@@ -22,7 +24,7 @@ const wrongForm2 = {
 }
 
 function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChange, wrongForm, workoutId, open }) {
-    const {isError, setIsError} = errorState;
+    const { isError, setIsError } = errorState;
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -53,25 +55,14 @@ function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChang
             <CardContent>
                 <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                     {/* workout description textarea input */}
-                    <TextField
-                        helperText=" "
-                        id="demo-helper-text-aligned-no-helper"
-                        label="Your Workout's Description"
-                        fullWidth={true}
-                        minRows={isSmallScreen ? 7 : 10}
-                        maxRows={isSmallScreen ? 7 : 10}
-                        multiline
-                        required
-                        autoFocus
-                        name="exercise"
-                        value={description}
-                        onChange={e => {
-                            setDescription(e.target.value);
+                    <ReactQuill
+                        modules={modulesCard}
+                        onChange={value => {
+                            setDescription(value);
                             setIsError(false);
                         }}
-                        error={isError}
-
-
+                        value={description}
+                        className={isError ? "ql-workout ql-error" : "ql-workout"}
                     />
                 </Box>
             </CardContent>
@@ -91,13 +82,11 @@ function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChang
 }
 
 
-export default function WrongFormDialog({ errorState, eventHandlers, workoutId, wrongFormExercises, open, setOpen }) { 
-    const {handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard: onClick} = eventHandlers;
+export default function WrongFormDialog({ errorState, eventHandlers, workoutId, wrongFormExercises, open, setOpen }) {
+    const { handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard: onClick } = eventHandlers;
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     const [parent, enableAnimations] = useAutoAnimate();
-
-    console.log(errorState)
 
     const handleClose = () => {
         setOpen(false);
@@ -116,7 +105,7 @@ export default function WrongFormDialog({ errorState, eventHandlers, workoutId, 
             >
                 <Grid container >
                     <Grid item container justifyContent={'flex-start'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
-                        <DialogTitle id="responsive-dialog-title" sx={{color: 'red'}}>
+                        <DialogTitle id="responsive-dialog-title" sx={{ color: 'red' }}>
                             {"Wrong Exercise Form"}
                         </DialogTitle>
                     </Grid>
@@ -136,7 +125,7 @@ export default function WrongFormDialog({ errorState, eventHandlers, workoutId, 
 
                             <Grid item sm={6}>
                                 {/* add WorkoutMediaCard / Workout button */}
-                                <Button onClick={() => { onClick('wrongForm', workoutId) }} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                <Button data-cy="Add Icon Wrong-Dialog" disabled={workoutId === 3} onClick={() => { onClick('wrongForm', workoutId) }} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                 </Button>
                             </Grid>

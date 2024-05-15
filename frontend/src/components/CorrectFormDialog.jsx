@@ -11,6 +11,8 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InputFileUpload from "./InputFileUpload";
+import { modules, modulesCard } from "../helper/quillModule";
+import ReactQuill from "react-quill";
 
 
 let theme = createTheme()
@@ -42,7 +44,7 @@ function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onCha
 
     return (
         open &&
-        <Card data-cy="Correct Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
+        <Card data-cy="Correct Form Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 700, height: '100%', borderTop: '4px solid green' }}>
             <CardMedia
                 component="img"
                 sx={{ aspectRatio: 16 / 9, width: { xs: 350, sm: 'auto' } }}
@@ -50,11 +52,11 @@ function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onCha
                 alt="workout demo"
             />
             <InputFileUpload correctFormId={correctForm.id} workoutId={workoutId} onChange={onChangeImage} name="demo" text="GIF File" />
-            {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
+            {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mt: 1 }}>Something Happend.Please try again</Typography>}
             <CardContent>
-                <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+            <Box width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                     {/* workout description textarea input */}
-                    <TextField
+                    {/* <TextField
                         helperText=" "
                         id="demo-helper-text-aligned-no-helper"
                         label="Your Workout's Description"
@@ -71,9 +73,16 @@ function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onCha
                             setIsError(false);
                         }}
                         error={isError}
-
-
-                    />
+                    /> */}
+                    <ReactQuill 
+                        modules={modulesCard}
+                            onChange={value => {
+                                setDescription(value);
+                                setIsError(false);
+                            }}
+                            value={description}
+                            className={isError ? "ql-workout ql-error" : "ql-workout"}
+                        />
                 </Box>
             </CardContent>
             <CardActions sx={{ marginTop: 'auto' }}>
@@ -137,7 +146,7 @@ export default function CorrectFormDialog({ errorState, eventHandlers, workoutId
 
                             <Grid item sm={6}>
                                 {/* add WorkoutMediaCard / Workout button */}
-                                <Button onClick={() => onClick('correctForm', workoutId)} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
+                                <Button data-cy="Add Icon Correct-Dialog" disabled={workoutId === 3} onClick={() => onClick('correctForm', workoutId)} sx={{ height: { xs: 250, sm: 622, md: 622 }, width: { xs: 340, sm: '100%', md: 391 } }}>
                                     <AddIcon fontSize="large" sx={{ height: 300, width: 300 }} />
                                 </Button>
                             </Grid>
