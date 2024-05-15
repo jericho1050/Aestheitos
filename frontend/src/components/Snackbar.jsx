@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import { useAtom } from 'jotai';
 import { snackbarReducerAtom } from '../atoms/snackbarAtom';
 
-export default function CustomizedSnackbars() {
+export default function CustomizedSnackbar() {
   const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
 
 
