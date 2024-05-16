@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+import sys
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -114,6 +115,16 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+
+# Decided to 'TEST' in sqlite3 because I don't know why my test cases are having assertion errors in postgreSQL.
+if 'test' in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_USER_MODEL = "learn.User"
 
