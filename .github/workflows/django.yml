@@ -18,6 +18,13 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+    - name: Set up PostgreSQL
+      uses: shivammathur/setup-postgres@v2
+      with:
+        postgres-version: '15'
+        postgres-db: mydatabase
+        postgres-user: jericho1050
+        postgres-password: ${{ secrets.PASSWORD }}
     - name: Run Django unit tests
       env:
         PASSWORD : ${{ secrets.PASSWORD }}
@@ -27,4 +34,3 @@ jobs:
         python manage.py makemigrations
         python manage.py migrate
         python manage.py test
-
