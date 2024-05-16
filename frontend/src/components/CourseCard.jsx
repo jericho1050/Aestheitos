@@ -12,6 +12,7 @@ theme = responsiveFontSizes(theme);
 
 
 export default function CourseCard(props) {
+  const description = removeTags(props.description);
   return (
     <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: 645, height: '100%' }}>
       <ThemeProvider theme={theme}>
@@ -34,7 +35,7 @@ export default function CourseCard(props) {
             </Typography>
 
             <Typography sx={{ height: 40, mb: {xs: 1, md: 2} }} variant='body2' color={"text.secondary"}>
-              Description: {truncateText(props.description, 10)}
+              Description: {truncateText(description, 10)}
             </Typography>
 
           </CardContent>
@@ -93,4 +94,30 @@ function truncateText(text, maxWords) {
   } else {
     return text;
   }
+}
+
+function removeTags(element) {
+  // removes tagName e.g., <a>Content</a> -> Content
+  let isTag = false;
+  let quote = false;
+  let content = '';
+
+  for (let i = 0; i < element.length; i++) {
+    const char = element[i];
+
+    if (char === '<' && !quote) {
+      // starting now with tagName
+      isTag = true;
+    } else if (char === '>' && !quote) {
+      // closing now with tagName
+      isTag = false;
+    } else if ((char === '"' || "'") && isTag) {
+      quote = !quote;
+    }
+     else if (!isTag) {
+      // starting now with html content
+      content = content.concat(char);
+    }
+  }
+  return content;
 }

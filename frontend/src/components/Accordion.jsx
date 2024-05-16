@@ -141,7 +141,7 @@ export function AccordionSection({ handleChange, expanded, accordion }) {
     )
 
     return (
-        <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%' }}>
+        <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%', width: '100%' }}>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1bh-content"
@@ -159,7 +159,6 @@ export function AccordionSection({ handleChange, expanded, accordion }) {
 
                     >
                         <AccordionItemDialog
-                            accordionId={accordion.id}
                             accordionItem={item}
                         >
                             {item.heading}

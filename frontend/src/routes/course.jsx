@@ -56,7 +56,7 @@ export async function loader({ params }) {
                     wrongForm: wrongExercises
                 };
             }));
-            return { ...item, workout: workoutExercises };
+            return { ...item, workouts: workoutExercises };
         }));
         return { ...section, items: itemWorkouts };
     }));
@@ -64,10 +64,10 @@ export async function loader({ params }) {
 }
 
 // responsible for the 'workout' demo card
-function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
+function WorkoutMediaCard({ workout, open }) {
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
-
+    const myTheme = useTheme();
     const handleClickOpen = (btn) => {
         if (btn === 'correct') {
             setisOpenCorrect(true);
@@ -80,24 +80,21 @@ function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
     return (
         open &&
         <>
-            <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 645 }, height: '100%' }}>
+            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 725 }, height: '100%', borderTop: `4px solid ${myTheme.palette.secondary.main}` }}>
                 <CardMedia
-                    component="iframe"
+                    component="img"
                     sx={{ aspectRatio: 16 / 9 }}
                     src={workout.demo}
                     alt="workout demo"
                     allowFullScreen
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
 
                 />
-                <CardContent sx={{ width: 320 }}>
-                    <ThemeProvider theme={theme}>
-                        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} overflow={'auto'} gutterBottom variant="h5" component="div">
-                            {workout.exercise}
-                        </Typography>
-                    </ThemeProvider>
+                <CardContent>
+                <Container width="inherit" sx={{height: {xs: 300, md:350}, overflow: 'auto'}} >
+                    <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(workout.exercise) }} />
+                </Container>
                 </CardContent>
-                <CardActions sx={{ marginTop: 'auto' }}>
+                <CardActions sx={{ marginTop: 'auto',  }}>
                     <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
@@ -107,8 +104,8 @@ function WorkoutMediaCard({ workout, correctForm, wrongForm, open }) {
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
                             {/* <WrongFormDialog wrongFormExercises={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} /> */}
                         </Grid>
-                        <Grid item >
-                            <Button startIcon={<EditIcon />}>Edit</Button>
+                        <Grid item xs sm={8}>
+                            <Button fullWidth={true} startIcon={<EditIcon />}>Edit</Button>
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -167,12 +164,20 @@ export function ResponsiveDialog({ accordionItem, children }) {
                         <DialogContent >
                             {isWorkoutRoutine ?
                                 <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
-                                    {accordionItem.workouts(workout => {
+                                    {accordionItem.workouts.length > 0 ? accordionItem.workouts.map(workout => (
                                         <Grid item sm={6}>
                                             <WorkoutMediaCard workout={workout} open={open}> </WorkoutMediaCard>
                                         </Grid>
-                                    })
+                                    ))
+                                    :
+                                    <Grid item>
+                                        <ThemeProvider theme={theme} >
+                                            <Typography variant="body1" height={350}>
+                                                No Workouts To Show
+                                            </Typography>
+                                        </ThemeProvider>
 
+                                    </Grid>
                                     }
 
                                 </Grid>
@@ -190,9 +195,9 @@ export function ResponsiveDialog({ accordionItem, children }) {
                                             </Box>
                                         }
                                     </Grid>
-                                    <Grid item mt={4}>
+                                    <Grid item mt={4} container width={'81%'}>
                                         <ThemeProvider theme={theme}>
-                                            <Typography variant="h4" textAlign={{ xs: 'center', sm: 'left' }}>
+                                            <Typography variant="h4">
                                                 Read me / Description
                                             </Typography>
                                         </ThemeProvider>
@@ -225,7 +230,7 @@ function ControlledAccordions() {
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
-
+    console.log(accordion);
     return (
         <>
             {
@@ -257,14 +262,14 @@ export default function Course() {
                         </Button>
                     </Box>
                     <Box className="clearfix" component={'div'}>
-                        <Paper elevation={4} sx={{ padding: { xs: '7%', md: '3%' }, float: 'left', margin: '0 20px 20px 0' }}>
+                        <Paper elevation={4} sx={{ padding: { xs: '7%', md: '3%' }, float: 'left', margin: {xs: '0 0 40px 0', md: '0 30px 20px 0'} }}>
                             <ThemeProvider theme={theme}>
 
-                                        <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
-                                            <img src={course.thumbnail} className="course-thumbnail" />
-                                        </Container>
-    
-   
+                                <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
+                                    <img src={course.thumbnail} className="course-thumbnail" />
+                                </Container>
+
+
 
                                 <Typography sx={{ maxWidth: { md: 250, xs: 300, sm: 400 }, mt: 2 }} noWrap>
                                     <b>Instructor:</b> {course.created_by_name} </Typography>
@@ -312,40 +317,42 @@ export default function Course() {
                     </Box>
                     <br></br>
                     <hr></hr>
-                    <Grid mt={'2%'} container direction={'column'} alignItems={'flex-start'} spacing={3}>
-                        <Grid item>
-                            <ThemeProvider theme={theme} >
-                                <Typography variant="h3">
-                                    Overview
-                                </Typography>
-                            </ThemeProvider>
-                        </Grid>
-                        <Grid item>
-                            <Box component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(courseContent.overview) }} />
-                        </Grid>
-                        <Grid item width={'100%'}>
-                            <ThemeProvider theme={theme}>
-                                <Typography sx={{ textAlign: 'left' }} variant="h6">
-                                    Preview this course
-                                </Typography>
-                            </ThemeProvider>
+                    <Container className="course-container">
+                        <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                            <Grid item alignSelf={'flex-start'}>
+                                <ThemeProvider theme={theme} >
+                                    <Typography variant="h3">
+                                        Overview
+                                    </Typography>
+                                </ThemeProvider>
+                            </Grid>
+                            <Grid item alignSelf={'flex-start'}>
+                                <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(courseContent.overview) }} />
+                            </Grid>
+                            <Grid item>
+                                <ThemeProvider theme={theme}>
+                                    <Typography sx={{ textAlign: 'left' }} variant="h6" fontSize={'small'}>
+                                        Preview this course
+                                    </Typography>
+                                </ThemeProvider>
+                                <br />
+                                <Box className="course-lecture-container" component={'div'}>
+                                    <iframe className="course-lecture" src={courseContent.preview} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowFullScreen></iframe>
+                                </Box>
+                            </Grid>
                             <br />
-                            <Box className="course-lecture-container" component={'div'}>
-                                <iframe className="course-lecture" src={courseContent.preview} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowFullScreen></iframe>
-                            </Box>
+                            <Grid item alignSelf={'flex-start'}>
+                                <ThemeProvider theme={theme}>
+                                    <Typography variant="h4">
+                                        Course content
+                                    </Typography>
+                                </ThemeProvider>
+                            </Grid>
+                            <Grid item width={{ xs: '100%' }}>
+                                <ControlledAccordions />
+                            </Grid>
                         </Grid>
-                        <br />
-                        <Grid item>
-                            <ThemeProvider theme={theme}>
-                                <Typography variant="h4">
-                                    Course content
-                                </Typography>
-                            </ThemeProvider>
-                        </Grid>
-                        <Grid item width={{ xs: '100%', md: '69%' }}>
-                            <ControlledAccordions />
-                        </Grid>
-                    </Grid>
+                    </Container>
                 </Box>
             </Container>
         </>

@@ -88,6 +88,8 @@ html {
     width: 69vw;
     margin-left: auto;
     margin-right: auto;
+    margin-top: 10px;
+
 
   }
 }
@@ -97,10 +99,11 @@ html {
   .course-thumbnail {
     object-fit: cover;
     aspect-ratio: 3 / 2;
-    width: 455px;
+    width: inherit;
     margin-left: auto;
     margin-right: auto;
     display: block;
+    margin-top: 10px;
 
   }
 }
@@ -108,10 +111,15 @@ html {
 
 
 
-
-.course-lecture {
+.course-lecture, .course-preview {
+  aspect-ratio: 16 / 9;
+  width: 69vw !important;
+  max-width: 850px;
+}
+.course-video-lecture {
   aspect-ratio: 16 / 9;
   width: 100% !important;
+
 }
 
 .course-card:hover {
@@ -217,7 +225,6 @@ html {
 .first-image {
   position: relative;
   z-index: 1;
-  animation-name: opacity1;
 }
 .second-image {
   position: absolute;
@@ -232,4 +239,19 @@ html {
 .html-content {
   word-break: break-word;
 }
-
+@media (max-width: 900px) {
+  .course-container {
+    margin: auto;
+    max-width:min-content;
+    width: auto !important;
+  }
+  
+}
+@media (min-width: 900px) {
+  .course-container {
+    margin: auto;
+    max-width: min-content;
+    width: 850px !important;
+  }
+  
+}

@@ -401,7 +401,7 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
                 <InputFileUpload workoutId={workout.id} onChange={onChangeImage} name="demo" text="GIF File" />
                 {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mt: 1 }}>Something Happend.Please try again</Typography>}
                 <CardContent>
-                    <Box width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+                    <Box width='inherit' component={'div'}>
                         {/* workout description editor */}
                         <ReactQuill
                             modules={modulesCard}
@@ -751,7 +751,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                         <Grid item width={'81%'}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
+                                                    <iframe className="course-video-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
                                                 :
                                                 <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                     <Typography variant="body" align={'center'}>
@@ -1077,13 +1077,11 @@ export default function CreateCourse() {
                                     {/* Paper starts here */}
                                     <Grid item xs sm md={5}>
                                         <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%' }}  >
-                                            <Grid item container justifyContent={'center'}>
-                                                <Grid item>
-                                                    <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">
+                                                <Grid item justifySelf={'center'}>
+                                                    <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 400 } }} component="div">
                                                         <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
                                                     </Container>
                                                 </Grid>
-                                            </Grid>
                                             <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
                                                 <Grid item xs>
                                                     {/* Uploading  image file button  here */}
@@ -1362,8 +1360,8 @@ export default function CreateCourse() {
                                         </Box>
                                         <Grid item width={'100%'}>
                                             {getEmbedUrl(courseContent.preview) ?
-                                                <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
+                                                <Box mt={4} className="course-container" component={'div'}>
+                                                    <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
                                                 </Box>
                                                 :
                                                 <Box mb="5%" mt="5%" component="div" height={200} className="course-lecture-container" alignItems={'center'} sx={{ border: '2px dotted black' }}>
