@@ -1,15 +1,16 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, TextField, Typography } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { ResponsiveDialog } from "../routes/create";
+import { ResponsiveDialog as AccordionItemDialogCreate} from "../routes/create";
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import AddAccordionItem from "./AddAccordionItem";
 import { useImmerAtom } from "jotai-immer";
 import { accordionsAtom } from "../atoms/accordionsAtom";
+import { ResponsiveDialog as AccordionItemDialog } from "../routes/course";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-
-export default function AccordionSection({ actionData, eventHandlers, onClickDelete, onChange, handleChange, expanded, accordion }) {
+export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelete, onChange, handleChange, expanded, accordion }) {
     const { handleDeleteAccordionItem: onClickDeleteItem, handleEditAccordionItem: onChangeItem, handleAddAccordionItem: onClickAddItem } = eventHandlers;
 
     const [isEditing, setIsEditing] = useState(false);
@@ -109,7 +110,7 @@ export default function AccordionSection({ actionData, eventHandlers, onClickDel
                         key={item.id}
 
                     >
-                        <ResponsiveDialog
+                        <AccordionItemDialogCreate
                             actionData={actionData}
                             immerAtom={[accordions, updateAccordions]}
                             itemId={item.id}
@@ -120,13 +121,54 @@ export default function AccordionSection({ actionData, eventHandlers, onClickDel
                         >
                             {item.heading}
 
-                        </ResponsiveDialog>
+                        </AccordionItemDialogCreate>
                     </AccordionDetails>
                 )) :
                     null
 
                 }
             </ul>
+        </Accordion>
+
+    )
+}
+export function AccordionSection({ handleChange, expanded, accordion }) {
+
+    let accordionHeadingContent = (
+        <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
+            {accordion.heading}
+        </Typography>
+    )
+
+    return (
+        <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%' }}>
+            <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1bh-content"
+                id="panel1bh-header"
+                sx={{ padding: '3%' }}
+            >
+                {accordionHeadingContent}
+            </AccordionSummary>
+        
+                {accordion.items ? accordion.items.map((item) => (
+
+                    <AccordionDetails
+                        sx={{ paddingLeft: '2%' }}
+                        key={item.id}
+
+                    >
+                        <AccordionItemDialog
+                            accordionId={accordion.id}
+                            accordionItem={item}
+                        >
+                            {item.heading}
+                        </AccordionItemDialog>
+                    </AccordionDetails>
+                )) :
+                    null
+
+                }
         </Accordion>
 
     )

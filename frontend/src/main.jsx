@@ -13,7 +13,7 @@ import ErrorPage from './error-page';
 import SignIn from './routes/signin';
 import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
-import Course from './routes/course';
+import Course, {loader as courseLoader} from './routes/course';
 import CreateCourse from './routes/create';
 import {action as createAction} from './routes/create';
 import ProectedRoute from './components/protectedRoute';
@@ -47,7 +47,8 @@ const router = createBrowserRouter([
       },
       {
         path: "courses/:courseId",
-        element: <Course />
+        element: <Course />,
+        loader: courseLoader
       },
       {
        

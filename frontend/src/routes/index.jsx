@@ -60,7 +60,7 @@ export function Index() {
 
     })
     const [springs, api] = useSprings(3, index => ({
-        from: { x: '100%'},
+        from: { x: index === 2 ? '-100%': '100%'},
         to: { x: '0%'},
         delay: index * 200
     }));
@@ -73,7 +73,8 @@ export function Index() {
                 {/* staggering effect */}
                 {springs.map((props, index) => {
                     let className = "background-image";
-                    if (index === 1) className += " second-image";
+                    if (index === 0) className += " first-image";
+                    else if (index === 1) className += " second-image";
                     else if (index === 2) className += " third-image";
                     return <animated.img key={index} style={props} src={images[index]} className={className} />
                 })}

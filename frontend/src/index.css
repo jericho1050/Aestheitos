@@ -78,7 +78,7 @@ html {
 }
 
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
 
   .course-thumbnail {
     object-fit: cover;
@@ -96,18 +96,17 @@ html {
 
   .course-thumbnail {
     object-fit: cover;
-    aspect-ratio: 2 / 2;
-    width: 300px;
+    aspect-ratio: 3 / 2;
+    width: 455px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+
   }
 }
 
 
 
-.course-lecture-container {
-  display: flex;
-  justify-content: center;
-  width: '81%';
-}
 
 
 .course-lecture {
@@ -215,15 +214,22 @@ html {
   }
 }
 
-
+.first-image {
+  position: relative;
+  z-index: 1;
+  animation-name: opacity1;
+}
 .second-image {
   position: absolute;
   z-index: -1;
-
 }
 
 .third-image {
   position: absolute;
   z-index: -2;
+}
+
+.html-content {
+  word-break: break-word;
 }
 

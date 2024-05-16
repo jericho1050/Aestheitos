@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, Fab, FormControl, Grid, Grow, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Container, Fab, FormControl, Grid, Grow, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as React from 'react';
@@ -14,8 +14,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
-import CorrectFormDialog from "../components/CorrectFormDialog";
-import WrongFormDialog from "../components/WrongFormDialog";
+import CorrectFormDialog from "../components/CreateCorrectFormDialog";
+import WrongFormDialog from "../components/CreateWrongFormDialog";
 import image from '../static/images/noimg.png'
 import { styled } from '@mui/material/styles';
 import { useImmer } from "use-immer";
@@ -24,7 +24,7 @@ import getEmbedUrl from '../helper/getEmbedUrl';
 import FormattedInputs from "../components/FormattedInput";
 import AddAccordion from "../components/AddAccordion";
 import InputFileUpload from "../components/InputFileUpload";
-import AccordionSection from "../components/Accordion";
+import { AccordionSectionCreate } from "../components/Accordion";
 import AddIcon from '@mui/icons-material/Add';
 import demoGif from "../static/images/chinupVecs.gif";
 import demoGif2 from '../static/images/pushupVecs.gif';
@@ -922,14 +922,13 @@ function ControlledAccordions({ activeStep, courseContentId }) {
                 </ThemeProvider>
             </Box>
             <TransitionGroup>
-
                 {
-                    accordions.map(accordion => (
-                        <Collapse key={accordion.id}>
-                            <AccordionSection actionData={actionData} eventHandlers={{ handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem }} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
+                    accordions.map(accordion => 
+                        <Collapse key={accordion.id}>{/* The collapse component's purpose is to transitionally remove the accordion. */}
+                            <AccordionSectionCreate actionData={actionData} eventHandlers={{ handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem }} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
                         </Collapse>
 
-                    ))
+                    )
                 }
             </TransitionGroup>
         </>
@@ -961,7 +960,7 @@ export default function CreateCourse() {
     })
 
     const fetcher = useFetcher();
-    const actionData = fetcher.data; // The returned data from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
+    const actionData = fetcher.data; // The returned data (Obj properties) from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     const [isError, setIsError] = useAtom(isErrorAtom)
     const [intent, setIntent] = React.useState('create');
     const navigation = useNavigation();
@@ -1086,7 +1085,7 @@ export default function CreateCourse() {
                                                 </Grid>
                                             </Grid>
                                             <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
-                                                <Grid item>
+                                                <Grid item xs>
                                                     {/* Uploading  image file button  here */}
                                                     <InputFileUpload thumbnail={course.thumbnail} name="thumbnail" text="Image" onChange={handleImageUpload} />
                                                 </Grid>

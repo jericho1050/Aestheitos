@@ -48,6 +48,13 @@ export async function getCourses() {
   });
 }
 
+
+export async function getCourse(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}`, {
+
+  });
+}
+
 export async function createCourse(courseFormData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}courses`, {
     method: 'POST',
@@ -57,17 +64,17 @@ export async function createCourse(courseFormData) {
 
 
 
-// export async function getCourse(id) {
-//   //TODO 
-//   try {
-//     const response = await fetch(`${import.meta.env.VITE_API_URL}course/${id}`);
-//   }
-// }
 
 export async function updateCourse(id, updates) {
   return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}`, {
     method: 'PATCH',
     body: updates
+  });
+}
+
+export async function getCourseContent(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/course-content`, {
+
   });
 }
 
@@ -82,6 +89,11 @@ export async function updateCourseContent(id, updates) {
   return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/course-content`, {
     method: 'PUT',
     body: updates
+  });
+}
+
+export async function getSections(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}sections/course-content/${id}`, {
   });
 }
 
@@ -132,7 +144,7 @@ export async function updateSectionItem(id, updates) {
 export async function deleteSectionItem(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}section-item/${id}/section`, {
     method: 'DELETE',
-  })
+  });
 }
 
 export async function getWorkouts(id) {
@@ -152,51 +164,62 @@ export async function updateWorkout(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}workout/${id}/section-item`, {
     method: 'PATCH',
     body: formData
-  })
+  });
 }
 
 export async function deleteWorkout(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}workout/${id}/section-item`, {
     method: 'DELETE',
-  })
+  });
+}
+
+export async function getCorrectExercises(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercise/course/workout/${id}`, {
+
+  });
 }
 
 export async function createCorrectExerciseForm(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercises/course/workout/${id}`, {
     method: 'POST',
     body: formData
-  })
+  });
 }
 export async function updateCorrectExerciseForm(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercise/${id}/course/workout`, {
     method: 'PATCH',
     body: formData
-  })
+  });
 }
 
 export async function deleteCorrectExerciseForm(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercise/${id}/course/workout`, {
     method: 'DELETE',
 
-  })
+  });
 }
 
+export async function getWrongExercises(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercises/course/workout/${id}`, {
+
+  });
+}
 export async function createWrongExerciseForm(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercises/course/workout/${id}`, {
     method: 'POST',
     body: formData
-  })
+  });
 }
 
 export async function updateWrongExerciseForm(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercise/${id}/course/workout`, {
     method: 'PATCH',
     body: formData
-  })
+  });
 }
 
-export async function deleteWrongExerciseForm(id){ 
+export async function deleteWrongExerciseForm(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercise/${id}/course/workout`, {
     method: 'DELETE',
-  })
+  });
 }

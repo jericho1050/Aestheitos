@@ -55,25 +55,6 @@ function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onCha
             {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mt: 1 }}>Something Happend.Please try again</Typography>}
             <CardContent>
             <Box width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
-                    {/* workout description textarea input */}
-                    {/* <TextField
-                        helperText=" "
-                        id="demo-helper-text-aligned-no-helper"
-                        label="Your Workout's Description"
-                        fullWidth={true}
-                        minRows={isSmallScreen ? 7 : 10}
-                        maxRows={isSmallScreen ? 7 : 10}
-                        multiline
-                        required
-                        autoFocus
-                        name="exercise"
-                        value={description}
-                        onChange={e => {
-                            setDescription(e.target.value);
-                            setIsError(false);
-                        }}
-                        error={isError}
-                    /> */}
                     <ReactQuill 
                         modules={modulesCard}
                             onChange={value => {
