@@ -106,15 +106,16 @@ WSGI_APPLICATION = "Aestheitos.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydatabase',
-        'USER': 'jericho1050',
-        'PASSWORD': os.getenv('PASSWORD'),
-        'HOST': 'db',  # Use 'db' to refer to the service name in the GitHub Actions workflow
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "mydatabase",
+        "USER": "jericho1050",
+        "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
     }
 }
+
 
 # Decided to 'TEST' in sqlite3 because I don't know why my test cases are having assertion errors in postgreSQL.
 if 'test' in sys.argv:
