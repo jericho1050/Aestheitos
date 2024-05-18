@@ -109,7 +109,7 @@ export function Index() {
                     </Grid>
                 </Grid>
                 <Box sx={{ml: {xs: 4, m: 3, l: 0}, mr: {xs: 4, m: 3, l: 0}}}>
-                    <Grid container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
+                    <Grid id="courses" container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
                         {/* Load lists of Courses that are approved only */}
                         {courses.map(course => {
                             

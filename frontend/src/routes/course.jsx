@@ -18,9 +18,9 @@ import { useLoaderData } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
 import getEmbedUrl from "../helper/getEmbedUrl";
+import CorrectFormDialog from "../components/CorrectFormDialog";
+import WrongFormDialog from "../components/WrongFormDialog";
 
-// import CorrectFormDialog from "../components/CorrectFormDialog";
-// import WrongFormDialog from "../components/WrongFormDialog";
 
 
 let theme = createTheme()
@@ -48,12 +48,12 @@ export async function loader({ params }) {
         const itemWorkouts = await Promise.all(sectionItems.map(async (item) => {
             const workouts = await getWorkouts(item.id); // This will retrieve a list of workouts for an item 
             const workoutExercises = await Promise.all(workouts.map(async (workout) => {
-                const correctExercises = await getCorrectExercises(workout.id); // This will retrieve a list of Correct Form Exercises for a workout
-                const wrongExercises = await getWrongExercises(workout.id); // This will retrieve a list of Wrong Form Exercises for a workout.
+                const correctFormExercises = await getCorrectExercises(workout.id); // This will retrieve a list of Correct Form Exercises for a workout
+                const wrongFormExercises = await getWrongExercises(workout.id); // This will retrieve a list of Wrong Form Exercises for a workout.
                 return {
                     ...workout,
-                    correctForm: correctExercises,
-                    wrongForm: wrongExercises
+                    correctForm: correctFormExercises,
+                    wrongForm: wrongFormExercises
                 };
             }));
             return { ...item, workouts: workoutExercises };
@@ -62,6 +62,9 @@ export async function loader({ params }) {
     }));
     return { course, courseContent, accordion };
 }
+
+function CourseComments() { } //TOODO 
+
 
 // responsible for the 'workout' demo card
 function WorkoutMediaCard({ workout, open }) {
@@ -75,7 +78,7 @@ function WorkoutMediaCard({ workout, open }) {
             setisOpenWrong(true);
         }
     };
-
+    console.log(workout.demo);
 
     return (
         open &&
@@ -90,22 +93,19 @@ function WorkoutMediaCard({ workout, open }) {
 
                 />
                 <CardContent>
-                <Container width="inherit" sx={{height: {xs: 300, md:350}, overflow: 'auto'}} >
-                    <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(workout.exercise) }} />
-                </Container>
+                    <Container width="inherit" sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }} >
+                        <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(workout.exercise) }} />
+                    </Container>
                 </CardContent>
-                <CardActions sx={{ marginTop: 'auto',  }}>
-                    <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2}>
+                <CardActions sx={{ marginTop: 'auto', }}>
+                    <Grid container justifyContent={'center'} columns={{ xs: 4, sm: 8 }} spacing={2} paddingBottom={2}>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('correct')} startIcon={<CheckIcon color="success" />} color="success" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            {/* <CorrectFormDialog correctFormExercises={correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} /> */}
+                            <CorrectFormDialog correctFormExercises={workout.correctForm} open={isOpenCorrect} setOpen={setisOpenCorrect} />
                         </Grid>
                         <Grid item xs={4} sm={4}>
                             <Button onClick={() => handleClickOpen('wrong')} startIcon={<ClearIcon color="error" />} color="error" fullWidth={true} variant="outlined" size="large">Form</Button>
-                            {/* <WrongFormDialog wrongFormExercises={wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} /> */}
-                        </Grid>
-                        <Grid item xs sm={8}>
-                            <Button fullWidth={true} startIcon={<EditIcon />}>Edit</Button>
+                            <WrongFormDialog wrongFormExercises={workout.wrongForm} open={isOpenWrong} setOpen={setisOpenWrong} />
                         </Grid>
                     </Grid>
                 </CardActions>
@@ -169,15 +169,15 @@ export function ResponsiveDialog({ accordionItem, children }) {
                                             <WorkoutMediaCard workout={workout} open={open}> </WorkoutMediaCard>
                                         </Grid>
                                     ))
-                                    :
-                                    <Grid item>
-                                        <ThemeProvider theme={theme} >
-                                            <Typography variant="body1" height={350}>
-                                                No Workouts To Show
-                                            </Typography>
-                                        </ThemeProvider>
+                                        :
+                                        <Grid item>
+                                            <ThemeProvider theme={theme} >
+                                                <Typography variant="body1" height={350}>
+                                                    No Workouts To Show
+                                                </Typography>
+                                            </ThemeProvider>
 
-                                    </Grid>
+                                        </Grid>
                                     }
 
                                 </Grid>
@@ -186,10 +186,11 @@ export function ResponsiveDialog({ accordionItem, children }) {
                                     <Grid item width={'81%'}>
                                         {getEmbedUrl(accordionItem.lecture) ?
                                             <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
+                                                <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>  
+                                            </Box>
                                             :
                                             <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                <Typography variant="body" align={'center'}>
+                                                <Typography variant="body">
                                                     No video
                                                 </Typography>
                                             </Box>
@@ -198,7 +199,7 @@ export function ResponsiveDialog({ accordionItem, children }) {
                                     <Grid item mt={4} container width={'81%'}>
                                         <ThemeProvider theme={theme}>
                                             <Typography variant="h4">
-                                                Read me / Description
+                                                Description
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
@@ -262,7 +263,7 @@ export default function Course() {
                         </Button>
                     </Box>
                     <Box className="clearfix" component={'div'}>
-                        <Paper elevation={4} sx={{ padding: { xs: '7%', md: '3%' }, float: 'left', margin: {xs: '0 0 40px 0', md: '0 30px 20px 0'} }}>
+                        <Paper elevation={4} sx={{ padding: { xs: '7%', md: '3%' }, float: 'left', margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' } }}>
                             <ThemeProvider theme={theme}>
 
                                 <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 500 } }} component="div">

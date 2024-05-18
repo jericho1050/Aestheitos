@@ -113,14 +113,13 @@ export default function WrongFormDialog({ errorState, eventHandlers, workoutId, 
                         <Grid ref={parent} justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
 
                             {
-                                wrongFormExercises?.map(exercise => {
+                                wrongFormExercises?.map(exercise => 
 
-                                    return (
                                         <Grid key={exercise.id} item sm={6}>
                                             <WorkoutMediaWrongFormCard errorState={errorState} onChangeImage={handleImageUpload} onClick={handleDeleteCard} onChange={handleChangeDescription} workoutId={workoutId} wrongForm={exercise} open={open}> </WorkoutMediaWrongFormCard>
                                         </Grid>
-                                    )
-                                })
+                                    
+                                )
                             }
 
                             <Grid item sm={6}>
@@ -155,30 +154,3 @@ export default function WrongFormDialog({ errorState, eventHandlers, workoutId, 
 
 
 // use it for the rendering of synced data later not create ui
-{/* <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid red' }}>
-<CardMedia
-    component="img"
-    sx={{ aspectRatio: 16 / 9, }}
-    src={wrongForm.demo}
-    alt="workout demo"
-    allowFullScreen
-    allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
-/>
-<CardContent sx={{ width: 300 }}>
-    <ThemeProvider theme={theme}>
-        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} overflow={'auto'} gutterBottom variant="h5" component="div">
-            <ClearIcon sx={{ border: "2px solid red" }} fontSize="large" color="warning"></ClearIcon> {wrongForm.description}
-        </Typography>
-    </ThemeProvider>
-</CardContent>
-<CardActions sx={{ marginTop: 'auto' }}>
-    <Grid container justifyContent={'center'}>
-        <Grid item>
-            <Button startIcon={<EditIcon />}>
-                Edit
-            </Button>
-        </Grid>
-    </Grid>
-
-</CardActions>
-</Card> */}

@@ -224,7 +224,7 @@ html {
 
 .first-image {
   position: relative;
-  z-index: 1;
+  z-index:0;
 }
 .second-image {
   position: absolute;
@@ -233,7 +233,7 @@ html {
 
 .third-image {
   position: absolute;
-  z-index: -2;
+  z-index: -1;
 }
 
 .html-content {
@@ -254,4 +254,23 @@ html {
     width: 850px !important;
   }
   
+}
+
+.wrong-icon {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  color: red;
+  opacity: 0.6;
+  border: 2px solid red;
+}
+
+.correct-icon {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  color: green;
+  opacity: 0.6;
+  border: 2px solid green;
+
 }

@@ -114,15 +114,14 @@ export default function CorrectFormDialog({ errorState, eventHandlers, workoutId
 
 
                             {
-                                correctFormExercises?.map(exercise => {
+                                correctFormExercises?.map(exercise => 
 
 
-                                    return (
                                         <Grid key={exercise.id} item sm={6}>
                                             <WorkoutMediaCorrectFormCard errorState={errorState} onChangeImage={handleImageUpload} onClick={handleDeleteCard} onChange={handleChangeDescription} workoutId={workoutId} correctForm={exercise} open={open}> </WorkoutMediaCorrectFormCard>
                                         </Grid>
-                                    )
-                                })
+                                    
+                                )
                             }
 
                             <Grid item sm={6}>
@@ -152,31 +151,3 @@ export default function CorrectFormDialog({ errorState, eventHandlers, workoutId
 
 
 
-// t be use later on same goes with formdialog
-{/* <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
-<CardMedia
-    component="img"
-    sx={{ aspectRatio: 16 / 9, }}
-    src={correctForm.demo}
-    alt="workout demo"
-    allowFullScreen
-    allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
-/>
-<CardContent sx={{ width: 300 }} >
-    <ThemeProvider theme={theme}>
-        <Typography maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} overflow={'auto'} gutterBottom variant="h5" component="div">
-            <CheckIcon sx={{ border: "2px solid green" }} fontSize="large" color="success"></CheckIcon> {correctForm.description}
-        </Typography>
-    </ThemeProvider>
-</CardContent>
-<CardActions sx={{ marginTop: 'auto' }}>
-    <Grid container justifyContent={'center'}>
-        <Grid item>
-            <Button startIcon={<EditIcon />}>
-                Edit
-            </Button>
-        </Grid>
-    </Grid>
-
-</CardActions>
-</Card> */}

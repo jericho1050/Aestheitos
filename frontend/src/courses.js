@@ -174,7 +174,7 @@ export async function deleteWorkout(id) {
 }
 
 export async function getCorrectExercises(id) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercise/course/workout/${id}`, {
+  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercises/course/workout/${id}`, {
 
   });
 }
@@ -200,7 +200,7 @@ export async function deleteCorrectExerciseForm(id) {
 }
 
 export async function getWrongExercises(id) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}correct-exercises/course/workout/${id}`, {
+  return sendRequest(`${import.meta.env.VITE_API_URL}wrong-exercises/course/workout/${id}`, {
 
   });
 }
