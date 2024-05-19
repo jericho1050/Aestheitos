@@ -56,7 +56,7 @@ function ResponsiveAppBar() {
 
   // attach event listener to each page in navbar
   const pageHandlers = {
-    'Courses': handleCourses,
+    // 'Courses': <Link to="/#courses" />,
     'Blogs': handleBlogs,
     'Create': handleCreate
   }
@@ -103,16 +103,16 @@ function ResponsiveAppBar() {
   }
 
   // pages handlers
-  function handleCourses() {
-
-  }
+  // function handleCourses() {
+  //   navigate('');
+  // }
 
   function handleBlogs() {
 
   }
 
   function handleCreate() {
-    navigate('/course/create')
+    navigate('/course/create');
   }
 
 
@@ -131,22 +131,22 @@ function ResponsiveAppBar() {
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <Avatar alt="logo" src={logo} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
-            <Link to='/' style={{color: 'inherit', textDecoration: 'none'}}>
-            <Typography
-              variant="h6"
-              noWrap
-              sx={{
-                mr: 2,
-                display: { xs: 'none', md: 'flex' },
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                letterSpacing: '.3rem',
-                color: 'inherit',
-                textDecoration: 'none',
-              }}
-            >
-              Aestheitos
-            </Typography>
+            <Link to='/' style={{ color: 'inherit', textDecoration: 'none' }}>
+              <Typography
+                variant="h6"
+                noWrap
+                sx={{
+                  mr: 2,
+                  display: { xs: 'none', md: 'flex' },
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  letterSpacing: '.3rem',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                }}
+              >
+                Aestheitos
+              </Typography>
             </Link>
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
               <IconButton
@@ -179,7 +179,9 @@ function ResponsiveAppBar() {
               >
                 {pages.map((page) => (
                   <MenuItem key={page} onClick={pageHandlers[page]}>
-                    <Typography textAlign="center">{page}</Typography>
+                    {
+                      page === 'Courses' ? <Typography textAlign="center"><Link to="/#courses" className='courses-link'>{page}</Link></Typography> : <Typography textAlign="center">{page}</Typography>
+                    }
                   </MenuItem>
                 ))}
               </Menu>
@@ -204,15 +206,20 @@ function ResponsiveAppBar() {
               Aestheitos
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              {pages.map((page) => (
-                <Button
+              {pages.map((page) => 
+                page === 'Courses' ? 
+                <Button key={page} sx={{ my: 2, color: 'white', display: 'block' }}>
+                  <Link to="/#courses" className='courses-link'>{page}</Link>
+                  </Button> : <Button
                   key={page}
                   onClick={pageHandlers[page]}
                   sx={{ my: 2, color: 'white', display: 'block' }}
                 >
                   {page}
                 </Button>
-              ))}
+              
+
+              )}
             </Box>
             {isAuthenticated ?
               <Box sx={{ flexGrow: 0 }}>

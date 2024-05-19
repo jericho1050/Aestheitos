@@ -3,7 +3,7 @@ import {jwtDecode} from 'jwt-decode';
 
 export const AuthContext = createContext(null);
 export const AuthDispatchContext = createContext(null);
-export const AccessTokenExpContext = createContext(null);
+export const AccessTokenDecodedContext = createContext(null);
 export const CurrentTimeContext = createContext(null);
 
 
@@ -29,13 +29,13 @@ export function AuthProvider({ children }) {
     return (
         <AuthContext.Provider value={token}>
             <AuthDispatchContext.Provider value={dispatch}>
-                <AccessTokenExpContext.Provider value={decoded}>
+                <AccessTokenDecodedContext.Provider value={decoded}>
                     <CurrentTimeContext.Provider value={currentTime}>
 
                                 {children}
 
                     </CurrentTimeContext.Provider>
-                </AccessTokenExpContext.Provider>
+                </AccessTokenDecodedContext.Provider>
             </AuthDispatchContext.Provider>
         </AuthContext.Provider>
     )

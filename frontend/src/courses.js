@@ -223,3 +223,9 @@ export async function deleteWrongExerciseForm(id) {
     method: 'DELETE',
   });
 }
+
+export async function getCourseEnrollees(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}enrollment/course/${id}`, {
+
+  })
+}

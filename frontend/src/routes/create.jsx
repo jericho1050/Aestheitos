@@ -1259,14 +1259,14 @@ export default function CreateCourse() {
                             <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                    <Grid item>
+                                    <Grid item alignSelf='flex-start'>
                                         <ThemeProvider theme={theme} >
                                             <Typography variant="h4">
                                                 Overview
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
-                                    <Grid item container>
+                
 
                                         {/* course overview textarea input */}
 
@@ -1305,7 +1305,7 @@ export default function CreateCourse() {
                                             <TextField type="hidden" value={courseContent.overview} name="overview" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
                                         </Container>
 
-                                    </Grid>
+                              
                                     <Grid item>
                                         <ThemeProvider theme={theme}>
                                             <Typography sx={{ textAlign: 'center' }} variant="h4">

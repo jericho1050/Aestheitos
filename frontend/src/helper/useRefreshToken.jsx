@@ -1,12 +1,12 @@
 import { useContext, useEffect } from "react";
-import { AccessTokenExpContext, CurrentTimeContext, useAuthToken} from "../contexts/authContext";
+import { AccessTokenDecodedContext, CurrentTimeContext, useAuthToken} from "../contexts/authContext";
 
 
 //ACCESS/REFRESH LOGIC here
 export default function useRefreshToken() {
     const { token, dispatch } = useAuthToken();
     const currentTime = useContext(CurrentTimeContext);
-    const accessTokenExp = useContext(AccessTokenExpContext);
+    const accessTokenExp = useContext(AccessTokenDecodedContext);
     const refreshBuffer = 30; 
 
     // refreshing the access token when it expires, use refresh token

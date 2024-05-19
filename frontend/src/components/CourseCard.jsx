@@ -7,12 +7,14 @@ import { Box, CardActionArea, Grid, Rating, ThemeProvider, createTheme, responsi
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import defaultImage from '../static/images/noimg.png'
 import { Link } from 'react-router-dom';
+import { Parser } from 'html-to-react';
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
 
 
 export default function CourseCard(props) {
-  const description = removeTags(props.description);
+  // const description = removeTags(props.description);
+  const htmlToReactParser = new Parser();
   return (
     <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: 645, height: '100%' }}>
       <ThemeProvider theme={theme}>
@@ -30,12 +32,12 @@ export default function CourseCard(props) {
           }}
           />
           <CardContent>
-            <Typography sx={{ height: {xs: 'auto', md: 60}, mb: {xs: 2, md: 4,}}} align='justify' gutterBottom fontFamily={'Play'} fontSize={'1.2rem'} fontWeight={'bolder'}>
+            <Typography sx={{ height:'auto', mb: {xs: 2, md: 4,}}} align='justify' gutterBottom fontFamily={'Play'} fontSize={'1.2rem'} fontWeight={'bolder'}>
               {truncateText(props.title, 9)} {/* Replace 2nd argument with the maximum number of words you want */}
             </Typography>
 
-            <Typography sx={{ height: 40, mb: {xs: 1, md: 2} }} variant='body2' color={"text.secondary"}>
-              Description: {truncateText(description, 10)}
+            <Typography sx={{ height: 40, mb: {xs: 1, md: 2},}} variant='body2' color={"text.secondary"} >
+              {htmlToReactParser.parse(truncateText(props.description, 10))}
             </Typography>
 
           </CardContent>
@@ -94,30 +96,4 @@ function truncateText(text, maxWords) {
   } else {
     return text;
   }
-}
-
-function removeTags(element) {
-  // removes tagName e.g., <a>Content</a> -> Content
-  let isTag = false;
-  let quote = false;
-  let content = '';
-
-  for (let i = 0; i < element.length; i++) {
-    const char = element[i];
-
-    if (char === '<' && !quote) {
-      // starting now with tagName
-      isTag = true;
-    } else if (char === '>' && !quote) {
-      // closing now with tagName
-      isTag = false;
-    } else if ((char === '"' || "'") && isTag) {
-      quote = !quote;
-    }
-     else if (!isTag) {
-      // starting now with html content
-      content = content.concat(char);
-    }
-  }
-  return content;
 }

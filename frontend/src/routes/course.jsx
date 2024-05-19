@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Container, Grid, Paper, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Container, Divider, Grid, Paper, Stack, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
@@ -13,13 +13,15 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { getCorrectExercises, getCourse, getCourseContent, getSectionItems, getSections, getWorkouts, getWrongExercises } from "../courses";
-import { useLoaderData } from "react-router-dom";
+import { getCorrectExercises, getCourse, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getWorkouts, getWrongExercises } from "../courses";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
 import getEmbedUrl from "../helper/getEmbedUrl";
 import CorrectFormDialog from "../components/CorrectFormDialog";
 import WrongFormDialog from "../components/WrongFormDialog";
+import { Parser } from "html-to-react";
+import { AccessTokenDecodedContext, useAuthToken } from "../contexts/authContext";
 
 
 
@@ -30,8 +32,8 @@ theme = responsiveFontSizes(theme)
 export async function loader({ params }) {
     // if you notice the pattern
     // everytime we do a GET request, the server respond with it's properties of our instance including it's ID
-    // now we chain this to retrieve other instances too.
-    // const accordion = [];
+    // then we chain this to retrieve other instances too.
+    // now we have a nice classic example of "callback hell" or "pyramid of doom"
     const course = await getCourse(params.courseId);
     if (!course) {
         throw new Response("", {
@@ -39,31 +41,49 @@ export async function loader({ params }) {
             statusText: course.message
         });
     }
+    const enrollees = await getCourseEnrollees(course.id);
     const courseContent = await getCourseContent(course.id);
-    const sections = await getSections(courseContent.id); // list of Accordions in our component
-    // data is kidna of deep here and it's not possible to flatten it.
-    // so we have to do something krazy here i mean something like accordionAtom.See in accordionAtom file for reference.
-    const accordion = await Promise.all(sections.map(async (section) => {
-        const sectionItems = await getSectionItems(section.id); // This will retrieve a list of AccordionItems for an Accordion
-        const itemWorkouts = await Promise.all(sectionItems.map(async (item) => {
-            const workouts = await getWorkouts(item.id); // This will retrieve a list of workouts for an item 
-            const workoutExercises = await Promise.all(workouts.map(async (workout) => {
-                const correctFormExercises = await getCorrectExercises(workout.id); // This will retrieve a list of Correct Form Exercises for a workout
-                const wrongFormExercises = await getWrongExercises(workout.id); // This will retrieve a list of Wrong Form Exercises for a workout.
-                return {
-                    ...workout,
-                    correctForm: correctFormExercises,
-                    wrongForm: wrongFormExercises
-                };
-            }));
-            return { ...item, workouts: workoutExercises };
+    try {
+        const sections = await getSections(courseContent.id);
+        const accordion = await Promise.all(sections.map(async (section) => {
+            try {
+                const sectionItems = await getSectionItems(section.id);
+                const itemWorkouts = await Promise.all(sectionItems.map(async (item) => {
+                    try {
+                        const workouts = await getWorkouts(item.id);
+                        const workoutExercises = await Promise.all(workouts.map(async (workout) => {
+                            try {
+                                const correctFormExercises = await getCorrectExercises(workout.id);
+                                const wrongFormExercises = await getWrongExercises(workout.id);
+                                return {
+                                    ...workout,
+                                    correctForm: correctFormExercises,
+                                    wrongForm: wrongFormExercises
+                                };
+                            } catch (error) {
+                                console.error('Error getting exercises:', error);
+                                return workout;
+                            }
+                        }));
+                        return { ...item, workouts: workoutExercises };
+                    } catch (error) {
+                        console.error('Error getting workouts:', error);
+                        return item;
+                    }
+                }));
+                return { ...section, items: itemWorkouts };
+            } catch (error) {
+                console.error('Error getting section items:', error);
+                return section;
+            }
         }));
-        return { ...section, items: itemWorkouts };
-    }));
-    return { course, courseContent, accordion };
+        return { course, courseContent, accordion, enrollees };
+    } catch (error) {
+        console.error('Error getting sections:', error);
+    }
 }
 
-function CourseComments() { } //TOODO 
+function CourseComments() { }
 
 
 // responsible for the 'workout' demo card
@@ -78,7 +98,6 @@ function WorkoutMediaCard({ workout, open }) {
             setisOpenWrong(true);
         }
     };
-    console.log(workout.demo);
 
     return (
         open &&
@@ -89,10 +108,9 @@ function WorkoutMediaCard({ workout, open }) {
                     sx={{ aspectRatio: 16 / 9 }}
                     src={workout.demo}
                     alt="workout demo"
-                    allowFullScreen
 
                 />
-                <CardContent>
+                <CardContent sx={{ padding: '10px 0 10px 10px' }}>
                     <Container width="inherit" sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }} >
                         <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(workout.exercise) }} />
                     </Container>
@@ -165,7 +183,7 @@ export function ResponsiveDialog({ accordionItem, children }) {
                             {isWorkoutRoutine ?
                                 <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} columns={12}>
                                     {accordionItem.workouts.length > 0 ? accordionItem.workouts.map(workout => (
-                                        <Grid item sm={6}>
+                                        <Grid key={workout.id} item sm={6}>
                                             <WorkoutMediaCard workout={workout} open={open}> </WorkoutMediaCard>
                                         </Grid>
                                     ))
@@ -186,25 +204,26 @@ export function ResponsiveDialog({ accordionItem, children }) {
                                     <Grid item width={'81%'}>
                                         {getEmbedUrl(accordionItem.lecture) ?
                                             <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>  
+                                                <iframe className="course-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>
                                             </Box>
                                             :
-                                            <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                <Typography variant="body">
-                                                    No video
-                                                </Typography>
-                                            </Box>
+                                            // <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                            //     <Typography variant="body">
+                                            //         No video
+                                            //     </Typography>
+                                            // </Box>
+                                            null
                                         }
                                     </Grid>
-                                    <Grid item mt={4} container width={'81%'}>
+                                    <Grid item mt={4} container >
                                         <ThemeProvider theme={theme}>
-                                            <Typography variant="h4">
+                                            <Typography variant="h5">
                                                 Description
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
-                                    <Grid item xs={10} mt={4}>
-
+                                    <Grid item xs={12} mt={4}>
+                                        {accordionItem.description}
                                     </Grid>
                                 </Grid>
                             }
@@ -216,9 +235,6 @@ export function ResponsiveDialog({ accordionItem, children }) {
                     <Button autoFocus onClick={handleClose}>
                         Close
                     </Button>
-                    {/* <Button onClick={handleClose} autoFocus>
-                        Agree
-                    </Button> */}
                 </DialogActions>
             </Dialog>
         </React.Fragment>
@@ -231,7 +247,6 @@ function ControlledAccordions() {
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
-    console.log(accordion);
     return (
         <>
             {
@@ -248,20 +263,40 @@ function ControlledAccordions() {
 export default function Course() {
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
-    const { course, courseContent } = useLoaderData();
+    const { course, courseContent, enrollees } = useLoaderData();
+    const htmlToReactParser = new Parser();
+    const { token } = useAuthToken();
+    const isAuthenticated = token['access'] !== null;
+    const navigate = useNavigate();
+    const accessTokenDecoded = React.useContext(AccessTokenDecodedContext);
+    const isInstructor = accessTokenDecoded?.user_id === course.created_by;
+    const isEnrolled = enrollees.some(enrollee => enrollee.user === accessTokenDecoded?.user_id && enrollee.course === course.id);
+    function handleClickEnroll() {
 
+        if (!isAuthenticated) {
+            navigate('/signin');
+        }
 
+    }
+
+    function handleClickSignUp() {
+        navigate('/signup')
+    }
     return (
         <>
             <br></br>
-            <Container maxWidth="xl">
+            <Container component="main" maxWidth="xl">
                 <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
-                    <Box mb={2} >
-                        <Button fullWidth={isSmallScreen ? true : false}>
-                            <EditIcon sx={{ marginRight: 1 }} />
-                            Edit
-                        </Button>
-                    </Box>
+                    {
+                        isInstructor &&
+                        <Box mb={2} >
+                            <Button fullWidth={isSmallScreen ? true : false}>
+                                <EditIcon sx={{ marginRight: 1 }} />
+                                Edit
+                            </Button>
+                        </Box>
+                    }
+
                     <Box className="clearfix" component={'div'}>
                         <Paper elevation={4} sx={{ padding: { xs: '7%', md: '3%' }, float: 'left', margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' } }}>
                             <ThemeProvider theme={theme}>
@@ -282,11 +317,16 @@ export default function Course() {
                                     </Typography>
 
                                 </Box>
-                                <Box display='flex' justifyContent={'center'} mt={2}>
-                                    <Button fullWidth variant="contained">
-                                        Enroll now!
-                                    </Button>
-                                </Box>
+                                {
+
+                                    accessTokenDecoded?.user_id !== course.created_by &&
+                                    <Box display='flex' justifyContent={'center'} mt={2}>
+                                        <Button fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
+                                            Enroll now!
+                                        </Button>
+                                    </Box>
+                                }
+
                                 <Grid container columns={{ xs: 6, md: 12 }} mt={2}>
                                     <Grid item xs={3} md={6}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
@@ -314,15 +354,18 @@ export default function Course() {
                         <Typography fontWeight="bold" variant="h3">
                             {course.title}
                         </Typography>
-                        <Box className="html-content" component={'div'} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(course.description) }} />
+                        {/* <Box className="html-content" component={'div'} dangerouslySetInnerHTML={{ __html: DOMPurify(course.description) }} /> */}
+                        <Box className="html-content">
+                            {htmlToReactParser.parse(course.description)}
+                        </Box>
                     </Box>
                     <br></br>
-                    <hr></hr>
+                    <Divider />
                     <Container className="course-container">
                         <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                             <Grid item alignSelf={'flex-start'}>
                                 <ThemeProvider theme={theme} >
-                                    <Typography variant="h3">
+                                    <Typography variant="h4">
                                         Overview
                                     </Typography>
                                 </ThemeProvider>
@@ -342,16 +385,89 @@ export default function Course() {
                                 </Box>
                             </Grid>
                             <br />
-                            <Grid item alignSelf={'flex-start'}>
-                                <ThemeProvider theme={theme}>
-                                    <Typography variant="h4">
-                                        Course content
-                                    </Typography>
-                                </ThemeProvider>
-                            </Grid>
-                            <Grid item width={{ xs: '100%' }}>
-                                <ControlledAccordions />
-                            </Grid>
+                            {
+                                !isAuthenticated ? // if anonymous user, don't show the course's content
+                                    <>
+                                        <Grid item container position={'relative'} justifyContent={'flex-start'}>
+                                            <ThemeProvider theme={theme}>
+                                                <Typography variant="h4">
+                                                    Course content
+                                                </Typography>
+                                            </ThemeProvider>
+                                            <Grid item width={'100%'} sx={{ pointerEvents: 'none' }}>
+                                                <ControlledAccordions />
+                                            </Grid>
+                                            <Grid item width={'100%'}>
+                                                <Stack className="non-modal-dialog">
+                                                    <Grid item container justifyContent={'center'} spacing={3} mt={'auto'}>
+                                                        <ThemeProvider theme={theme}>
+                                                            <Typography align="center" gutterBottom variant="h5">
+                                                                Create an account and enroll to view content
+                                                            </Typography>
+                                                        </ThemeProvider>
+                                                        <Grid item xs={7}>
+                                                            <Button variant="outlined" disableRipple sx={{ borderRadius: 10 }} fullWidth={true} onClick={handleClickSignUp}>Sign Up</Button>
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            {/* <Button variant="outlined" disableRipple sx={{ borderRadius: 10 }} fullWidth={true}>Sign In</Button> */}
+                                                            <ThemeProvider theme={theme}>
+                                                                <Typography align="center" gutterBottom variant="body1">
+                                                                    Already have an account? <Link to='/signin'>Sign In</Link>
+                                                                </Typography>
+                                                            </ThemeProvider>
+                                                        </Grid>
+                                                    </Grid>
+
+
+                                                </Stack>
+                                            </Grid>
+                                        </Grid>
+
+                                    </>
+                                    :
+                                    <>
+                                        {!isEnrolled ? // if user is not enrolled, don't show the course's content
+                                            <Grid item container position={'relative'} justifyContent={'flex-start'}>
+                                                <ThemeProvider theme={theme}>
+                                                    <Typography variant="h4">
+                                                        Course content
+                                                    </Typography>
+                                                </ThemeProvider>
+                                                <Grid item width={'100%'} sx={{ pointerEvents: 'none' }}>
+                                                    <ControlledAccordions />
+                                                </Grid>
+                                                <Grid item width={'100%'}>
+                                                    <Stack className="non-modal-dialog">
+                                                        <Grid container justifyContent={'center'} spacing={3} mt={'auto'}>
+                                                            <ThemeProvider theme={theme}>
+                                                                <Typography align="center" gutterBottom variant="h5">
+                                                                    Enroll to view content
+                                                                </Typography>
+                                                            </ThemeProvider>
+                                                            <Grid item xs={12}>
+                                                                <Button variant="outlined" disableRipple sx={{ borderRadius: 10 }} fullWidth >Enroll now</Button>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Stack>
+                                                </Grid>
+                                            </Grid>
+                                            :
+                                            <>
+                                                <Grid item alignSelf={'flex-start'}>
+                                                    <ThemeProvider theme={theme}>
+                                                        <Typography variant="h4">
+                                                            Course content
+                                                        </Typography>
+                                                    </ThemeProvider>
+                                                </Grid>
+                                                <Grid item width={{ xs: '100%' }}>
+                                                    <ControlledAccordions />
+                                                </Grid>
+                                            </>
+                                        }
+                                    </>
+                            }
+
                         </Grid>
                     </Container>
                 </Box>

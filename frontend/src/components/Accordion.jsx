@@ -151,7 +151,7 @@ export function AccordionSection({ handleChange, expanded, accordion }) {
                 {accordionHeadingContent}
             </AccordionSummary>
         
-                {accordion.items ? accordion.items.map((item) => (
+                {accordion.items ? accordion.items?.map((item) => (
 
                     <AccordionDetails
                         sx={{ paddingLeft: '2%' }}

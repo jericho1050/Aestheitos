@@ -28,8 +28,6 @@ function WorkoutMediaCorrectFormCard({ correctForm, open }) {
                 sx={{ aspectRatio: 16 / 9, }}
                 src={correctForm.demo}
                 alt="workout demo"
-                allowFullScreen
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
             />
             <CheckIcon  fontSize="large" className="correct-icon"/>
             </Box>
@@ -80,7 +78,7 @@ export default function CorrectFormDialog({ correctFormExercises, open, setOpen 
                                     :
                                     <Grid item sm={12}>
                                         <ThemeProvider theme={theme} >
-                                            <Typography variant="body1" height={350}>
+                                            <Typography variant="body1" align='center' height={350}>
                                                 No Workouts To Show
                                             </Typography>
                                         </ThemeProvider>

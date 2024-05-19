@@ -6,7 +6,7 @@ import validateJWTToken from "../helper/verifySignature";
 
 export default function ProectedRoute() {
   const { token } = useAuthToken();
-  let isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
 
 
@@ -29,7 +29,7 @@ export default function ProectedRoute() {
 
   useEffect(() => {
     (async () => {
-    const hasToken = await validateJWTToken();
+    const hasToken = await validateJWTToken(); // we verify the signature of the cookie (i.e., the HTTP-only cookie in the storage)
     if (!isAuthenticated && !hasToken) {
       navigate('/signin')
     }

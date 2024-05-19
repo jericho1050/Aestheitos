@@ -219,6 +219,7 @@ class SectionItemList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = SectionItemSerializer
 
     def get_queryset(self):
+        user_authentication(self.request)
         return SectionItem.objects.filter(section=self.kwargs["pk"])
     
 class SectionItemDetail(DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView):

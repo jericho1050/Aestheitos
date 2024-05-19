@@ -13,15 +13,15 @@ const sectionItem1 = {
     heading: "Your own item header here: e.g., ReadMe or Lecture",
     workouts: [
         // {
-        //     id : Math.floor(Math.random() * 501),
+        //     id : ,
         //     demo: demoGif,
         //     exercise: '',
         //     correctForm : [{
-        //         id : Math.floor(Math.random() * 501),
+        //         id : ,
         //         ...correctForm
         //     }],
         //     wrongForm: [{
-        //         id : Math.floor(Math.random() * 501),
+        //         id : ,
         //         ...wrongForm
         //     }]
         // }

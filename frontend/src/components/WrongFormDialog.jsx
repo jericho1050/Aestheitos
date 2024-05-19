@@ -27,8 +27,6 @@ function WorkoutMediaWrongFormCard({ wrongForm, open }) {
                     sx={{ aspectRatio: 16 / 9, }}
                     src={wrongForm.demo}
                     alt="workout demo"
-                    allowFullScreen
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
                 />
                 <ClearIcon fontSize="large" className="wrong-icon" />
             </Box>
@@ -80,7 +78,7 @@ export default function WrongFormDialog({ wrongFormExercises, open, setOpen }) {
                                     :
                                     <Grid item sm={12}>
                                         <ThemeProvider theme={theme} >
-                                            <Typography variant="body1" height={350}>
+                                            <Typography variant="body1" align={'center'} height={350}>
                                                 No Workouts To Show
                                             </Typography>
                                         </ThemeProvider>

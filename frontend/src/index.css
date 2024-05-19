@@ -33,7 +33,7 @@ html {
     width: 100%;
     height: 50vh;
     object-fit: cover;
-    opacity: 0.5;
+    opacity: 0.3;
   }
 }
 
@@ -42,7 +42,7 @@ html {
     width: 100%;
     height: 69vh;
     object-fit: cover;
-    opacity: 0.5;
+    opacity: 0.3;
 
   }
 }
@@ -52,7 +52,7 @@ html {
     width: 100%;
     height: 90vh;
     object-fit: cover;
-    opacity: 0.4;
+    opacity: 0.3;
 
   }
 }
@@ -109,6 +109,14 @@ html {
 }
 
 
+.courses-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.courses-link:active {
+  color: inherit;
+}
 
 
 .course-lecture, .course-preview {
@@ -273,4 +281,33 @@ html {
   opacity: 0.6;
   border: 2px solid green;
 
+}
+
+
+/* .non-modal-dialog-login::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.69));
+    z-index: -1;
+  }
+   */
+
+
+.non-modal-dialog {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 1));
+z-index: 1;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 22vh 0 10vh 0;
 }
