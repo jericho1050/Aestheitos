@@ -16,6 +16,7 @@ import { Index, loader as indexLoader } from './routes/index';
 import Course, {loader as courseLoader} from './routes/course';
 import CreateCourse from './routes/create';
 import {action as createAction} from './routes/create';
+import { action as enrollAction } from './routes/course';
 import ProectedRoute from './components/protectedRoute';
 import { IsLoadingProvider } from './contexts/IsLoadingContext';
 
@@ -48,7 +49,8 @@ const router = createBrowserRouter([
       {
         path: "courses/:courseId",
         element: <Course />,
-        loader: courseLoader
+        loader: courseLoader,
+        action: enrollAction
       },
       {
        

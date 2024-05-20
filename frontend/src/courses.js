@@ -1,5 +1,3 @@
-import { FaceRetouchingNatural } from "@mui/icons-material";
-
 class HttpError extends Error {
   constructor(statusCode, message, ...params) {
     super(...params);
@@ -61,8 +59,6 @@ export async function createCourse(courseFormData) {
     body: courseFormData
   });
 }
-
-
 
 
 export async function updateCourse(id, updates) {
@@ -227,5 +223,36 @@ export async function deleteWrongExerciseForm(id) {
 export async function getCourseEnrollees(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}enrollment/course/${id}`, {
 
+  });
+}
+
+export async function createCourseEnrollment(id) {
+  // i.e., the user enrolls in a course 
+
+  return sendRequest(`${import.meta.env.VITE_API_URL}enrollment/course/${id}`, {
+    method: 'POST',
+  });
+}
+
+export async function deleteCourseUnenrollment(id) {
+  // i.e., the user unenrolls in a course
+
+  return sendRequest(`${import.meta.env.VITE_API_URL}enrollment/unenrollment/${id}`, {
+    method: 'DELETE',
+
   })
+}
+
+export async function getCourseComments(id) {
+
+  return sendRequest(`${import.meta.env.VITE_API_URL}comments/course/${id}`, {
+
+  });
+}
+
+export async function getUser(id) {
+  
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/${id}`, {
+
+  });
 }

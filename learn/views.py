@@ -34,6 +34,22 @@ from .custom_serializer import *
 
 
 # API calls (Class based functions)
+
+# class UserList(generics.ListAPIView):
+#     """
+#     List all Users
+#     """
+#     serializer_class = UserCommentSerializer
+#     queryset =  User.objects.all()
+
+class UserRetrieveView(generics.RetrieveAPIView):
+     """
+     Retrieve a user instance
+     """
+     serializer_class = UserCommentSerializer
+     queryset = User.objects.all()
+
+
 class RegisterView(APIView):
     """
     Creates a newly Account and return an access and refresh token

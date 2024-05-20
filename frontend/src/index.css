@@ -34,6 +34,10 @@ html {
     height: 50vh;
     object-fit: cover;
     opacity: 0.3;
+    background-color:hsla(0,13%,97%,0.5);
+    background-image:
+    radial-gradient(at 80% 100%, hsla(209,78%,46%,0.3) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(38,100%,68%,0.3) 0px, transparent 50%);
   }
 }
 
@@ -43,7 +47,10 @@ html {
     height: 69vh;
     object-fit: cover;
     opacity: 0.3;
-
+    background-color:hsla(0,13%,97%,0.5);
+    background-image:
+    radial-gradient(at 80% 100%, hsla(209,78%,46%,0.3) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(38,100%,68%,0.3) 0px, transparent 50%);
   }
 }
 
@@ -53,7 +60,10 @@ html {
     height: 90vh;
     object-fit: cover;
     opacity: 0.3;
-
+    background-color:hsla(0,13%,97%,0.5);
+    background-image:
+    radial-gradient(at 80% 100%, hsla(209,78%,46%,0.3) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(38,100%,68%,0.3) 0px, transparent 50%);
   }
 }
 
@@ -64,6 +74,10 @@ html {
     left: 50%;
     transform: translate(-50%, -40%);
     border-radius: 35px;
+    background-color:hsla(0,13%,97%,0.69);
+    background-image:
+    radial-gradient(at 80% 100%, hsla(38,100%,68%,0.2) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(209,78%,46%,0.2) 0px, transparent 50%);
   }
 }
 
@@ -74,6 +88,10 @@ html {
     left: 50%;
     transform: translate(-50%, -69%);
     border-radius: 35px;
+    background-color:hsla(0,13%,97%,0.69);
+    background-image:
+    radial-gradient(at 80% 100%, hsla(38,100%,68%,0.2) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(209,78%,46%,0.2) 0px, transparent 50%);
   }
 }
 
@@ -124,6 +142,8 @@ html {
   width: 69vw !important;
   max-width: 850px;
 }
+
+
 .course-video-lecture {
   aspect-ratio: 16 / 9;
   width: 100% !important;
@@ -236,7 +256,7 @@ html {
 }
 .second-image {
   position: absolute;
-  z-index: -1;
+  z-index: 1;
 }
 
 .third-image {
@@ -310,4 +330,14 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 padding: 22vh 0 10vh 0;
+}
+
+.price-tag {
+  padding: 0;
+  background-color:hsla(0,0%,100%,1);
+  background-image:
+  radial-gradient(at 80% 100%, hsla(209,78%,46%,0.2) 0px, transparent 50%),
+  radial-gradient(at 0% 0%, hsla(38,100%,68%, 0.2) 0px, transparent 50%);
+  border-radius: 15px;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }

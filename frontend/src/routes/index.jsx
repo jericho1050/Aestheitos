@@ -19,7 +19,7 @@ import ScrollToHashElement from "../helper/scrollToHashElement";
 
 const images = [
     "src/static/images/firstBG.png",
-    "src/static/images/secondBG.png",
+    "src/static/images/secondBG copy.png",
     "src/static/images/thirdBG.png"
 ]
 export async function loader() {
@@ -31,13 +31,12 @@ const MysteriousText = ({ children, ...props }) => {
     const matches = useMediaQuery(theme => theme.breakpoints.up('lg'))
     const animation = i =>
         useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650) });
-    const certainIndex = 43;
     return (
-        <Typography variant={matches ? 'h3' : 'h4'} sx={{ textAlign: 'left', }} {...props}>
+        <Typography variant={matches ? 'h3' : 'h4'} sx={{ textAlign: 'left', WebkitTextStrokeColor: 'white', WebkitTextStrokeWidth: 1, }} {...props}>
             {children.split("").map((item, index) => (
                 <animated.span key={index} style={{
                     ...animation(index),
-                    fontFamily: index <= certainIndex ? '"Anta"' : '"Rem"',
+                    fontFamily: 'Archivo Black',
                 }}>
                     {item}
                 </animated.span>
@@ -61,15 +60,15 @@ export function Index() {
 
     })
     const [springs, api] = useSprings(3, index => ({
-        from: { x: index === 2 ? '-100%': '100%'},
-        to: { x: '0%'},
+        from: { x: index === 2 ? '-100%' : '100%' },
+        to: { x: '0%' },
         delay: index * 200
     }));
     const [snackbar,] = useAtom(snackbarReducerAtom);
-    
+
 
     return (<>
-    {snackbar.open && <CustomizedSnackbar />}
+        {snackbar.open && <CustomizedSnackbar />}
         <Box sx={{ margin: -1, padding: 0, position: 'relative' }}>
             <Box display={'flex'}>
                 {/* staggering effect */}
@@ -81,10 +80,10 @@ export function Index() {
                     return <animated.img key={index} style={props} src={images[index]} className={className} />
                 })}
             </Box>
-        
+
 
             <animated.div style={{ ...spring }}>
-                <Container fixed={true} maxWidth={false} sx={{ display: 'flex', backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: { xs: '4%', sm: '6%' }, paddingLeft: { xs: '8%' }, paddingRight: { xs: '8%' }, width: { xs: '69%' } }} className="container-homepage">
+                <Container fixed={true} maxWidth={false} sx={{ display: 'flex', padding: { xs: '4%', sm: '6%' }, paddingLeft: { xs: '8%' }, paddingRight: { xs: '8%' }, width: { xs: '69%' } }} className="container-homepage">
                     <ThemeProvider theme={theme}>
                         {/* <Typography variant={matches ? 'h3' : 'h4'} sx={{ color: '#5A5A5A', fontWeight: 600, fontFamily: '"Helvetica Neue"', textAlign: 'left' }}>
                         </Typography> */}
@@ -100,28 +99,30 @@ export function Index() {
                     <div className="divider"></div>
                 </Grid>
             </Grid>
-            <Container maxWidth="xl" sx={{ml:'auto', mr: 'auto'}}>
-                <Grid container mb={4} mt={'10vh'}>
-                    <Grid item>
-                    <ThemeProvider theme={theme}>
-                        <Typography variant={'h3'} sx={{ fontFamily: 'Play' }}>
-                            Explore Courses
-                        </Typography>
-                    </ThemeProvider>
+            <Container maxWidth="xl" sx={{ ml: 'auto', mr: 'auto' }}>
+
+                <Box sx={{ ml: { xs: 4, m: 3, l: 0 }, mr: { xs: 4, m: 3, l: 0 } }}>
+                    <Grid container mb={4} mt={'10vh'}>
+                        <Grid item>
+                            <ThemeProvider theme={theme}>
+                                <Typography variant={'h3'} sx={{ fontFamily: 'Play' }}>
+                                    Explore Courses
+                                </Typography>
+                            </ThemeProvider>
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Box sx={{ml: {xs: 4, m: 3, l: 0}, mr: {xs: 4, m: 3, l: 0}}}>
-                <ScrollToHashElement />
+                    <ScrollToHashElement />
                     <Grid id="courses" container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
                         {/* Load lists of Courses that are approved only */}
                         {courses.map(course => {
                             return (
-                            course.status === 'A' ?  
-                            <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
-                                <CourseCard  {...course} />
-                            </Grid>
-                            : null
-                        )}
+                                course.status === 'A' ?
+                                    <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
+                                        <CourseCard  {...course} />
+                                    </Grid>
+                                    : null
+                            )
+                        }
 
                         )}
                     </Grid>

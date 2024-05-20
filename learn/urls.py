@@ -12,6 +12,8 @@ urlpatterns = [
     path('token/refresh', MyTokenRefreshView.as_view(), name='token_refresh'),
     
     path("user", UserView.as_view(), name="user"),
+    path("user/<int:pk>", UserRetrieveView.as_view(), name="user-detail"),
+    # path("users", UserList.as_view(), name="users"),
     path("logout", LogoutView.as_view(), name="logout"),
     path("user/courses/progress", UserProgressList.as_view(), name="progress-list"),
     path("user/course/<int:pk>/progress", UserProgressDetail.as_view(), name="progress-detail"),

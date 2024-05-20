@@ -206,18 +206,18 @@ function ResponsiveAppBar() {
               Aestheitos
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              {pages.map((page) => 
-                page === 'Courses' ? 
-                <Button key={page} sx={{ my: 2, color: 'white', display: 'block' }}>
-                  <Link to="/#courses" className='courses-link'>{page}</Link>
+              {pages.map((page) =>
+                page === 'Courses' ?
+                  <Button key={page} sx={{ my: 2, color: 'white', display: 'block' }}>
+                    <Link to="/#courses" className='courses-link'>{page}</Link>
                   </Button> : <Button
-                  key={page}
-                  onClick={pageHandlers[page]}
-                  sx={{ my: 2, color: 'white', display: 'block' }}
-                >
-                  {page}
-                </Button>
-              
+                    key={page}
+                    onClick={pageHandlers[page]}
+                    sx={{ my: 2, color: 'white', display: 'block' }}
+                  >
+                    {page}
+                  </Button>
+
 
               )}
             </Box>

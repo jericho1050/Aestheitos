@@ -22,6 +22,12 @@ class UserSerializer(ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+    
+class UserCommentSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "profile_pic"]
+        
 
 
 class UserProgressSerializer(ModelSerializer):

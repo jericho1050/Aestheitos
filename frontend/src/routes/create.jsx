@@ -746,12 +746,13 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                         </Grid>
                                     </>
                                     :
-                                    <Grid justifyContent={{ xs: 'center' }} item container>
+                                    <Grid justifyContent={'center'} item container>
                                         <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} itemId={itemId} />
-                                        <Grid item width={'81%'}>
+                                        <Grid item xs={10}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-video-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>                                    </Box>
+                                                    <iframe className="course-video-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe> 
+                                                </Box>
                                                 :
                                                 <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                     <Typography variant="body" align={'center'}>
@@ -760,10 +761,10 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                                 </Box>
                                             }
                                         </Grid>
-                                        <Grid item mt={4}>
+                                        <Grid item mt={4} xs={10} justifySelf={'flex-start'}>
                                             <ThemeProvider theme={theme}>
                                                 <Typography variant="h4">
-                                                    Read me info.
+                                                    Description
                                                 </Typography>
                                             </ThemeProvider>
                                         </Grid>
@@ -923,7 +924,7 @@ function ControlledAccordions({ activeStep, courseContentId }) {
             </Box>
             <TransitionGroup>
                 {
-                    accordions.map(accordion => 
+                    accordions.map(accordion =>
                         <Collapse key={accordion.id}>{/* The collapse component's purpose is to transitionally remove the accordion. */}
                             <AccordionSectionCreate actionData={actionData} eventHandlers={{ handleDeleteAccordionItem, handleEditAccordionItem, handleAddAccordionItem }} onClickDelete={handleDeleteAccordion} onChange={handleEditAccordion} handleChange={handleChange} expanded={expanded} accordion={accordion} />
                         </Collapse>
@@ -1052,7 +1053,7 @@ export default function CreateCourse() {
             intent: 'submit',
             courseId: course.id,
             activeStep: activeStep
-        }, {method:'post'})
+        }, { method: 'post' })
         dispatch({
             type: 'submitting'
         })
@@ -1070,18 +1071,20 @@ export default function CreateCourse() {
                         <input type="hidden" value={course.id} name="courseId" />
                         <Box sx={{ m: '3vw' }}>
                             <Container>
-                                <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                    <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
-                                </Box>
+                                <Grid container mb={4}>
+                                    <Grid item xs>
+                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                    </Grid>
+                                </Grid>
                                 <Grid container sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }} spacing={2}>
                                     {/* Paper starts here */}
                                     <Grid item xs sm md={5}>
                                         <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%' }}  >
-                                                <Grid item justifySelf={'center'}>
-                                                    <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 400 } }} component="div">
-                                                        <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
-                                                    </Container>
-                                                </Grid>
+                                            <Grid item justifySelf={'center'}>
+                                                <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 400 } }} component="div">
+                                                    <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
+                                                </Container>
+                                            </Grid>
                                             <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
                                                 <Grid item xs>
                                                     {/* Uploading  image file button  here */}
@@ -1249,27 +1252,29 @@ export default function CreateCourse() {
                         <fetcher.Form method="post" encType="multipart/form-data" noValidate >
                             <TextField type="hidden" value={activeStep} name="activeStep" />
                             <TextField type="hidden" value={course.id} name="courseId" />
-                            <Box sx={{ m: '3vw' }}>
+                            <Grid sx={{ m: '3vw' }}>
                                 <Container>
-                                    <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
-                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
-                                    </Box>
+                                    <Grid container mb={4}>
+                                        <Grid item xs>
+                                            <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                        </Grid>
+                                    </Grid>
                                 </Container>
-                            </Box>
+                            </Grid>
                             <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                                     <Grid item alignSelf='flex-start'>
                                         <ThemeProvider theme={theme} >
-                                            <Typography variant="h4">
+                                            <Typography variant="h5">
                                                 Overview
                                             </Typography>
                                         </ThemeProvider>
                                     </Grid>
-                
 
-                                        {/* course overview textarea input */}
 
+                                    {/* course overview textarea input */}
+                                    <Grid item width={'100%'}>
                                         <Container className="ql-editor-container">
                                             <fieldset className="quill-fieldset">
                                                 {isError && actionData?.message ?
@@ -1304,14 +1309,13 @@ export default function CreateCourse() {
                                             </fieldset>
                                             <TextField type="hidden" value={courseContent.overview} name="overview" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
                                         </Container>
-
-                              
-                                    <Grid item>
+                                    </Grid>
+                                    <Grid item alignSelf={'flex-start'}>
                                         <ThemeProvider theme={theme}>
-                                            <Typography sx={{ textAlign: 'center' }} variant="h4">
+                                            <Typography variant="h5">
                                                 Preview this course
                                             </Typography>
-                                            <Typography sx={{ display: 'block', textAlign: 'center' }} variant="small">
+                                            <Typography sx={{ display: 'block' }} variant="small">
                                                 Put your youtube video link here
                                             </Typography>
                                         </ThemeProvider>
@@ -1380,9 +1384,11 @@ export default function CreateCourse() {
 
                             <Box sx={{ m: '3vw' }}>
                                 <Container>
-                                    <Box sx={{ m: 4, display: 'flex', justifyContent: 'center' }}>
+                                    <Grid container>
+                                        <Grid item xs>
                                         <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
-                                    </Box>
+                                        </Grid>
+                                    </Grid>
                                 </Container>
                             </Box>
                             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
@@ -1398,13 +1404,13 @@ export default function CreateCourse() {
                                         <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
                                     </Grid>
                                 </Grid>
-                                    {/* <TextField type="hidden" value={activeStep} name="activeStep" />
+                                {/* <TextField type="hidden" value={activeStep} name="activeStep" />
                                     <TextField type="hidden" value={course.id} name="courseId" /> */}
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
-                                        <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
-                                            <AlertDialog onClickSubmit={handleSubmit}/>
-                                        </Box>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
+                                    <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
+                                        <AlertDialog onClickSubmit={handleSubmit} />
                                     </Box>
+                                </Box>
 
                             </Box>
 
