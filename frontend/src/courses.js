@@ -250,9 +250,16 @@ export async function getCourseComments(id) {
   });
 }
 
-export async function getUser(id) {
+export async function getUser() {
   
-  return sendRequest(`${import.meta.env.VITE_API_URL}user/${id}`, {
+  return sendRequest(`${import.meta.env.VITE_API_URL}user-detail`, {
 
   });
+}
+
+export async function createCourseComment(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}comments/course/${id}`, {
+    method: 'POST',
+    body: formData
+  })
 }

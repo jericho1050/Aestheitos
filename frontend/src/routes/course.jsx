@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Container, Divider, Grid, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Container, Divider, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
@@ -21,8 +21,9 @@ import getEmbedUrl from "../helper/getEmbedUrl";
 import CorrectFormDialog from "../components/CorrectFormDialog";
 import WrongFormDialog from "../components/WrongFormDialog";
 import { Parser } from "html-to-react";
-import { AccessTokenDecodedContext, useAuthToken } from "../contexts/authContext";
-
+import { AccessTokenDecodedContext, AuthContext, useAuthToken } from "../contexts/authContext";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ReplyIcon from '@mui/icons-material/Reply';
 
 
 let theme = createTheme()
@@ -34,6 +35,7 @@ export async function loader({ params }) {
     // everytime we do a GET request, the server respond with it's properties of our instance including it's ID
     // then we chain this to retrieve other instances too.
     // now we have a nice classic example of "callback hell" or "pyramid of doom"
+    const user = await getUser();
     const course = await getCourse(params.courseId);
     if (!course) {
         throw new Response("", {
@@ -44,16 +46,6 @@ export async function loader({ params }) {
     const enrollees = await getCourseEnrollees(course.id);
     const courseContent = await getCourseContent(course.id);
     const comments = await getCourseComments(course.id);
-    const courseComments = await Promise.all(comments.map(async (comment) => {
-        let user;
-        try {
-            user = await getUser(comment.comment_by);
-        } catch (erorr) {
-            console.error('Error getting user', user);
-            return comment;
-        }
-        return { ...comment, ...user };
-    }));
     try {
         const sections = await getSections(courseContent.id);
         const accordion = await Promise.all(sections.map(async (section) => {
@@ -88,7 +80,7 @@ export async function loader({ params }) {
                 return section;
             }
         }));
-        return { course, courseContent, accordion, enrollees, courseComments };
+        return { user, course, courseContent, accordion, enrollees, comments };
     } catch (error) {
         console.error('Error getting sections:', error);
     }
@@ -98,7 +90,6 @@ export async function action({ request, params }) {
     const data = await request.json();
     let enrollment, unenrollment;
     if (data.intent === 'enroll') {
-        console.log('am called here');
         enrollment = await createCourseEnrollment(params.courseId);
     } else {
         unenrollment = await deleteCourseUnenrollment(data.enrollmentId);
@@ -106,27 +97,83 @@ export async function action({ request, params }) {
     return { enrollment, unenrollment };
 }
 
+function CourseCommentReplies({ comment, level = 0 }) {
+    const [open, setOpen] = React.useState(false);
+    const totalReplies = comment.replies.length;
+
+    return (
+        <Grid container>
+            {totalReplies !== 0 &&
+
+                <Grid item xs={12} style={{ paddingLeft: `${level * 20}px` }}>
+                    <Button startIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
+                        {totalReplies} {totalReplies === 1 ? 'reply' : 'replies'}
+                    </Button>
+                </Grid>
+            }
+            <Grid item>
+                <Collapse in={open} timeout='auto' unmountOnExit>
+                    <List component="div" disablePadding>
+                        {
+                            comment.replies.map(reply => (
+                                <Box key={reply.id}>
+                                    <ListItem>
+                                        <ListItemAvatar>
+                                            <Avatar alit={reply.username} src={reply.profile_pic} />
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={`${reply.first_name || reply.username} ${reply.last_name || ''}`}
+                                            secondary={reply.comment}
+                                        />
+                                    </ListItem>
+                                    <ListItemText inset={true} style={{ paddingLeft: `${(level + 1) * 20}px` }}>
+                                        <IconButton sx={{ borderRadius: 3, mt: -1 }}>
+                                            <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
+                                        </IconButton>
+                                    </ListItemText>
+                                    <CourseCommentReplies comment={reply} level={level + 1} />
+                                </Box>
+                            ))}
+                    </List>
+                </Collapse>
+            </Grid>
+        </Grid>
+    )
+}
+
 function CourseComments() {
-    const { courseComments } = useLoaderData();
-    console.log(courseComments);
+    const { comments } = useLoaderData();
     return (
         <List sx={{ width: '100%', maxWidth: 'inherit', bgcolor: 'background.paper' }}>
-            {courseComments.map(comment =>
-                <>
-                    <ListItem alignItems="flex-start">
-                        <ListItemAvatar>
-                            <Avatar alt={comment.username} src={comment.profile_pic} />
-                        </ListItemAvatar>
-                        <ListItemText
-                            primary={`${comment.first_name || comment.username} ${comment.last_name || null}`}
-                            secondary={
-                                comment.comment
-                            }
-                        />
-                    </ListItem>
-                    <Divider variant="inset" component="li" />
-                </>
-
+            <ListItem >
+                <CommentTextField />
+            </ListItem>
+            {comments.map(comment =>
+                !comment.parent_comment && (
+                    <Box key={comment.id}>
+                        <ListItem alignItems="flex-start">
+                            <ListItemAvatar>
+                                <Avatar alt={comment.username} src={comment.profile_pic} />
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary={`${comment.first_name || comment.username} ${comment.last_name || ''}`}
+                                secondary={
+                                    comment.comment
+                                }
+                            />
+                        </ListItem>
+                        <ListItemText inset={true}>
+                            <IconButton sx={{ borderRadius: 3, mt: -1 }}>
+                                <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
+                            </IconButton>
+                        </ListItemText>
+                        <ListItem>
+                            <ListItemAvatar></ListItemAvatar> {/* Nah im just rendering a whitespace here */}
+                            <CourseCommentReplies comment={comment} />
+                        </ListItem>
+                        <Divider variant="inset" component="li" />
+                    </Box>
+                )
             )}
 
         </List>
@@ -134,6 +181,61 @@ function CourseComments() {
 }
 
 function CommentTextField() {
+    const [isTyping, setIsTyping] = React.useState(false);
+    const [comment, setComment] = React.useState('');
+    const { user } = useLoaderData();
+    const token = React.useContext(AuthContext);
+    const isAuthenticated = token['access'] !== null;
+    const navigate = useNavigate();
+    const fetcher = useFetcher();
+
+    function handleFocus() {
+        if (!isAuthenticated) {
+            navigate('/signin');
+        } else {
+            setIsTyping(true);
+        }
+    }
+
+    function handleChange(e) {
+        setComment(e.target.value);
+    }
+
+    return (
+        <Grid container justifyContent={'flex-end'}>
+            <Grid item xs={2} md={1}>
+                <Avatar alt="myPP" src={`${import.meta.env.VITE_API_URL}${user.profile_pic}`}/>
+            </Grid>
+            <Grid item xs={10} md={11}>
+                <TextField
+                    id="standard-multiline-static"
+                    multiline
+                    placeholder="Add a comment.."
+                    variant="standard"
+                    fullWidth
+                    onFocus={handleFocus}
+                    onChange={handleChange}
+                    name="comment"
+                    value={comment}
+                />
+            </Grid>
+            {isTyping && (
+                <>
+
+                    <Grid item >
+                        <Button sx={{ borderRadius: 3 }} onClick={() => setIsTyping(!isTyping)}>Cancel</Button>
+                    </Grid>
+                    <fetcher.Form>
+                        <Grid item >
+                            <Button variant="contained" sx={{ borderRadius: 3 }} type='submit' disabled={!comment}>Comment</Button>
+                        </Grid>
+                    </fetcher.Form>
+
+                </>
+            )}
+        </Grid>
+
+    )
 }
 
 
@@ -343,7 +445,7 @@ export default function Course() {
     return (
         <>
             <br></br>
-            <Container component="main" maxWidth="xl">
+            <Container component="main" maxWidth="lg">
                 <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
                     {
                         isInstructor &&
@@ -356,7 +458,11 @@ export default function Course() {
                     }
 
                     <Box className="clearfix" component={'div'}>
-                        <Paper id="enroll" elevation={4} sx={{ padding: { xs: '7%', md: '3%' }, float: 'left', margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' } }}>
+                        <Paper id="enroll" elevation={4} sx={{
+                            padding: { xs: '7%', md: '3%' },
+                            float: 'left',
+                            margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' }
+                        }}>
                             <ThemeProvider theme={theme}>
 
                                 <Container disableGutters sx={{ maxWidth: { xs: 700, md: 500 } }} component="div">
@@ -446,9 +552,18 @@ export default function Course() {
                                     </Typography>
                                 </ThemeProvider>
                                 <br />
-                                <Box className="course-lecture-container" component={'div'}>
-                                    <iframe className="course-lecture" src={courseContent.preview} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowFullScreen></iframe>
-                                </Box>
+                                {
+                                    getEmbedUrl(courseContent.preview) ?
+
+
+                                        (<Box sx={{ maxWidth: 'inherit', width: '100%' }} component={'div'}>
+                                            <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowFullScreen></iframe>
+                                        </Box>)
+                                        :
+                                        (<Box sx={{ maxWidth: 'inherit', width: '100%' }} component={'div'}>
+                                            <iframe className="course-lecture" src={''} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowFullScreen></iframe>
+                                        </Box>)
+                                }
                             </Grid>
                             <br />
                             {
@@ -462,17 +577,20 @@ export default function Course() {
                                                     </Typography>
                                                 </ThemeProvider>
                                             </Grid>
-                                            <Grid item width={'100%'} sx={{ pointerEvents: 'none' }}>
+                                            <Grid item xs={12} sx={{ pointerEvents: 'none' }}>
                                                 <ControlledAccordions />
                                             </Grid>
-                                            <Grid item width={'100%'}>
+                                            <Grid item xs={12}>
                                                 <Stack className="non-modal-dialog">
                                                     <Grid item container justifyContent={'center'} spacing={3} mt={'auto'}>
-                                                        <ThemeProvider theme={theme}>
-                                                            <Typography align="center" gutterBottom variant="h5">
-                                                                Create an account and enroll to view content
-                                                            </Typography>
-                                                        </ThemeProvider>
+                                                        <Grid item>
+                                                            <ThemeProvider theme={theme}>
+                                                                <Typography align="center" gutterBottom variant="h5">
+                                                                    Create an account and enroll to view content
+                                                                </Typography>
+                                                            </ThemeProvider>
+                                                        </Grid>
+
                                                         <Grid item xs={7}>
                                                             <Button variant="outlined" disableRipple sx={{ borderRadius: 10 }} fullWidth={true} onClick={handleClickSignUp}>Sign Up</Button>
                                                         </Grid>
@@ -497,7 +615,7 @@ export default function Course() {
                                                     </Typography>
                                                 </ThemeProvider>
                                             </Grid>
-                                            <Grid item>
+                                            <Grid item xs>
                                                 <CourseComments />
                                             </Grid>
                                         </Grid>
@@ -541,7 +659,7 @@ export default function Course() {
                                                             </Typography>
                                                         </ThemeProvider>
                                                     </Grid>
-                                                    <Grid item>
+                                                    <Grid item xs>
                                                         <CourseComments />
                                                     </Grid>
                                                 </Grid>
@@ -556,7 +674,7 @@ export default function Course() {
                                                             </Typography>
                                                         </ThemeProvider>
                                                     </Grid>
-                                                    <Grid item width={'100%'}>
+                                                    <Grid item xs={12}>
                                                         <ControlledAccordions />
                                                     </Grid>
                                                 </Grid>
@@ -568,7 +686,7 @@ export default function Course() {
                                                             </Typography>
                                                         </ThemeProvider>
                                                     </Grid>
-                                                    <Grid item>
+                                                    <Grid item xs>
                                                         <CourseComments />
                                                     </Grid>
                                                 </Grid>

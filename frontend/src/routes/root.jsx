@@ -6,7 +6,13 @@ import useRefreshToken from "../helper/useRefreshToken";
 import { useContext } from "react";
 import { IsLoadingContext } from "../contexts/IsLoadingContext";
 import Box from '@mui/material/Box';
+import { getUser } from "../courses";
 
+
+export async function loader() {
+  const user = await getUser();
+  return {user};
+}
 export default function Root() {
     const navigation = useNavigation();
     const isLoading = useContext(IsLoadingContext);

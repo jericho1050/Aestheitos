@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 // eslint-disable-next-line no-unused-vars
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import { useAuthToken } from '../contexts/authContext';
 import SearchIcon from '@mui/icons-material/Search';
 import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
@@ -37,14 +37,12 @@ function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isOpen, setIsOpen] = React.useState(false);
-
   const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
   // returns the token state and it's dispatch function 
   const { token, dispatch } = useAuthToken();
   const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
-
-
+  const { user } = useLoaderData();
 
   // attach event listener to  each setting
   const settingsHandlers = {
@@ -60,8 +58,6 @@ function ResponsiveAppBar() {
     'Blogs': handleBlogs,
     'Create': handleCreate
   }
-
-
 
 
 
@@ -101,11 +97,6 @@ function ResponsiveAppBar() {
 
   function handleEnrolled() {
   }
-
-  // pages handlers
-  // function handleCourses() {
-  //   navigate('');
-  // }
 
   function handleBlogs() {
 
@@ -180,7 +171,7 @@ function ResponsiveAppBar() {
                 {pages.map((page) => (
                   <MenuItem key={page} onClick={pageHandlers[page]}>
                     {
-                      page === 'Courses' ? <Typography textAlign="center"><Link to="/#courses" className='courses-link'>{page}</Link></Typography> : <Typography textAlign="center">{page}</Typography>
+                      page === 'Courses' ? <Link to="/#courses" className='courses-link'><Typography textAlign="center">{page}</Typography> </Link> : <Typography textAlign="center">{page}</Typography>
                     }
                   </MenuItem>
                 ))}
@@ -208,9 +199,13 @@ function ResponsiveAppBar() {
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               {pages.map((page) =>
                 page === 'Courses' ?
-                  <Button key={page} sx={{ my: 2, color: 'white', display: 'block' }}>
-                    <Link to="/#courses" className='courses-link'>{page}</Link>
-                  </Button> : <Button
+                  <Link key={page} to="/#courses" className='courses-link'>
+                    <Button sx={{ my: 2, color: 'white', display: 'block' }}>
+                      {page}
+                    </Button>
+                  </Link>
+                  :
+                  <Button
                     key={page}
                     onClick={pageHandlers[page]}
                     sx={{ my: 2, color: 'white', display: 'block' }}
@@ -227,7 +222,7 @@ function ResponsiveAppBar() {
                   <Grid item xs>
                     <Tooltip data-cy="Tool tip" title="Open settings">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar data-cy="Avatar" alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                        <Avatar data-cy="Avatar" alt="myPP" src={`${import.meta.env.VITE_API_URL}${user.profile_pic}`} />
                       </IconButton>
                     </Tooltip>
                   </Grid>

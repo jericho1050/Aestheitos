@@ -1,14 +1,20 @@
-import { useContext, useEffect } from "react";
-import { AccessTokenDecodedContext, CurrentTimeContext, useAuthToken} from "../contexts/authContext";
+import { useContext, useEffect, useState } from "react";
+import { AccessTokenDecodedContext, useAuthToken } from "../contexts/authContext";
 
 
 //ACCESS/REFRESH LOGIC here
 export default function useRefreshToken() {
     const { token, dispatch } = useAuthToken();
-    const currentTime = useContext(CurrentTimeContext);
+    const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000))
     const accessTokenExp = useContext(AccessTokenDecodedContext);
-    const refreshBuffer = 30; 
+    const refreshBuffer = 30;
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(Math.floor(Date.now() / 1000));
+        }, 1000); // update every second
+        return () => clearInterval(interval); // cleanup on unmount
+    }, []);
     // refreshing the access token when it expires, use refresh token
     // persist user authentication == true
     useEffect(() => {
@@ -30,7 +36,7 @@ export default function useRefreshToken() {
                     })
                     // console.log('set isAuthentocated to true')
                 }
-            } 
+            }
         })(); // calls the nameless async fn
 
     }, [currentTime]);
@@ -40,9 +46,9 @@ export default function useRefreshToken() {
 
 async function refreshAccessToken(refreshToken) {
     //   refreshing access token when it's due.
-    
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}token/refresh`, {
+
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}token/refresh`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -51,20 +57,20 @@ async function refreshAccessToken(refreshToken) {
             body: JSON.stringify({
                 "refresh": refreshToken
             })
-            })
-    
-            if (!response.ok) {
-                throw new Error(response.status)
-            }
-            
-            const data = await response.json()
-    
-            return data['access']
-    
-        } catch(error) {
-            console.error(`error code: ${error}`);
-            return false;
+        })
+
+        if (!response.ok) {
+            throw new Error(response.status)
         }
-    
-        
+
+        const data = await response.json()
+
+        return data['access']
+
+    } catch (error) {
+        console.error(`error code: ${error}`);
+        return false;
     }
+
+
+}

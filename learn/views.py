@@ -42,13 +42,20 @@ from .custom_serializer import *
 #     serializer_class = UserCommentSerializer
 #     queryset =  User.objects.all()
 
-class UserRetrieveView(generics.RetrieveAPIView):
+class UserDetail(APIView):
      """
      Retrieve a user instance
      """
-     serializer_class = UserCommentSerializer
-     queryset = User.objects.all()
-
+     def get(self, request):
+        try:
+            access = request.COOKIES.get('refresh')
+            decoded = jwt.decode(access, settings.SECRET_KEY, algorithms=["HS256"])
+            user = User.objects.get(id=decoded['user_id'])
+        except (jwt.exceptions.DecodeError, User.DoesNotExist, jwt.exceptions.ExpiredSignatureError):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return Response(UserCommentSerializer(user).data)
+  
+         
 
 class RegisterView(APIView):
     """
@@ -278,7 +285,7 @@ class CourseCommentList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = CourseCommentsSerializer
 
     def get_queryset(self):
-        return CourseComments.objects.filter(course=self.kwargs["pk"])
+        return CourseComments.objects.filter(course=self.kwargs["pk"], parent_comment=None)
 
 
 class CourseCommentDetail(
@@ -437,7 +444,7 @@ class UserView(APIView):
         return response
 
 
-# Not used anymore
+# Not used anymore, lately realized that DRF-simplejwt exists
 # class LoginView(APIView):
 #     """
 #     Log in and User validation then returns a JWT

@@ -4,7 +4,6 @@ import {jwtDecode} from 'jwt-decode';
 export const AuthContext = createContext(null);
 export const AuthDispatchContext = createContext(null);
 export const AccessTokenDecodedContext = createContext(null);
-export const CurrentTimeContext = createContext(null);
 
 
 
@@ -12,29 +11,21 @@ export const CurrentTimeContext = createContext(null);
 export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [token, dispatch] = useReducer(authReducer, { access: null, refresh: null });
-    const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000))
     const access = token['access'];
     let decoded;
     if (typeof access === 'string') {
       decoded = jwtDecode(access);
     }
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentTime(Math.floor(Date.now() / 1000));
-        }, 1000); // update every second
-        return () => clearInterval(interval); // cleanup on unmount
-    }, []);
+
 
     return (
         <AuthContext.Provider value={token}>
             <AuthDispatchContext.Provider value={dispatch}>
                 <AccessTokenDecodedContext.Provider value={decoded}>
-                    <CurrentTimeContext.Provider value={currentTime}>
 
                                 {children}
 
-                    </CurrentTimeContext.Provider>
                 </AccessTokenDecodedContext.Provider>
             </AuthDispatchContext.Provider>
         </AuthContext.Provider>

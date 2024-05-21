@@ -165,10 +165,17 @@ class SectionItemSerializer(ModelSerializer):
 
 
 class CourseCommentsSerializer(ModelSerializer):
+    replies = serializers.SerializerMethodField()
+    comment_by = UserCommentSerializer(read_only=True)
+
     class Meta:
         model = CourseComments
         fields = "__all__"
         read_only_fields = ["course", "comment_by"]
+
+    def get_replies(self, obj):
+        replies = CourseComments.objects.filter(parent_comment=obj)
+        return CourseCommentsSerializer(replies, many=True).data
 
     def save_with_auth_user(self, user, pk, update=False):
         if update:
@@ -178,6 +185,14 @@ class CourseCommentsSerializer(ModelSerializer):
             return
         course = get_object_or_404(Course, id=pk)
         self.save(course=course, comment_by=user)
+
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        comment_by_representation = representation.pop('comment_by')
+        for key in comment_by_representation:
+            representation[key] = comment_by_representation[key]
+        return representation
 
 
 class EnrollmentSerializer(ModelSerializer):

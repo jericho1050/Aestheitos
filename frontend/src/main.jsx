@@ -8,14 +8,14 @@ import {
 } from "react-router-dom";
 import "./index.css";
 import "./divider.css"
-import Root from './routes/root';
+import Root, { loader as rootLoader } from './routes/root';
 import ErrorPage from './error-page';
 import SignIn from './routes/signin';
 import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
-import Course, {loader as courseLoader} from './routes/course';
+import Course, { loader as courseLoader } from './routes/course';
 import CreateCourse from './routes/create';
-import {action as createAction} from './routes/create';
+import { action as createAction } from './routes/create';
 import { action as enrollAction } from './routes/course';
 import ProectedRoute from './components/protectedRoute';
 import { IsLoadingProvider } from './contexts/IsLoadingContext';
@@ -40,6 +40,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
+    loader: rootLoader,
     children: [
       {
         index: true,
@@ -53,13 +54,13 @@ const router = createBrowserRouter([
         action: enrollAction
       },
       {
-       
+
         element: <ProectedRoute />,
         children: [
           {
-          path: "course/create",
-          element: <CreateCourse />,
-          action: createAction
+            path: "course/create",
+            element: <CreateCourse />,
+            action: createAction
           },
           // {
           //   path: "course/create/edit",
@@ -69,6 +70,8 @@ const router = createBrowserRouter([
       }
     ],
   },
+  // if you're wondering why I didn't use react-router's action route.
+  // yes, i was dumb, i overlooked it and i think i was still studying react-router when implementing the signUp and signIn routes
   {
     path: "/signup",
     element: <SignUp />
@@ -84,7 +87,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <IsLoadingProvider>
-        <RouterProvider router={router} />
+          <RouterProvider router={router} />
         </IsLoadingProvider>
       </AuthProvider>
     </ThemeProvider>
