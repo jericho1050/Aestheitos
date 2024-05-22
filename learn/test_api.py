@@ -863,12 +863,12 @@ class CourseCommentListAPITestCase(APITestCase):
         self.assertEqual(
             response.data["comment"], "testing authenticated client to comment"
         )
-        self.assertEqual(response.data["comment_by"], self.user.id)
+        self.assertEqual(response.data["username"], self.user.username)
         self.assertIsNone(response.data["parent_comment"])
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_4.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response_4.data["comment_by"], self.user_2.id)
+        self.assertEqual(response_4.data["username"], self.user_2.username)
         self.assertEqual(response_4.data["parent_comment"], response.data["id"])
         self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -926,7 +926,7 @@ class CourseCommentDetailAPITestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["comment_by"], self.user.id)
+        self.assertEqual(response.data["username"], self.user.username)
         self.assertIn("to modify", response.data["comment"])
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -976,8 +976,8 @@ class CourseCommentDetailAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("modified", response.data["comment"])
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_2.data["comment_by"], self.user.id)
-        self.assertNotEqual(response_2.data["comment_by"], self.user_2.id)
+        self.assertEqual(response_2.data["username"], self.user.username)
+        self.assertNotEqual(response_2.data["username"], self.user_2.username)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_5.status_code, status.HTTP_403_FORBIDDEN)
