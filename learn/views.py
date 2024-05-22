@@ -42,20 +42,25 @@ from .custom_serializer import *
 #     serializer_class = UserCommentSerializer
 #     queryset =  User.objects.all()
 
+
 class UserDetail(APIView):
-     """
-     Retrieve a user instance
-     """
-     def get(self, request):
+    """
+    Retrieve a user instance
+    """
+
+    def get(self, request):
         try:
-            access = request.COOKIES.get('refresh')
+            access = request.COOKIES.get("refresh")
             decoded = jwt.decode(access, settings.SECRET_KEY, algorithms=["HS256"])
-            user = User.objects.get(id=decoded['user_id'])
-        except (jwt.exceptions.DecodeError, User.DoesNotExist, jwt.exceptions.ExpiredSignatureError):
+            user = User.objects.get(id=decoded["user_id"])
+        except (
+            jwt.exceptions.DecodeError,
+            User.DoesNotExist,
+            jwt.exceptions.ExpiredSignatureError,
+        ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return Response(UserCommentSerializer(user).data)
-  
-         
+
 
 class RegisterView(APIView):
     """
@@ -79,8 +84,10 @@ class RegisterView(APIView):
             "refresh": str(token),
             "access": str(token.access_token),
         }
-        response.set_cookie(key="refresh", value=response.data['refresh'], httponly=True)
-        response.set_cookie(key="access", value=response.data['access'], httponly=True)
+        response.set_cookie(
+            key="refresh", value=response.data["refresh"], httponly=True
+        )
+        response.set_cookie(key="access", value=response.data["access"], httponly=True)
         return response
 
 
@@ -175,6 +182,15 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
     queryset = Course.objects.all()
 
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(average_rating=Avg("course_rating__rating"))
+            .order_by("average_rating", "-course_created")
+        )
+
+
 class CourseDetail(
     UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView
 ):
@@ -244,11 +260,15 @@ class SectionItemList(CreateAPIMixin, generics.ListCreateAPIView):
     def get_queryset(self):
         user_authentication(self.request)
         return SectionItem.objects.filter(section=self.kwargs["pk"])
-    
-class SectionItemDetail(DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView):
+
+
+class SectionItemDetail(
+    DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """
     Retrieve, update or delete a section item instance
     """
+
     queryset = SectionItem.objects.all()
     serializer_class = SectionItemSerializer
 
@@ -285,7 +305,9 @@ class CourseCommentList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = CourseCommentsSerializer
 
     def get_queryset(self):
-        return CourseComments.objects.filter(course=self.kwargs["pk"], parent_comment=None)
+        return CourseComments.objects.filter(
+            course=self.kwargs["pk"], parent_comment=None
+        ).order_by("-comment_date")
 
 
 class CourseCommentDetail(

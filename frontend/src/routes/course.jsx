@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Container, Divider, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, CircularProgress, Collapse, Container, Divider, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
@@ -13,8 +13,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { createCourseEnrollment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises } from "../courses";
-import { Link, useFetcher, useLoaderData, useNavigate } from "react-router-dom";
+import { createCourseComment, createCourseEnrollment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises } from "../courses";
+import { Link, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
 import getEmbedUrl from "../helper/getEmbedUrl";
@@ -24,6 +24,7 @@ import { Parser } from "html-to-react";
 import { AccessTokenDecodedContext, AuthContext, useAuthToken } from "../contexts/authContext";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReplyIcon from '@mui/icons-material/Reply';
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 
 let theme = createTheme()
@@ -45,7 +46,14 @@ export async function loader({ params }) {
     }
     const enrollees = await getCourseEnrollees(course.id);
     const courseContent = await getCourseContent(course.id);
+    if (!courseContent) {
+        throw new Response("", {
+            status: courseContent.status,
+            statusText: courseContent.message
+        });
+    }
     const comments = await getCourseComments(course.id);
+
     try {
         const sections = await getSections(courseContent.id);
         const accordion = await Promise.all(sections.map(async (section) => {
@@ -80,6 +88,7 @@ export async function loader({ params }) {
                 return section;
             }
         }));
+
         return { user, course, courseContent, accordion, enrollees, comments };
     } catch (error) {
         console.error('Error getting sections:', error);
@@ -87,14 +96,46 @@ export async function loader({ params }) {
 }
 
 export async function action({ request, params }) {
-    const data = await request.json();
-    let enrollment, unenrollment;
-    if (data.intent === 'enroll') {
+    const formData = await request.formData();
+    let enrollment, unenrollment, comment;
+    if (formData.get('intent') === 'enroll') {
         enrollment = await createCourseEnrollment(params.courseId);
+    } else if (formData.get('intent') === 'unenroll') {
+        unenrollment = await deleteCourseUnenrollment(formData.get('enrollmentId'));
     } else {
-        unenrollment = await deleteCourseUnenrollment(data.enrollmentId);
+        comment = await createCourseComment(params.courseId, formData);
     }
-    return { enrollment, unenrollment };
+    return { enrollment, unenrollment, comment };
+}
+
+function CommentReply({ reply, level }) {
+    const [isReplying, setIsReplying] = React.useState(false);
+    return (
+        <Box>
+            <ListItem>
+                <ListItemAvatar>
+                    <Avatar alt={reply.username} src={reply.profile_pic} />
+                </ListItemAvatar>
+                <ListItemText
+                    primary={`${reply.first_name || reply.username} ${reply.last_name || ''}`}
+                    secondary={reply.comment}
+                />
+            </ListItem>
+            <ListItemText inset={true} style={{ paddingLeft: `${(level + 1) * 20}px` }}>
+                <IconButton onClick={() => setIsReplying(true)} sx={{ borderRadius: 3, mt: -1 }}>
+                    <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
+                </IconButton>
+            </ListItemText>
+            {
+                isReplying &&
+                <Box pl={`${(level + 1) * 20}px`}>
+                    <CommentTextField setReply={setIsReplying} parentComment={reply.id} username={`@${reply.first_name || reply.username} ${reply.last_name || ''}`} />
+                </Box>
+
+            }
+            <CourseCommentReplies comment={reply} level={level + 1} />
+        </Box>
+    )
 }
 
 function CourseCommentReplies({ comment, level = 0 }) {
@@ -103,7 +144,7 @@ function CourseCommentReplies({ comment, level = 0 }) {
 
     return (
         <Grid container>
-            {totalReplies !== 0 &&
+            {totalReplies !== 0 && level === 0 &&
 
                 <Grid item xs={12} style={{ paddingLeft: `${level * 20}px` }}>
                     <Button startIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
@@ -111,28 +152,12 @@ function CourseCommentReplies({ comment, level = 0 }) {
                     </Button>
                 </Grid>
             }
-            <Grid item>
-                <Collapse in={open} timeout='auto' unmountOnExit>
+            <Grid item xs>
+                <Collapse in={open || level !== 0 } timeout='auto' unmountOnExit>
                     <List component="div" disablePadding>
                         {
                             comment.replies.map(reply => (
-                                <Box key={reply.id}>
-                                    <ListItem>
-                                        <ListItemAvatar>
-                                            <Avatar alit={reply.username} src={reply.profile_pic} />
-                                        </ListItemAvatar>
-                                        <ListItemText
-                                            primary={`${reply.first_name || reply.username} ${reply.last_name || ''}`}
-                                            secondary={reply.comment}
-                                        />
-                                    </ListItem>
-                                    <ListItemText inset={true} style={{ paddingLeft: `${(level + 1) * 20}px` }}>
-                                        <IconButton sx={{ borderRadius: 3, mt: -1 }}>
-                                            <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
-                                        </IconButton>
-                                    </ListItemText>
-                                    <CourseCommentReplies comment={reply} level={level + 1} />
-                                </Box>
+                                <CommentReply key={reply.id} reply={reply} level={level}/>
                             ))}
                     </List>
                 </Collapse>
@@ -141,53 +166,70 @@ function CourseCommentReplies({ comment, level = 0 }) {
     )
 }
 
+function Comment({ comment }) {
+    const [isReplying, setIsReplying] = React.useState(false);
+    return (
+        <Box>
+            <ListItem alignItems="flex-start">
+                <ListItemAvatar>
+                    <Avatar alt={comment.username} src={comment.profile_pic} />
+                </ListItemAvatar>
+                <ListItemText
+                    primary={`${comment.first_name || comment.username} ${comment.last_name || ''}`}
+                    secondary={
+                        comment.comment
+                    }
+                />
+            </ListItem>
+            <ListItemText inset={true}>
+                <IconButton onClick={() => setIsReplying(true)} sx={{ borderRadius: 3, mt: -1 }}>
+                    <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
+                </IconButton>
+            </ListItemText>
+            {
+                isReplying &&
+                <Box pl={'56px'}>
+                    <CommentTextField setReply={setIsReplying} parentComment={comment.id} />
+                </Box>
+
+            }
+            <Box pl={'56px'}>
+                <CourseCommentReplies comment={comment} />
+            </Box>
+
+
+            <Divider variant="inset" component="li" />
+        </Box>
+    )
+}
+
 function CourseComments() {
     const { comments } = useLoaderData();
+    const [parent,] = useAutoAnimate();
     return (
-        <List sx={{ width: '100%', maxWidth: 'inherit', bgcolor: 'background.paper' }}>
+        <List ref={parent} sx={{ width: '100%', maxWidth: 'inherit', bgcolor: 'background.paper' }}>
             <ListItem >
                 <CommentTextField />
             </ListItem>
             {comments.map(comment =>
-                !comment.parent_comment && (
-                    <Box key={comment.id}>
-                        <ListItem alignItems="flex-start">
-                            <ListItemAvatar>
-                                <Avatar alt={comment.username} src={comment.profile_pic} />
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={`${comment.first_name || comment.username} ${comment.last_name || ''}`}
-                                secondary={
-                                    comment.comment
-                                }
-                            />
-                        </ListItem>
-                        <ListItemText inset={true}>
-                            <IconButton sx={{ borderRadius: 3, mt: -1 }}>
-                                <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
-                            </IconButton>
-                        </ListItemText>
-                        <ListItem>
-                            <ListItemAvatar></ListItemAvatar> {/* Nah im just rendering a whitespace here */}
-                            <CourseCommentReplies comment={comment} />
-                        </ListItem>
-                        <Divider variant="inset" component="li" />
-                    </Box>
-                )
+
+                <Comment key={comment.id} comment={comment} />
+
             )}
 
         </List>
     );
 }
 
-function CommentTextField() {
+function CommentTextField({ setReply, parentComment, username }) {
     const [isTyping, setIsTyping] = React.useState(false);
-    const [comment, setComment] = React.useState('');
+    const [comment, setComment] = React.useState(username || '');
     const { user } = useLoaderData();
     const token = React.useContext(AuthContext);
     const isAuthenticated = token['access'] !== null;
     const navigate = useNavigate();
     const fetcher = useFetcher();
+    const revalidator = useRevalidator();
 
     function handleFocus() {
         if (!isAuthenticated) {
@@ -200,41 +242,66 @@ function CommentTextField() {
     function handleChange(e) {
         setComment(e.target.value);
     }
-
+    React.useEffect(() => {
+        if (fetcher.state === 'submitting') {
+            setComment('');
+            setIsTyping(!isTyping);
+            setReply && setReply(false);
+            revalidator.revalidate(); // this will & should cause a re-render so that the comment useLoaderData in CourseComments (parent component) is updated. 
+        }
+    }, [fetcher]);
     return (
-        <Grid container justifyContent={'flex-end'}>
-            <Grid item xs={2} md={1}>
-                <Avatar alt="myPP" src={`${import.meta.env.VITE_API_URL}${user.profile_pic}`}/>
-            </Grid>
-            <Grid item xs={10} md={11}>
-                <TextField
-                    id="standard-multiline-static"
-                    multiline
-                    placeholder="Add a comment.."
-                    variant="standard"
-                    fullWidth
-                    onFocus={handleFocus}
-                    onChange={handleChange}
-                    name="comment"
-                    value={comment}
-                />
-            </Grid>
-            {isTyping && (
-                <>
-
-                    <Grid item >
-                        <Button sx={{ borderRadius: 3 }} onClick={() => setIsTyping(!isTyping)}>Cancel</Button>
-                    </Grid>
-                    <fetcher.Form>
-                        <Grid item >
-                            <Button variant="contained" sx={{ borderRadius: 3 }} type='submit' disabled={!comment}>Comment</Button>
+        <>
+            {
+                fetcher.state === 'idle' ?
+                    <Grid container justifyContent={'flex-end'}>
+                        <Grid item xs={2} md={1}>
+                            <Avatar alt="myPP" src={`${import.meta.env.VITE_API_URL}${user.profile_pic}`} />
                         </Grid>
-                    </fetcher.Form>
+                        <Grid item xs={10} md={11}>
+                            <TextField
+                                id="standard-multiline-static"
+                                multiline
+                                placeholder="Add a comment.."
+                                variant="standard"
+                                fullWidth
+                                onFocus={handleFocus}
+                                onChange={handleChange}
+                                value={comment}
+                            />
+                        </Grid>
+                        {isTyping && (
+                            <>
 
-                </>
-            )}
-        </Grid>
+                                <Grid item >
+                                    <Button sx={{ borderRadius: 3 }} onClick={() => {
+                                        setIsTyping(!isTyping);
+                                        setReply(false);
+                                    }}>Cancel</Button>
+                                </Grid>
+                                <fetcher.Form method="post">
+                                    <Grid item >
+                                        <Button variant="contained" sx={{ borderRadius: 3 }} name="comment" value={comment} type='submit' disabled={!comment}>Comment</Button>
+                                    </Grid>
+                                    {parentComment && <TextField type="hidden" name="parent_comment" value={parentComment} />} {/* if user is replying to a comment render this hidden Textfield */}
+                                </fetcher.Form>
 
+                            </>
+                        )}
+                    </Grid>
+                    :
+
+                    <Grid container justifyContent={'center'}>
+                        <Grid item>
+                            <CircularProgress />
+
+                        </Grid>
+
+
+                    </Grid>
+
+            }
+        </>
     )
 }
 
@@ -432,11 +499,11 @@ export default function Course() {
             navigate('/signin');
         }
         else {
-            fetcher.submit({ intent: 'enroll' }, { method: 'post', encType: "application/json" });
+            fetcher.submit({ intent: 'enroll' }, { method: 'post' });
         }
     }
     function handleClickUnenroll() {
-        fetcher.submit({ intent: 'unenroll', enrollmentId: enrollment.id }, { method: 'delete', encType: "application/json" });
+        fetcher.submit({ intent: 'unenroll', enrollmentId: enrollment.id }, { method: 'delete' });
     }
 
     function handleClickSignUp() {
@@ -547,7 +614,7 @@ export default function Course() {
                             </Grid>
                             <Grid item>
                                 <ThemeProvider theme={theme}>
-                                    <Typography sx={{ textAlign: 'left' }} variant="h6" fontSize={'small'}>
+                                    <Typography sx={{ textAlign: 'left' }} variant="h6" fontSize={'x-small'}>
                                         Preview this course
                                     </Typography>
                                 </ThemeProvider>

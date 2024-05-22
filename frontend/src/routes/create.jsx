@@ -762,7 +762,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                         </Grid>
                                         <Grid item mt={4} xs={10} justifySelf={'flex-start'}>
                                             <ThemeProvider theme={theme}>
-                                                <Typography variant="h4">
+                                                <Typography variant="h3" fontWeight={500}>
                                                     Description
                                                 </Typography>
                                             </ThemeProvider>
@@ -1391,10 +1391,10 @@ export default function CreateCourse() {
                                 </Container>
                             </Box>
                             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
-                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
+                                <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3} >
                                     <Grid item>
-                                        <ThemeProvider theme={theme}>
-                                            <Typography variant="h4" sx={{ textAlign: 'center' }}>
+                                        <ThemeProvider theme={theme} >
+                                            <Typography variant="h3" fontWeight={500}>
                                                 Course content
                                             </Typography>
                                         </ThemeProvider>
