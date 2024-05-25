@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, CircularProgress, Collapse, Container, Divider, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, CircularProgress, Collapse, Container, Divider, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Popover, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
@@ -13,7 +13,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { createCourseComment, createCourseEnrollment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises } from "../courses";
+import { createCourseComment, createCourseEnrollment, deleteCourseComment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises, updateCourseComment } from "../courses";
 import { Link, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
@@ -25,7 +25,9 @@ import { AccessTokenDecodedContext, AuthContext, useAuthToken } from "../context
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReplyIcon from '@mui/icons-material/Reply';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons/faEllipsisV';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -102,14 +104,19 @@ export async function action({ request, params }) {
         enrollment = await createCourseEnrollment(params.courseId);
     } else if (formData.get('intent') === 'unenroll') {
         unenrollment = await deleteCourseUnenrollment(formData.get('enrollmentId'));
-    } else {
+    } else if (formData.get('intent') === 'editing') {
+        comment = await updateCourseComment(formData.get('commentId'), formData);
+    } else if (formData.get('intent') === 'deleting') {
+        comment = await deleteCourseComment(formData.get('commentId'));
+    }
+    else {
         comment = await createCourseComment(params.courseId, formData);
     }
     return { enrollment, unenrollment, comment };
 }
 
 function CommentReply({ reply, level }) {
-    const [isReplying, setIsReplying] = React.useState(false);
+    const [status, setStatus] = React.useState('');
     return (
         <Box>
             <ListItem>
@@ -122,14 +129,14 @@ function CommentReply({ reply, level }) {
                 />
             </ListItem>
             <ListItemText inset={true} style={{ paddingLeft: `${(level + 1) * 20}px` }}>
-                <IconButton onClick={() => setIsReplying(true)} sx={{ borderRadius: 3, mt: -1 }}>
+                <IconButton onClick={() => setStatus('replying')} sx={{ borderRadius: 3, mt: -1 }}>
                     <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
                 </IconButton>
             </ListItemText>
             {
-                isReplying &&
+                status === 'replying' &&
                 <Box pl={`${(level + 1) * 20}px`}>
-                    <CommentTextField setReply={setIsReplying} parentComment={reply.id} username={`@${reply.first_name || reply.username} ${reply.last_name || ''}`} />
+                    <CommentTextField setStatus={setStatus} parentComment={reply.id} username={`@${reply.first_name || reply.username} ${reply.last_name || ''}`} />
                 </Box>
 
             }
@@ -153,11 +160,11 @@ function CourseCommentReplies({ comment, level = 0 }) {
                 </Grid>
             }
             <Grid item xs>
-                <Collapse in={open || level !== 0 } timeout='auto' unmountOnExit>
+                <Collapse in={open || level !== 0} timeout='auto' unmountOnExit>
                     <List component="div" disablePadding>
                         {
                             comment.replies.map(reply => (
-                                <CommentReply key={reply.id} reply={reply} level={level}/>
+                                <CommentReply key={reply.id} reply={reply} level={level} />
                             ))}
                     </List>
                 </Collapse>
@@ -167,29 +174,101 @@ function CourseCommentReplies({ comment, level = 0 }) {
 }
 
 function Comment({ comment }) {
-    const [isReplying, setIsReplying] = React.useState(false);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [status, setStatus] = React.useState('');
+    const fetcher = useFetcher();
+    const { token } = useAuthToken();
+    const isAuthenticated = token['access'] !== null;
+
+    function handleClick(e) {
+        setAnchorEl(e.currentTarget);
+    }
+    function handleClose() {
+        setAnchorEl(null);
+    }
+
+    function handleClickEdit() {
+        setStatus('editing');
+    }
+    function handleClickDelete() {
+        setStatus('deleting');
+        fetcher.submit({ intent: 'deleting', commentId: comment.id }, { method: 'DELETE' });
+    }
+
+    const open = Boolean(anchorEl);
+
     return (
         <Box>
-            <ListItem alignItems="flex-start">
-                <ListItemAvatar>
-                    <Avatar alt={comment.username} src={comment.profile_pic} />
-                </ListItemAvatar>
-                <ListItemText
-                    primary={`${comment.first_name || comment.username} ${comment.last_name || ''}`}
-                    secondary={
-                        comment.comment
-                    }
-                />
+            <ListItem
+                secondaryAction={
+
+                    <>
+                        {isAuthenticated && (
+                            <IconButton id="ellipsis" edge="end" aria-label="ellipsis" sx={{ p: '0.3em 0.5em' }} onClick={handleClick}>
+                                <FontAwesomeIcon icon={faEllipsisV} fontSize="medium" />
+                            </IconButton>
+                        )}
+
+                        <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left'
+                            }}
+                            onClose={handleClose}
+                        >
+
+                            <Stack alignItems={'flex-start'} p={'0.4em 0.2em'}>
+                                <Button fullWidth sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }} onClick={handleClickEdit}>
+                                    <Box ml={-3} pl={2} pr={2}>
+                                        <EditIcon fontSize="smaller" />
+                                    </Box>
+                                    Edit
+                                </Button>
+                                <Divider />
+                                <Button fullWidth sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }} onClick={handleClickDelete}>
+                                    <Box pl={2} pr={2}>
+                                        <DeleteIcon fontSize="smaller" />
+                                    </Box>
+                                    Delete
+                                </Button>
+
+                            </Stack>
+                        </Popover>
+                    </>
+
+                }
+                alignItems="flex-start">
+
+                {
+                    status === 'editing' ?
+                        <CommentTextField status={status} setStatus={setStatus} comment={comment} />
+                        :
+                        (<>
+                            <ListItemAvatar>
+                                <Avatar alt={comment.username} src={comment.profile_pic} />
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary={`${comment.first_name || comment.username} ${comment.last_name || ''}`}
+                                secondary={
+                                    comment.comment
+                                }
+                            />
+                        </>)
+
+                }
+
             </ListItem>
             <ListItemText inset={true}>
-                <IconButton onClick={() => setIsReplying(true)} sx={{ borderRadius: 3, mt: -1 }}>
+                <IconButton onClick={() => setStatus('replying')} sx={{ borderRadius: 3, mt: -1 }}>
                     <ReplyIcon sx={{ fontSize: 19 }} /> <Typography variant="span" sx={{ fontSize: 14 }}>Reply</Typography>
                 </IconButton>
             </ListItemText>
             {
-                isReplying &&
+                status === 'replying' &&
                 <Box pl={'56px'}>
-                    <CommentTextField setReply={setIsReplying} parentComment={comment.id} />
+                    <CommentTextField status={status} setStatus={setStatus} parentComment={comment.id} />
                 </Box>
 
             }
@@ -221,11 +300,11 @@ function CourseComments() {
     );
 }
 
-function CommentTextField({ setReply, parentComment, username }) {
+function CommentTextField({ status, setStatus, comment = '', parentComment, username }) {
     const [isTyping, setIsTyping] = React.useState(false);
-    const [comment, setComment] = React.useState(username || '');
+    const [text, setText] = React.useState(username || '');
     const { user } = useLoaderData();
-    const token = React.useContext(AuthContext);
+    const { token } = useAuthToken();
     const isAuthenticated = token['access'] !== null;
     const navigate = useNavigate();
     const fetcher = useFetcher();
@@ -240,13 +319,13 @@ function CommentTextField({ setReply, parentComment, username }) {
     }
 
     function handleChange(e) {
-        setComment(e.target.value);
+        setText(e.target.value);
     }
     React.useEffect(() => {
         if (fetcher.state === 'submitting') {
-            setComment('');
+            setText('');
             setIsTyping(!isTyping);
-            setReply && setReply(false);
+            setStatus && setStatus('');
             revalidator.revalidate(); // this will & should cause a re-render so that the comment useLoaderData in CourseComments (parent component) is updated. 
         }
     }, [fetcher]);
@@ -254,11 +333,11 @@ function CommentTextField({ setReply, parentComment, username }) {
         <>
             {
                 fetcher.state === 'idle' ?
-                    <Grid container justifyContent={'flex-end'}>
-                        <Grid item xs={2} md={1}>
+                    <Grid container justifyContent={'flex-start'}>
+                        <ListItemAvatar>
                             <Avatar alt="myPP" src={`${import.meta.env.VITE_API_URL}${user.profile_pic}`} />
-                        </Grid>
-                        <Grid item xs={10} md={11}>
+                        </ListItemAvatar>
+                        <Grid item xs>
                             <TextField
                                 id="standard-multiline-static"
                                 multiline
@@ -267,26 +346,34 @@ function CommentTextField({ setReply, parentComment, username }) {
                                 fullWidth
                                 onFocus={handleFocus}
                                 onChange={handleChange}
-                                value={comment}
+                                value={text || comment.comment}
                             />
                         </Grid>
-                        {isTyping && (
-                            <>
+                        {(isTyping || status === 'editing') && (
+                            <Grid item container justifyContent={'flex-end'}>
 
-                                <Grid item >
+                                <Grid item>
                                     <Button sx={{ borderRadius: 3 }} onClick={() => {
                                         setIsTyping(!isTyping);
-                                        setReply(false);
+                                        setStatus && setStatus('');
                                     }}>Cancel</Button>
                                 </Grid>
                                 <fetcher.Form method="post">
-                                    <Grid item >
-                                        <Button variant="contained" sx={{ borderRadius: 3 }} name="comment" value={comment} type='submit' disabled={!comment}>Comment</Button>
+                                    <Grid item>
+                                        <Button variant="contained" sx={{ borderRadius: 3 }} name="comment" value={text} type='submit' disabled={!comment}>{status === 'replying' ? 'Reply' : status === 'editing' ? 'Save' : 'Comment'}</Button>
                                     </Grid>
                                     {parentComment && <TextField type="hidden" name="parent_comment" value={parentComment} />} {/* if user is replying to a comment render this hidden Textfield */}
+                                    {comment.id && (
+                                        <>
+                                            {/* if user is editing his own comment render this two hidden TextFields */}
+                                            <TextField type="hidden" name="intent" value={status} />
+                                            <TextField type="hidden" name="commentId" value={comment.id} />
+                                        </>
+
+                                    )}
                                 </fetcher.Form>
 
-                            </>
+                            </Grid>
                         )}
                     </Grid>
                     :
@@ -517,8 +604,7 @@ export default function Course() {
                     {
                         isInstructor &&
                         <Box mb={2} >
-                            <Button fullWidth={isSmallScreen ? true : false}>
-                                <EditIcon sx={{ marginRight: 1 }} />
+                            <Button variant="outlined" size="large" startIcon={<EditIcon />} fullWidth={isSmallScreen ? true : false}>
                                 Edit
                             </Button>
                         </Box>

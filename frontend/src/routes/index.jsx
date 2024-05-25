@@ -1,6 +1,6 @@
-import { Box, Container, Grid, ThemeProvider, Typography, colors, createTheme, responsiveFontSizes, useMediaQuery } from "@mui/material";
+import { Box, Container, Grid, ThemeProvider, Typography, colors, createTheme, responsiveFontSizes, useMediaQuery, useTheme } from "@mui/material";
 import { useSpring, animated, useSprings } from "@react-spring/web";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CourseCard from "../components/CourseCard";
 
 import { getCourses } from "../courses";
@@ -31,12 +31,18 @@ const MysteriousText = ({ children, ...props }) => {
     const matches = useMediaQuery(theme => theme.breakpoints.up('lg'))
     const animation = i =>
         useSpring({ opacity: 1, from: { opacity: 0 }, delay: 2 * (Math.random() * 650) });
+    const startIndex = 60;
+    const endIndex = 71;
+    const theme = useTheme();
+
     return (
-        <Typography variant={matches ? 'h3' : 'h4'} sx={{ textAlign: 'left', WebkitTextStrokeColor: 'white', WebkitTextStrokeWidth: 1, }} {...props}>
+        <Typography variant={matches ? 'h3' : 'h4'} className="mysterious-text" {...props}>
             {children.split("").map((item, index) => (
                 <animated.span key={index} style={{
                     ...animation(index),
-                    fontFamily: 'Archivo Black',
+                    fontFamily: index >= startIndex && index <= endIndex ? 'Passion One' : 'Archivo Black',
+                    fontSize: index >= startIndex && index <= endIndex ? '1.8em' : 'inherit',
+                    color: index >= startIndex && index <= endIndex ? theme.palette.primary.main : 'inherit',
                 }}>
                     {item}
                 </animated.span>

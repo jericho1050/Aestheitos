@@ -28,6 +28,12 @@ html {
   text-decoration: none;
 }
 
+.mysterious-text {
+  text-align: left;
+  -webkit-text-stroke-color: white;
+  -webkit-text-stroke-width: 1px;
+  
+}
 @media (max-width: 575.98px) {
   .background-image {
     width: 100%;

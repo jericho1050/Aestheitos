@@ -1,3 +1,5 @@
+import { method } from "lodash";
+
 class HttpError extends Error {
   constructor(statusCode, message, ...params) {
     super(...params);
@@ -261,5 +263,19 @@ export async function createCourseComment(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}comments/course/${id}`, {
     method: 'POST',
     body: formData
+  })
+}
+
+
+export async function updateCourseComment(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}comment/${id}/course`, {
+    method: 'PUT',
+    body: formData
+  })
+}
+
+export async function deleteCourseComment(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}comment/${id}/course`, {
+    method: 'DELETE'
   })
 }
