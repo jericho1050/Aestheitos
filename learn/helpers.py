@@ -91,6 +91,10 @@ class CreateAPIMixin(CreateModelMixin):
     def perform_create(self, serializer):
         user = user_authentication(self.request)
 
+        # Check daily limit for Course Creation
+        from learn.serializers import CourseSerializer # solution to NameError: name 'CourseSerializer' is not defined
+        if isinstance(serializer, CourseSerializer):
+            serializer.check_daily_limit(user)
         # checking for additional arguements i.e pk so that our method will be flexible/ resuable for different serializers
         parameters = inspect.signature(serializer.save_with_auth_user).parameters
         if "pk" in parameters:

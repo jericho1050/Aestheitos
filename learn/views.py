@@ -189,7 +189,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
             .annotate(average_rating=Avg("course_rating__rating"))
             .order_by("average_rating", "-course_created")
         )
-
+    
 
 class CourseDetail(
     UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView

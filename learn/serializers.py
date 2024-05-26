@@ -22,12 +22,12 @@ class UserSerializer(ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
-    
+
+
 class UserCommentSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "first_name", "last_name", "profile_pic"]
-        
 
 
 class UserProgressSerializer(ModelSerializer):
@@ -78,10 +78,11 @@ class CourseRatingSerializer(ModelSerializer):
 
 class CourseSerializer(ModelSerializer):
     average_rating = serializers.SerializerMethodField()
-    created_by_name = serializers.StringRelatedField(source='created_by', read_only=True)
+    created_by_name = serializers.StringRelatedField(
+        source="created_by", read_only=True
+    )
     difficulty_display = serializers.SerializerMethodField()
     enrollee_count = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Course
@@ -104,12 +105,24 @@ class CourseSerializer(ModelSerializer):
 
     def get_average_rating(self, obj) -> float:
         return obj.course_rating_average()
-    
+
     def get_difficulty_display(self, obj):
         return obj.get_difficulty_display()
-    
+
     def get_enrollee_count(self, obj):
         return obj.enrollee_count()
+
+    def check_daily_limit(self, user):
+        # Get the count of courses created by the user today
+        courses_today = Course.objects.filter(
+            created_by=user, course_created=date.today()
+        ).count()
+        if courses_today >= 2:
+            raise serializers.ValidationError(
+                {
+                    "detail": "Sorry, you can only create two courses per day.\n This is to prevent the spamming of creations."
+                }
+            )
 
 
 class CourseContentSerializer(ModelSerializer):
@@ -137,7 +150,7 @@ class SectionSerializer(ModelSerializer):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
-        
+
         course_content = get_object_or_404(CourseContent, id=pk)
         if not is_valid_ownership(user, course_content.course.id):
             raise AuthenticationFailed("Not allowed to create")
@@ -152,16 +165,17 @@ class SectionItemSerializer(ModelSerializer):
 
     def save_with_auth_user(self, user, pk, update=False):
         if update:
-            if not is_valid_ownership(user, self.instance.section.course_content.course.id):
+            if not is_valid_ownership(
+                user, self.instance.section.course_content.course.id
+            ):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
-        
+
         section = get_object_or_404(Section, id=pk)
         if not is_valid_ownership(user, section.course_content.course.id):
             raise AuthenticationFailed("Not allowed to create")
         self.save(section=section)
-        
 
 
 class CourseCommentsSerializer(ModelSerializer):
@@ -186,10 +200,9 @@ class CourseCommentsSerializer(ModelSerializer):
         course = get_object_or_404(Course, id=pk)
         self.save(course=course, comment_by=user)
 
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        comment_by_representation = representation.pop('comment_by')
+        comment_by_representation = representation.pop("comment_by")
         for key in comment_by_representation:
             representation[key] = comment_by_representation[key]
         return representation
@@ -222,7 +235,9 @@ class WorkoutsSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
-            if not is_valid_ownership(user, self.instance.section_item.section.course_content.course.id):
+            if not is_valid_ownership(
+                user, self.instance.section_item.section.course_content.course.id
+            ):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
@@ -242,13 +257,18 @@ class CorrectExerciseFormSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
-            if not is_valid_ownership(user, self.instance.workout.section_item.section.course_content.course.id):
+            if not is_valid_ownership(
+                user,
+                self.instance.workout.section_item.section.course_content.course.id,
+            ):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
 
         workout = get_object_or_404(Workouts, id=pk)
-        if not is_valid_ownership(user, workout.section_item.section.course_content.course.id):
+        if not is_valid_ownership(
+            user, workout.section_item.section.course_content.course.id
+        ):
             raise AuthenticationFailed("Not allowed to create")
         self.save(workout=workout)
 
@@ -262,13 +282,18 @@ class WrongExerciseFormSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
-            if not is_valid_ownership(user, self.instance.workout.section_item.section.course_content.course.id):
+            if not is_valid_ownership(
+                user,
+                self.instance.workout.section_item.section.course_content.course.id,
+            ):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
 
         workout = get_object_or_404(Workouts, id=pk)
-        if not is_valid_ownership(user, workout.section_item.section.course_content.course.id):
+        if not is_valid_ownership(
+            user, workout.section_item.section.course_content.course.id
+        ):
             raise AuthenticationFailed("Not allowed to create")
         self.save(workout=workout)
 

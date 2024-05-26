@@ -1095,8 +1095,8 @@ export default function CreateCourse() {
                                                             <>
                                                                 {Object.entries(JSON.parse(actionData.message)).map(([key, value]) => (
                                                                     <Box key={key} component="div">
-                                                                        <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left', }}>
-                                                                            {key === 'difficulty' || key === 'price' || key === 'weeks' ? `${key}: ${value[0]}` : null}
+                                                                        <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left', whiteSpace: 'pre-line'}}>
+                                                                            {key === 'difficulty' || key === 'price' || key === 'weeks' ? `${key}: ${value[0]}` : key === 'detail' ? `${value}` : null}
                                                                         </Typography>
                                                                     </Box>
                                                                 ))}
