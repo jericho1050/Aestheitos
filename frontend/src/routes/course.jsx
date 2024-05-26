@@ -116,17 +116,82 @@ export async function action({ request, params }) {
 }
 
 function CommentReply({ reply, level }) {
+    const [anchorEl, setAnchorEl] = React.useState(null);
     const [status, setStatus] = React.useState('');
+    const fetcher = useFetcher();
+    const { token } = useAuthToken();
+    const isAuthenticated = token['access'] !== null;
+
+    function handleClick(e) {
+        setAnchorEl(e.currentTarget);
+    }
+    function handleClose() {
+        setAnchorEl(null);
+    }
+
+    function handleClickEdit() {
+        setStatus('editing');
+    }
+    function handleClickDelete() {
+        setStatus('deleting');
+        fetcher.submit({ intent: 'deleting', commentId: reply.id }, { method: 'DELETE' });
+    }
+    const open = Boolean(anchorEl);
+
     return (
         <Box>
-            <ListItem>
-                <ListItemAvatar>
-                    <Avatar alt={reply.username} src={reply.profile_pic} />
-                </ListItemAvatar>
-                <ListItemText
-                    primary={`${reply.first_name || reply.username} ${reply.last_name || ''}`}
-                    secondary={reply.comment}
-                />
+            <ListItem
+                secondaryAction={
+                    <>
+                        {isAuthenticated && (
+                            <IconButton id="ellipsis" edge="end" aria-label="ellipsis" sx={{ p: '0.3em 0.5em' }} onClick={handleClick}>
+                                <FontAwesomeIcon icon={faEllipsisV} fontSize="medium" />
+                            </IconButton>
+                        )}
+
+                        <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left'
+                            }}
+                            onClose={handleClose}
+                        >
+
+                            <Stack alignItems={'flex-start'} p={'0.4em 0.2em'}>
+                                <Button fullWidth sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }} onClick={handleClickEdit}>
+                                    <Box ml={-3} pl={2} pr={2}>
+                                        <EditIcon fontSize="smaller" />
+                                    </Box>
+                                    Edit
+                                </Button>
+                                <Divider />
+                                <Button fullWidth sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }} onClick={handleClickDelete}>
+                                    <Box pl={2} pr={2}>
+                                        <DeleteIcon fontSize="smaller" />
+                                    </Box>
+                                    Delete
+                                </Button>
+
+                            </Stack>
+                        </Popover>
+                    </>
+                }
+                alignItems="flex-start">
+                {status === 'editing' ?
+
+                    <CommentTextField setStatus={setStatus} status={status} comment={reply} />
+                    :
+                    (<>
+                        <ListItemAvatar>
+                            <Avatar alt={reply.username} src={reply.profile_pic} />
+                        </ListItemAvatar>
+                        <ListItemText
+                            primary={`${reply.first_name || reply.username} ${reply.last_name || ''}`}
+                            secondary={reply.comment}
+                        />
+                    </>)}
             </ListItem>
             <ListItemText inset={true} style={{ paddingLeft: `${(level + 1) * 20}px` }}>
                 <IconButton onClick={() => setStatus('replying')} sx={{ borderRadius: 3, mt: -1 }}>
@@ -135,9 +200,9 @@ function CommentReply({ reply, level }) {
             </ListItemText>
             {
                 status === 'replying' &&
-                <Box pl={`${(level + 1) * 20}px`}>
+                (<Box pl={`${(level + 1) * 20}px`}>
                     <CommentTextField setStatus={setStatus} parentComment={reply.id} username={`@${reply.first_name || reply.username} ${reply.last_name || ''}`} />
-                </Box>
+                </Box>)
 
             }
             <CourseCommentReplies comment={reply} level={level + 1} />
@@ -360,7 +425,7 @@ function CommentTextField({ status, setStatus, comment = '', parentComment, user
                                 </Grid>
                                 <fetcher.Form method="post">
                                     <Grid item>
-                                        <Button variant="contained" sx={{ borderRadius: 3 }} name="comment" value={text} type='submit' disabled={!comment}>{status === 'replying' ? 'Reply' : status === 'editing' ? 'Save' : 'Comment'}</Button>
+                                        <Button variant="contained" sx={{ borderRadius: 3 }} name="comment" value={text} type='submit' disabled={!text}>{status === 'replying' ? 'Reply' : status === 'editing' ? 'Save' : 'Comment'}</Button>
                                     </Grid>
                                     {parentComment && <TextField type="hidden" name="parent_comment" value={parentComment} />} {/* if user is replying to a comment render this hidden Textfield */}
                                     {comment.id && (
@@ -525,7 +590,7 @@ export function ResponsiveDialog({ accordionItem, children }) {
                                     <Grid item mt={4} container xs={10}>
                                         <Grid item >
                                             <ThemeProvider theme={theme}>
-                                                <Typography variant="h5">
+                                                <Typography variant="h4" fontWeight={'bold'}>
                                                     Description
                                                 </Typography>
                                             </ThemeProvider>
@@ -629,7 +694,7 @@ export default function Course() {
 
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
                                     {course.price != 0 && <AttachMoneyIcon fontSize="large" className="price-tag" />}
-                                    <Typography fontWeight="bolder" sx={{ fontSize: '2em' }} className="price-tag">
+                                    <Typography fontWeight={800} sx={{ fontSize: '2em' }} className="price-tag">
                                         {course.price == 0 ? 'FREE' : course.price}
                                     </Typography>
 
@@ -640,13 +705,13 @@ export default function Course() {
                                         null
                                         : accessTokenDecoded?.user_id !== course.created_by && !enrollment ?
                                             <Box display='flex' justifyContent={'center'} mt={2}>
-                                                <Button fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
+                                                <Button size="large" fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
                                                     Enroll now!
                                                 </Button>
                                             </Box>
                                             :
                                             <Box display='flex' justifyContent={'center'} mt={2}>
-                                                <Button fullWidth={isSmallScreen ? true : false} variant="contained" color="error" onClick={handleClickUnenroll}>
+                                                <Button size="large" fullWidth={isSmallScreen ? true : false} variant="contained" color="error" onClick={handleClickUnenroll}>
                                                     Unenroll
                                                 </Button>
                                             </Box>
@@ -690,7 +755,7 @@ export default function Course() {
                         <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
                             <Grid item alignSelf={'flex-start'}>
                                 <ThemeProvider theme={theme} >
-                                    <Typography variant="h4">
+                                    <Typography variant="h4" fontWeight={'bold'}>
                                         Overview
                                     </Typography>
                                 </ThemeProvider>
@@ -725,7 +790,7 @@ export default function Course() {
                                         <Grid item container position={'relative'} justifyContent={'flex-start'}>
                                             <Grid item mb={2}>
                                                 <ThemeProvider theme={theme}>
-                                                    <Typography variant="h4">
+                                                    <Typography variant="h4" fontWeight={'bold'}>
                                                         Course content
                                                     </Typography>
                                                 </ThemeProvider>
@@ -760,19 +825,6 @@ export default function Course() {
                                                 </Stack>
                                             </Grid>
                                         </Grid>
-                                        <Grid item container alignSelf={'flex-start'} mt={'30vh'}>
-                                            <Grid item xs={12}>
-                                                <ThemeProvider theme={theme}>
-                                                    <Typography variant="h5">
-                                                        Comments
-                                                    </Typography>
-                                                </ThemeProvider>
-                                            </Grid>
-                                            <Grid item xs>
-                                                <CourseComments />
-                                            </Grid>
-                                        </Grid>
-
                                     </>
                                     :
                                     <>
@@ -781,7 +833,7 @@ export default function Course() {
                                                 <Grid item container position={'relative'} justifyContent={'flex-start'}>
                                                     <Grid item mb={2}>
                                                         <ThemeProvider theme={theme}>
-                                                            <Typography variant="h4">
+                                                            <Typography variant="h4" fontWeight={'bold'}>
                                                                 Course content
                                                             </Typography>
                                                         </ThemeProvider>
@@ -804,25 +856,14 @@ export default function Course() {
                                                         </Stack>
                                                     </Grid>
                                                 </Grid>
-                                                <Grid item container alignSelf={'flex-start'} mt={'30vh'}>
-                                                    <Grid item xs={12}>
-                                                        <ThemeProvider theme={theme}>
-                                                            <Typography variant="h5">
-                                                                Comments
-                                                            </Typography>
-                                                        </ThemeProvider>
-                                                    </Grid>
-                                                    <Grid item xs>
-                                                        <CourseComments />
-                                                    </Grid>
-                                                </Grid>
+
                                             </>
                                             :
                                             <>
                                                 <Grid item container alignSelf={'flex-start'}>
                                                     <Grid item mb={2}>
                                                         <ThemeProvider theme={theme}>
-                                                            <Typography variant="h4">
+                                                            <Typography variant="h4" fontWeight={'bold'}>
                                                                 Course content
                                                             </Typography>
                                                         </ThemeProvider>
@@ -831,23 +872,22 @@ export default function Course() {
                                                         <ControlledAccordions />
                                                     </Grid>
                                                 </Grid>
-                                                <Grid item container alignSelf={'flex-start'}>
-                                                    <Grid item xs={12}>
-                                                        <ThemeProvider theme={theme}>
-                                                            <Typography variant="h5">
-                                                                Comments
-                                                            </Typography>
-                                                        </ThemeProvider>
-                                                    </Grid>
-                                                    <Grid item xs>
-                                                        <CourseComments />
-                                                    </Grid>
-                                                </Grid>
                                             </>
                                         }
                                     </>
                             }
-
+                            <Grid item container alignSelf={'flex-start'} mt={!isAuthenticated || (!enrollment && !isInstructor) ? '30vh' : 'initial'}>
+                                <Grid item xs={12}>
+                                    <ThemeProvider theme={theme}>
+                                        <Typography variant="h5" fontWeight={'bold'}>
+                                            Comments
+                                        </Typography>
+                                    </ThemeProvider>
+                                </Grid>
+                                <Grid item xs>
+                                    <CourseComments />
+                                </Grid>
+                            </Grid>
                         </Grid>
                     </Container>
                 </Box>
