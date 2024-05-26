@@ -5,7 +5,7 @@ import { correctForm, wrongForm } from "./workoutsAtom";
 
 
 const section1 = {
-    heading: "Your Own Heading Here: e.g., Phase 1 (Preparation)."
+    heading: "e.g., Phase 1: Preparation or Week 1-4: Preparation"
 }
 const sectionItem1 = {
     lecture: '',

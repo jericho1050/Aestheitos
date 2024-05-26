@@ -693,7 +693,7 @@ export default function Course() {
                                     <b>Instructor:</b> {course.created_by_name} </Typography>
 
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
-                                    {course.price != 0 && <AttachMoneyIcon fontSize="large" className="price-tag" />}
+                                    {course.price != 0 && <AttachMoneyIcon fontSize="large" />}
                                     <Typography fontWeight={800} sx={{ fontSize: '2em' }} className="price-tag">
                                         {course.price == 0 ? 'FREE' : course.price}
                                     </Typography>
@@ -774,12 +774,12 @@ export default function Course() {
                                     getEmbedUrl(courseContent.preview) ?
 
 
-                                        (<Box sx={{ maxWidth: 'inherit', width: '100%' }} component={'div'}>
-                                            <iframe className="course-lecture" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowFullScreen></iframe>
+                                        (<Box sx={{ maxWidth: 'inherit'}} component={'div'}>
+                                            <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
                                         </Box>)
                                         :
-                                        (<Box sx={{ maxWidth: 'inherit', width: '100%' }} component={'div'}>
-                                            <iframe className="course-lecture" src={''} title="vide-lecture here" allow="accelerometer; clipboard-write; encrypted-media; gyroscope;" allowFullScreen></iframe>
+                                        (<Box sx={{ maxWidth: 'inherit'}} component={'div'}>
+                                            <iframe className="course-preview" src={''} title="vide-lecture here"  allowFullScreen></iframe>
                                         </Box>)
                                 }
                             </Grid>

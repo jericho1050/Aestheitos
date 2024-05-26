@@ -1,7 +1,7 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, TextField, Typography } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { ResponsiveDialog as AccordionItemDialogCreate} from "../routes/create";
+import { ResponsiveDialog as AccordionItemDialogCreate } from "../routes/create";
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import AddAccordionItem from "./AddAccordionItem";
@@ -65,7 +65,8 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
         )
     } else {
         accordionHeadingContent = (
-            <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
+            <Typography fontWeight="bold" align='justify' sx={{ maxWidth: {xs: 400, sm: 500, lg: 725}, flexShrink: 0 }} className="heading"
+            >
                 {accordion.heading}
             </Typography>
         )
@@ -74,7 +75,7 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
     return (
         <Accordion expanded={isEditing ? false : expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%' }}>
             <AccordionSummary
-                expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
                     {accordion.id !== 0 &&
                         (<>
                             <Button onClick={() => setIsEditing(true)} sx={{ paddingLeft: 2 }} startIcon={!isEditing ? <EditIcon /> : null} size="small" />
@@ -82,10 +83,11 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
                         </>
                         )
                     }
+
                 </Box>}
                 aria-controls="panel1bh-content"
                 id="panel1bh-header"
-                sx={{ padding: '3%' }}
+                sx={{ padding: '3%', }}
             >
 
                 {accordionHeadingContent}
@@ -93,7 +95,7 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
             {
                 /* don't render the first accordion item's buttons (they are just examples) */
                 accordion.id !== 0 &&
-                 <>
+                <>
                     <AccordionDetails >
                         <AddAccordionItem actionData={actionData} onClick={onClickAddItem} accordionId={accordion.id} />
                     </AccordionDetails>
@@ -103,7 +105,7 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
 
             <ul ref={parent}>
                 {accordion.items ? accordion.items.map((item) => (
-                /* don't render the first accordion (they are just examples) */
+                    /* don't render the first accordion (they are just examples) */
 
                     <AccordionDetails
                         sx={{ paddingLeft: '2%' }}
@@ -134,14 +136,14 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
 }
 export function AccordionSection({ handleChange, expanded, accordion }) {
 
-    let accordionHeadingContent = (
-        <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }}>
+    const accordionHeadingContent = (
+        <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }} >
             {accordion.heading}
         </Typography>
     )
 
     return (
-        <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%', width: '100%' }}>
+        <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%' }}>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1bh-content"
@@ -150,24 +152,24 @@ export function AccordionSection({ handleChange, expanded, accordion }) {
             >
                 {accordionHeadingContent}
             </AccordionSummary>
-        
-                {accordion.items ? accordion.items?.map((item) => (
 
-                    <AccordionDetails
-                        sx={{ paddingLeft: '2%' }}
-                        key={item.id}
+            {accordion.items ? accordion.items?.map((item) => (
 
+                <AccordionDetails
+                    sx={{ paddingLeft: '2%' }}
+                    key={item.id}
+
+                >
+                    <AccordionItemDialog
+                        accordionItem={item}
                     >
-                        <AccordionItemDialog
-                            accordionItem={item}
-                        >
-                            {item.heading}
-                        </AccordionItemDialog>
-                    </AccordionDetails>
-                )) :
-                    null
+                        {item.heading}
+                    </AccordionItemDialog>
+                </AccordionDetails>
+            )) :
+                null
 
-                }
+            }
         </Accordion>
 
     )

@@ -441,14 +441,14 @@ function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, 
 }
 
 // Event handlers in RepsonsiveDialog don't use the Submit hook anymore (because I am lazy about refactoring the logic, and it's added complexity to revise and use the Effect hook for it) to send it to our action server. Instead, it just now calls the function that makes the HTTP request inside the event handler.
-export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onChange, accordionId, accordionItem, children }) {
+export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onChange, accordionId, accordionItem, children }) { // This compponent (ResponsiveDialog) is actually an Accordion item or detail of an accordion
     const [isError, setIsError] = React.useState(false);
     const [, updateAccordions] = immerAtom; // lol this is just a prop from the parent component (AccordionSection) 
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [parent, enableAnimations] = useAutoAnimate();
     const [isWorkoutRoutine, setIsWorkoutRoutine] = React.useState(accordionItem?.workouts?.length > 0);
-    const [heading, setHeading] = React.useState('');
+    const [heading, setHeading] = React.useState(children);
     // The `lecture` and `description` state variable holds the *first* value of `accordionItem.lecture` for lecture and `accordItem.description` for description.
     // Further changes to both `accordionItem` prop are ignored.
     const [lecture, setLecture] = React.useState(accordionItem.lecture || '');
@@ -665,10 +665,10 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
         // show content when not in edit mode
         accordionItemHeadingContent = (
             <>
-                <Grid item xs={10} lg={11}>
-                    <ThemeProvider theme={theme} >
+                <Grid item xs={10} lg={11} className="heading">
+                    <ThemeProvider theme={theme}>
                         <DescriptionIcon theme={theme2} sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
-                        <Typography data-cy={`Accordion item ${itemId}`} align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
+                        <Typography data-cy={`Accordion item ${itemId}`} align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' }, }} >
                             {children}
                         </Typography>
                     </ThemeProvider>
@@ -750,7 +750,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                         <Grid item xs={10}>
                                             {getEmbedUrl(accordionItem.lecture) ?
                                                 <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-video-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe> 
+                                                    <iframe className="course-video-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>
                                                 </Box>
                                                 :
                                                 <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
@@ -762,7 +762,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                         </Grid>
                                         <Grid item mt={4} xs={10} justifySelf={'flex-start'}>
                                             <ThemeProvider theme={theme}>
-                                                <Typography variant="h3" fontWeight={500}>
+                                                <Typography variant="h4" fontWeight={'bold'}>
                                                     Description
                                                 </Typography>
                                             </ThemeProvider>
@@ -1108,7 +1108,7 @@ export default function CreateCourse() {
                                                 </Grid>
                                                 <Grid item xs pb={4}>
                                                     {/* Select menu form */}
-                                                    <FormControl required={true} sx={{ width: 200 }} error={isError}>
+                                                    <FormControl required={true} sx={{ width: 150 }} error={isError}>
                                                         <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
                                                         <Select
                                                             data-cy="Select Difficulty"
@@ -1385,19 +1385,19 @@ export default function CreateCourse() {
                                 <Container>
                                     <Grid container>
                                         <Grid item xs>
-                                        <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
+                                            <ProgressMobileStepper intent={intent} setIntent={setIntent} activeStep={activeStep} setActiveStep={setActiveStep} />
                                         </Grid>
                                     </Grid>
                                 </Container>
                             </Box>
                             <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3} >
-                                    <Grid item>
-                                        <ThemeProvider theme={theme} >
-                                            <Typography variant="h3" fontWeight={500}>
-                                                Course content
-                                            </Typography>
-                                        </ThemeProvider>
+                                    <Grid item width={{ xs: '100%', md: '69%' }}>
+                                            <ThemeProvider theme={theme} >
+                                                <Typography variant="h3" fontWeight={'bold'}>
+                                                    Course content
+                                                </Typography>
+                                            </ThemeProvider>
                                     </Grid>
                                     <Grid item width={{ xs: '100%', md: '69%' }}>
                                         <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>

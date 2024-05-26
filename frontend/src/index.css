@@ -77,7 +77,7 @@ html {
   .container-homepage {
     position: absolute;
     top: 69%;
-    left: 50%;
+    left: 36%;
     transform: translate(-50%, -40%);
     border-radius: 35px;
     /* background-color:hsla(0,13%,97%,0.69);
@@ -91,7 +91,7 @@ html {
   .container-homepage {
     position: absolute;
     top: 25%;
-    left: 50%;
+    left: 40%;
     transform: translate(-50%, -69%);
     border-radius: 35px;
     /* background-color:hsla(0,13%,97%,0.69); */
@@ -339,11 +339,17 @@ padding: 22vh 0 10vh 0;
 }
 
 .price-tag {
-  padding: 0.2em 0.5em;
+  padding: 0.2em 0.4em;
   background-color:hsla(0,0%,100%,1);
   background-image:
   radial-gradient(at 80% 100%, hsla(209,78%,46%,0.2) 0px, transparent 50%),
   radial-gradient(at 0% 0%, hsla(38,100%,68%, 0.2) 0px, transparent 50%);
   border-radius: 15px;
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
+.heading {
+    white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
