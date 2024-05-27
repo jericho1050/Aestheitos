@@ -1408,7 +1408,7 @@ export default function CreateCourse() {
                                     <TextField type="hidden" value={course.id} name="courseId" /> */}
                                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
                                     <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
-                                        <AlertDialog onClickSubmit={handleSubmit} />
+                                        <AlertDialog onClickSubmit={handleSubmit} intent="submitting" />
                                     </Box>
                                 </Box>
 

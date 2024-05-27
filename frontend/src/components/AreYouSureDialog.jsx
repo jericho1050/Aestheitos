@@ -5,18 +5,20 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { useMediaQuery, useTheme } from '@mui/material';
+import { Box, Fab, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigation } from 'react-router-dom';
 import SendIcon from '@mui/icons-material/Send';
 import { useAtom } from 'jotai';
-import { snackbarReducerAtom } from '../atoms/snackbarAtom';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function AlertDialog({onClickSubmit}) {
+export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
     const theme2 = useTheme();
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
     const [open, setOpen] = React.useState(false);
     const navigation = useNavigation();
-    const[, dispatch] = useAtom(snackbarReducerAtom);
+    const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -26,12 +28,23 @@ export default function AlertDialog({onClickSubmit}) {
     };
 
 
-    
     return (
         <React.Fragment>
-            <Button onClick={handleClickOpen} disabled={navigation.state === 'submitting'}  sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+
+            {intent === 'submitting' && (<Button onClick={handleClickOpen} disabled={navigation.state === 'submitting'} sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
                 Submit
-            </Button>
+            </Button>)}
+            {intent === 'deleting' && (
+                <Box display="flex" position="fixed" bottom="20px" right="20px" flexDirection={'column'} gap={'0.69em'}>
+                    <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit">
+                        <EditIcon />
+                    </Fab>
+                    <Fab color="error" size={isSmallScreen ? 'medium' : 'large'} aria-label="delete" onClick={handleClickOpen}>
+                        <DeleteIcon />
+                    </Fab>
+                </Box>
+            )}
+
             <Dialog
                 open={open}
                 onClose={handleClose}
@@ -43,18 +56,21 @@ export default function AlertDialog({onClickSubmit}) {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        Are you sure you want to submit?
+                        {intent === 'submitting' ? "Are you sure you want to submit?": "Are you sure you want to delete the course?"}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button autoFocus onClick={() => {
-                        onClickSubmit();
-                        dispatch({
-                            type: 'submitting'
-                        })
-                        }}>
-                        Submit
+                        if (intent === 'submitting') {
+                            onClickSubmit();
+
+                        } else {
+                            onClickDelete();
+                        }
+
+                    }}>
+                        {intent === 'submitting' ? "Submit" : "Delete"}
                     </Button>
                 </DialogActions>
             </Dialog>

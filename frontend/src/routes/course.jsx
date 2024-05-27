@@ -30,6 +30,7 @@ import { faEllipsisV } from '@fortawesome/free-solid-svg-icons/faEllipsisV';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useAtom } from "jotai";
 import { snackbarReducerAtom } from "../atoms/snackbarAtom";
+import AlertDialog from "../components/AreYouSureDialog";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -696,14 +697,7 @@ export default function Course() {
                     {
                         isInstructor &&
                         (
-                            <Box display="flex" position="fixed" bottom="20px" right="20px" flexDirection={'column'} gap={'0.69em'}>
-                                <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit">
-                                    <EditIcon />
-                                </Fab>
-                                <Fab color="error" size={isSmallScreen ? 'medium' : 'large'} aria-label="delete" onClick={handleClickDelete}>
-                                    <DeleteIcon />
-                                </Fab>
-                            </Box>
+                            <AlertDialog onClickDelete={handleClickDelete} intent="deleting" />
                         )
                     }
 
