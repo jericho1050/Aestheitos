@@ -31,6 +31,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useAtom } from "jotai";
 import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 import AlertDialog from "../components/AreYouSureDialog";
+import image from '../static/images/noimg.png'
+
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -661,7 +663,7 @@ export default function Course() {
     const enrollment = enrollees.find(enrollee => enrollee.user === accessTokenDecoded?.user_id && enrollee.course === course.id);
     const fetcher = useFetcher();
     const [, dispatch] = useAtom(snackbarReducerAtom);
-    
+
     function handleClickEnroll() {
         if (!isAuthenticated) {
             navigate('/signin');
@@ -676,10 +678,6 @@ export default function Course() {
 
     function handleClickSignUp() {
         navigate('/signup')
-    }
-
-    function handleClickEdit() {
-
     }
 
     function handleClickDelete() {
@@ -710,7 +708,10 @@ export default function Course() {
                             <ThemeProvider theme={theme}>
 
                                 <Container disableGutters sx={{ maxWidth: { xs: 700, md: 500 } }} component="div">
-                                    <img src={course.thumbnail} className="course-thumbnail" />
+                                    <img src={course.thumbnail} className="course-thumbnail" onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = image;
+                                    }} />
                                 </Container>
 
 
@@ -731,13 +732,13 @@ export default function Course() {
                                         null
                                         : accessTokenDecoded?.user_id !== course.created_by && !enrollment ?
                                             <Box display='flex' justifyContent={'center'} mt={2}>
-                                                <Button size="large" fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
+                                                <Button size="large" sx={{borderRadius: '2em', fontWeight: 800}} fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
                                                     Enroll now!
                                                 </Button>
                                             </Box>
                                             :
                                             <Box display='flex' justifyContent={'center'} mt={2}>
-                                                <Button size="large" fullWidth={isSmallScreen ? true : false} variant="contained" color="error" onClick={handleClickUnenroll}>
+                                                <Button size="large" sx={{borderRadius: '2em', fontWeight: 800}} fullWidth={isSmallScreen ? true : false} variant="contained" color="error" onClick={handleClickUnenroll}>
                                                     Unenroll
                                                 </Button>
                                             </Box>
@@ -771,7 +772,7 @@ export default function Course() {
                             {course.title}
                         </Typography>
                         {/* <Box className="html-content" component={'div'} dangerouslySetInnerHTML={{ __html: DOMPurify(course.description) }} /> */}
-                        <Box className="html-content">
+                        <Box className="html-content" lineHeight={'1.4em'}>
                             {htmlToReactParser.parse(course.description)}
                         </Box>
                     </Box>
@@ -787,7 +788,7 @@ export default function Course() {
                                 </ThemeProvider>
                             </Grid>
                             <Grid item alignSelf={'flex-start'}>
-                                <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(courseContent.overview) }} />
+                                <Box lineHeight={'1.4em'} className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(courseContent.overview) }} />
                             </Grid>
                             <Grid item>
                                 <ThemeProvider theme={theme}>
@@ -871,12 +872,12 @@ export default function Course() {
                                                         <Stack className="non-modal-dialog">
                                                             <Grid container justifyContent={'center'} spacing={3} mt={'auto'}>
                                                                 <ThemeProvider theme={theme}>
-                                                                    <Typography align="center" gutterBottom variant="h5">
+                                                                    <Typography align="center" gutterBottom variant="h5" fontWeight={'bold'}>
                                                                         Enroll to view content
                                                                     </Typography>
                                                                 </ThemeProvider>
                                                                 <Grid item xs={12}>
-                                                                    <Button variant="outlined" disableRipple sx={{ borderRadius: 10 }} onClick={() => document.getElementById("enroll").scrollIntoView({ behavior: 'smooth' })} fullWidth >Enroll now</Button>
+                                                                    <Button variant="outlined" size="large" disableRipple sx={{ borderRadius: 10, fontWeight: 'bolder' }} onClick={() => document.getElementById("enroll").scrollIntoView({ behavior: 'smooth' })} fullWidth >Enroll now</Button>
                                                                 </Grid>
                                                             </Grid>
                                                         </Stack>

@@ -19,6 +19,8 @@ import { action as createAction } from './routes/create';
 import { action as enrollAction } from './routes/course';
 import ProectedRoute from './components/protectedRoute';
 import { IsLoadingProvider } from './contexts/IsLoadingContext';
+import EditCourse from './routes/edit';
+import { loader as editCourseLoader, action as editAction } from './routes/edit';
 
 const theme = createTheme({
   palette: {
@@ -48,7 +50,7 @@ const router = createBrowserRouter([
         loader: indexLoader,
       },
       {
-        path: "courses/:courseId",
+        path: "course/:courseId",
         element: <Course />,
         loader: courseLoader,
         action: enrollAction
@@ -62,10 +64,13 @@ const router = createBrowserRouter([
             element: <CreateCourse />,
             action: createAction
           },
-          // {
-          //   path: "course/create/edit",
-          //   action: createAction
-          // }
+          {
+            path: "course/:courseId/edit",
+            element: <EditCourse />,
+            loader: editCourseLoader,
+            action: editAction
+
+          }
         ]
       }
     ],

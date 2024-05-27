@@ -35,7 +35,7 @@ export default function ProgressMobileStepper({ intent, setIntent, activeStep, s
           type="submit"
           disabled={activeStep === 2 || isError}
         >
-          Next
+          {intent === "update" ? "Save" : "Next"}
           {theme.direction === 'rtl' ? (
             <KeyboardArrowLeft />
           ) : (

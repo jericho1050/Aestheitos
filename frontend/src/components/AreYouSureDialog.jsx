@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Box, Fab, useMediaQuery, useTheme } from '@mui/material';
-import { useNavigation } from 'react-router-dom';
+import { Form, useNavigation } from 'react-router-dom';
 import SendIcon from '@mui/icons-material/Send';
 import { useAtom } from 'jotai';
 import EditIcon from '@mui/icons-material/Edit';
@@ -34,11 +34,13 @@ export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
             {intent === 'submitting' && (<Button onClick={handleClickOpen} disabled={navigation.state === 'submitting'} sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
                 Submit
             </Button>)}
-            {intent === 'deleting' && (
+            {intent === 'deleting' && ( // or it could be editing, but i merge it in here.
                 <Box display="flex" position="fixed" bottom="20px" right="20px" flexDirection={'column'} gap={'0.69em'}>
-                    <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit">
-                        <EditIcon />
-                    </Fab>
+                    <Form action="edit">
+                        <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit" type="submit">
+                            <EditIcon />
+                        </Fab>
+                    </Form>
                     <Fab color="error" size={isSmallScreen ? 'medium' : 'large'} aria-label="delete" onClick={handleClickOpen}>
                         <DeleteIcon />
                     </Fab>
@@ -56,7 +58,7 @@ export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        {intent === 'submitting' ? "Are you sure you want to submit?": "Are you sure you want to delete the course?"}
+                        {intent === 'submitting' ? "Are you sure you want to submit?" : "Are you sure you want to delete the course?"}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

@@ -31,8 +31,8 @@ import { TransitionGroup } from "react-transition-group";
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
-import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
-import { Form, redirect, useActionData, useFetcher, useNavigation } from "react-router-dom";
+import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getCourse, getCourseContent, getSection, getSectionItems, getSections, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
+import { Form, redirect, useActionData, useFetcher, useLoaderData, useNavigation } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import { Provider, atom, useAtom } from "jotai";
 import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
@@ -44,6 +44,7 @@ import 'react-quill/dist/quill.snow.css';
 import { modules, modulesCard } from "../helper/quillModule";
 import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 import AlertDialog from "../components/AreYouSureDialog";
+import { DoneAll } from "@mui/icons-material";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -59,10 +60,6 @@ export async function action({ request }) {
     switch (parseInt(formData.get('activeStep'))) {
 
         case 0:
-            // create a course
-            if (intent === 'create') {
-                course = await createCourse(formData);
-            }
             // update a course
             if (intent === 'update') {
                 course = await updateCourse(formData.get('courseId'), formData);
@@ -78,9 +75,6 @@ export async function action({ request }) {
         case 1:
             // create a course's overview
             let courseId = formData.get('courseId');
-            if (intent === 'create') {
-                courseContent = await createCourseContent(courseId, formData);
-            }
             // update a course's overview
             if (intent === 'update') {
                 courseContent = await updateCourseContent(courseId, formData);
@@ -164,17 +158,6 @@ export async function action({ request }) {
                         }
                     }
                     break;
-                case 'submit':
-                    let courseId = formData.get('courseId');
-                    formData.append('is_draft', false);
-                    course = await updateCourse(courseId, formData);
-                    if (course?.statusCode >= 400) {
-                        error = { ...course };
-                        return error;
-                    }
-                    return redirect('/');
-
-
             }
             section = {
                 ...section,
@@ -188,6 +171,65 @@ export async function action({ request }) {
     return { course, courseContent, section }; // only one obj property will persist i.e one returns a value other's are undefined 
 }
 
+
+export async function loader({ params }) {
+    // kind of  partially copy and paste from the route course's loader
+    const course = await getCourse(params.courseId);
+    if (!course) {
+        throw new Response("", {
+            status: course.status,
+            statusText: course.message
+        });
+    }
+    const courseContent = await getCourseContent(course.id);
+    if (!courseContent) {
+        throw new Response("", {
+            status: courseContent.status,
+            statusText: courseContent.message
+        });
+    }
+
+    try {
+        const sections = await getSections(courseContent.id);
+        const accordion = await Promise.all(sections.map(async (section) => {
+            try {
+                const sectionItems = await getSectionItems(section.id);
+                const itemWorkouts = await Promise.all(sectionItems.map(async (item) => {
+                    try {
+                        const workouts = await getWorkouts(item.id);
+                        const workoutExercises = await Promise.all(workouts.map(async (workout) => {
+                            try {
+                                const correctFormExercises = await getCorrectExercises(workout.id);
+                                const wrongFormExercises = await getWrongExercises(workout.id);
+                                return {
+                                    ...workout,
+                                    correctForm: correctFormExercises,
+                                    wrongForm: wrongFormExercises
+                                };
+                            } catch (error) {
+                                console.error('Error getting exercises:', error);
+                                return workout;
+                            }
+                        }));
+                        return { ...item, workouts: workoutExercises };
+                    } catch (error) {
+                        console.error('Error getting workouts:', error);
+                        return item;
+                    }
+                }));
+                return { ...section, items: itemWorkouts };
+            } catch (error) {
+                console.error('Error getting section items:', error);
+                return section;
+            }
+        }));
+
+        return { course, courseContent, accordion };
+    } catch (error) {
+        console.error('Error getting sections:', error);
+    }
+
+}
 function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, onClick, workout, open }) {
     const { accordionId, itemId } = ids;
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
@@ -791,12 +833,19 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
 
 
 function ControlledAccordions({ activeStep, courseContentId }) {
+    const { accordion } = useLoaderData();
     const [expanded, setExpanded] = React.useState(false);
     const fetcher = useFetcher();
     const actionData = fetcher.data; // returns the response from previous action 
-    // actionData will be pass to this component's childrens. because we are using fetcher here but for components up they don't
+    // actionData will be pass to this component's childrens. because we are using fetcher here but for the components above they don't
     const [accordions, updateAccordions] = useImmerAtom(accordionsAtom);
 
+    // On initial render, replace the initial state or atom of accordions so that it's updated and we can update our course content's accordions.
+    React.useEffect(() => {
+        if (accordion) {
+            updateAccordions(() => accordion)
+        }
+    }, [accordion, updateAccordions]);
     React.useEffect(() => {
         // initially the accordion's IDs is not up to date with the database server,
         // so we continuously update our real 'IDs' and values of our state variables
@@ -937,63 +986,34 @@ function ControlledAccordions({ activeStep, courseContentId }) {
 }
 
 
-export default function CreateCourse() {
+export default function EditCourse() {
+    const loader = useLoaderData();
     const [activeStep, setActiveStep] = React.useState(0);
-    const [previewImage, setPreviewImage] = React.useState(null);
-    const [course, setCourse] = React.useState({
-        id: 0,
-        title: '',
-        difficulty: '',
-        description: '',
-        thumbnail: image,
-        price: 0,
-        weeks: '',
-        isFirstView: true
-
-    });
-    const [courseContent, setCourseContent] = React.useState({
-        id: 0,
-        preview: '',
-        overview: '',
-        isFirstView: true
-
-    })
-
+    const [course, setCourse] = React.useState(loader.course);
+    const [previewImage, setPreviewImage] = React.useState(course.thumbnail);
+    const [courseContent, setCourseContent] = React.useState(loader.courseContent);
+    const theme2 = useTheme();
+    const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'))
     const fetcher = useFetcher();
     const actionData = fetcher.data; // The returned data (Obj properties) from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
     const [isError, setIsError] = useAtom(isErrorAtom)
-    const [intent, setIntent] = React.useState('create');
+    const [intent, setIntent] = React.useState('update');
     const navigation = useNavigation();
     const [, dispatch] = useAtom(snackbarReducerAtom);
 
-    // console.log(`in creatCourse ${navigation.state === "submitting"} ${fetcher.state === "submitting"}`)
-
     React.useEffect(() => {
-        // continuously update real time 'IDs' of our state variables
         // !resonse.ok then there's a message
         // optional chaining
         if (actionData?.message) {
             setIsError(true);
         }
-        // persist the IDs state so that we can use it to sent to our api (/course/courseId/course-content, note: this rest endpoint requires courseId)
         else if (actionData?.course?.title && actionData?.course?.description && activeStep === 0) {  // returned value of previous action.
-            setCourse({
-                ...course,
-                id: actionData.course.id,
-                isFirstView: false
-            })
             // im assuming this is somewhere 200 status code so we move on to the next step
             const nextActiveStep = activeStep + 1;
-            setActiveStep(nextActiveStep); //  mew activeStep is queued for next rerender that's why we use a variable 'nextActiveStep'
-            // determineItent wether to update or create in which active step currently on and is first view for next render
-            setIntent(determineIntent(courseContent.isFirstView, nextActiveStep));
+            setActiveStep(nextActiveStep); //  new activeStep is queued for next rerender that's why we use a variable 'nextActiveStep'
+            setIntent('update');
         }
         else if (actionData?.courseContent?.preview && actionData?.courseContent?.overview && activeStep === 1) {  // returned value of previous action.
-            setCourseContent({
-                ...courseContent,
-                id: actionData.courseContent.id,
-                isFirstView: false
-            })
             // im assuming this is somewhere 200 status code so we move on to the next step
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setIntent('create');
@@ -1047,17 +1067,17 @@ export default function CreateCourse() {
 
     }
 
-    function handleSubmit() {
-        fetcher.submit({
-            intent: 'submit',
-            courseId: course.id,
-            activeStep: activeStep
-        }, { method: 'post' })
-        dispatch({
-            type: 'submitting',
-            text: `Course submitted! It's now under review (3-7 days). Thanks for your patience!`
-        })
-    }
+    // function handleSubmit() {
+    //     fetcher.submit({
+    //         intent: 'submit',
+    //         courseId: course.id,
+    //         activeStep: activeStep
+    //     }, { method: 'post' })
+    //     dispatch({
+    //         type: 'submitting',
+    //         text: `Course submitted! It's now under review (3-7 days). Thanks for your patience!`
+    //     })
+    // }
 
 
 
@@ -1066,7 +1086,7 @@ export default function CreateCourse() {
             <br></br>
             {
                 activeStep === 0 ? (
-                    <fetcher.Form method="post" encType="multipart/form-data" noValidate >
+                    <fetcher.Form method="put" encType="multipart/form-data" noValidate >
                         <input type="hidden" value={activeStep} name="activeStep" />
                         <input type="hidden" value={course.id} name="courseId" />
                         <Box m="3vw">
@@ -1082,7 +1102,11 @@ export default function CreateCourse() {
                                         <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%' }}  >
                                             <Grid item justifySelf={'center'}>
                                                 <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 400 } }} component="div">
-                                                    <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
+                                                    <img src={previewImage} className="course-thumbnail" style={{ objectFit: !course.thumbnail ? 'fill' : 'cover', border: '1px dashed black' }} onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = image;
+
+                                                    }} />
                                                 </Container>
                                             </Grid>
                                             <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>
@@ -1249,7 +1273,7 @@ export default function CreateCourse() {
                     /* title  & description ends here */
                 )
                     : activeStep === 1 ? (
-                        <fetcher.Form method="post" encType="multipart/form-data" noValidate >
+                        <fetcher.Form method="put" encType="multipart/form-data" noValidate >
                             <TextField type="hidden" value={activeStep} name="activeStep" />
                             <TextField type="hidden" value={course.id} name="courseId" />
                             <Box m="3vw">
@@ -1404,12 +1428,14 @@ export default function CreateCourse() {
                                         <ControlledAccordions activeStep={activeStep} courseContentId={courseContent.id}></ControlledAccordions>
                                     </Grid>
                                 </Grid>
-                                {/* <TextField type="hidden" value={activeStep} name="activeStep" />
-                                    <TextField type="hidden" value={course.id} name="courseId" /> */}
                                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
-                                    <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
-                                        <AlertDialog onClickSubmit={handleSubmit} intent="submitting" />
-                                    </Box>
+                                    <Form action={`/course/${course.id}`}>
+                                        <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
+                                            <Button disabled={navigation.state === 'submitting'} sx={{ mt: 3 }} fullWidth={isXsmallScreen} startIcon={<DoneAll />} variant="contained" type="submit">
+                                                Done
+                                            </Button>
+                                        </Box>
+                                    </Form>
                                 </Box>
 
                             </Box>
@@ -1420,4 +1446,21 @@ export default function CreateCourse() {
         </>
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
