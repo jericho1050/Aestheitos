@@ -70,6 +70,12 @@ export async function updateCourse(id, updates) {
   });
 }
 
+export async function deleteCourse(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}`, {
+    method: 'DELETE'
+  })
+}
+
 export async function getCourseContent(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/course-content`, {
 
@@ -253,7 +259,7 @@ export async function getCourseComments(id) {
 }
 
 export async function getUser() {
-  
+
   return sendRequest(`${import.meta.env.VITE_API_URL}user-detail`, {
 
   });

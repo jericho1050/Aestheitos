@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, CircularProgress, Collapse, Container, Divider, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Popover, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, CircularProgress, Collapse, Container, Divider, Fab, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Popover, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
@@ -13,8 +13,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { createCourseComment, createCourseEnrollment, deleteCourseComment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises, updateCourseComment } from "../courses";
-import { Link, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
+import { createCourseComment, createCourseEnrollment, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises, updateCourseComment } from "../courses";
+import { Link, redirect, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
 import getEmbedUrl from "../helper/getEmbedUrl";
@@ -28,6 +28,8 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons/faEllipsisV';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useAtom } from "jotai";
+import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -100,18 +102,29 @@ export async function loader({ params }) {
 export async function action({ request, params }) {
     const formData = await request.formData();
     let enrollment, unenrollment, comment;
-    if (formData.get('intent') === 'enroll') {
-        enrollment = await createCourseEnrollment(params.courseId);
-    } else if (formData.get('intent') === 'unenroll') {
-        unenrollment = await deleteCourseUnenrollment(formData.get('enrollmentId'));
-    } else if (formData.get('intent') === 'editing') {
-        comment = await updateCourseComment(formData.get('commentId'), formData);
-    } else if (formData.get('intent') === 'deleting') {
-        comment = await deleteCourseComment(formData.get('commentId'));
+
+    switch (formData.get('intent')) {
+        case 'enroll':
+            enrollment = await createCourseEnrollment(params.courseId);
+            break;
+        case 'unenroll':
+            unenrollment = await deleteCourseUnenrollment(formData.get('enrollmentId'));
+            break;
+        case 'deleteCourse':
+            await deleteCourse(params.courseId);
+            return redirect('/');
+        case 'editing':
+            comment = await updateCourseComment(formData.get('commentId'), formData);
+            break;
+        case 'deleting':
+            comment = await deleteCourseComment(formData.get('commentId'));
+            break;
+        default:
+            comment = await createCourseComment(params.courseId, formData);
+
+
     }
-    else {
-        comment = await createCourseComment(params.courseId, formData);
-    }
+
     return { enrollment, unenrollment, comment };
 }
 
@@ -646,6 +659,8 @@ export default function Course() {
     const isInstructor = accessTokenDecoded?.user_id === course.created_by;
     const enrollment = enrollees.find(enrollee => enrollee.user === accessTokenDecoded?.user_id && enrollee.course === course.id);
     const fetcher = useFetcher();
+    const [, dispatch] = useAtom(snackbarReducerAtom);
+    
     function handleClickEnroll() {
         if (!isAuthenticated) {
             navigate('/signin');
@@ -661,6 +676,18 @@ export default function Course() {
     function handleClickSignUp() {
         navigate('/signup')
     }
+
+    function handleClickEdit() {
+
+    }
+
+    function handleClickDelete() {
+        dispatch({
+            type: 'deleting',
+            text: 'Course Deleted!'
+        })
+        fetcher.submit({ intent: 'deleteCourse', courseId: course.id }, { method: 'delete' });
+    }
     return (
         <>
             <br></br>
@@ -668,11 +695,16 @@ export default function Course() {
                 <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
                     {
                         isInstructor &&
-                        <Box mb={2} >
-                            <Button variant="outlined" size="large" startIcon={<EditIcon />} fullWidth={isSmallScreen ? true : false}>
-                                Edit
-                            </Button>
-                        </Box>
+                        (
+                            <Box display="flex" position="fixed" bottom="20px" right="20px" flexDirection={'column'} gap={'0.69em'}>
+                                <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit">
+                                    <EditIcon />
+                                </Fab>
+                                <Fab color="error" size={isSmallScreen ? 'medium' : 'large'} aria-label="delete" onClick={handleClickDelete}>
+                                    <DeleteIcon />
+                                </Fab>
+                            </Box>
+                        )
                     }
 
                     <Box className="clearfix" component={'div'}>
@@ -774,12 +806,12 @@ export default function Course() {
                                     getEmbedUrl(courseContent.preview) ?
 
 
-                                        (<Box sx={{ maxWidth: 'inherit'}} component={'div'}>
+                                        (<Box sx={{ maxWidth: 'inherit' }} component={'div'}>
                                             <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
                                         </Box>)
                                         :
-                                        (<Box sx={{ maxWidth: 'inherit'}} component={'div'}>
-                                            <iframe className="course-preview" src={''} title="vide-lecture here"  allowFullScreen></iframe>
+                                        (<Box sx={{ maxWidth: 'inherit' }} component={'div'}>
+                                            <iframe className="course-preview" src={''} title="vide-lecture here" allowFullScreen></iframe>
                                         </Box>)
                                 }
                             </Grid>

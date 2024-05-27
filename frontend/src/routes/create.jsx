@@ -1054,7 +1054,8 @@ export default function CreateCourse() {
             activeStep: activeStep
         }, { method: 'post' })
         dispatch({
-            type: 'submitting'
+            type: 'submitting',
+            text: `Course submitted! It's now under review (3-7 days). Thanks for your patience!`
         })
     }
 

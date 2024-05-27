@@ -2,7 +2,7 @@ import { atomWithReducer } from 'jotai/utils'
 
 export const snackbarReducerAtom = atomWithReducer({
   open: false,
-  message: `Course submitted! It's now under review (3-7 days). Thanks for your patience!`,
+  message: '',
 }, snackBarReducer);
 
 
@@ -12,7 +12,12 @@ function snackBarReducer(snackbar, action) {
     switch(action.type) {
         case 'submitting': 
             return {
-                ...snackbar,
+                message: action.text,
+                open: true
+            }
+        case 'deleting':
+            return {
+                message: action.text,
                 open: true
             }
         case 'close':
