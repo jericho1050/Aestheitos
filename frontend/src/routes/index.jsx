@@ -43,6 +43,7 @@ const MysteriousText = ({ children, ...props }) => {
                     fontFamily: index >= startIndex && index <= endIndex ? 'Passion One' : 'Archivo Black',
                     fontSize: index >= startIndex && index <= endIndex ? '1.8em' : 'inherit',
                     color: index >= startIndex && index <= endIndex ? theme.palette.primary.main : 'inherit',
+                    lineHeight: '1.3em'
                 }}>
                     {item}
                 </animated.span>

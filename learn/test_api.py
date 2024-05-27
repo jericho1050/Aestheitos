@@ -173,7 +173,7 @@ class CourseListAPITestCase(APITestCase):
         # reset cursor for file reading of image
         image.seek(0)
 
-        # test create course with an authenticated client and valid fields
+        # test create course with an authenticated client and valid fields but is not allowed due to limitations
         response_4 = self.authenticated_client.post(
             reverse("learn:course-list"),
             {
@@ -193,11 +193,9 @@ class CourseListAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_3.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response_4.status_code, status.HTTP_201_CREATED)
-        self.assertIn("test", response_4.data["title"])
-        self.assertIsNotNone(response_4.data["thumbnail"])
-        self.assertIsNotNone(response_4.data["description"])
-        self.assertEqual(response_4.data["created_by"], self.user.id)
+        self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsNotNone(response_4.data["detail"])
+        self.assertIn('Sorry', response_4.data["detail"])
         self.assertEqual(response_5.status_code, status.HTTP_400_BAD_REQUEST)
 
 
