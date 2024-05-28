@@ -32,6 +32,7 @@ import { useAtom } from "jotai";
 import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 import AlertDialog from "../components/AreYouSureDialog";
 import image from '../static/images/noimg.png'
+import CustomizedSnackbar from "../components/Snackbar";
 
 
 let theme = createTheme()
@@ -662,17 +663,25 @@ export default function Course() {
     const isInstructor = accessTokenDecoded?.user_id === course.created_by;
     const enrollment = enrollees.find(enrollee => enrollee.user === accessTokenDecoded?.user_id && enrollee.course === course.id);
     const fetcher = useFetcher();
-    const [, dispatch] = useAtom(snackbarReducerAtom);
+    const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
 
     function handleClickEnroll() {
         if (!isAuthenticated) {
             navigate('/signin');
         }
         else {
+            dispatch({
+                type: 'enroll',
+                text: 'You are now enrolled!'
+            })
             fetcher.submit({ intent: 'enroll' }, { method: 'post' });
         }
     }
     function handleClickUnenroll() {
+        dispatch({
+            type: 'unenroll',
+            text: 'You are unenrolled!'
+        })
         fetcher.submit({ intent: 'unenroll', enrollmentId: enrollment.id }, { method: 'delete' });
     }
 
@@ -689,6 +698,7 @@ export default function Course() {
     }
     return (
         <>
+            <CustomizedSnackbar />
             <br></br>
             <Container component="main" maxWidth="lg">
                 <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
@@ -732,13 +742,13 @@ export default function Course() {
                                         null
                                         : accessTokenDecoded?.user_id !== course.created_by && !enrollment ?
                                             <Box display='flex' justifyContent={'center'} mt={2}>
-                                                <Button size="large" sx={{borderRadius: '2em', fontWeight: 800}} fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
+                                                <Button size="large" sx={{ borderRadius: '2em', fontWeight: 800 }} fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
                                                     Enroll now!
                                                 </Button>
                                             </Box>
                                             :
                                             <Box display='flex' justifyContent={'center'} mt={2}>
-                                                <Button size="large" sx={{borderRadius: '2em', fontWeight: 800}} fullWidth={isSmallScreen ? true : false} variant="contained" color="error" onClick={handleClickUnenroll}>
+                                                <Button size="large" sx={{ borderRadius: '2em', fontWeight: 800 }} fullWidth={isSmallScreen ? true : false} variant="contained" color="error" onClick={handleClickUnenroll}>
                                                     Unenroll
                                                 </Button>
                                             </Box>
@@ -768,9 +778,12 @@ export default function Course() {
                                 </Grid>
                             </ThemeProvider>
                         </Paper>
-                        <Typography fontWeight="bold" variant="h3">
-                            {course.title}
-                        </Typography>
+                        <ThemeProvider theme={theme}>
+                            <Typography fontWeight="bold" variant="h3">
+                                {course.title}
+                            </Typography>
+                        </ThemeProvider>
+
                         {/* <Box className="html-content" component={'div'} dangerouslySetInnerHTML={{ __html: DOMPurify(course.description) }} /> */}
                         <Box className="html-content" lineHeight={'1.4em'}>
                             {htmlToReactParser.parse(course.description)}
@@ -922,74 +935,3 @@ export default function Course() {
         </>
     )
 }
-
-
-// mock data 
-// temporary for now 
-// const user = {
-//     firstName: 'test user',
-//     lastName: 'isUser'
-// }
-// const course = {
-//     title: "test course test course test course test course test course test course test coursetest ",
-//     description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac tortor sed risus pellentesque efficitur. Cras et nulla mauris. Nulla auctor vel nisl vitae iaculis. Suspendisse laoreet cursus elit. Curabitur maximus ultricies orci. Fusce consectetur sollicitudin purus, in dignissim neque condimentum in. Mauris mattis dapibus quam, at rhoncus sapien viverra in. Maecenas mollis erat risus, ac sagittis leo pharetra ultricies. In pellentesque rhoncus tortor, at tristique nisl consequat in. Praesent ipsum eros, egestas gravida efficitur sed, suscipit sed dui.
-
-//     Aliquam arcu arcu, pellentesque a nunc rhoncus, imperdiet interdum ipsum. Proin euismod risus ut velit dignissim ornare. Fusce eu nisi sit amet quam placerat egestas eu non urna. Sed at diam ut libero cursus blandit. Integer in lectus ac est laoreet ultrices. Nunc iaculis vel dolor placerat consectetur. Aliquam tellus enim, pretium eu ipsum sit amet, finibus mollis nibh. Donec et lacinia ligula. Sed feugiat nulla lectus, quis dictum neque hendrerit nec. In tempor congue malesuada. Nunc sodales nulla ut massa pellentesque, at lobortis quam pellentesque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam erat volutpat. Sed ullamcorper pharetra velit nec ullamcorper. Fusce pulvinar purus eu interdum viverra. Suspendisse aliquam tellus eget arcu dignissim, sed tempus ante consectetur.`,
-//     // thumbnail: 'https://i.imgur.com/B5wZm19.jpeg',
-//     thumbnail: 'https://i.imgur.com/e3mMEwA.gif',
-//     // thumbnail: 'https://i.imgur.com/K6NLbi4.gif',
-//     // thumbnail: 'https://i.imgur.com/bC5G14n.gif',
-//     courseCreated: '10/20/2024',
-//     courseUpdated: '10/25/2024',
-//     created_by: 'testuser'
-// }
-// const courseContent = {
-//     // lecture: "https://youtube.com/embed/CXMZxgNnnv8",
-//     lecture: 'https://www.youtube.com/embed/LxKHX2fumJw',
-//     overview: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum felis rhoncus. Duis vestibulum, mi eu porta sodales, magna mauris bibendum lacus, id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed lorem libero. Donec cursus dictum leo a feugiat. Mauris non felis vitae mi fermentum blandit. Sed placerat, nunc et accumsan gravida, leo ipsum venenatis nulla, non gravida nisl ex et felis. Proin quis gravida orci, at aliquam enim. Curabitur eget mi nisl. Donec mattis dui tellus, non congue lacus suscipit et. Nullam sit amet ultricies massa. Nullam rutrum ullamcorper lacus. Fusce dictum interdum ligula vel pellentesque.
-
-//     Phasellus luctus lorem sed sapien pharetra, ac laoreet arcu sollicitudin. Morbi viverra rhoncus bibendum. In tellus nisi, varius sed ligula sit amet, ultricies laoreet magna. Donec maximus a augue nec vestibulum. Donec accumsan odio at porta rutrum. Nulla a blandit mi. Sed tortor justo, imperdiet in maximus sed, sagittis at eros. Nunc id sagittis mauris, porta malesuada mi. Vivamus ut nisl mollis, egestas odio at, ornare massa. Proin dictum, augue vel fermentum egestas, arcu elit fermentum lorem, nec consectetur mi massa ac mauris. Sed sollicitudin eleifend ullamcorper. Duis commodo lorem eu finibus ultricies. Pellentesque cursus risus eget volutpat lacinia. Nulla vitae est at massa vehicula bibendum.`,
-//     weeks: 12,
-// }
-// const workouts1 = {
-//     intesity: "H",
-//     exercise: " quis, ",
-//     demo: "https://www.youtube.com/embed/IZMKe61144w",
-//     rest_time: 2,
-//     sets: 3,
-//     reps: 10,
-//     excertion: 8,
-// }
-
-// const workouts2 = {
-//     intesity: "H",
-//     exercise: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur    description: Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-//     demo: "https://youtube.com/embed/IODxDxX7oi4",
-//     rest_time: 2,
-//     sets: 3,
-//     reps: 10,
-//     excertion: 8,
-// }
-// const correctForm = [{
-//     demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
-//     description: "Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum."
-// }]
-// const wrongForm = [{
-//     demo: 'https://www.youtube.com/embed/yQEx9OC2C3E',
-//     description: "scapula not moving"
-// }]
-
-// const section1 = {
-//     title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex quam, blandit feugiat dignissim eget, vestibulum ultrices diam. Curabitur ut tellus a sapien porttitor vulputate. Sed pulvinar tincidunt lacus. Praesent tincidunt leo id nibh fringilla, tempor interdum id tincidunt ipsum libero ac justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-// }
-// const sectionItem1 = {
-//     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
-//     description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-//     title: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. "
-// }
-
-// const sectionItem2 = {
-//     lecture: "https://www.youtube.com/embed/ua2rJJwZ4nc",
-//     description: "Lorem ipsum dolor sit amet, Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.",
-//     title: "Workout Routine"
-// }

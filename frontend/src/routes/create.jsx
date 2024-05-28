@@ -1193,9 +1193,11 @@ export default function CreateCourse() {
                                                 name="title"
                                                 value={course.title}
                                                 onChange={e => {
+                                                    let title = e.target.value;
+                                                    title = title.replace(/\s+/g, ' '); // This replaces mutiple spaces with a single space
                                                     setCourse({
                                                         ...course,
-                                                        title: e.target.value
+                                                        title: title
                                                     });
                                                     setIsError(false);
                                                 }}

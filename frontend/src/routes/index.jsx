@@ -75,7 +75,7 @@ export function Index() {
 
 
     return (<>
-        {snackbar.open && <CustomizedSnackbar />}
+        <CustomizedSnackbar />
         <Box sx={{ margin: -1, padding: 0, position: 'relative' }}>
             <Box display={'flex'}>
                 {/* staggering effect */}

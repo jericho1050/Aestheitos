@@ -32,13 +32,12 @@ export default function CourseCard(props) {
           }}
           />
           <CardContent>
-            <Typography sx={{ height:'auto', mb: 2}} align='justify' gutterBottom fontFamily={'Play'} fontSize={'1.2rem'} fontWeight={'bolder'}>
+            <Typography sx={{ height:'4em', mb: 2}} align='justify' gutterBottom fontFamily={'Play'} fontSize={'1rem'} fontWeight={'bolder'}>
               {truncateText(props.title, 9)} {/* Replace 2nd argument with the maximum number of words you want */}
             </Typography>
-
-            {/* <Typography sx={{ height: 40, mb: {xs: 1, md: 2},}} variant='body2' color={"text.secondary"} > */}
+            <Box height={'2em'}>
               {htmlToReactParser.parse(truncateText(props.description, 10))}
-            {/* </Typography> */}
+            </Box>
 
           </CardContent>
           <Box sx={{ marginLeft: 2, marginRight: 2}} component={'div'}>

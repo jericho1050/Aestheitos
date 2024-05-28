@@ -10,11 +10,10 @@ export const snackbarReducerAtom = atomWithReducer({
 function snackBarReducer(snackbar, action) {
 
     switch(action.type) {
-        case 'submitting': 
-            return {
-                message: action.text,
-                open: true
-            }
+        
+        case 'submitting':
+        case 'enroll':
+        case 'unenroll':
         case 'deleting':
             return {
                 message: action.text,

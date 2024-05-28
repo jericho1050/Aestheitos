@@ -45,6 +45,7 @@ import { modules, modulesCard } from "../helper/quillModule";
 import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 import AlertDialog from "../components/AreYouSureDialog";
 import { DoneAll } from "@mui/icons-material";
+import CustomizedSnackbar from "../components/Snackbar";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -999,7 +1000,7 @@ export default function EditCourse() {
     const [isError, setIsError] = useAtom(isErrorAtom)
     const [intent, setIntent] = React.useState('update');
     const navigation = useNavigation();
-    const [, dispatch] = useAtom(snackbarReducerAtom);
+    const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
 
     React.useEffect(() => {
         // !resonse.ok then there's a message
@@ -1067,18 +1068,15 @@ export default function EditCourse() {
 
     }
 
-    // function handleSubmit() {
-    //     fetcher.submit({
-    //         intent: 'submit',
-    //         courseId: course.id,
-    //         activeStep: activeStep
-    //     }, { method: 'post' })
-    //     dispatch({
-    //         type: 'submitting',
-    //         text: `Course submitted! It's now under review (3-7 days). Thanks for your patience!`
-    //     })
-    // }
-
+    React.useEffect(() => {
+        console.log(fetcher.state);
+        if (fetcher.state === 'submitting') {
+            dispatch({
+                type: 'submitting',
+                text: 'Course Updated!'
+            })
+        }
+    }, [fetcher])
 
 
     return (
@@ -1120,7 +1118,7 @@ export default function EditCourse() {
                                                             <>
                                                                 {Object.entries(JSON.parse(actionData.message)).map(([key, value]) => (
                                                                     <Box key={key} component="div" p={'0 1.5em'}>
-                                                                        <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left'}}>
+                                                                        <Typography key={key} variant='small' sx={{ color: 'red', textAlign: 'left' }}>
                                                                             {key === 'thumbnail' || key === 'difficulty' || key === 'price' || key === 'weeks' ? `${key}: ${value[0]}` : key === 'detail' ? `${value}` : null}
                                                                         </Typography>
                                                                     </Box>
@@ -1217,9 +1215,11 @@ export default function EditCourse() {
                                                 name="title"
                                                 value={course.title}
                                                 onChange={e => {
+                                                    let title = e.target.value;
+                                                    title = title.replace(/\s+/g, ' '); // This replaces mutiple spaces with a single space
                                                     setCourse({
                                                         ...course,
-                                                        title: e.target.value
+                                                        title: title
                                                     });
                                                     setIsError(false);
                                                 }}
@@ -1274,6 +1274,7 @@ export default function EditCourse() {
                 )
                     : activeStep === 1 ? (
                         <fetcher.Form method="put" encType="multipart/form-data" noValidate >
+                            <CustomizedSnackbar />
                             <TextField type="hidden" value={activeStep} name="activeStep" />
                             <TextField type="hidden" value={course.id} name="courseId" />
                             <Box m="3vw">
@@ -1405,7 +1406,7 @@ export default function EditCourse() {
                         </fetcher.Form>
                     ) : (
                         <>
-
+                            <CustomizedSnackbar />
                             <Box m="3vw">
                                 <Container>
                                     <Grid container>
@@ -1437,7 +1438,6 @@ export default function EditCourse() {
                                         </Box>
                                     </Form>
                                 </Box>
-
                             </Box>
 
                         </>
