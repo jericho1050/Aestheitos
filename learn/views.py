@@ -35,13 +35,6 @@ from .custom_serializer import *
 
 # API calls (Class based functions)
 
-# class UserList(generics.ListAPIView):
-#     """
-#     List all Users
-#     """
-#     serializer_class = UserCommentSerializer
-#     queryset =  User.objects.all()
-
 
 class UserDetail(APIView):
     """
@@ -59,7 +52,7 @@ class UserDetail(APIView):
             jwt.exceptions.ExpiredSignatureError,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        return Response(UserCommentSerializer(user).data)
+        return Response(UserDetailSerializer(user).data)
 
 
 class RegisterView(APIView):

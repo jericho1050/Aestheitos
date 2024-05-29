@@ -24,10 +24,10 @@ class UserSerializer(ModelSerializer):
         return instance
 
 
-class UserCommentSerializer(ModelSerializer):
+class UserDetailSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "first_name", "last_name", "profile_pic"]
+        fields = ["username", "first_name", "last_name", "profile_pic", "is_staff", "is_superuser"]
 
 
 class UserProgressSerializer(ModelSerializer):
@@ -180,7 +180,7 @@ class SectionItemSerializer(ModelSerializer):
 
 class CourseCommentsSerializer(ModelSerializer):
     replies = serializers.SerializerMethodField()
-    comment_by = UserCommentSerializer(read_only=True)
+    comment_by = UserDetailSerializer(read_only=True)
 
     class Meta:
         model = CourseComments
