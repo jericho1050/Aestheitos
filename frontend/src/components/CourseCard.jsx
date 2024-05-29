@@ -20,10 +20,10 @@ export default function CourseCard(props) {
       <ThemeProvider theme={theme}>
 
         <CardActionArea className="course-card" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <Link to={`course/${props.id}`} style={{color: 'inherit', textDecoration: 'none'}}>
+          <Link to={`/course/${props.id}`} style={{color: 'inherit', textDecoration: 'none'}}>
           <CardMedia
             component="img"
-            sx={{ aspectRatio: 16 / 9 }}
+            sx={{ aspectRatio: 16 / 9, objectFit: 'cover'}}
             src={props.thumbnail || defaultImage}
             alt="workout demo"
             onError={(e) => {

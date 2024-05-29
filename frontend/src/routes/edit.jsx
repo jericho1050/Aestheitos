@@ -46,6 +46,12 @@ import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 import AlertDialog from "../components/AreYouSureDialog";
 import { DoneAll } from "@mui/icons-material";
 import CustomizedSnackbar from "../components/Snackbar";
+import DifficultySelectForm from "../components/DifficultySelectForm";
+import WeeksTextField from "../components/WeeksTextField";
+import CourseTitleTextField from "../components/CourseTitleTextField";
+import DescriptionTextField from "../components/DescriptionTextField";
+import OverviewTextField from "../components/OverviewTextField";
+import PreviewCourseTextField from "../components/PreviewCourseTextField";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -986,7 +992,6 @@ function ControlledAccordions({ activeStep, courseContentId }) {
 
 }
 
-
 export default function EditCourse() {
     const loader = useLoaderData();
     const [activeStep, setActiveStep] = React.useState(0);
@@ -1079,6 +1084,7 @@ export default function EditCourse() {
     }, [fetcher])
 
 
+
     return (
         <>
             <br></br>
@@ -1131,54 +1137,8 @@ export default function EditCourse() {
                                                 </Grid>
                                                 <Grid item xs pb={4}>
                                                     {/* Select menu form */}
-                                                    <FormControl required={true} sx={{ width: 150 }} error={isError}>
-                                                        <InputLabel id="demo-simple-select-label">Difficulty</InputLabel>
-                                                        <Select
-                                                            data-cy="Select Difficulty"
-                                                            labelId="demo-simple-select-label"
-                                                            id="demo-simple-select"
-                                                            value={course.difficulty}
-                                                            label="Difficulty"
-                                                            onChange={e => {
-                                                                setCourse({
-                                                                    ...course,
-                                                                    difficulty: e.target.value
-                                                                });
-                                                                setIsError(false);
-                                                            }}
-                                                            inputProps={{ name: "difficulty" }}
-                                                            autoWidth
-                                                        >
-                                                            <MenuItem value={'BG'} >Beginner</MenuItem>
-                                                            <MenuItem value={'IN'} >Intermediate</MenuItem>
-                                                            <MenuItem value={'AD'} >Advanced</MenuItem>
-                                                        </Select>
-                                                    </FormControl>
-                                                    <TextField
-                                                        name="weeks"
-                                                        id="outlined-number"
-                                                        label="Weeks"
-                                                        type="number"
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        sx={{ width: 100 }}
-                                                        inputProps={{
-                                                            min: "0",
-                                                        }}
-                                                        value={course.weeks}
-                                                        onChange={e => {
-                                                            setCourse(
-                                                                {
-                                                                    ...course,
-                                                                    weeks: e.target.value
-                                                                }
-                                                            );
-                                                            setIsError(false);
-                                                        }}
-                                                        error={isError}
-
-                                                    />
+                                                    <DifficultySelectForm isError={isError} setIsError={setIsError} course={course} setCourse={setCourse} />
+                                                    <WeeksTextField isError={isError} setIsError={setIsError} course={course} setCourse={setCourse} />
                                                 </Grid>
                                             </Grid>
                                         </Paper>
@@ -1190,79 +1150,11 @@ export default function EditCourse() {
                                     <Grid item xs={12} sm={12} md container wrap="nowrap" direction="column">
                                         <Grid item xs>
                                             {/* Course title textarea input */}
-                                            <TextField
-                                                helperText=" "
-                                                id="demo-helper-text-aligned-no-helper"
-                                                label={isError && actionData?.message ?
-
-                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                        if (key === 'title') {
-                                                            return `${key}: ${value}`;
-                                                        } else {
-                                                            return null;
-                                                        }
-                                                    })
-
-                                                    : "Your Course's Title"
-                                                }
-                                                fullWidth={true}
-                                                minRows={5}
-                                                maxRows={5}
-                                                multiline
-                                                required={true}
-                                                inputProps={{ maxLength: 200 }}
-                                                autoFocus
-                                                name="title"
-                                                value={course.title}
-                                                onChange={e => {
-                                                    let title = e.target.value;
-                                                    title = title.replace(/\s+/g, ' '); // This replaces mutiple spaces with a single space
-                                                    setCourse({
-                                                        ...course,
-                                                        title: title
-                                                    });
-                                                    setIsError(false);
-                                                }}
-                                                error={isError}
-                                            />
-
+                                            <CourseTitleTextField isError={isError} setIsError={setIsError} course={course} setCourse={setCourse} actionData={actionData} />
                                         </Grid>
                                         <Grid item xs={12}>
                                             {/* Course Description input here */}
-                                            <Container className="ql-editor-container">
-
-                                                <fieldset className="quill-fieldset">
-                                                    {isError && actionData?.message ?
-
-                                                        Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                            if (key === 'description') {
-                                                                return <legend style={{ color: 'red', visibility: 'visible', bottom: '96%' }}>{key}: {value}</legend>;
-                                                            } else {
-                                                                return null;
-                                                            }
-                                                        })
-
-                                                        : <legend style={{ bottom: '96%' }}>Your Course's Description</legend>
-
-                                                    }
-                                                    <ReactQuill
-                                                        onChange={value => {
-                                                            setCourse({
-                                                                ...course,
-                                                                description: value
-                                                            });
-                                                            setIsError(false);
-                                                        }}
-                                                        value={course.description}
-                                                        modules={modules}
-                                                        className={isError ? 'ql-description ql-error' : 'ql-description'}
-                                                        placeholder="Your Course's Description"
-                                                        style={{ border: isError ? '1px solid red' : '' }}
-                                                    />
-                                                </fieldset>
-                                                <TextField type="hidden" value={course.description} name="description" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
-                                                <TextField type="hidden" name="is_draft" />
-                                            </Container>
+                                            <DescriptionTextField isError={isError} setIsError={setIsError} course={course} setCourse={setCourse} actionData={actionData} />
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -1289,118 +1181,9 @@ export default function EditCourse() {
                             <Box sx={{ marginLeft: 'auto', marginRight: 'auto' }} maxWidth={{ xs: '85vw', md: '69vw' }}>
                                 {/* title  & description ends here */}
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3}>
-                                    <Grid item alignSelf='flex-start'>
-                                        <ThemeProvider theme={theme} >
-                                            <Typography variant="h4" fontWeight={'bold'}>
-                                                Overview
-                                            </Typography>
-                                        </ThemeProvider>
-                                    </Grid>
-
-
                                     {/* course overview textarea input */}
-                                    <Grid item width={'100%'}>
-                                        <Container className="ql-editor-container">
-                                            <fieldset className="quill-fieldset">
-                                                {isError && actionData?.message ?
-
-                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                        if (key === 'overview') {
-                                                            return <legend style={{ color: 'red', visibility: 'visible', bottom: '94%' }}>{key}: {value}</legend>;
-                                                        } else {
-                                                            return null;
-                                                        }
-                                                    })
-
-                                                    : <legend style={{ bottom: '94%' }}>Your Course's Overview</legend>
-
-                                                }
-                                                <ReactQuill
-                                                    onChange={value => {
-                                                        setCourseContent({
-                                                            ...courseContent,
-                                                            overview: value
-                                                        });
-                                                        setIsError(false);
-                                                    }}
-                                                    data-cy="Course Overview"
-                                                    value={courseContent.overview}
-                                                    modules={modules}
-                                                    className={isError ? 'ql-overview ql-error' : 'ql-overview'}
-                                                    placeholder="Your Course's Overview"
-                                                    style={{ border: isError ? '1px solid red' : '' }}
-                                                />
-
-                                            </fieldset>
-                                            <TextField type="hidden" value={courseContent.overview} name="overview" />  {/* we need the name attribute when sending this data to server, hence the hidden */}
-                                        </Container>
-                                    </Grid>
-                                    <Grid item alignSelf={'flex-start'}>
-                                        <ThemeProvider theme={theme}>
-                                            <Typography sx={{ textAlign: 'left' }} variant="h6" fontSize={'x-small'}>
-                                                Preview this course
-                                            </Typography>
-                                            <Typography sx={{ display: 'block' }} variant="small" fontSize={'x-small'}>
-                                                Put your youtube video link here
-                                            </Typography>
-                                        </ThemeProvider>
-                                    </Grid>
-                                    <br />
-                                    <Grid item container justifyContent={'center'} width="100%">
-                                        <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
-                                            {/* course preview textarea input */}
-                                            <TextField
-                                                value={courseContent.preview}
-                                                onChange={e => {
-                                                    setIsError(false);
-                                                    setCourseContent({
-                                                        ...courseContent,
-                                                        preview: e.target.value
-                                                    })
-                                                }
-
-
-                                                }
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <YouTubeIcon />
-                                                        </InputAdornment>
-
-                                                    )
-                                                }}
-                                                fullWidth={true}
-                                                id="lecture-url"
-                                                label={isError && actionData?.message ?
-
-                                                    Object.entries(JSON.parse(actionData.message)).map(function ([key, value]) {
-                                                        if (key === 'preview') {
-                                                            return `${key}: ${value}`;
-                                                        } else {
-                                                            return null;
-                                                        }
-                                                    })
-                                                    : 'e.g https://www.youtube.com/watch?v=SOMEID'
-                                                }
-                                                type="url"
-                                                name="preview"
-                                                error={isError}
-                                            />
-                                        </Box>
-                                        <Grid item width={'100%'}>
-                                            {getEmbedUrl(courseContent.preview) ?
-                                                <Box mt={4} className="course-container" component={'div'}>
-                                                    <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
-                                                </Box>
-                                                :
-                                                <Box mb="5%" mt="5%" component="div" height={200} className="course-lecture-container" alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                    <Typography variant="body" align={'center'}>
-                                                        Your video will show up here
-                                                    </Typography>
-                                                </Box>
-                                            }
-                                        </Grid>
-                                    </Grid>
+                                    <OverviewTextField isError={isError} setIsError={setIsError} courseContent={courseContent} setCourseContent={setCourseContent} actionData={actionData} />
+                                    <PreviewCourseTextField isError={isError} setIsError={setIsError} courseContent={courseContent} setCourseContent={setCourseContent} actionData={actionData} />
                                 </Grid>
                             </Box>
                         </fetcher.Form>

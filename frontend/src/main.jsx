@@ -21,6 +21,8 @@ import ProectedRoute from './components/protectedRoute';
 import { IsLoadingProvider } from './contexts/IsLoadingContext';
 import EditCourse from './routes/edit';
 import { loader as editCourseLoader, action as editAction } from './routes/edit';
+import { Pending } from './routes/pending';
+import { loader as pendingCoursesLoader } from './routes/pending';
 
 const theme = createTheme({
   palette: {
@@ -70,6 +72,11 @@ const router = createBrowserRouter([
             loader: editCourseLoader,
             action: editAction
 
+          },
+          {
+            path: "pending",
+            element: <Pending />,
+            loader: pendingCoursesLoader
           }
         ]
       }

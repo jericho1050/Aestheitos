@@ -5,7 +5,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Box, Fab, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Fab, IconButton, useMediaQuery, useTheme } from '@mui/material';
 import { Form, useNavigation } from 'react-router-dom';
 import SendIcon from '@mui/icons-material/Send';
 import { useAtom } from 'jotai';
@@ -27,24 +27,18 @@ export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
         setOpen(false);
     };
 
-
     return (
         <React.Fragment>
 
             {intent === 'submitting' && (<Button onClick={handleClickOpen} disabled={navigation.state === 'submitting'} sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
                 Submit
             </Button>)}
-            {intent === 'deleting' && ( // or it could be editing, but i merge it in here.
-                <Box display="flex" position="fixed" bottom="20px" right="20px" flexDirection={'column'} gap={'0.69em'}>
-                    <Form action="edit">
-                        <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit" type="submit">
-                            <EditIcon />
-                        </Fab>
-                    </Form>
-                    <Fab color="error" size={isSmallScreen ? 'medium' : 'large'} aria-label="delete" onClick={handleClickOpen}>
-                        <DeleteIcon />
-                    </Fab>
-                </Box>
+            {intent === 'deleting' && ( // or it could be deleting, but i merge it in here.
+
+                    <Button size="large" fullWidth={isSmallScreen} startIcon={<DeleteIcon />} sx={{ p: '1em', borderRadius: '0.9em', mb: 2}} color="error" aria-label="delete" onClick={handleClickOpen} >
+                        Delete
+                    </Button>
+
             )}
 
             <Dialog

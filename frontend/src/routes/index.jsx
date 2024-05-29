@@ -92,8 +92,6 @@ export function Index() {
             <animated.div style={{ ...spring }}>
                 <Container fixed={true} maxWidth={false} sx={{ display: 'flex', padding: { xs: '4%', sm: '6%' }, paddingLeft: { xs: '8%' }, paddingRight: { xs: '8%' }, width: { xs: '69%' } }} className="container-homepage">
                     <ThemeProvider theme={theme}>
-                        {/* <Typography variant={matches ? 'h3' : 'h4'} sx={{ color: '#5A5A5A', fontWeight: 600, fontFamily: '"Helvetica Neue"', textAlign: 'left' }}>
-                        </Typography> */}
                         {animationFinished &&
                             <MysteriousText>
                                 Challenge Yourself, Unleash Your Potential: Start Your Free Calisthenics Journey Today.
@@ -112,7 +110,7 @@ export function Index() {
                     <Grid container mb={4} mt={'10vh'}>
                         <Grid item>
                             <ThemeProvider theme={theme}>
-                                <Typography variant={'h2'} sx={{ fontFamily: 'Play' }}>
+                                <Typography variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'}>
                                     Explore Courses
                                 </Typography>
                             </ThemeProvider>

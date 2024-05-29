@@ -27,7 +27,7 @@ class UserSerializer(ModelSerializer):
 class UserDetailSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "first_name", "last_name", "profile_pic", "is_staff", "is_superuser"]
+        fields = ["id", "username", "first_name", "last_name", "profile_pic", "is_staff", "is_superuser"]
 
 
 class UserProgressSerializer(ModelSerializer):

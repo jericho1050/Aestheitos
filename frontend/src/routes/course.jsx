@@ -14,14 +14,14 @@ import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { createCourseComment, createCourseEnrollment, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises, updateCourseComment } from "../courses";
-import { Link, redirect, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
+import { Form, Link, redirect, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
 import getEmbedUrl from "../helper/getEmbedUrl";
 import CorrectFormDialog from "../components/CorrectFormDialog";
 import WrongFormDialog from "../components/WrongFormDialog";
 import { Parser } from "html-to-react";
-import { AccessTokenDecodedContext, AuthContext, useAuthToken } from "../contexts/authContext";
+import { useAuthToken } from "../contexts/authContext";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReplyIcon from '@mui/icons-material/Reply';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -33,6 +33,7 @@ import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 import AlertDialog from "../components/AreYouSureDialog";
 import image from '../static/images/noimg.png'
 import CustomizedSnackbar from "../components/Snackbar";
+import AuthenticationWall from "../components/AuthenticationWall";
 
 
 let theme = createTheme()
@@ -61,7 +62,6 @@ export async function loader({ params }) {
         });
     }
     const comments = await getCourseComments(course.id);
-
     try {
         const sections = await getSections(courseContent.id);
         const accordion = await Promise.all(sections.map(async (section) => {
@@ -100,6 +100,8 @@ export async function loader({ params }) {
         return { user, course, courseContent, accordion, enrollees, comments };
     } catch (error) {
         console.error('Error getting sections:', error);
+        return { user, course, courseContent, enrollees, comments };
+
     }
 }
 
@@ -632,7 +634,7 @@ export function ResponsiveDialog({ accordionItem, children }) {
     );
 }
 
-function ControlledAccordions() {
+export function ControlledAccordions() {
     const [expanded, setExpanded] = React.useState(false);
     const { accordion } = useLoaderData();
     const handleChange = (panel) => (event, isExpanded) => {
@@ -641,7 +643,7 @@ function ControlledAccordions() {
     return (
         <>
             {
-                accordion.map((accordion) =>
+                accordion?.map((accordion) =>
                     <AccordionSection key={accordion.id} handleChange={handleChange} expanded={expanded} accordion={accordion} />
                 )
             }
@@ -654,14 +656,15 @@ function ControlledAccordions() {
 export default function Course() {
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
-    const { course, courseContent, enrollees } = useLoaderData();
+    const { user, course, courseContent, enrollees } = useLoaderData();
     const htmlToReactParser = new Parser();
     const { token } = useAuthToken();
     const isAuthenticated = token['access'] !== null;
     const navigate = useNavigate();
-    const accessTokenDecoded = React.useContext(AccessTokenDecodedContext);
-    const isInstructor = accessTokenDecoded?.user_id === course.created_by;
-    const enrollment = enrollees.find(enrollee => enrollee.user === accessTokenDecoded?.user_id && enrollee.course === course.id);
+    // const accessTokenDecoded = React.useContext(AccessTokenDecodedContext);
+    const isInstructor = user.id === course.created_by;
+    const isAdmin = user.is_superuser || user.is_staff;
+    const enrollment = enrollees.find(enrollee => enrollee.user === user.id && enrollee.course === course.id);
     const fetcher = useFetcher();
     const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
 
@@ -704,11 +707,20 @@ export default function Course() {
                 <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
                     {
                         isInstructor &&
-                        (
+                        (<>
+
                             <AlertDialog onClickDelete={handleClickDelete} intent="deleting" />
+                            <Box position="fixed" bottom="20px" right="20px">
+                                <Form action="edit">
+                                    <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit" type="submit">
+                                        <EditIcon />
+                                    </Fab>
+                                </Form>
+                            </Box>
+                        </>
                         )
                     }
-
+                    
                     <Box className="clearfix" component={'div'}>
                         <Paper id="enroll" elevation={4} sx={{
                             padding: { xs: '7%', md: '3%' },
@@ -738,9 +750,9 @@ export default function Course() {
                                 </Box>
                                 {
 
-                                    accessTokenDecoded?.user_id === course.created_by && !enrollment ?
+                                    (isInstructor && !enrollment) || (isAdmin) ? // Don't render the enroll buttonn for instructors or admins
                                         null
-                                        : accessTokenDecoded?.user_id !== course.created_by && !enrollment ?
+                                        : (user.id !== course.created_by && !enrollment ?
                                             <Box display='flex' justifyContent={'center'} mt={2}>
                                                 <Button size="large" sx={{ borderRadius: '2em', fontWeight: 800 }} fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
                                                     Enroll now!
@@ -751,7 +763,7 @@ export default function Course() {
                                                 <Button size="large" sx={{ borderRadius: '2em', fontWeight: 800 }} fullWidth={isSmallScreen ? true : false} variant="contained" color="error" onClick={handleClickUnenroll}>
                                                     Unenroll
                                                 </Button>
-                                            </Box>
+                                            </Box>)
                                 }
 
                                 <Grid container columns={{ xs: 6, md: 12 }} mt={2}>
@@ -779,10 +791,11 @@ export default function Course() {
                             </ThemeProvider>
                         </Paper>
                         <ThemeProvider theme={theme}>
-                            <Typography fontWeight="bold" variant="h3">
+                            <Typography fontWeight="bold" variant="h3" sx={{ wordBreak: 'break-word' }}>
                                 {course.title}
                             </Typography>
                         </ThemeProvider>
+
 
                         {/* <Box className="html-content" component={'div'} dangerouslySetInnerHTML={{ __html: DOMPurify(course.description) }} /> */}
                         <Box className="html-content" lineHeight={'1.4em'}>
@@ -827,49 +840,12 @@ export default function Course() {
                             {
                                 !isAuthenticated ? // if anonymous user, don't show the course's content
                                     <>
-                                        <Grid item container position={'relative'} justifyContent={'flex-start'}>
-                                            <Grid item mb={2}>
-                                                <ThemeProvider theme={theme}>
-                                                    <Typography variant="h4" fontWeight={'bold'}>
-                                                        Course content
-                                                    </Typography>
-                                                </ThemeProvider>
-                                            </Grid>
-                                            <Grid item xs={12} sx={{ pointerEvents: 'none' }}>
-                                                <ControlledAccordions />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <Stack className="non-modal-dialog">
-                                                    <Grid item container justifyContent={'center'} spacing={3} mt={'auto'}>
-                                                        <Grid item>
-                                                            <ThemeProvider theme={theme}>
-                                                                <Typography align="center" gutterBottom variant="h5">
-                                                                    Create an account and enroll to view content
-                                                                </Typography>
-                                                            </ThemeProvider>
-                                                        </Grid>
-
-                                                        <Grid item xs={7}>
-                                                            <Button variant="outlined" disableRipple sx={{ borderRadius: 10 }} fullWidth={true} onClick={handleClickSignUp}>Sign Up</Button>
-                                                        </Grid>
-                                                        <Grid item xs={12}>
-                                                            {/* <Button variant="outlined" disableRipple sx={{ borderRadius: 10 }} fullWidth={true}>Sign In</Button> */}
-                                                            <ThemeProvider theme={theme}>
-                                                                <Typography align="center" gutterBottom variant="body1">
-                                                                    Already have an account? <Link to='/signin'>Sign In</Link>
-                                                                </Typography>
-                                                            </ThemeProvider>
-                                                        </Grid>
-                                                    </Grid>
-
-                                                </Stack>
-                                            </Grid>
-                                        </Grid>
+                                        <AuthenticationWall onClickSignUp={handleClickSignUp} />
                                     </>
                                     :
                                     <>
-                                        {!enrollment && !isInstructor ? // if user is not enrolled, don't show the course's content
-                                            <>
+                                        {!enrollment && !isInstructor && !isAdmin ? // if user is not enrolled, don't show the course's content
+                                            (<>
                                                 <Grid item container position={'relative'} justifyContent={'flex-start'}>
                                                     <Grid item mb={2}>
                                                         <ThemeProvider theme={theme}>
@@ -897,9 +873,9 @@ export default function Course() {
                                                     </Grid>
                                                 </Grid>
 
-                                            </>
+                                            </>)
                                             :
-                                            <>
+                                            (<>
                                                 <Grid item container alignSelf={'flex-start'}>
                                                     <Grid item mb={2}>
                                                         <ThemeProvider theme={theme}>
@@ -912,11 +888,11 @@ export default function Course() {
                                                         <ControlledAccordions />
                                                     </Grid>
                                                 </Grid>
-                                            </>
+                                            </>)
                                         }
                                     </>
                             }
-                            <Grid item container alignSelf={'flex-start'} mt={!isAuthenticated || (!enrollment && !isInstructor) ? '30vh' : 'initial'}>
+                            <Grid item container alignSelf={'flex-start'} mt={!isAuthenticated || (!enrollment && !isInstructor && !isAdmin) ? '30vh' : 'initial'}>
                                 <Grid item xs={12}>
                                     <ThemeProvider theme={theme}>
                                         <Typography variant="h5" fontWeight={'bold'}>

@@ -43,6 +43,18 @@ function ResponsiveAppBar() {
   const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
   const { user } = useLoaderData();
+  const didRun = React.useRef(false);
+
+
+
+  React.useEffect(() => {
+    // this is would only execute once regardless of how many times this component rerenders
+    if (!didRun.current && (user.is_staff || user.is_superuser)) {
+      console.log('this is true wtf?')
+      pages.push('Pending');
+      didRun.current = true;
+    }
+  }, []);
 
   // attach event listener to  each setting
   const settingsHandlers = {
@@ -56,13 +68,9 @@ function ResponsiveAppBar() {
   const pageHandlers = {
     // 'Courses': <Link to="/#courses" />,
     'Blogs': handleBlogs,
-    'Create': handleCreate
+    'Create': () => navigate('/course/create'),
+    'Pending': () => navigate('/pending')
   }
-
-
-
-
-
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -102,9 +110,6 @@ function ResponsiveAppBar() {
 
   }
 
-  function handleCreate() {
-    navigate('/course/create');
-  }
 
 
   async function handleLogout(dispatch) {
