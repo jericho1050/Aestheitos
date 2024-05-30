@@ -1059,7 +1059,7 @@ export default function CreateCourse() {
             activeStep: activeStep
         }, { method: 'post' })
         dispatch({
-            type: 'submitting',
+            type: 'submitted',
             text: `Course submitted! It's now under review (3-7 days). Thanks for your patience!`
         })
     }
@@ -1193,7 +1193,7 @@ export default function CreateCourse() {
                                     <TextField type="hidden" value={course.id} name="courseId" /> */}
                                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'space-between' }}>
                                     <Box sx={{ display: "flex", justifyContent: 'flex-end' }}>
-                                        <AlertDialog onClickSubmit={handleSubmit} intent="submitting" />
+                                        <AlertDialog onClickSubmit={handleSubmit} intent="submitting course" />
                                     </Box>
                                 </Box>
 

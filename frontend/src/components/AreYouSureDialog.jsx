@@ -11,8 +11,10 @@ import SendIcon from '@mui/icons-material/Send';
 import { useAtom } from 'jotai';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 
-export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
+export default function AlertDialog({ onClickApprove, onClickReject, onClickSubmit, onClickDelete, intent }) {
     const theme2 = useTheme();
     const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
     const [open, setOpen] = React.useState(false);
@@ -30,16 +32,27 @@ export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
     return (
         <React.Fragment>
 
-            {intent === 'submitting' && (<Button onClick={handleClickOpen} disabled={navigation.state === 'submitting'} sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
+            {intent === 'submitting course' && (<Button onClick={handleClickOpen} disabled={navigation.state === 'submitting'} sx={{ mt: 3 }} fullWidth={isXsmallScreen ? true : false} startIcon={<SendIcon />} variant="contained" color="primary">
                 Submit
             </Button>)}
-            {intent === 'deleting' && ( // or it could be deleting, but i merge it in here.
+            {intent === 'deleting course' && (
 
-                    <Button size="large" fullWidth={isSmallScreen} startIcon={<DeleteIcon />} sx={{ p: '1em', borderRadius: '0.9em', mb: 2}} color="error" aria-label="delete" onClick={handleClickOpen} >
-                        Delete
-                    </Button>
+                <Button size="large" fullWidth={isSmallScreen} startIcon={<DeleteIcon />} sx={{ p: '1em', borderRadius: '0.9em', mb: 2 }} color="error" aria-label="delete" onClick={handleClickOpen} >
+                    Delete
+                </Button>
 
             )}
+            {intent === "change course's status" && (
+                <Box display={'flex'} columnGap={2} mb={2}>
+                    <Button size="large" variant="outlined" fullWidth={isSmallScreen} startIcon={<ThumbDownIcon />} color="error" onClick={onClickReject}>
+                        Reject
+                    </Button>
+                    <Button size="large" variant="contained" fullWidth={isSmallScreen} startIcon={<ThumbUpIcon />} color="success" onClick={onClickApprove}>
+                        Approve
+                    </Button>
+                </Box>
+            )
+            }
 
             <Dialog
                 open={open}
@@ -52,13 +65,13 @@ export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        {intent === 'submitting' ? "Are you sure you want to submit?" : "Are you sure you want to delete the course?"}
+                        {intent === 'submitting course' ? "Are you sure you want to submit?" : "Are you sure you want to delete the course?"}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button autoFocus onClick={() => {
-                        if (intent === 'submitting') {
+                        if (intent === 'submitting course') {
                             onClickSubmit();
 
                         } else {
@@ -66,7 +79,7 @@ export default function AlertDialog({ onClickSubmit, onClickDelete, intent }) {
                         }
 
                     }}>
-                        {intent === 'submitting' ? "Submit" : "Delete"}
+                        {intent === 'submitting course' ? "Submit" : "Delete"}
                     </Button>
                 </DialogActions>
             </Dialog>

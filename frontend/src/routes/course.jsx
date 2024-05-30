@@ -13,8 +13,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { createCourseComment, createCourseEnrollment, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises, updateCourseComment } from "../courses";
-import { Form, Link, redirect, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router-dom";
+import { createCourseComment, createCourseEnrollment, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises, updateCourse, updateCourseComment } from "../courses";
+import { Form, Link, redirect, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator, useSubmit } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
 import getEmbedUrl from "../helper/getEmbedUrl";
@@ -119,10 +119,15 @@ export async function action({ request, params }) {
         case 'deleteCourse':
             await deleteCourse(params.courseId);
             return redirect('/');
-        case 'editing':
+        case 'approveCourse':
+            await updateCourse(params.courseId);
+            return redirect('/pending');
+        case 'rejectCourse':
+            await updateCourse(params.courseId);
+        case 'editing': // i.e., for the comment
             comment = await updateCourseComment(formData.get('commentId'), formData);
             break;
-        case 'deleting':
+        case 'deleting':  // i.e., for the comment
             comment = await deleteCourseComment(formData.get('commentId'));
             break;
         default:
@@ -656,6 +661,7 @@ export function ControlledAccordions() {
 export default function Course() {
     const theme2 = useTheme();
     const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+    const isMediumScreen = useMediaQuery(theme2.breakpoints.up('md'));
     const { user, course, courseContent, enrollees } = useLoaderData();
     const htmlToReactParser = new Parser();
     const { token } = useAuthToken();
@@ -667,38 +673,57 @@ export default function Course() {
     const enrollment = enrollees.find(enrollee => enrollee.user === user.id && enrollee.course === course.id);
     const fetcher = useFetcher();
     const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
-
+    const submit = useSubmit();
     function handleClickEnroll() {
         if (!isAuthenticated) {
             navigate('/signin');
         }
         else {
             dispatch({
-                type: 'enroll',
+                type: 'enrolled',
                 text: 'You are now enrolled!'
-            })
+            });
             fetcher.submit({ intent: 'enroll' }, { method: 'post' });
         }
     }
     function handleClickUnenroll() {
         dispatch({
-            type: 'unenroll',
+            type: 'unenrolled',
             text: 'You are unenrolled!'
-        })
+        });
         fetcher.submit({ intent: 'unenroll', enrollmentId: enrollment.id }, { method: 'delete' });
     }
 
     function handleClickSignUp() {
-        navigate('/signup')
+        navigate('/signup');
     }
 
     function handleClickDelete() {
         dispatch({
-            type: 'deleting',
+            type: 'deleted',
             text: 'Course Deleted!'
-        })
-        fetcher.submit({ intent: 'deleteCourse', courseId: course.id }, { method: 'delete' });
+        });
+        fetcher.submit({ intent: 'deleteCourse' }, { method: 'delete' });
     }
+
+    function handleClickApprove() {
+        dispatch({
+            type: 'approved',
+            text: `Course #${course.id} Approved!`
+        });
+        submit({ intent: 'approveCourse', status: 'A' }, { method: 'patch' });
+    }
+
+    function handleClickReject() {
+        dispatch({
+            type: 'rejected',
+            text: `Course #${course.id} Rejected!`
+        });
+        submit({ intent: 'rejectCourse', status: 'R' }, { method: 'patch' });
+
+    }
+
+
     return (
         <>
             <CustomizedSnackbar />
@@ -706,10 +731,11 @@ export default function Course() {
             <Container component="main" maxWidth="lg">
                 <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
                     {
+                        // if user is the instructor show the primary actions and secondary actions (i.e., edit and delete btns)
                         isInstructor &&
                         (<>
 
-                            <AlertDialog onClickDelete={handleClickDelete} intent="deleting" />
+                            <AlertDialog onClickDelete={handleClickDelete} intent="deleting course" />
                             <Box position="fixed" bottom="20px" right="20px">
                                 <Form action="edit">
                                     <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit" type="submit">
@@ -720,7 +746,15 @@ export default function Course() {
                         </>
                         )
                     }
-                    
+                    {
+                        // if user is the admin or staff show the primary actions and secondary actions (i.e., approve or reject btns)
+                        (isAdmin && course.status === 'P') && (
+                            <>
+                                <AlertDialog intent="change course's status" onClickApprove={handleClickApprove} onClickReject={handleClickReject} />
+                            </>
+                        )
+                    }
+
                     <Box className="clearfix" component={'div'}>
                         <Paper id="enroll" elevation={4} sx={{
                             padding: { xs: '7%', md: '3%' },
@@ -791,7 +825,7 @@ export default function Course() {
                             </ThemeProvider>
                         </Paper>
                         <ThemeProvider theme={theme}>
-                            <Typography fontWeight="bold" variant="h3" sx={{ wordBreak: 'break-word' }}>
+                            <Typography fontWeight="bold" variant="h3" sx={{ wordBreak: isMediumScreen ? 'break-word' : 'normal' }}>
                                 {course.title}
                             </Typography>
                         </ThemeProvider>

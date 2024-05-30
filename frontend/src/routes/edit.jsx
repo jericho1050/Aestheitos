@@ -1077,7 +1077,7 @@ export default function EditCourse() {
         console.log(fetcher.state);
         if (fetcher.state === 'submitting') {
             dispatch({
-                type: 'submitting',
+                type: 'submitted',
                 text: 'Course Updated!'
             })
         }

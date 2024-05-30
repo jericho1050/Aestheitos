@@ -11,10 +11,12 @@ function snackBarReducer(snackbar, action) {
 
     switch(action.type) {
         
-        case 'submitting':
-        case 'enroll':
-        case 'unenroll':
-        case 'deleting':
+        case 'submitted':
+        case 'enrolled':
+        case 'unenrolled':
+        case 'deleted':
+        case 'approved':
+        case 'rejected':
             return {
                 message: action.text,
                 open: true
