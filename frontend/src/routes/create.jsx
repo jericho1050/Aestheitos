@@ -31,7 +31,7 @@ import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ProgressMobileStepper from "../components/ProgressMobileStepper";
 import { createCorrectExerciseForm, createCourse, createCourseContent, createSection, createSectionItem, createWorkout, createWrongExerciseForm, deleteCorrectExerciseForm, deleteSection, deleteSectionItem, deleteWorkout, deleteWrongExerciseForm, getSection, getSectionItems, getWorkouts, updateCorrectExerciseForm, updateCourse, updateCourseContent, updateSection, updateSectionItem, updateWorkout, updateWrongExerciseForm } from "../courses";
-import { Form, redirect, useActionData, useFetcher, useNavigation } from "react-router-dom";
+import { Form, redirect, useActionData, useFetcher, useNavigation, useSubmit } from "react-router-dom";
 import determineIntent from "../helper/determineIntent";
 import { Provider, atom, useAtom } from "jotai";
 import { YoutubeInput, DescriptionInput } from "../components/LectureReadMeTextFields";
@@ -970,9 +970,7 @@ export default function CreateCourse() {
     const [intent, setIntent] = React.useState('create');
     const navigation = useNavigation();
     const [, dispatch] = useAtom(snackbarReducerAtom);
-
-    // console.log(`in creatCourse ${navigation.state === "submitting"} ${fetcher.state === "submitting"}`)
-
+    const submit = useSubmit(); 
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
         // !resonse.ok then there's a message
@@ -1053,7 +1051,7 @@ export default function CreateCourse() {
     }
 
     function handleSubmit() {
-        fetcher.submit({
+        submit({
             intent: 'submit',
             courseId: course.id,
             activeStep: activeStep

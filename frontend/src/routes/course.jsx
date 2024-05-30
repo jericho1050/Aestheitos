@@ -124,6 +124,7 @@ export async function action({ request, params }) {
             return redirect('/pending');
         case 'rejectCourse':
             await updateCourse(params.courseId);
+            return redirect('/pending');
         case 'editing': // i.e., for the comment
             comment = await updateCourseComment(formData.get('commentId'), formData);
             break;
@@ -145,6 +146,7 @@ function CommentReply({ reply, level }) {
     const fetcher = useFetcher();
     const { token } = useAuthToken();
     const isAuthenticated = token['access'] !== null;
+    const { user } = useLoaderData();
 
     function handleClick(e) {
         setAnchorEl(e.currentTarget);
@@ -167,7 +169,7 @@ function CommentReply({ reply, level }) {
             <ListItem
                 secondaryAction={
                     <>
-                        {isAuthenticated && (
+                        {(isAuthenticated && user.user_id === reply.user_id) && (
                             <IconButton id="ellipsis" edge="end" aria-label="ellipsis" sx={{ p: '0.3em 0.5em' }} onClick={handleClick}>
                                 <FontAwesomeIcon icon={faEllipsisV} fontSize="medium" />
                             </IconButton>
@@ -268,6 +270,7 @@ function Comment({ comment }) {
     const fetcher = useFetcher();
     const { token } = useAuthToken();
     const isAuthenticated = token['access'] !== null;
+    const { user } = useLoaderData();
 
     function handleClick(e) {
         setAnchorEl(e.currentTarget);
@@ -292,7 +295,7 @@ function Comment({ comment }) {
                 secondaryAction={
 
                     <>
-                        {isAuthenticated && (
+                        {(isAuthenticated && user.user_id === comment.user_id) && (
                             <IconButton id="ellipsis" edge="end" aria-label="ellipsis" sx={{ p: '0.3em 0.5em' }} onClick={handleClick}>
                                 <FontAwesomeIcon icon={faEllipsisV} fontSize="medium" />
                             </IconButton>
@@ -668,9 +671,9 @@ export default function Course() {
     const isAuthenticated = token['access'] !== null;
     const navigate = useNavigate();
     // const accessTokenDecoded = React.useContext(AccessTokenDecodedContext);
-    const isInstructor = user.id === course.created_by;
+    const isInstructor = user.user_id === course.created_by;
     const isAdmin = user.is_superuser || user.is_staff;
-    const enrollment = enrollees.find(enrollee => enrollee.user === user.id && enrollee.course === course.id);
+    const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course === course.id);
     const fetcher = useFetcher();
     const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
     const submit = useSubmit();
@@ -703,7 +706,7 @@ export default function Course() {
             type: 'deleted',
             text: 'Course Deleted!'
         });
-        fetcher.submit({ intent: 'deleteCourse' }, { method: 'delete' });
+        submit({ intent: 'deleteCourse' }, { method: 'delete' });
     }
 
     function handleClickApprove() {
@@ -786,7 +789,7 @@ export default function Course() {
 
                                     (isInstructor && !enrollment) || (isAdmin) ? // Don't render the enroll buttonn for instructors or admins
                                         null
-                                        : (user.id !== course.created_by && !enrollment ?
+                                        : (user.user_id !== course.created_by && !enrollment ?
                                             <Box display='flex' justifyContent={'center'} mt={2}>
                                                 <Button size="large" sx={{ borderRadius: '2em', fontWeight: 800 }} fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
                                                     Enroll now!

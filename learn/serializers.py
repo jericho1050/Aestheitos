@@ -25,9 +25,11 @@ class UserSerializer(ModelSerializer):
 
 
 class UserDetailSerializer(ModelSerializer):
+    user_id = serializers.IntegerField(source='id')
+
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "profile_pic", "is_staff", "is_superuser"]
+        fields = ["user_id", "username", "first_name", "last_name", "profile_pic", "is_staff", "is_superuser"]
 
 
 class UserProgressSerializer(ModelSerializer):
