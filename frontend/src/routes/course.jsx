@@ -120,10 +120,10 @@ export async function action({ request, params }) {
             await deleteCourse(params.courseId);
             return redirect('/');
         case 'approveCourse':
-            await updateCourse(params.courseId);
+            await updateCourse(params.courseId, formData);
             return redirect('/pending');
         case 'rejectCourse':
-            await updateCourse(params.courseId);
+            await updateCourse(params.courseId, formData);
             return redirect('/pending');
         case 'editing': // i.e., for the comment
             comment = await updateCourseComment(formData.get('commentId'), formData);
@@ -549,7 +549,7 @@ export function ResponsiveDialog({ accordionItem, children }) {
         <React.Fragment>
             <ThemeProvider theme={theme} >
                 {/* <YouTubeIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></YouTubeIcon> */}
-                <DescriptionIcon theme={theme2} sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
+                <DescriptionIcon sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
                 <Typography align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
                     {children}
                 </Typography>
@@ -662,9 +662,8 @@ export function ControlledAccordions() {
 }
 
 export default function Course() {
-    const theme2 = useTheme();
-    const isSmallScreen = useMediaQuery(theme2.breakpoints.down('sm'));
-    const isMediumScreen = useMediaQuery(theme2.breakpoints.up('md'));
+    const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+    const isMediumScreen = useMediaQuery(theme => theme.breakpoints.up('md'));
     const { user, course, courseContent, enrollees } = useLoaderData();
     const htmlToReactParser = new Parser();
     const { token } = useAuthToken();

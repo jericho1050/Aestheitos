@@ -74,6 +74,7 @@ class Course(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00) 
     weeks = models.IntegerField()
     is_draft = models.BooleanField(default=True)
+    read = models.BooleanField(default=False)
   
 
     def __str__(self):

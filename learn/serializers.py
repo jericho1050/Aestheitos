@@ -25,11 +25,19 @@ class UserSerializer(ModelSerializer):
 
 
 class UserDetailSerializer(ModelSerializer):
-    user_id = serializers.IntegerField(source='id')
+    user_id = serializers.IntegerField(source="id")
 
     class Meta:
         model = User
-        fields = ["user_id", "username", "first_name", "last_name", "profile_pic", "is_staff", "is_superuser"]
+        fields = [
+            "user_id",
+            "username",
+            "first_name",
+            "last_name",
+            "profile_pic",
+            "is_staff",
+            "is_superuser",
+        ]
 
 
 class UserProgressSerializer(ModelSerializer):
@@ -94,11 +102,19 @@ class CourseSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
+            # Check if 'read' is the only field being updated
+            if set(self.validated_data.keys()) == {"read"}:
+                self.instance.read = self.validated_data.get("read")
+                self.instance.save(update_fields=["read"])
+                return
 
             if "status" in self.validated_data and not user.is_staff:
                 raise AuthenticationFailed("Only staff can change the status")
 
-            if not (user.is_superuser or not user.is_staff) and self.instance.created_by != user:
+            if (
+                not (user.is_superuser or not user.is_staff)
+                and self.instance.created_by != user
+            ):
                 raise AuthenticationFailed("Not allowed to modify")
 
             self.save()

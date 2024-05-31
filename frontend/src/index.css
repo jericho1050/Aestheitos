@@ -348,8 +348,8 @@ padding: 22vh 0 10vh 0;
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
 
-.heading {
-    white-space: nowrap;
+.heading, .text-overflow {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }

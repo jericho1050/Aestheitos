@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import "./index.css";
 import "./divider.css"
-import Root, { loader as rootLoader } from './routes/root';
+import Root, { action as rootAction, loader as rootLoader } from './routes/root';
 import ErrorPage from './error-page';
 import SignIn from './routes/signin';
 import SignUp from './routes/signup';
@@ -45,6 +45,7 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
     loader: rootLoader,
+    action: rootAction,
     children: [
       {
         index: true,

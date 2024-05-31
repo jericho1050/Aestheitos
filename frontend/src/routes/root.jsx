@@ -6,41 +6,52 @@ import useRefreshToken from "../helper/useRefreshToken";
 import { useContext } from "react";
 import { IsLoadingContext } from "../contexts/IsLoadingContext";
 import Box from '@mui/material/Box';
-import { getUser } from "../courses";
+import { getCourses, getUser, updateCourse } from "../courses";
 
 
 export async function loader() {
   const user = await getUser();
-  return {user};
+  let courses = await getCourses();
+  courses = courses.filter(course => course.created_by === user.user_id && course.status !== 'P'); // just return THE user's or instructor's courses for notifcation purposes.
+  return { user, courses };
 }
+
+export async function action({ request }) {
+  const formData = await request.formData();
+  const course = await updateCourse(formData.get('courseId'), formData);
+
+  return { course };
+
+}
+
 export default function Root() {
-    const navigation = useNavigation();
-    const isLoading = useContext(IsLoadingContext);
+  const navigation = useNavigation();
+  const isLoading = useContext(IsLoadingContext);
 
-    persistJWT(); // here we are persisting log in state
-    useRefreshToken(); // refreshing access token when it's due if the user has a refresh token in storage.
+  persistJWT(); // here we are persisting log in state
+  useRefreshToken(); // refreshing access token when it's due if the user has a refresh token in storage.
 
-    return (
-        <>
-            <ResponsiveAppBar></ResponsiveAppBar>
-            <>
+  return (
+    <>
+      <ResponsiveAppBar></ResponsiveAppBar>
+      <>
 
-                {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: '100%' }}>
-                    <progress value={null} />
-                    <p>Loading...</p>
-                </Box>)
-                    : 
-                    <Box id="detail"
-                    className={
-                      navigation.state === "loading" ? "loading" : ""
-                    }
-                  >
-                    <Outlet />
-                  </Box>
-                    
-                    }
-            </>
+        {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: '100%' }}>
+          <progress value={null} />
+          <p>Loading...</p>
+        </Box>)
+          :
+          <Box id="detail"
+            className={
+              navigation.state === "loading" ? "loading" : ""
+            }
+          >
+            <Outlet />
+          </Box>
 
-        </>
-    )
+        }
+      </>
+
+    </>
+  )
 }

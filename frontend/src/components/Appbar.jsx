@@ -15,19 +15,16 @@ import MenuItem from '@mui/material/MenuItem';
 // eslint-disable-next-line no-unused-vars
 import AdbIcon from '@mui/icons-material/Adb';
 import { useState } from 'react';
-import { Link, useLoaderData, useNavigate } from 'react-router-dom';
+import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
 import { useAuthToken } from '../contexts/authContext';
 import SearchIcon from '@mui/icons-material/Search';
-import { Grid, Popover, Slide, useMediaQuery } from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
-import InputBase from '@mui/material/InputBase';
+import { Badge, Grid, List, ListItem, ListItemIcon, ListItemText, Popover, Slide, useMediaQuery } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
 import logo from '../static/images/aestheitoslogo.png';
-
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import SearchBar from './SearchBar';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -36,14 +33,16 @@ const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const [isOpen, setIsOpen] = React.useState(false);
-  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
-  // returns the token state and it's dispatch function 
-  const { token, dispatch } = useAuthToken();
+  const [anchorElBadge, setAnchorElBadge] = React.useState(null);
+  const [isOpen, setIsOpen] = React.useState(false); // search dialog
+  const { token, dispatch } = useAuthToken(); // returns the token state and it's dispatch function 
   const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
-  const { user } = useLoaderData();
+  const { user, courses } = useLoaderData(); // loader is in root.jsx
+  const [firstClick, setFirstClick] = React.useState(true);
   const didRun = React.useRef(false);
+  const fetcher = useFetcher();
+
 
 
 
@@ -58,16 +57,16 @@ function ResponsiveAppBar() {
 
   // attach event listener to  each setting
   const settingsHandlers = {
-    'Profile': handleProfile,
-    'Account': handleAccount,
-    'Enrolled': handleEnrolled,
+    'Profile': () => { },
+    'Account': () => { },
+    'Enrolled': () => { },
     'Logout': () => handleLogout(dispatch)
   }
 
   // attach event listener to each page in navbar
   const pageHandlers = {
     // 'Courses': <Link to="/#courses" />,
-    'Blogs': handleBlogs,
+    'Blogs': () => { },
     'Create': () => navigate('/course/create'),
     'Pending': () => navigate('/pending')
   }
@@ -78,9 +77,6 @@ function ResponsiveAppBar() {
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
-  const handleClickSearch = () => {
-    setIsOpen(true);
-  };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
@@ -90,25 +86,27 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
-  };
 
-  // settings handlers
-  function handleProfile() {
 
-  }
-
-  function handleAccount() {
-
-  }
-
-  function handleEnrolled() {
-  }
-
-  function handleBlogs() {
+  const handleClickBadge = (event) => {
+    setAnchorElBadge(event.currentTarget);
+    if (firstClick) {
+      setFirstClick(false);
+      // if first click
+      // Only run this once to update the course instance's read to true.
+      courses.map(course =>
+        fetcher.submit({ read: true, courseId: course.id }, { method: 'PATCH' })
+      )
+    }
 
   }
+
+
+
+
+
+
+
 
 
 
@@ -223,7 +221,7 @@ function ResponsiveAppBar() {
             </Box>
             {isAuthenticated ?
               <Box sx={{ flexGrow: 0 }}>
-                <Grid direction="row-reverse" container alignItems={'center'} spacing={2}>
+                <Grid direction="row-reverse" container alignItems={'center'} spacing={1}>
                   <Grid item xs>
                     <Tooltip data-cy="Tool tip" title="Open settings">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -231,64 +229,71 @@ function ResponsiveAppBar() {
                       </IconButton>
                     </Tooltip>
                   </Grid>
-                  {isSmallScreen ?
-                    <>
-                      <Grid item xs md>
-                        <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
-                          <SearchIcon />
-                        </IconButton>
+                  <Grid item xs>
+                    <IconButton aria-label='notification' sx={{ color: 'white' }} onClick={handleClickBadge}>
+                      <Badge badgeContent={courses.filter(course => !course.read).length}>
+                        <NotificationsOutlinedIcon />
+                      </Badge>
+                    </IconButton>
+                    <Popover
+
+                      open={Boolean(anchorElBadge)}
+                      onClose={() => setAnchorElBadge(null)}
+                      anchorEl={anchorElBadge}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                    >
+
+                      <Grid container width={500} padding={'0 1em'} >
+                        <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+                          Notifications
+                        </Typography>
+                        {courses.map(course => {
+                          const course_date = new Date(course.course_updated);
+                          const now = new Date();
+                          const course_day_updated = course_date.getDay();
+                          const course_hour_updated = course_date.getHours();
+                          const last_updated_day = now.getDay() - course_day_updated;
+                          const last_updated_hour = now.getHours() - course_hour_updated;
+                          return (<Grid key={course.id} item xs={12}>
+
+                            <List>
+                              <ListItem>
+                                <ListItemIcon>
+                                  {(course.status === 'A' && <CheckIcon />) || (course.status === 'R' && <ClearIcon />)}
+                                </ListItemIcon>
+                                <ListItemText
+                                  className='text-overflow'
+                                  primary={course.title}
+                                  secondary={
+                                    <>
+                                      {`Your Course has been ${course.status === 'A' ? 'Approved' : 'Rejected'}`}
+                                      <br />
+                                      {last_updated_day === 0 ? `${last_updated_hour} hour ago` : `${last_updated_day} days ago`}
+                                    </>
+                                  }
+                                  sx={{ width: 350, mr: 2 }}
+                                />
+                                <Box>
+
+                                  <img src={course.thumbnail} style={{ width: '40px', height: '59px', objectFit: 'cover' }} />
+                                </Box>
+                              </ListItem>
+                            </List>
+                          </Grid>)
+                        }
+                        )}
                       </Grid>
-                      <Dialog
-                        fullWidth={true}
-                        maxWidth="md"
-                        open={isOpen}
-                        onClose={handleClose}
-                        PaperProps={{
-                          component: 'form',
-                          onSubmit: (event) => {
-                            event.preventDefault();
-                            const formData = new FormData(event.currentTarget);
-                            const formJson = Object.fromEntries(formData.entries());
-                            const email = formJson.email;
-                            // console.log(email);
-                            handleClose();
-                          },
-                        }}
-                      >
-                        <DialogTitle>Search for Courses</DialogTitle>
-                        <DialogContent>
-                          {/* <DialogContentText>
-                          Search Available Courses
-                        </DialogContentText> */}
-                          <Search>
-                            <SearchIconWrapper>
-                              <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                              placeholder="Search…"
-                              inputProps={{ 'aria-label': 'search' }}
-                            />
-                          </Search>
-                        </DialogContent>
-                        <DialogActions>
-                          <Button onClick={handleClose}>Cancel</Button>
-                          <Button type="submit">Search</Button>
-                        </DialogActions>
-                      </Dialog>
-                    </>
-                    :
-                    <Grid item xs md>
-                      <Search>
-                        <SearchIconWrapper>
-                          <SearchIcon />
-                        </SearchIconWrapper>
-                        <StyledInputBase
-                          placeholder="Search…"
-                          inputProps={{ 'aria-label': 'search' }}
-                        />
-                      </Search>
-                    </Grid>
-                  }
+                    </Popover>
+
+                  </Grid>
+                  <SearchBar isOpen={isOpen} setIsOpen={setIsOpen} />
                 </Grid>
                 <Menu
                   sx={{ mt: '45px' }}
@@ -316,65 +321,8 @@ function ResponsiveAppBar() {
               :
               <Box sx={{ flexGrow: 0 }}>
                 <Grid container spacing={{ xs: 0, sm: 1, md: 2 }} alignItems={'center'}>
-                  {isSmallScreen ?
-                    <>
-                      <Grid item xs md>
-                        <IconButton onClick={handleClickSearch} size="large" aria-label="search" color="inherit">
-                          <SearchIcon />
-                        </IconButton>
-                      </Grid>
-                      <Dialog
-                        fullWidth={true}
-                        maxWidth="md"
-                        open={isOpen}
-                        onClose={handleClose}
-                        PaperProps={{
-                          component: 'form',
-                          onSubmit: (event) => {
-                            event.preventDefault();
-                            const formData = new FormData(event.currentTarget);
-                            const formJson = Object.fromEntries(formData.entries());
-                            const email = formJson.email;
-                            // console.log(email);
-                            handleClose();
-                          },
-                        }}
-                      >
-                        <DialogTitle>Search for Courses</DialogTitle>
-                        <DialogContent>
-                          {/* <DialogContentText>
-                          Search Available Courses
-                        </DialogContentText> */}
-                          <Search>
-                            <SearchIconWrapper>
-                              <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                              placeholder="Search…"
-                              inputProps={{ 'aria-label': 'search' }}
-                            />
-                          </Search>
-                        </DialogContent>
-                        <DialogActions>
-                          <Button onClick={handleClose}>Cancel</Button>
-                          <Button type="submit">Search</Button>
-                        </DialogActions>
-                      </Dialog>
-                    </>
-                    :
-                    <Grid item xs md>
-                      <Search>
-                        <SearchIconWrapper>
-                          <SearchIcon />
-                        </SearchIconWrapper>
-                        <StyledInputBase
-                          placeholder="Search…"
-                          inputProps={{ 'aria-label': 'search' }}
-                        />
-                      </Search>
-                    </Grid>
-                  }
-                  <Grid item xs md>
+                  <SearchBar isOpen={isOpen} setIsOpen={setIsOpen} />
+                  <Grid item ml={1}>
                     <Link to={`/signin`} id="sign-in">Sign in</Link>
                   </Grid>
                 </Grid>
@@ -390,47 +338,6 @@ function ResponsiveAppBar() {
 }
 export default ResponsiveAppBar;
 
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    [theme.breakpoints.up('sm')]: {
-      width: '12ch',
-      '&:focus': {
-        width: '20ch',
-      },
-    },
-  },
-}));
 
 
 function signOutAPI(refreshToken) {
