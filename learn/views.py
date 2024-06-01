@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
+from rest_framework.pagination import PageNumberPagination
 
 # from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 # from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -35,6 +36,8 @@ from .custom_serializer import *
 
 # API calls (Class based functions)
 
+class CustomPagination(PageNumberPagination):
+    page_size = 15
 
 class UserDetail(APIView):
     """
@@ -173,7 +176,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
 
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
-
+    # pagination_class = CustomPagination
 
     def get_queryset(self):
         return (
@@ -182,7 +185,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
             .annotate(average_rating=Avg("course_rating__rating"))
             .order_by("average_rating", "-course_created")
         )
-    
+
 
 class CourseDetail(
     UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView

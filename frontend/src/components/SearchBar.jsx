@@ -1,11 +1,19 @@
 import { useTheme } from "@emotion/react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, useMediaQuery } from "@mui/material";
+import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemText, TextField, useMediaQuery } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
-import { styled, alpha } from '@mui/material/styles';
+import { styled, alpha, duration } from '@mui/material/styles';
+import { Link, useLoaderData, useLocation } from "react-router-dom";
+import { BorderColor } from "@mui/icons-material";
+import { useEffect } from "react";
 
 export default function SearchBar({ isOpen, setIsOpen }) {
     const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+    const location = useLocation();
+
+    useEffect(() => {
+        setIsOpen(false);
+    }, [location]);
     return (
         isSmallScreen ?
             (<>
@@ -23,59 +31,89 @@ export default function SearchBar({ isOpen, setIsOpen }) {
                     onClose={() => {
                         setIsOpen(false);
                     }}
-                    PaperProps={{
-                        component: 'form',
-                        onSubmit: (event) => {
-                            event.preventDefault();
-                            const formData = new FormData(event.currentTarget);
-                            const formJson = Object.fromEntries(formData.entries());
-                            const email = formJson.email;
-                            // console.log(email);
-                            setIsOpen(false);
-                        },
-                    }}
                 >
                     <DialogTitle>Search for Courses</DialogTitle>
                     <DialogContent>
-                        {/* <DialogContentText>
-                  Search Available Courses
-                </DialogContentText> */}
-                        <Search>
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                                placeholder="Search…"
-                                inputProps={{ 'aria-label': 'search' }}
-                            />
-                        </Search>
+                        <SearchInput isSmallScreen={isSmallScreen} />
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => {
                             setIsOpen(false);
-                        }}>Cancel</Button>
-                        <Button type="submit">Search</Button>
+                        }}>Close</Button>
                     </DialogActions>
                 </Dialog>
             </>)
             :
-            (<Grid item xs>
-                <Search>
-                    <SearchIconWrapper>
-                        <SearchIcon />
-                    </SearchIconWrapper>
-                    <StyledInputBase
-                        placeholder="Search…"
-                        inputProps={{ 'aria-label': 'search' }}
-                    />
-                </Search>
-            </Grid>)
+            (
+                <Grid item>
+                    <SearchInput />
+                </Grid>
+
+            )
 
     )
 
 }
 
-const Search = styled('div')(({ theme }) => ({
+function SearchInput() {
+    const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+    const isMediumScreen = useMediaQuery(theme => theme.breakpoints.up('md'));
+
+    const { courses } = useLoaderData(); // this is the from the rootLoader
+    return (
+        <Search>
+            <List sx={{ padding: 0 }}>
+                <Autocomplete
+                    freeSolo
+                    disableClearable
+                    options={courses.filter(course => course.status === 'A')}
+                    getOptionLabel={course => course.title}
+                    renderInput={(params) =>
+                        <StyledTextField
+                            {...params}
+                            placeholder="Search…"
+                            inputProps={{
+
+                                ...params.inputProps,
+                                'aria-label': 'search',
+                                type: 'search',
+
+                            }}
+                            InputProps={{
+                                ...params.InputProps,
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ color: isSmallScreen ? 'intial' : 'white' }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+
+                        />
+                    }
+                    renderOption={(props, option) => {
+                        const { key, ...otherProps } = props;
+
+                        return (
+                            <Link key={key} to={`/course/${option.id}`} style={{ textDecoration: 'none', color: 'initial' }}>
+                                <ListItem {...otherProps} sx={{ display: 'flex', width: '100%' }}>
+                                    <Box maxWidth={isMediumScreen || isSmallScreen ? '85%' : '125px'}>
+                                        <ListItemText className="text-overflow"
+                                            primary={option.title}
+                                        />
+                                    </Box>
+                                    <Box marginLeft="auto" justifySelf={'flex-end'}>
+                                        <img src={option.thumbnail} style={{ width: '30px', height: '49px', objectFit: 'cover' }} />
+                                    </Box>
+                                </ListItem>
+                            </Link>
+                        );
+                    }}
+                />
+            </List>
+        </Search>
+    )
+}
+const Search = styled('div')(({ theme, }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -88,9 +126,10 @@ const Search = styled('div')(({ theme }) => ({
         marginLeft: theme.spacing(1),
         width: 'auto',
     },
+
 }));
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
+const SearchIconWrapper = styled('Box')(({ theme }) => ({
     padding: theme.spacing(0, 2),
     height: '100%',
     position: 'absolute',
@@ -100,19 +139,30 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
     justifyContent: 'center',
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
+
+const StyledTextField = styled((props) => {
+    const isMediumScreen = useMediaQuery(theme => theme.breakpoints.up('md'));
+    const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+
+    return <TextField {...props}
+        sx={{
+            '& .MuiInputBase-input': {
+                color: isSmallScreen ? 'intial' : 'white',
+                '&:focus': {
+                    width: isMediumScreen ? '30ch' : '20ch',
+                },
+            },
+
+        }}
+    />;
+})(({ theme }) => ({
+    minWidth: 150,
     color: 'inherit',
     width: '100%',
     '& .MuiInputBase-input': {
-        padding: theme.spacing(1, 1, 1, 0),
-        // vertical padding + font size from searchIcon
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
         transition: theme.transitions.create('width'),
         [theme.breakpoints.up('sm')]: {
             width: '12ch',
-            '&:focus': {
-                width: '20ch',
-            },
         },
     },
 }));

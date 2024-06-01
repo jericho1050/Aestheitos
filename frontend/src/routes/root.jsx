@@ -12,7 +12,6 @@ import { getCourses, getUser, updateCourse } from "../courses";
 export async function loader() {
   const user = await getUser();
   let courses = await getCourses();
-  courses = courses.filter(course => course.created_by === user.user_id && course.status !== 'P'); // just return THE user's or instructor's courses for notifcation purposes.
   return { user, courses };
 }
 

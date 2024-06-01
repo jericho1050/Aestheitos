@@ -25,6 +25,7 @@ import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined
 import SearchBar from './SearchBar';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
+import parseDateTime from '../helper/parseDateTime';
 
 const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
@@ -39,6 +40,8 @@ function ResponsiveAppBar() {
   const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
   const { user, courses } = useLoaderData(); // loader is in root.jsx
+  const userCourses = courses.filter(course => course.created_by === user.user_id && course.status !== 'P'); // just return THE user's or instructor's courses for notifcation purposes.
+
   const [firstClick, setFirstClick] = React.useState(true);
   const didRun = React.useRef(false);
   const fetcher = useFetcher();
@@ -94,7 +97,7 @@ function ResponsiveAppBar() {
       setFirstClick(false);
       // if first click
       // Only run this once to update the course instance's read to true.
-      courses.map(course =>
+      userCourses.map(course =>
         fetcher.submit({ read: true, courseId: course.id }, { method: 'PATCH' })
       )
     }
@@ -231,7 +234,7 @@ function ResponsiveAppBar() {
                   </Grid>
                   <Grid item xs>
                     <IconButton aria-label='notification' sx={{ color: 'white' }} onClick={handleClickBadge}>
-                      <Badge badgeContent={courses.filter(course => !course.read).length}>
+                      <Badge badgeContent={userCourses.filter(course => !course.read).length}>
                         <NotificationsOutlinedIcon />
                       </Badge>
                     </IconButton>
@@ -254,13 +257,8 @@ function ResponsiveAppBar() {
                         <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
                           Notifications
                         </Typography>
-                        {courses.map(course => {
-                          const course_date = new Date(course.course_updated);
-                          const now = new Date();
-                          const course_day_updated = course_date.getDay();
-                          const course_hour_updated = course_date.getHours();
-                          const last_updated_day = now.getDay() - course_day_updated;
-                          const last_updated_hour = now.getHours() - course_hour_updated;
+                        {userCourses.map(course => {
+                          const [last_updated_day, last_updated_hour] = parseDateTime(course.course_updated);
                           return (<Grid key={course.id} item xs={12}>
 
                             <List>
@@ -275,7 +273,7 @@ function ResponsiveAppBar() {
                                     <>
                                       {`Your Course has been ${course.status === 'A' ? 'Approved' : 'Rejected'}`}
                                       <br />
-                                      {last_updated_day === 0 ? `${last_updated_hour} hour ago` : `${last_updated_day} days ago`}
+                                      {last_updated_day === 0 || last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
                                     </>
                                   }
                                   sx={{ width: 350, mr: 2 }}

@@ -353,3 +353,8 @@ padding: 22vh 0 10vh 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* padding of searchbar */
+.css-clttge-MuiAutocomplete-root .MuiOutlinedInput-root {
+  padding: 6px  !important;
+}
