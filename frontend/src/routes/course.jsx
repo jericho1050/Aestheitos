@@ -4,7 +4,6 @@ import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
@@ -13,8 +12,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { createCourseComment, createCourseEnrollment, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getWorkouts, getWrongExercises, updateCourse, updateCourseComment } from "../courses";
-import { Form, Link, redirect, useActionData, useFetcher, useLoaderData, useNavigate, useRevalidator, useSubmit } from "react-router-dom";
+import { createCourseComment, createCourseEnrollment, createUserCourseProgress, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, deleteUserCourseProgress, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getUserCourseProgress, getWorkouts, getWrongExercises, updateCourse, updateCourseComment, updateSection, updateUserCourseProgress } from "../courses";
+import { Form, Link, redirect, useFetcher, useLoaderData, useNavigate, useRevalidator, useSubmit } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
 import getEmbedUrl from "../helper/getEmbedUrl";
@@ -47,6 +46,7 @@ export async function loader({ params }) {
     // now we have a nice classic example of "callback hell" or "pyramid of doom"
     const user = await getUser();
     const course = await getCourse(params.courseId);
+    let progress;
     if (!course) {
         throw new Response("", {
             status: course.status,
@@ -62,6 +62,13 @@ export async function loader({ params }) {
         });
     }
     const comments = await getCourseComments(course.id);
+    try {
+        progress = await getUserCourseProgress(course.id);
+    }
+    catch (error) {
+        console.error('Error getting course progress', error);
+        progress = {};
+    }
     try {
         const sections = await getSections(courseContent.id);
         const accordion = await Promise.all(sections.map(async (section) => {
@@ -97,24 +104,26 @@ export async function loader({ params }) {
             }
         }));
 
-        return { user, course, courseContent, accordion, enrollees, comments };
+        return { user, course, courseContent, accordion, enrollees, comments, progress };
     } catch (error) {
         console.error('Error getting sections:', error);
-        return { user, course, courseContent, enrollees, comments };
+        return { user, course, courseContent, enrollees, comments, progress };
 
     }
 }
 
 export async function action({ request, params }) {
     const formData = await request.formData();
-    let enrollment, unenrollment, comment;
+    let enrollment, progress, unenrollment, comment;
 
     switch (formData.get('intent')) {
         case 'enroll':
             enrollment = await createCourseEnrollment(params.courseId);
+            progress = await createUserCourseProgress(params.courseId);
             break;
         case 'unenroll':
             unenrollment = await deleteCourseUnenrollment(formData.get('enrollmentId'));
+            progress = await deleteUserCourseProgress(params.courseId);
             break;
         case 'deleteCourse':
             await deleteCourse(params.courseId);
@@ -137,7 +146,7 @@ export async function action({ request, params }) {
 
     }
 
-    return { enrollment, unenrollment, comment };
+    return { enrollment, progress, unenrollment, comment };
 }
 
 function CommentReply({ reply, level }) {
@@ -501,7 +510,7 @@ function WorkoutMediaCard({ workout, open }) {
     return (
         open &&
         <>
-            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 725 }, height: '100%', borderTop: `4px solid ${myTheme.palette.secondary.main}` }}>
+            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', width: { xs: '401.921875px', sm: '100%' }, maxWidth: 400, maxHeight: { xs: 700, md: 725 }, height: '100%', borderTop: `4px solid ${myTheme.palette.secondary.main}` }}>
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}
@@ -549,10 +558,13 @@ export function ResponsiveDialog({ accordionItem, children }) {
         <React.Fragment>
             <ThemeProvider theme={theme} >
                 {/* <YouTubeIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></YouTubeIcon> */}
-                <DescriptionIcon sx={{ position: 'sticky', marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
-                <Typography align='justify' variant="body" onClick={handleClickOpen} sx={{ cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
-                    {children}
-                </Typography>
+                <Box display="flex" alignItems={"center"}>
+                    <DescriptionIcon sx={{ marginRight: 2 }} fontSize="x-small"></DescriptionIcon>
+                    <Typography align='justify' variant="body" onClick={handleClickOpen} sx={{ width: '100%', wordBreak: 'break-word', cursor: 'pointer', '&:hover': { color: 'lightgray' } }}>
+                        {children}
+                    </Typography>
+                </Box>
+
             </ThemeProvider>
 
             <Dialog
@@ -644,10 +656,12 @@ export function ResponsiveDialog({ accordionItem, children }) {
 
 export function ControlledAccordions() {
     const [expanded, setExpanded] = React.useState(false);
-    const { accordion } = useLoaderData();
+    const { accordion, progress} = useLoaderData();
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
+    const fetcher = useFetcher();
+
     return (
         <>
             {

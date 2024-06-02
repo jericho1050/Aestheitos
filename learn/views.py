@@ -36,8 +36,10 @@ from .custom_serializer import *
 
 # API calls (Class based functions)
 
+
 class CustomPagination(PageNumberPagination):
     page_size = 15
+
 
 class UserDetail(APIView):
     """
@@ -150,7 +152,7 @@ class UserProgressList(generics.ListAPIView):
 
 
 class UserProgressDetail(
-    CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
+    CourseLookupMixin, UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView
 ):
     """
     Retrieve and update a user's course progress instance
@@ -167,6 +169,8 @@ class UserProgressDetail(
         serializer.is_valid(raise_exception=True)
         serializer.save_with_auth_user(user, pk)
         return Response(serializer.data)
+    
+
 
 
 class CourseList(CreateAPIMixin, generics.ListCreateAPIView):

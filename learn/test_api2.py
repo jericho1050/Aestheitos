@@ -39,8 +39,8 @@ class UserProgressListAPITestCase(APITestCase):
         Enrollment.objects.create(user=self.user, course=course)
         Enrollment.objects.create(user=self.user, course=course_2)
 
-        UserProgress.objects.create(user=self.user, course=course, weeks_completed=6)
-        UserProgress.objects.create(user=self.user, course=course_2, weeks_completed=1)
+        UserProgress.objects.create(user=self.user, course=course, sections_completed=6)
+        UserProgress.objects.create(user=self.user, course=course_2, sections_completed=1)
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
         self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
@@ -112,7 +112,7 @@ class UserProgressDetailAPITestCase(APITestCase):
         Enrollment.objects.create(user=self.user, course=self.course_3)
 
         UserProgress.objects.create(
-            user=self.user, course=self.course_2, weeks_completed=1
+            user=self.user, course=self.course_2, sections_completed=1
         )
 
         self.authenticated_client = APIClient(enforce_csrf_checks=True)
@@ -146,21 +146,21 @@ class UserProgressDetailAPITestCase(APITestCase):
         # test create user progress with an authenticated client
         response = self.authenticated_client.post(
             reverse("learn:progress-detail", args=[1]),
-            {"weeks_completed": 1},
+            {"sections_completed": 1},
             
         )
 
         # test create user progress with an authenticated client on the same course.
         response_2 = self.authenticated_client.post(
             reverse("learn:progress-detail", args=[1]),
-            {"weeks_completed": 2},
+            {"sections_completed": 2},
             
         )
 
         # test create user progress with an invalid data type
         response_3 = self.authenticated_client.post(
             reverse("learn:progress-detail", args=[3]),
-            {"weeks_completed": "1"},
+            {"sections_completed": "1"},
             
         )
 
@@ -172,26 +172,26 @@ class UserProgressDetailAPITestCase(APITestCase):
         # test create user progress for course that DOESN'T exist
         response_5 = self.authenticated_client.post(
             reverse("learn:progress-detail", args=[6]),
-            {"weeks_completed": 2},
+            {"sections_completed": 2},
             fomrat="json",
         )
 
         # test create user progress with an unauthenticated client
         response_6 = self.unauthenticated_client.post(
             reverse("learn:progress-detail", args=[1]),
-            {"weeks_completed": 1},
+            {"sections_completed": 1},
             
         )
 
         # test create user progress with authenticated client that isn't enrolled to a course
         response_7 = self.authenticated_client_2.post(
             reverse("learn:progress-detail", args=[1]),
-            {"weeks_completed": 1},
+            {"sections_completed": 1},
             
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["weeks_completed"], 1)
+        self.assertEqual(response.data["sections_completed"], 1)
         self.assertEqual(response.data["user"], 1)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_200_OK)
@@ -205,30 +205,30 @@ class UserProgressDetailAPITestCase(APITestCase):
         Ensure we can update a user progress instance
         """
         UserProgress.objects.create(
-            user=self.user, course=self.course, weeks_completed=6
+            user=self.user, course=self.course, sections_completed=6
         )
         UserProgress.objects.create(
-            user=self.user, course=self.course_3, weeks_completed=1
+            user=self.user, course=self.course_3, sections_completed=1
         )
 
         # test update user progress instance with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:progress-detail", args=[2]),
-            {"weeks_completed": 3},
+            {"sections_completed": 3},
             
         )
 
         # test update user progress instance again with an authenticated client
         response_2 = self.authenticated_client.put(
             reverse("learn:progress-detail", args=[2]),
-            {"weeks_completed": 6},
+            {"sections_completed": 6},
             
         )
 
         # test update user progress instance with an invalid data type
         response_3 = self.authenticated_client.put(
             reverse("learn:progress-detail", args=[1]),
-            {"weeks_completed": "10"},
+            {"sections_completed": "10"},
             
         )
 
@@ -240,31 +240,31 @@ class UserProgressDetailAPITestCase(APITestCase):
         # test update user progress instance for course that DOESN'T exist
         response_5 = self.authenticated_client.put(
             reverse("learn:progress-detail", args=[6]),
-            {"weeks_completed": 2},
+            {"sections_completed": 2},
             fomrat="json",
         )
 
         # test update user progress instance with an unauthenticated client
         response_6 = self.unauthenticated_client.put(
             reverse("learn:progress-detail", args=[1]),
-            {"weeks_completed": 1},
+            {"sections_completed": 1},
             
         )
 
         # test update user progress instance with an authenticated client that isn't enrolled to a course
         response_7 = self.authenticated_client_2.put(
             reverse("learn:progress-detail", args=[1]),
-            {"weeks_completed": 1},
+            {"sections_completed": 1},
             
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["weeks_completed"], 3)
+        self.assertEqual(response.data["sections_completed"], 3)
         self.assertEqual(response.data["user"], 1)
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
         self.assertEqual(response_3.status_code, status.HTTP_200_OK)
         self.assertEqual(response_4.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_4.data["weeks_completed"], 10)
+        self.assertEqual(response_4.data["sections_completed"], 10)
         self.assertEqual(response_5.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_7.status_code, status.HTTP_403_FORBIDDEN)

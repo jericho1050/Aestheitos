@@ -35,7 +35,7 @@ export default function Root() {
       <ResponsiveAppBar></ResponsiveAppBar>
       <>
 
-        {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: '100%' }}>
+        {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
           <progress value={null} />
           <p>Loading...</p>
         </Box>)

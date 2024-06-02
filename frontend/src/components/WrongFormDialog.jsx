@@ -20,7 +20,7 @@ const wrongForm2 = {
 function WorkoutMediaWrongFormCard({ wrongForm, open }) {
     return (
         open &&
-        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid red' }}>
+        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: 400, width: { xs: '401.921875px', sm: '100%' }, maxHeight: 645, height: '100%', borderTop: '4px solid red' }}>
             <Box position="relative">
                 <CardMedia
                     component="img"
@@ -31,8 +31,8 @@ function WorkoutMediaWrongFormCard({ wrongForm, open }) {
                 <ClearIcon fontSize="large" className="wrong-icon" />
             </Box>
 
-            <CardContent>
-                <Container width="inherit" sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }} >
+            <CardContent sx={{ padding: '1em' }} >
+                <Container sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }} >
                     <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrongForm.description) }} />
                 </Container>
             </CardContent>
@@ -67,7 +67,7 @@ export default function WrongFormDialog({ wrongFormExercises, open, setOpen }) {
                         </DialogTitle>
                     </Grid>
                     <DialogContent>
-                        <Grid justifyContent={'flex-start'} item container spacing={3} columns={12}>
+                        <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container spacing={3} columns={12}>
                             {
                                 wrongFormExercises.length ?
                                     wrongFormExercises?.map(exercise =>

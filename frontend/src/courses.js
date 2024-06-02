@@ -114,7 +114,7 @@ export async function createSection(id, formData) {
 
 export async function updateSection(id, updates) {
   return sendRequest(`${import.meta.env.VITE_API_URL}section/${id}/course-content`, {
-    method: 'PUT',
+    method: 'PATCH',
     body: updates
   });
 }
@@ -282,6 +282,29 @@ export async function updateCourseComment(id, formData) {
 
 export async function deleteCourseComment(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}comment/${id}/course`, {
+    method: 'DELETE'
+  })
+}
+
+export async function getUserCourseProgress(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}/user/course/${id}/progress`, {
+
+  })
+}
+export async function createUserCourseProgress(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
+    method: 'POST'
+  })
+} 
+
+export async function updateUserCourseProgress(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
+    method: 'PATCH'
+  })
+}
+
+export async function deleteUserCourseProgress(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
     method: 'DELETE'
   })
 }

@@ -20,17 +20,17 @@ class UserProgressTestCase(TestCase):
             weeks=18,
         )
         self.progress = UserProgress.objects.create(
-            user=self.user, course=self.course, weeks_completed=3
+            user=self.user, course=self.course, sections_completed=3
         )
 
     def test_user_progress_creation(self):
         self.assertIsNotNone(self.progress)
-        self.assertEqual(3, self.progress.weeks_completed)
-        self.assertNotEqual(0, self.progress.weeks_completed)
+        self.assertEqual(3, self.progress.sections_completed)
+        self.assertNotEqual(0, self.progress.sections_completed)
 
     def test_user_progress_update(self):
-        self.progress.weeks_completed = 50
-        self.assertEqual(self.progress.weeks_completed, 50)
+        self.progress.sections_completed = 50
+        self.assertEqual(self.progress.sections_completed, 50)
 
 
 class CourseRatingTestCase(TestCase):

@@ -32,7 +32,20 @@ class UserProgress(models.Model):
     course = models.ForeignKey(
         "Course", on_delete=models.CASCADE, related_name="course_progress"
     )
-    weeks_completed = models.IntegerField(default=0, blank=True, null=True)
+    sections_completed = models.IntegerField(default=0, blank=True, null=True)
+
+
+class UserSection(models.Model):
+    """
+    Represents the relationship between a user and a section.
+    """
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    section = models.ForeignKey("Section", on_delete=models.CASCADE)
+    is_clicked = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'section')
 
 
 class CourseRating(models.Model):
@@ -42,7 +55,6 @@ class CourseRating(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="user_ratings")
     course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name="course_rating")
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-
 
 
 class Course(models.Model):
@@ -98,7 +110,6 @@ class Course(models.Model):
         super().save(*args, **kwargs)
 
 
-
 class CourseContent(models.Model):
     """
     Represents a course's overview and it's content
@@ -112,9 +123,8 @@ class CourseContent(models.Model):
 
     def __str__(self):
         return f"( pk: { self.pk } ) Course: {self.course.title}"
-    
-    
-    
+
+
 class Section(models.Model): 
     """
     Represents a section item
@@ -122,13 +132,13 @@ class Section(models.Model):
 
     course_content = models.ForeignKey("CourseContent", on_delete=models.CASCADE, related_name="sections")
     heading = models.CharField(max_length=200)
+    
 
     def delete_with_auth_user(self, user):
         if self.course_content.course.created_by != user:
             raise AuthenticationFailed("Not allowed to delete")
         
         self.delete()
-        
 
 
 class SectionItem(models.Model):
