@@ -1,5 +1,5 @@
 import { useTheme } from "@emotion/react";
-import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemText, TextField, useMediaQuery } from "@mui/material";
+import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemText, TextField, Typography, useMediaQuery } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
 import { styled, alpha, duration } from '@mui/material/styles';
@@ -95,11 +95,13 @@ function SearchInput() {
 
                         return (
                             <Link key={key} to={`/course/${option.id}`} style={{ textDecoration: 'none', color: 'initial' }}>
-                                <ListItem {...otherProps} sx={{ display: 'flex', width: '100%' }}>
+                                <ListItem {...otherProps} sx={{ display: 'flex' }}>
                                     <Box maxWidth={isMediumScreen || isSmallScreen ? '85%' : '125px'}>
                                         <ListItemText className="text-overflow"
-                                            primary={option.title}
-                                        />
+                                        >        <Typography variant="small" sx={{ fontSize: '0.9em' }}>
+                                                {option.title}
+                                            </Typography></ListItemText>
+                                            
                                     </Box>
                                     <Box marginLeft="auto" justifySelf={'flex-end'}>
                                         <img src={option.thumbnail} style={{ width: '30px', height: '49px', objectFit: 'cover' }} />

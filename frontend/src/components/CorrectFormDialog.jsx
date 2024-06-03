@@ -21,19 +21,19 @@ const correctForm2 = {
 function WorkoutMediaCorrectFormCard({ correctForm, open }) {
     return (
         open &&
-        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
+        <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: 400, width: { xs: '401.921875px', sm: '100%' }, maxHeight: 645, height: '100%', borderTop: '4px solid green' }}>
             <Box position="relative">
-            <CardMedia
-                component="img"
-                sx={{ aspectRatio: 16 / 9, }}
-                src={correctForm.demo}
-                alt="workout demo"
-            />
-            <CheckIcon  fontSize="large" className="correct-icon"/>
+                <CardMedia
+                    component="img"
+                    sx={{ aspectRatio: 16 / 9, }}
+                    src={correctForm.demo}
+                    alt="workout demo"
+                />
+                <CheckIcon fontSize="large" className="correct-icon" />
             </Box>
-            <CardContent sx={{ width: 300 }} >
-                <Container width="inherit" sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }} >
-                    <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(correctForm.description) }} />
+            <CardContent sx={{ padding: '1em' }} >
+                <Container sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }} >
+                    <Box width="100%" className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(correctForm.description) }} />
                 </Container>
             </CardContent>
         </Card>
@@ -60,13 +60,13 @@ export default function CorrectFormDialog({ correctFormExercises, open, setOpen 
             >
                 <Grid container >
                     <Grid item container justifyContent={'flex-start'} marginLeft={{ md: 2 }} marginRight={{ md: 2 }}>
-                        <DialogTitle id="responsive-dialog-title" sx={{color: 'green'}}>
+                        <DialogTitle id="responsive-dialog-title" sx={{ color: 'green' }}>
                             {"Correct Exercise Form"}
                         </DialogTitle>
                     </Grid>
                     <DialogContent>
 
-                        <Grid justifyContent={'flex-start'} item container spacing={3} columns={12}>
+                        <Grid justifyContent={{ xs: 'center', sm: 'flex-start' }} item container spacing={3} columns={12}>
                             {
                                 correctFormExercises.length ?
                                     correctFormExercises?.map(exercise =>

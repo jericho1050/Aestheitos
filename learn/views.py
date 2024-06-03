@@ -36,8 +36,10 @@ from .custom_serializer import *
 
 # API calls (Class based functions)
 
+
 class CustomPagination(PageNumberPagination):
     page_size = 15
+
 
 class UserDetail(APIView):
     """
@@ -150,7 +152,7 @@ class UserProgressList(generics.ListAPIView):
 
 
 class UserProgressDetail(
-    CourseLookupMixin, UpdateAPIMixin, generics.RetrieveUpdateAPIView
+    UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView
 ):
     """
     Retrieve and update a user's course progress instance
@@ -167,6 +169,26 @@ class UserProgressDetail(
         serializer.is_valid(raise_exception=True)
         serializer.save_with_auth_user(user, pk)
         return Response(serializer.data)
+
+    def get_object(self):
+        user = user_authentication(self.request)
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, course=self.kwargs["pk"], user=user)
+        return obj
+    
+class UserSectionView(generics.RetrieveUpdateAPIView):
+    """
+    Retrieve and Update a user's clicked or unclicked 'Section or Accordion checkbox'
+    """
+    serializer_class = UserSectionSerializer
+    queryset = UserSection.objects.all()
+
+    def get_object(self):
+        user = user_authentication(self.request)
+        return UserSection.objects.get(user=user, section=self.kwargs['pk'])
+    
+
+    
 
 
 class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
@@ -231,9 +253,18 @@ class SectionList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = SectionSerializer
 
     def get_queryset(self):
-        return Section.objects.filter(course_content=self.kwargs["pk"])
+        sections = Section.objects.filter(course_content=self.kwargs["pk"])
+        user = get_auth_user(self.request) # retrieve the user
+        course = CourseContent.objects.get(id=self.kwargs["pk"]).course.id # retrieve the course
+        user_existing_sections = UserSection.objects.filter(user=user).values_list('section', flat=True)
+        if user and Enrollment.objects.filter(course=course, user=user).exists():
+            for section in sections:
+                if section.id in user_existing_sections: 
+                    continue
+                UserSection.objects.create(user=user, section=section)
 
-
+        return sections 
+    
 class SectionDetail(
     DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
 ):

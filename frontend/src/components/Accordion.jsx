@@ -1,7 +1,8 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, TextField, Typography } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, Popover, TextField, Typography } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { ResponsiveDialog as AccordionItemDialogCreate } from "../routes/create";
+// import { ResponsiveDialog as AccordionItemDialogCreate } from "../routes/create";
+
 import { useEffect, useRef, useState } from "react";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import AddAccordionItem from "./AddAccordionItem";
@@ -9,6 +10,8 @@ import { useImmerAtom } from "jotai-immer";
 import { accordionsAtom } from "../atoms/accordionsAtom";
 import { ResponsiveDialog as AccordionItemDialog } from "../routes/course";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { ResponsiveDialog as AccordionItemDialogCreate } from "./AccordionItem";
+import { useFetcher, useLoaderData } from "react-router-dom";
 
 export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelete, onChange, handleChange, expanded, accordion }) {
     const { handleDeleteAccordionItem: onClickDeleteItem, handleEditAccordionItem: onChangeItem, handleAddAccordionItem: onClickAddItem } = eventHandlers;
@@ -65,7 +68,7 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
         )
     } else {
         accordionHeadingContent = (
-            <Typography fontWeight="bold" align='justify' sx={{ maxWidth: {xs: 400, sm: 500, lg: 725}, flexShrink: 0 }} className="heading"
+            <Typography fontWeight="bold" align='justify' sx={{ width: '100%', flexShrink: 0 }}
             >
                 {accordion.heading}
             </Typography>
@@ -73,13 +76,13 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
     }
 
     return (
-        <Accordion expanded={isEditing ? false : expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%' }}>
+        <Accordion expanded={isEditing ? false : expanded === accordion.id} onChange={handleChange(accordion.id)}>
             <AccordionSummary
                 expandIcon={<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
                     {accordion.id !== 0 &&
                         (<>
-                            <Button onClick={() => setIsEditing(true)} sx={{ paddingLeft: 2 }} startIcon={!isEditing ? <EditIcon /> : null} size="small" />
-                            <Button onClick={() => onClickDelete(accordion.id)} sx={{ paddingLeft: 2 }} startIcon={!isEditing ? <DeleteIcon /> : null} size="small" />
+                            <Button onClick={() => setIsEditing(true)} sx={{ paddingLeft: 2, display: isEditing ? 'none' : 'flex' }} startIcon={<EditIcon />} size="small" />
+                            <Button onClick={() => onClickDelete(accordion.id)} sx={{ paddingLeft: 2, display: isEditing ? 'none' : 'flex' }} startIcon={<DeleteIcon />} size="small" />
                         </>
                         )
                     }
@@ -134,23 +137,71 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
 
     )
 }
+
 export function AccordionSection({ handleChange, expanded, accordion }) {
+    const { user, course, enrollees } = useLoaderData();
+    const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course === course.id);
+    const isInstructor = user.user_id === course.created_by;
+    const label = { inputProps: { 'aria-label': 'Checkbox' } };
+    const [anchorEl, setAnchorEl] = useState(null);
+    const fetcher = useFetcher();
+
+    const checked = fetcher.formData
+        ? fetcher.formData.get("is_clicked") === true
+        : accordion.is_clicked;
 
     const accordionHeadingContent = (
-        <Typography fontWeight="bold" align='justify' sx={{ maxWidth: '96%', flexShrink: 0 }} >
+        <Typography fontWeight="bold" align='justify' sx={{ width: '100%', flexShrink: 0 }} >
             {accordion.heading}
         </Typography>
     )
 
+    const handlePopoverOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handlePopoverClose = () => {
+        setAnchorEl(null);
+    };
+
+    function handleClickCheckbox(event, accordion) {
+        fetcher.submit({ intent: 'updateUserSection', sectionId: accordion.id, is_clicked: !accordion.is_clicked }, { method: 'PATCH' })
+        event.stopPropagation();
+    }
+
+    const open = Boolean(anchorEl);
     return (
-        <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)} sx={{ maxWidth: '100%' }}>
+        <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)}>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1bh-content"
                 id="panel1bh-header"
                 sx={{ padding: '3%' }}
             >
-                {accordionHeadingContent}
+                <Box display="flex" alignItems="center">
+                    <Checkbox {...label} checked={checked ? true : false} onClick={e => handleClickCheckbox(e, accordion)} sx={{ display: isInstructor || !enrollment ? 'none' : 'inline-block' }} onMouseOver={handlePopoverOpen} onMouseLeave={handlePopoverClose} />
+                    {accordionHeadingContent}
+                </Box>
+                <Popover
+                    id="mouse-over-popover"
+                    sx={{
+                        pointerEvents: 'none',
+                    }}
+                    open={open}
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                    }}
+                    onClose={handlePopoverClose}
+                    disableRestoreFocus
+                >
+                    <Typography sx={{ p: 1 }}>Completed</Typography>
+                </Popover>
             </AccordionSummary>
 
             {accordion.items ? accordion.items?.map((item) => (

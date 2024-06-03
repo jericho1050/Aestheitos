@@ -65,6 +65,25 @@ def user_authentication(request):
     return user
 
 
+def get_auth_user(request):
+    """
+    User-look-up function. returns the user instance based on the JWT payload
+    """
+    token = request.COOKIES.get("access")
+
+    if not token:
+        return None
+
+    try:
+        payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=["HS256"])
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return None
+
+    user = User.objects.filter(id=payload["user_id"]).first()
+
+    return user
+
+
 def is_valid_ownership(user, course_id):
     """
     we check if this course belongs to the instructor(creator of the course)
@@ -92,7 +111,10 @@ class CreateAPIMixin(CreateModelMixin):
         user = user_authentication(self.request)
 
         # Check daily limit for Course Creation
-        from learn.serializers import CourseSerializer # solution to NameError: name 'CourseSerializer' is not defined
+        from learn.serializers import (
+            CourseSerializer,
+        )  # solution to NameError: name 'CourseSerializer' is not defined
+
         if isinstance(serializer, CourseSerializer):
             serializer.check_daily_limit(user)
         # checking for additional arguements i.e pk so that our method will be flexible/ resuable for different serializers
@@ -116,6 +138,7 @@ class UpdateAPIMixin(UpdateModelMixin):
         user = user_authentication(self.request)
         serializer.save_with_auth_user(user, self.kwargs["pk"], update=True)
 
+
 class DeleteAPIMixin(DestroyModelMixin):
     """
     Apply this mixin for instances that requires authentication before deleting.
@@ -129,12 +152,10 @@ class DeleteAPIMixin(DestroyModelMixin):
 
 class CourseLookupMixin:
     """
-    Apply this mixin to a view that depends on the course_id (i.e CourseContentDetail and UserProgress) for retrieving the snippet instance or object.
+    Apply this mixin to a view that depends on the course_id (i.e CourseContentDetail) for retrieving the snippet instance or object.
     """
 
     def get_object(self):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, course=self.kwargs["pk"])
         return obj
-
-

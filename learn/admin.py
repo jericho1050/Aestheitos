@@ -12,6 +12,7 @@ class UserAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(User, UserAdmin)
 admin.site.register(UserProgress)
+admin.site.register(UserSection)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseContent)
 admin.site.register(Section)
