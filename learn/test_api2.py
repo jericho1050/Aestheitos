@@ -267,7 +267,7 @@ class UserProgressDetailAPITestCase(APITestCase):
         self.assertEqual(response_4.data["sections_completed"], 10)
         self.assertEqual(response_5.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_6.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response_7.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_7.status_code, status.HTTP_404_NOT_FOUND) # well its 404 because user is not even enrolled to begin with
 
 
 class CourseRatingViewAPITestCase(APITestCase):
