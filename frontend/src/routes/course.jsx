@@ -12,7 +12,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { createCourseComment, createCourseEnrollment, createUserCourseProgress, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, deleteUserCourseProgress, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getUserCourseProgress, getWorkouts, getWrongExercises, updateCourse, updateCourseComment, updateSection, updateUserCourseProgress } from "../courses";
+import { createCourseComment, createCourseEnrollment, createUserCourseProgress, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, deleteUserCourseProgress, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getUserCourseProgress, getUserSection, getWorkouts, getWrongExercises, updateCourse, updateCourseComment, updateSection, updateUserCourseProgress, updateUserSection } from "../courses";
 import { Form, Link, redirect, useFetcher, useLoaderData, useNavigate, useRevalidator, useSubmit } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
@@ -33,6 +33,7 @@ import AlertDialog from "../components/AreYouSureDialog";
 import image from '../static/images/noimg.png'
 import CustomizedSnackbar from "../components/Snackbar";
 import AuthenticationWall from "../components/AuthenticationWall";
+import parseDateTime from "../helper/parseDateTime";
 
 
 let theme = createTheme()
@@ -73,6 +74,7 @@ export async function loader({ params }) {
         const sections = await getSections(courseContent.id);
         const accordion = await Promise.all(sections.map(async (section) => {
             try {
+                const userSection = await getUserSection(section.id);
                 const sectionItems = await getSectionItems(section.id);
                 const itemWorkouts = await Promise.all(sectionItems.map(async (item) => {
                     try {
@@ -97,7 +99,7 @@ export async function loader({ params }) {
                         return item;
                     }
                 }));
-                return { ...section, items: itemWorkouts };
+                return { ...section, items: itemWorkouts, is_clicked: userSection?.is_clicked };
             } catch (error) {
                 console.error('Error getting section items:', error);
                 return section;
@@ -114,7 +116,7 @@ export async function loader({ params }) {
 
 export async function action({ request, params }) {
     const formData = await request.formData();
-    let enrollment, progress, unenrollment, comment;
+    let enrollment, progress, unenrollment, userSection, comment;
 
     switch (formData.get('intent')) {
         case 'enroll':
@@ -124,6 +126,9 @@ export async function action({ request, params }) {
         case 'unenroll':
             unenrollment = await deleteCourseUnenrollment(formData.get('enrollmentId'));
             progress = await deleteUserCourseProgress(params.courseId);
+            break;
+        case 'updateUserSection':
+            userSection = await updateUserSection(formData.get('sectionId'), formData);
             break;
         case 'deleteCourse':
             await deleteCourse(params.courseId);
@@ -146,7 +151,7 @@ export async function action({ request, params }) {
 
     }
 
-    return { enrollment, progress, unenrollment, comment };
+    return { enrollment, progress, unenrollment, userSection, comment };
 }
 
 function CommentReply({ reply, level }) {
@@ -656,11 +661,11 @@ export function ResponsiveDialog({ accordionItem, children }) {
 
 export function ControlledAccordions() {
     const [expanded, setExpanded] = React.useState(false);
-    const { accordion, progress} = useLoaderData();
+    const { accordion, progress } = useLoaderData();
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
-    const fetcher = useFetcher();
+
 
     return (
         <>
@@ -690,6 +695,7 @@ export default function Course() {
     const fetcher = useFetcher();
     const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
     const submit = useSubmit();
+    const [last_updated_day, last_updated_hour] = parseDateTime(course.course_updated);
     function handleClickEnroll() {
         if (!isAuthenticated) {
             navigate('/signin');
@@ -752,7 +758,7 @@ export default function Course() {
                         (<>
 
                             <AlertDialog onClickDelete={handleClickDelete} intent="deleting course" />
-                            <Box position="fixed" bottom="20px" right="20px">
+                            <Box position="fixed" bottom="20px" right="20px" zIndex={999}>
                                 <Form action="edit">
                                     <Fab color="primary" size={isSmallScreen ? 'medium' : 'large'} aria-label="edit" type="submit">
                                         <EditIcon />
@@ -824,7 +830,8 @@ export default function Course() {
                                     </Grid>
                                     <Grid item xs={3} md={6} >
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
-                                            <b>Last updated:</b> {course.course_updated}
+                                            <b>Last updated:</b> {last_updated_day === 0 || last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
+
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={3} md={6}>

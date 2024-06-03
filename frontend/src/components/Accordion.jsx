@@ -139,11 +139,17 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
 }
 
 export function AccordionSection({ handleChange, expanded, accordion }) {
-    const { user, course,  enrollees } = useLoaderData();
+    const { user, course, enrollees } = useLoaderData();
     const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course === course.id);
     const isInstructor = user.user_id === course.created_by;
     const label = { inputProps: { 'aria-label': 'Checkbox' } };
     const [anchorEl, setAnchorEl] = useState(null);
+    const fetcher = useFetcher();
+
+    const checked = fetcher.formData
+        ? fetcher.formData.get("is_clicked") === true
+        : accordion.is_clicked;
+
     const accordionHeadingContent = (
         <Typography fontWeight="bold" align='justify' sx={{ width: '100%', flexShrink: 0 }} >
             {accordion.heading}
@@ -157,10 +163,12 @@ export function AccordionSection({ handleChange, expanded, accordion }) {
     const handlePopoverClose = () => {
         setAnchorEl(null);
     };
-    function handleClickCheckbox(event) {
-        // if section is not yet checked increment else decrement
+
+    function handleClickCheckbox(event, accordion) {
+        fetcher.submit({ intent: 'updateUserSection', sectionId: accordion.id, is_clicked: !accordion.is_clicked }, { method: 'PATCH' })
         event.stopPropagation();
     }
+
     const open = Boolean(anchorEl);
     return (
         <Accordion expanded={expanded === accordion.id} onChange={handleChange(accordion.id)}>
@@ -171,7 +179,7 @@ export function AccordionSection({ handleChange, expanded, accordion }) {
                 sx={{ padding: '3%' }}
             >
                 <Box display="flex" alignItems="center">
-                    <Checkbox {...label} defaultChecked={accordion.is_clicked} onClick={handleClickCheckbox} sx={{ display: isInstructor || !enrollment ? 'none' : 'inline-block' }} onMouseOver={handlePopoverOpen} onMouseLeave={handlePopoverClose} />
+                    <Checkbox {...label} checked={checked ? true : false} onClick={e => handleClickCheckbox(e, accordion)} sx={{ display: isInstructor || !enrollment ? 'none' : 'inline-block' }} onMouseOver={handlePopoverOpen} onMouseLeave={handlePopoverClose} />
                     {accordionHeadingContent}
                 </Box>
                 <Popover

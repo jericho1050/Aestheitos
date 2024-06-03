@@ -67,6 +67,12 @@ class UserProgressSerializer(ModelSerializer):
         self.save(user=user, course=course)
 
 
+class UserSectionSerializer(ModelSerializer):
+    class Meta:
+        model = UserSection
+        fields= "__all__"
+        read_only_fields = ["user", "section"]
+
 class CourseRatingSerializer(ModelSerializer):
     class Meta:
         model = CourseRating

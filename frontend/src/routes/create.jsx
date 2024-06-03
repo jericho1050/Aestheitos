@@ -358,6 +358,9 @@ export default function CreateCourse() {
     const navigation = useNavigation();
     const [, dispatch] = useAtom(snackbarReducerAtom);
     const submit = useSubmit(); 
+    
+
+    // Yes, I kind of admit this use effect is bad and will probably revise it. should've gone with an imperative submission with fetcher.submit().
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
         // !resonse.ok then there's a message

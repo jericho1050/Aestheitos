@@ -308,3 +308,19 @@ export async function deleteUserCourseProgress(id) {
     method: 'DELETE'
   })
 }
+
+export async function getUserSection(id) {
+  
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/section/${id}`, {
+
+  })
+}
+
+export async function updateUserSection(id, formData) {
+  // btw, this interaction between the user and section primarily checks whether this section is completed or uncompleted.
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/section/${id}`, {
+    method: 'PATCH',
+    body: formData 
+  })
+
+}
