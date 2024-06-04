@@ -6,6 +6,7 @@ import CustomizedSnackbar from "../components/Snackbar";
 
 export async function loader() {
     const courses = await getCourses();
+    courses.sort((a, b) => new Date(b.course_updated) - new Date(a.course_updated));
 
     return { courses };
 }
