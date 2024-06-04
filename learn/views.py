@@ -185,7 +185,11 @@ class UserSectionView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user = user_authentication(self.request)
-        return UserSection.objects.get(user=user, section=self.kwargs['pk'])
+        try:
+            user_section = UserSection.objects.get(user=user, section=self.kwargs['pk'])
+        except UserSection.DoesNotExist:
+            return Response(status=404)
+        return user_section
     
 
     

@@ -52,7 +52,6 @@ function ResponsiveAppBar() {
   React.useEffect(() => {
     // this is would only execute once regardless of how many times this component rerenders
     if (!didRun.current && (user.is_staff || user.is_superuser)) {
-      console.log('this is true wtf?')
       pages.push('Pending');
       didRun.current = true;
     }

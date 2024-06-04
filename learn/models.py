@@ -93,7 +93,7 @@ class Course(models.Model):
     description = models.TextField()
     thumbnail = models.ImageField(upload_to="images/", null=True, blank=True)
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES)
-    course_created = models.DateField(null=True, blank=True)
+    course_created = models.DateField(null=True, blank=True) # course_created is manually initiated in CourseSerializer
     course_updated = models.DateTimeField(null=True, blank=True, auto_now=True)
     created_by = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="creator"

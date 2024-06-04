@@ -1,8 +1,10 @@
 import { Box, Grid, InputAdornment, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import getEmbedUrl from "../helper/getEmbedUrl";
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import Plyr from "plyr-react"
+import "plyr-react/plyr.css"
 
-export default function PreviewCourseTextField({isError, setIsError, courseContent, setCourseContent, actionData}) {
+export default function PreviewCourseTextField({ isError, setIsError, courseContent, setCourseContent, actionData }) {
     let theme = createTheme();
     theme = responsiveFontSizes(theme);
 
@@ -60,18 +62,20 @@ export default function PreviewCourseTextField({isError, setIsError, courseConte
                         error={isError}
                     />
                 </Box>
-                <Grid item width={'100%'}>
-                    {getEmbedUrl(courseContent.preview) ?
-                        <Box mt={4} className="course-container" component={'div'}>
-                            <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
-                        </Box>
-                        :
-                        <Box mb="5%" mt="5%" component="div" height={200} className="course-lecture-container" alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                            <Typography variant="body" align={'center'}>
-                                Your video will show up here
-                            </Typography>
-                        </Box>
-                    }
+                <Grid item xs>
+                    <Box mt={4} className="course-preview-container" component={'div'}>
+                        <Plyr source={{
+                            type: 'video',
+                            sources: [
+                                {
+                                    src: getEmbedUrl(courseContent.preview) || '',
+                                    provider: 'youtube',
+                                },
+                            ],
+                        }}
+                        />
+                    </Box>
+
                 </Grid>
             </Grid>
         </>

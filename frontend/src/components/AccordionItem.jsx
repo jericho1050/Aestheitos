@@ -11,6 +11,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import demoGif from "../static/images/chinupVecs.gif";
 import InputFileUpload from "./InputFileUpload";
+import Plyr from "plyr-react"
+import "plyr-react/plyr.css"
 
 
 let theme = createTheme()
@@ -33,7 +35,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;
     const isFirstRender = React.useRef(true); const initialDescription = React.useRef(description); const initialLecture = React.useRef(lecture); // necessary variables to avoid this side effect from running on the first render
-    
+
     React.useEffect(() => {
         if (actionData?.message) { // if there's a message from action server. then there's an error
             setIsError(true);
@@ -42,7 +44,7 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
 
     React.useEffect(() => {
         if (isEditing) {
-            
+
             // debounce event handler
             const handler = setTimeout(() => {
                 onChange({
@@ -324,18 +326,22 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
                                     <Grid justifyContent={'center'} item container>
                                         <YoutubeInput isError={isError} actionData={actionData} lecture={lecture} onChange={setLecture} itemId={itemId} />
                                         <Grid item xs={10}>
-                                            {getEmbedUrl(accordionItem.lecture) ?
-                                                <Box mt={4} className="course-lecture-container" component={'div'}>
-                                                    <iframe className="course-video-lecture" src={getEmbedUrl(accordionItem.lecture)} title="vide-lecture here" allowFullScreen></iframe>
-                                                </Box>
-                                                :
-                                                <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                                                    <Typography variant="body" align={'center'}>
-                                                        Your video will show up here
-                                                    </Typography>
-                                                </Box>
-    
-                                            }
+                                            <Box mt={4} className="course-preview-container" component={'div'}>
+                                                <Plyr source={{
+                                                    type: 'video',
+                                                    sources: [
+                                                        {
+                                                            src: getEmbedUrl(accordionItem.lecture) || '',
+                                                            provider: 'youtube',
+                                                        },
+                                                    ],
+                                                }}
+                                                />
+                                            </Box>
+
+
+
+
                                         </Grid>
                                         <Grid item mt={4} xs={10} justifySelf={'flex-start'}>
                                             <ThemeProvider theme={theme}>

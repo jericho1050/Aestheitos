@@ -34,7 +34,8 @@ import image from '../static/images/noimg.png'
 import CustomizedSnackbar from "../components/Snackbar";
 import AuthenticationWall from "../components/AuthenticationWall";
 import parseDateTime from "../helper/parseDateTime";
-
+import Plyr from "plyr-react"
+import "plyr-react/plyr.css"
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -873,24 +874,35 @@ export default function Course() {
                             <Grid item alignSelf={'flex-start'}>
                                 <Box lineHeight={'1.4em'} className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(courseContent.overview) }} />
                             </Grid>
-                            <Grid item>
-                                <ThemeProvider theme={theme}>
-                                    <Typography sx={{ textAlign: 'left' }} variant="h6" fontSize={'x-small'}>
+                            <Grid item xs width={'100%'}>
+                                    <Typography sx={{ textAlign: 'left' }} variant="caption" fontSize={'1em'}>
                                         Preview this course
                                     </Typography>
-                                </ThemeProvider>
                                 <br />
                                 {
                                     getEmbedUrl(courseContent.preview) ?
 
 
-                                        (<Box sx={{ maxWidth: 'inherit' }} component={'div'}>
-                                            <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe>
+                                        (<Box className="course-preview-container" component={'div'}>
+                                            {/* <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe> */}
+                                            <Plyr source={{
+                                                type: 'video',
+                                                sources: [
+                                                    {
+                                                        src: getEmbedUrl(courseContent.preview),
+                                                        provider: 'youtube',
+                                                    },
+                                                ],
+                                            }} />
+
                                         </Box>)
                                         :
-                                        (<Box sx={{ maxWidth: 'inherit' }} component={'div'}>
-                                            <iframe className="course-preview" src={''} title="vide-lecture here" allowFullScreen></iframe>
-                                        </Box>)
+                                        (
+                                            <Box mb="5%" mt="5%" height={200} display="flex" className="course-lecture-container" justifyContent="center" alignItems={'center'} sx={{ border: '2px dotted black' }}>
+                                                <Typography variant="body" align={'center'}>
+                                                   No preview :/
+                                                </Typography>
+                                            </Box>)
                                 }
                             </Grid>
                             <br />
