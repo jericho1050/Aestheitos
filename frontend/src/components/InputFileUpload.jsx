@@ -5,7 +5,7 @@ import { Typography } from '@mui/material';
 import { useAtom } from 'jotai';
 import { isErrorAtom } from '../atoms/isErrorAtom';
 
-const VisuallyHiddenInput = styled('input')({
+export const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
     clipPath: 'inset(50%)',
     height: 1,
@@ -17,26 +17,27 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-
-export default function InputFileUpload({name, text, onChange, workoutId, wrongFormId, correctFormId }) {
-    const [,setIsError] = useAtom(isErrorAtom);
+// for course
+export default function InputFileUpload({ name, text, onChange, workoutId, wrongFormId, correctFormId }) {
+    const [, setIsError] = useAtom(isErrorAtom);
     return (
         <>
-        <Button
-            component="label"
-            role={undefined}
-            variant="outlined"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-        >
-            Upload {text}
-            <VisuallyHiddenInput type="file" accept="image/*" onChange={e => { 
-                onChange(e, workoutId, wrongFormId, correctFormId);
-                setIsError(false);
+            <Button
+                component="label"
+                role={undefined}
+                variant="outlined"
+                tabIndex={-1}
+                startIcon={<CloudUploadIcon />}
+            >
+                Upload {text}
+                <VisuallyHiddenInput type="file" accept="image/*" onChange={e => {
+                    onChange(e, workoutId, wrongFormId, correctFormId);
+                    setIsError(false);
                 }} name={name} />
-        </Button>
+            </Button>
 
-    </>
+        </>
 
     );
 }
+

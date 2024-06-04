@@ -475,7 +475,7 @@ export default function CreateCourse() {
                                         <Paper elevation={4} sx={{ height: { xs: 'auto', md: isError ? 630 : 600, }, width: 'auto', maxWidth: { md: 450 }, mb: '5%' }}  >
                                             <Grid item justifySelf={'center'}>
                                                 <Container sx={{ padding: '4%', maxWidth: { xs: 700, md: 400 } }} component="div">
-                                                    <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.image == image ? 'fill' : 'cover', border: '1px dashed black' }} />
+                                                    <img src={previewImage ? previewImage : image} className="course-thumbnail" style={{ objectFit: course.thumbnail == image ? 'fill' : 'cover', border: '1px dashed black' }} />
                                                 </Container>
                                             </Grid>
                                             <Grid item container wrap="nowrap" alignItems={'center'} direction="column" spacing={2}>

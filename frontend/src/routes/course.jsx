@@ -33,7 +33,7 @@ import AlertDialog from "../components/AreYouSureDialog";
 import image from '../static/images/noimg.png'
 import CustomizedSnackbar from "../components/Snackbar";
 import AuthenticationWall from "../components/AuthenticationWall";
-import parseDateTime from "../helper/parseDateTime";
+import parseCourseDateTime from "../helper/parseDateTime";
 import Plyr from "plyr-react"
 import "plyr-react/plyr.css"
 
@@ -696,7 +696,7 @@ export default function Course() {
     const fetcher = useFetcher();
     const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
     const submit = useSubmit();
-    const [last_updated_day, last_updated_hour] = parseDateTime(course.course_updated);
+    const [last_updated_day, last_updated_hour] = parseCourseDateTime(course.course_updated);
     function handleClickEnroll() {
         if (!isAuthenticated) {
             navigate('/signin');
@@ -796,7 +796,7 @@ export default function Course() {
 
 
                                 <Typography sx={{ maxWidth: { md: 250, xs: 300, sm: 400 }, mt: 2 }} noWrap>
-                                    <b>Instructor:</b> {course.created_by_name} </Typography>
+                                    Instructor: <b>{course.created_by_name} </b></Typography>
 
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
                                     {course.price != 0 && <AttachMoneyIcon fontSize="large" />}
@@ -849,7 +849,7 @@ export default function Course() {
                             </ThemeProvider>
                         </Paper>
                         <ThemeProvider theme={theme}>
-                            <Typography fontWeight="bold" variant="h3" sx={{ wordBreak: isMediumScreen ? 'break-word' : 'normal' }}>
+                            <Typography fontWeight="bold" variant="h2" sx={{ wordBreak: isMediumScreen ? 'break-word' : 'normal' }}>
                                 {course.title}
                             </Typography>
                         </ThemeProvider>
@@ -875,9 +875,9 @@ export default function Course() {
                                 <Box lineHeight={'1.4em'} className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(courseContent.overview) }} />
                             </Grid>
                             <Grid item xs width={'100%'}>
-                                    <Typography sx={{ textAlign: 'left' }} variant="caption" fontSize={'1em'}>
-                                        Preview this course
-                                    </Typography>
+                                <Typography sx={{ textAlign: 'left' }} variant="caption" fontSize={'1em'}>
+                                    Preview this course
+                                </Typography>
                                 <br />
                                 {
                                     getEmbedUrl(courseContent.preview) ?
@@ -900,7 +900,7 @@ export default function Course() {
                                         (
                                             <Box mb="5%" mt="5%" height={200} display="flex" className="course-lecture-container" justifyContent="center" alignItems={'center'} sx={{ border: '2px dotted black' }}>
                                                 <Typography variant="body" align={'center'}>
-                                                   No preview :/
+                                                    No preview :/
                                                 </Typography>
                                             </Box>)
                                 }

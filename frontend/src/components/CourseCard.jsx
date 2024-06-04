@@ -32,7 +32,7 @@ export default function CourseCard(props) {
               }}
             />
             <CardContent>
-              <Typography mb={2} height={'4em'} gutterBottom fontFamily={'Play'} fontSize={'1rem'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
+              <Typography height={'4em'} gutterBottom fontFamily={'Play'} fontSize={'1.8em'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
                 {truncateText(props.title, 50)} {/* Replace 2nd argument with the maximum number of words you want */}
               </Typography>
               <Box maxHeight={'2em'} height={'100%'} maxWidth={250} sx={{ wordBreak: 'break-word' }}>
@@ -44,7 +44,7 @@ export default function CourseCard(props) {
               <Grid marginBottom={2} spacing={2} container>
                 <Grid item container justifyContent={'space-between'}>
                   <Grid item>
-                    <Typography noWrap fontSize="small" fontWeight="bold" variant='small' color="text.secondary">
+                    <Typography noWrap fontSize="smaller" fontWeight="bold" variant='small' color="text.secondary">
                       {props.created_by_name}
                     </Typography>
                   </Grid>
@@ -68,7 +68,7 @@ export default function CourseCard(props) {
                 </Grid>
                 <Grid item container justifyContent={'space-between'}>
                   <Grid item>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', ml: -1}}>
                       <AttachMoneyIcon />
                       <Typography fontWeight="bolder" fontSize="large" variant='button'>{props.price == 0.00 ? 'Free' : props.price}</Typography>
                     </Box>

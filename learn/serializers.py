@@ -37,6 +37,7 @@ class UserDetailSerializer(ModelSerializer):
             "profile_pic",
             "is_staff",
             "is_superuser",
+            "date_joined"
         ]
 
 

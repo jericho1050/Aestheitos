@@ -25,11 +25,11 @@ import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined
 import SearchBar from './SearchBar';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
-import parseDateTime from '../helper/parseDateTime';
+import parseCourseDateTime from '../helper/parseDateTime';
 
 const pages = ['Courses', 'Blog', 'Create'];
-const settings = ['Profile', 'Account', 'Enrolled', 'Logout'];
-
+const settings = ['Profile',  'Enrolled', 'Logout'];
+// 'Account',
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -59,8 +59,8 @@ function ResponsiveAppBar() {
 
   // attach event listener to  each setting
   const settingsHandlers = {
-    'Profile': () => { },
-    'Account': () => { },
+    'Profile': () => navigate(`/profile/user/${user.user_id}`),
+    // 'Account': () => { },
     'Enrolled': () => { },
     'Logout': () => handleLogout(dispatch)
   }
@@ -257,7 +257,7 @@ function ResponsiveAppBar() {
                           Notifications
                         </Typography>
                         {userCourses.map(course => {
-                          const [last_updated_day, last_updated_hour] = parseDateTime(course.course_updated);
+                          const [last_updated_day, last_updated_hour] = parseCourseDateTime(course.course_updated);
                           return (<Grid key={course.id} item xs={12}>
 
                             <List>

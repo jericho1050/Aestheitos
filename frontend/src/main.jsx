@@ -23,7 +23,8 @@ import EditCourse from './routes/edit';
 import { loader as editCourseLoader, action as editAction } from './routes/edit';
 import { Pending } from './routes/pending';
 import { loader as pendingCoursesLoader } from './routes/pending';
-
+import Profile from './routes/profile';
+import { loader as profileLoader } from './routes/profile';
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -78,6 +79,12 @@ const router = createBrowserRouter([
             path: "pending",
             element: <Pending />,
             loader: pendingCoursesLoader
+          },
+          {
+            path: "profile/user/:userId",
+            element: <Profile />,
+            loader: profileLoader
+
           }
         ]
       }
@@ -85,6 +92,7 @@ const router = createBrowserRouter([
   },
   // if you're wondering why I didn't use react-router's action route.
   // yes, i was dumb, i overlooked it and i think i was still studying react-router when implementing the signUp and signIn routes
+  // so forgive my ignorance
   {
     path: "/signup",
     element: <SignUp />
