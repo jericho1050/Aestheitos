@@ -264,6 +264,13 @@ export async function getUser() {
 
   });
 }
+export async function updateUser(formData) {
+  // this only handles Profile Picture
+  return sendRequest(`${import.meta.env.VITE_API_URL}user-detail`, {
+    method: 'PATCH',
+    body: formData
+  });
+}
 
 export async function createCourseComment(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}comments/course/${id}`, {

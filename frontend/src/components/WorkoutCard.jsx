@@ -42,6 +42,7 @@ export default function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChan
     }, [workoutDescription])
 
     function handleImageUpload(event, workoutId, wrongFormId, correctFormId) {
+        // imperatively send the request without action route (fetcher.submit() can't handle images even with multipart/formData as ecntype)
         // update image for wrongForm and correctForm exercise demo
         const file = event.target.files[0];
         const reader = new FileReader();

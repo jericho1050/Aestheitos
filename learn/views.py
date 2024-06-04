@@ -43,7 +43,7 @@ class CustomPagination(PageNumberPagination):
 
 class UserDetail(APIView):
     """
-    Retrieve a user instance
+    Retrieve and update a user instance
     """
 
     def get(self, request):
@@ -58,7 +58,14 @@ class UserDetail(APIView):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return Response(UserDetailSerializer(user).data)
-
+    
+    def patch(self, request):
+        user = user_authentication(request)
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(status=status.HTTP_200_OK)
 
 class RegisterView(APIView):
     """

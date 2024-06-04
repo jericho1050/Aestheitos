@@ -36,7 +36,7 @@ export function Pending() {
                         {/* Load lists of Courses that are approved only */}
                         {courses.map(course => {
                             return (
-                                course.status === 'P' ?
+                                course.status === 'P' && !course.is_draft ?
                                     <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
                                         <CourseCard  {...course} />
                                     </Grid>
