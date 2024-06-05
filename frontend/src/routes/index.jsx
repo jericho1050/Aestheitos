@@ -1,11 +1,10 @@
-import { Box, Container, Grid, ThemeProvider, Typography, colors, createTheme, responsiveFontSizes, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Container, Grid, Pagination, Stack, TextField, ThemeProvider, Typography, colors, createTheme, responsiveFontSizes, useMediaQuery, useTheme } from "@mui/material";
 import { useSpring, animated, useSprings } from "@react-spring/web";
 import { useEffect, useState } from "react";
 import CourseCard from "../components/CourseCard";
 
 import { getCourses } from "../courses";
-import { useLoaderData } from "react-router-dom";
-import { transform } from "lodash";
+import { useLoaderData, useSubmit, Form } from "react-router-dom";
 import CustomizedSnackbar from "../components/Snackbar";
 import { useAtom } from "jotai";
 import { snackbarReducerAtom } from "../atoms/snackbarAtom";
@@ -22,8 +21,10 @@ const images = [
     "src/static/images/secondBG copy.png",
     "src/static/images/thirdBG.png"
 ]
-export async function loader() {
-    const courses = await getCourses();
+export async function loader({ request }) {
+    const url = new URL(request.url);
+    const page = url.searchParams.get('page');
+    const courses = await getCourses(true, page || 1, 'A');
     return { courses };
 }
 
@@ -72,6 +73,22 @@ export function Index() {
         delay: index * 200
     }));
     const [snackbar,] = useAtom(snackbarReducerAtom);
+    const submit = useSubmit();
+    let counter = 1;
+    let count = courses.count;
+
+    while (count >= 15) {
+        counter++;
+        count -= 15;
+    }
+    /* if course count <= 15 then its 1
+        if course count > 15 then its 2
+        if course count <= 30 then its 3
+        if course count > 30 then its 4
+        so on
+    /*/
+
+
 
 
     return (<>
@@ -119,7 +136,7 @@ export function Index() {
                     <ScrollToHashElement />
                     <Grid id="courses" container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
                         {/* Load lists of Courses that are approved only */}
-                        {courses.map(course => {
+                        {courses.results?.map(course => {
                             return (
                                 course.status === 'A' ?
                                     <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
@@ -132,6 +149,18 @@ export function Index() {
                         )}
                     </Grid>
                 </Box>
+                <Form>
+                    <Box display={'flex'} justifyContent={'center'} mt={4}>
+                        <Pagination size="large" count={counter} onChange={(event, page) => {
+                            submit(`page=${page}`);
+                            const element = document.getElementById('courses');
+                            window.scrollTo({
+                                top: element.offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }} />
+                    </Box>
+                </Form>
             </Container>
         </Box>
 

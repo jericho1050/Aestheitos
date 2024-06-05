@@ -139,6 +139,8 @@ class CourseSerializer(ModelSerializer):
 
     def check_daily_limit(self, user):
         # Get the count of courses created by the user today
+        if user.is_superuser or user.is_staff:
+            return
         courses_today = Course.objects.filter(
             created_by=user, course_created=date.today()
         ).count()

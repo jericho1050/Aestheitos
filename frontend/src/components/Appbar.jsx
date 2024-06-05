@@ -28,8 +28,21 @@ import ClearIcon from '@mui/icons-material/Clear';
 import parseCourseDateTime from '../helper/parseDateTime';
 
 const pages = ['Courses', 'Blog', 'Create'];
-const settings = ['Profile',  'Enrolled', 'Logout'];
+const settings = ['Profile', 'Enrolled', 'Logout'];
 // 'Account',
+
+function NavLinks({ pageHandlers }) {
+
+  return (
+    pages.map((page) => (
+      <MenuItem key={page} onClick={pageHandlers[page]}>
+        {
+          page === 'Courses' ? <Link to="/#courses" className='courses-link'><Typography textAlign="center">{page}</Typography> </Link> : <Typography textAlign="center">{page}</Typography>
+        }
+      </MenuItem>
+    ))
+  )
+}
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -173,13 +186,7 @@ function ResponsiveAppBar() {
                   display: { xs: 'block', md: 'none' },
                 }}
               >
-                {pages.map((page) => (
-                  <MenuItem key={page} onClick={pageHandlers[page]}>
-                    {
-                      page === 'Courses' ? <Link to="/#courses" className='courses-link'><Typography textAlign="center">{page}</Typography> </Link> : <Typography textAlign="center">{page}</Typography>
-                    }
-                  </MenuItem>
-                ))}
+                <NavLinks pageHandlers={pageHandlers} />
               </Menu>
             </Box>
             <Typography
@@ -263,7 +270,7 @@ function ResponsiveAppBar() {
                             <List>
                               <ListItem>
                                 <ListItemIcon>
-                                  {(course.status === 'A' && <CheckIcon />) || (course.status === 'R' && <ClearIcon />)}
+                                  {(course.status === 'A' && <CheckIcon color='success' />) || (course.status === 'R' && <ClearIcon color='error' />)}
                                 </ListItemIcon>
                                 <ListItemText
                                   className='text-overflow'
