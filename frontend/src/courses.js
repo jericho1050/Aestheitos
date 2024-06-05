@@ -43,8 +43,8 @@ async function sendRequest(url, options) {
   }
 }
 
-export async function getCourses() {
-  return sendRequest(`${import.meta.env.VITE_API_URL}courses`, {
+export async function getCourses(paginate = false, page = 1, status = 'A') {
+  return sendRequest(`${import.meta.env.VITE_API_URL}courses?page=${page}&paginate=${paginate}&status=${status}`, {
   });
 }
 

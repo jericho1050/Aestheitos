@@ -28,7 +28,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import parseCourseDateTime from '../helper/parseDateTime';
 
 const pages = ['Courses', 'Blog', 'Create'];
-const settings = ['Profile',  'Enrolled', 'Logout'];
+const settings = ['Profile', 'Enrolled', 'Logout'];
 // 'Account',
 
 function ResponsiveAppBar() {
@@ -263,7 +263,7 @@ function ResponsiveAppBar() {
                             <List>
                               <ListItem>
                                 <ListItemIcon>
-                                  {(course.status === 'A' && <CheckIcon />) || (course.status === 'R' && <ClearIcon />)}
+                                  {(course.status === 'A' && <CheckIcon color='success' />) || (course.status === 'R' && <ClearIcon color='error'/>)}
                                 </ListItemIcon>
                                 <ListItemText
                                   className='text-overflow'

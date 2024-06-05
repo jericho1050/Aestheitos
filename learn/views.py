@@ -182,7 +182,7 @@ class UserProgressDetail(
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, course=self.kwargs["pk"], user=user)
         return obj
-    
+
 class UserSectionView(generics.RetrieveUpdateAPIView):
     """
     Retrieve and Update a user's clicked or unclicked 'Section or Accordion checkbox'
@@ -197,9 +197,6 @@ class UserSectionView(generics.RetrieveUpdateAPIView):
         except UserSection.DoesNotExist:
             return Response(status=404)
         return user_section
-    
-
-    
 
 
 class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
@@ -209,15 +206,37 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
 
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
-    # pagination_class = CustomPagination
+    pagination_class = CustomPagination
 
     def get_queryset(self):
-        return (
+
+        if (self.request.query_params.get("paginate") == "true" and self.request.query_params.get("status") == "A"):  
+            # If the pagination argument is true in Stirng and Course status is acccepted, then return the paginated queryset.
+            queryset = (
+            super()
+            .get_queryset()
+            .filter(status="A")
+            .annotate(average_rating=Avg("course_rating__rating"))
+            .order_by("average_rating", "-course_created"))
+            return queryset
+        elif (self.request.query_params.get("paginate") == "true" and self.request.query_params.get("status") == "P"):
+            # If the pagination argument is true in Stirng and Course status is pending, then return the paginated queryset.
+            queryset = (
+            super()
+            .get_queryset()
+            .filter(status="P")
+            .annotate(average_rating=Avg("course_rating__rating"))
+            .order_by("-course_created"))
+            return queryset
+        else:  
+            # else return non-paginated queryset
+            queryset = (
             super()
             .get_queryset()
             .annotate(average_rating=Avg("course_rating__rating"))
-            .order_by("average_rating", "-course_created")
-        )
+            .order_by("average_rating", "-course_created"))
+            self.pagination_class = None
+            return queryset
 
 
 class CourseDetail(
@@ -275,7 +294,7 @@ class SectionList(CreateAPIMixin, generics.ListCreateAPIView):
                 UserSection.objects.create(user=user, section=section)
 
         return sections 
-    
+
 class SectionDetail(
     DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
 ):

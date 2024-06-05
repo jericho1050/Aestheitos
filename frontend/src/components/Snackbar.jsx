@@ -21,7 +21,7 @@ export default function CustomizedSnackbar() {
 
   return (
     <div>
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleClose}>
         <Alert
           onClose={handleClose}
           severity="success"

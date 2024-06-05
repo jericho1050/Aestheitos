@@ -5,8 +5,7 @@ export default function parseCourseDateTime(course_updated) {
     const course_day_updated = course_date.getDay();
     const course_hour_updated = course_date.getHours();
     const last_updated_day = course_day_updated - now.getDay();
-    const last_updated_hour =  now.getHours() - course_hour_updated;
-
+    const last_updated_hour = Math.abs(course_hour_updated - now.getHours());
     return [last_updated_day, last_updated_hour]
 }
 
