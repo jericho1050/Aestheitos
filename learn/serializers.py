@@ -147,7 +147,7 @@ class CourseSerializer(ModelSerializer):
         if courses_today >= 2:
             raise serializers.ValidationError(
                 {
-                    "detail": ["Sorry, you can only create two courses per day.\n This is to prevent the spamming of creations."]
+                    "detail": "Sorry, you can only create two courses per day.\n This is to prevent the spamming of creations."
                 }
             )
 
