@@ -62,6 +62,7 @@ const router = createBrowserRouter([
       {
 
         element: <ProectedRoute />,
+        errorElement: <ErrorPage />,
         children: [
           {
             path: "course/create",
