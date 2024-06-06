@@ -40,7 +40,7 @@ export default function SignIn() {
         try {
             setStatus('submitting')
             const data = new FormData(event.currentTarget);
-            const token = await signInAPI(data);
+            const token = await signIn(data);
             if (token['invalid']) {
                 setIsInvalidCredentials(true);
                 throw new Error(token);
@@ -149,7 +149,7 @@ export default function SignIn() {
 }
 
 // sends a POST request to /signin route
-function signInAPI(data) {
+function signIn(data) {
     // User login API authentication
 
     // route "/login"

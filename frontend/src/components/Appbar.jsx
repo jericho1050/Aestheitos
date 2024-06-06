@@ -74,7 +74,7 @@ function ResponsiveAppBar() {
   const settingsHandlers = {
     'Profile': () => navigate(`/profile/user/${user.user_id}`),
     // 'Account': () => { },
-    'Enrolled': () => { },
+    'Enrolled': () => navigate(`/enrolled/user/${user.user_id}`),
     'Logout': () => handleLogout(dispatch)
   }
 
@@ -116,17 +116,8 @@ function ResponsiveAppBar() {
 
   }
 
-
-
-
-
-
-
-
-
-
   async function handleLogout(dispatch) {
-    await signOutAPI(token['refresh']);
+    await signOut(token['refresh']);
     await dispatch({
       type: 'removeToken',
     })
@@ -260,12 +251,12 @@ function ResponsiveAppBar() {
                     >
 
                       <Grid container width={500} padding={'0 1em'} >
-                        <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+                        <Typography sx={{ mt: 4, mb: 2 }} variant="h5" fontWeight={'bold'} component="div">
                           Notifications
                         </Typography>
                         {userCourses.map(course => {
                           const [last_updated_day, last_updated_hour] = parseCourseDateTime(course.course_updated);
-                          return (<Grid key={course.id} item xs={12}>
+                          return (<Grid key={course.id} item xs={10} sm={12}>
 
                             <List>
                               <ListItem>
@@ -285,8 +276,7 @@ function ResponsiveAppBar() {
                                   sx={{ width: 350, mr: 2 }}
                                 />
                                 <Box>
-
-                                  <img src={course.thumbnail} style={{ width: '40px', height: '59px', objectFit: 'cover' }} />
+                                  <img src={course.thumbnail} style={{ width: '60px', height: '59px', objectFit: 'cover' }} />
                                 </Box>
                               </ListItem>
                             </List>
@@ -344,7 +334,7 @@ export default ResponsiveAppBar;
 
 
 
-function signOutAPI(refreshToken) {
+function signOut(refreshToken) {
   // ask the backend server to delete the httpOnly jwt cookie
   const response = fetch(`${import.meta.env.VITE_API_URL}logout`, {
     method: 'POST',

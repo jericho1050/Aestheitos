@@ -25,6 +25,7 @@ import { Pending } from './routes/pending';
 import { loader as pendingCoursesLoader } from './routes/pending';
 import Profile from './routes/profile';
 import { loader as profileLoader } from './routes/profile';
+import Enrolled, {loader as enrolledLoader} from './routes/enrolled';
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -49,15 +50,26 @@ const router = createBrowserRouter([
     action: rootAction,
     children: [
       {
-        index: true,
-        element: <Index />,
-        loader: indexLoader,
-      },
-      {
-        path: "course/:courseId",
-        element: <Course />,
-        loader: courseLoader,
-        action: enrollAction
+        errorElement: <ErrorPage />,
+        children: [{
+          index: true,
+          element: <Index />,
+          loader: indexLoader,
+        },
+        {
+          path: "course/:courseId",
+          element: <Course />,
+          loader: courseLoader,
+          action: enrollAction
+        },
+        {
+          path: "profile/user/:userId",
+          element: <Profile />,
+          loader: profileLoader
+
+        },
+      ]
+
       },
       {
 
@@ -81,11 +93,11 @@ const router = createBrowserRouter([
             element: <Pending />,
             loader: pendingCoursesLoader
           },
-          {
-            path: "profile/user/:userId",
-            element: <Profile />,
-            loader: profileLoader
 
+          {
+            path: "enrolled/user/:userId",
+            element: <Enrolled />,
+            loader: enrolledLoader
           }
         ]
       }

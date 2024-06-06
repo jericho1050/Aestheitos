@@ -234,10 +234,12 @@ class CourseCommentsSerializer(ModelSerializer):
 
 
 class EnrollmentSerializer(ModelSerializer):
+    course = CourseSerializer(read_only=True)
     class Meta:
         model = Enrollment
         fields = "__all__"
         read_only_fields = ["user", "course"]
+    
 
     def save_with_auth_user(self, user, pk):
         course = get_object_or_404(Course, id=pk)
