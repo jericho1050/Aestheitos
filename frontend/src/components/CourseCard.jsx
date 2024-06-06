@@ -8,6 +8,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import defaultImage from '../static/images/noimg.png'
 import { Link } from 'react-router-dom';
 import { Parser } from 'html-to-react';
+import truncateText from '../helper/truncateText';
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
 
@@ -88,10 +89,3 @@ export default function CourseCard(props) {
   );
 }
 
-function truncateText(text, maxCharacters) {
-  if (text.length > maxCharacters) {
-    return text.slice(0, maxCharacters) + "...";
-  } else {
-    return text;
-  }
-}

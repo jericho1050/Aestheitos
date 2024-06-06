@@ -786,7 +786,7 @@ export default function Course() {
                         }}>
                             <ThemeProvider theme={theme}>
 
-                                <Container disableGutters sx={{ maxWidth: { xs: 700, md: 500 } }} component="div">
+                                <Container disableGutters sx={{ maxWidth: { xs: 700, md: 500 }, }} component="div">
                                     <img src={course.thumbnail} className="course-thumbnail" onError={(e) => {
                                         e.target.onerror = null;
                                         e.target.src = image;
