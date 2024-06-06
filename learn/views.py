@@ -210,31 +210,53 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
 
     def get_queryset(self):
 
-        if (self.request.query_params.get("paginate") == "true" and self.request.query_params.get("status") == "A"):  
+        if (
+            self.request.query_params.get("paginate") == "true"
+            and self.request.query_params.get("status") == "A"
+        ):
             # If the pagination argument is true in Stirng and Course status is acccepted, then return the paginated queryset.
-            queryset = (
-            super()
-            .get_queryset()
-            .filter(status="A")
-            .annotate(average_rating=Avg("course_rating__rating"))
-            .order_by("average_rating", "-course_created"))
+            scope = self.request.query_params.get("scope")
+
+            if scope == "all":
+                queryset = (
+                    super()
+                    .get_queryset()
+                    .filter(status="A")
+                    .annotate(average_rating=Avg("course_rating__rating"))
+                    .order_by("average_rating", "-course_created")
+                )
+            else:
+                # If scope has a user ID, then return the user's created courses as a query set.
+                queryset = (
+                    super()
+                    .get_queryset()
+                    .filter(status="A", created_by=scope)
+                    .annotate(average_rating=Avg("course_rating__rating"))
+                    .order_by("average_rating", "-course_created")
+                )
+
             return queryset
-        elif (self.request.query_params.get("paginate") == "true" and self.request.query_params.get("status") == "P"):
+        elif (
+            self.request.query_params.get("paginate") == "true"
+            and self.request.query_params.get("status") == "P"
+        ):
             # If the pagination argument is true in Stirng and Course status is pending, then return the paginated queryset.
             queryset = (
-            super()
-            .get_queryset()
-            .filter(status="P")
-            .annotate(average_rating=Avg("course_rating__rating"))
-            .order_by("-course_created"))
+                super()
+                .get_queryset()
+                .filter(status="P")
+                .annotate(average_rating=Avg("course_rating__rating"))
+                .order_by("-course_created")
+            )
             return queryset
-        else:  
+        else:
             # else return non-paginated queryset
             queryset = (
-            super()
-            .get_queryset()
-            .annotate(average_rating=Avg("course_rating__rating"))
-            .order_by("average_rating", "-course_created"))
+                super()
+                .get_queryset()
+                .annotate(average_rating=Avg("course_rating__rating"))
+                .order_by("average_rating", "-course_created")
+            )
             self.pagination_class = None
             return queryset
 
@@ -288,6 +310,7 @@ class SectionList(CreateAPIMixin, generics.ListCreateAPIView):
         course = CourseContent.objects.get(id=self.kwargs["pk"]).course.id # retrieve the course
         user_existing_sections = UserSection.objects.filter(user=user).values_list('section', flat=True)
         if user and Enrollment.objects.filter(course=course, user=user).exists():
+            # This would create a checkbox or be clicked for a section.
             for section in sections:
                 if section.id in user_existing_sections: 
                     continue
@@ -443,6 +466,7 @@ class EnrollmentUserList(generics.ListAPIView):
 
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         user = user_authentication(self.request)

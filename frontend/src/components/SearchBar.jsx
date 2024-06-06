@@ -104,7 +104,7 @@ function SearchInput() {
                                             
                                     </Box>
                                     <Box marginLeft="auto" justifySelf={'flex-end'}>
-                                        <img src={option.thumbnail} style={{ width: '30px', height: '49px', objectFit: 'cover' }} />
+                                        <img src={option.thumbnail} style={{ width: '50px', height: '40px', objectFit: 'cover', padding: 1 }} />
                                     </Box>
                                 </ListItem>
                             </Link>

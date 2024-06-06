@@ -1,4 +1,4 @@
-html {
+html  {
   box-sizing: border-box;
 
 }
@@ -396,3 +396,11 @@ html {
   right: 0;
   /* margin-top: 56px; */
 }
+
+.user-course-progress-bar {
+  position: absolute !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+

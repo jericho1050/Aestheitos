@@ -1,7 +1,7 @@
-import { Avatar, Badge, Box, Container, Divider, Grid, IconButton, Paper, ThemeProvider, Typography, Zoom, responsiveFontSizes, styled, useTheme } from "@mui/material";
+import { Avatar, Badge, Box, Container, Divider, Grid, IconButton, Pagination, Paper, Rating, ThemeProvider, Typography, Zoom, responsiveFontSizes, styled, useTheme } from "@mui/material";
 import { getCourses, getUser, updateUser } from "../courses";
-import { Link, useLoaderData, } from "react-router-dom";
-import { parseUserDateTime } from "../helper/parseDateTime";
+import { Form, Link, useLoaderData, useSubmit, } from "react-router-dom";
+import parseCourseDateTime, { parseUserDateTime } from "../helper/parseDateTime";
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { VisuallyHiddenInput } from "../components/InputFileUpload";
 import { useState } from "react";
@@ -13,7 +13,7 @@ export async function loader({ request }) {
     const user = await getUser();
     const url = new URL(request.url);
     const page = url.searchParams.get('page');
-    const courses = await getCourses(true, page || 1, 'A');
+    const courses = await getCourses(true, page || 1, 'A', user.user_id);
     return { user, courses };
 
 }
@@ -27,6 +27,15 @@ export default function Profile() {
     theme = responsiveFontSizes(theme);
     const [date_joined_day, date_joined_month, date_joined_year] = parseUserDateTime(user.date_joined);
     const htmlToReactParser = new Parser();
+    const submit = useSubmit();
+    let counter = 1;
+    let count = courses.count;
+
+    while (count >= 15) {
+        counter++;
+        count -= 15;
+    }
+
     function handleChangeProfile(e) {
         const file = e.target.files[0]; // file object
         const formData = new FormData();
@@ -86,36 +95,51 @@ export default function Profile() {
             </Paper>
             <Box mt={5}>
                 <ThemeProvider theme={theme}>
-                    <Typography variant="h2" fontWeight={'bolder'} mb={2}>
+                    <Typography variant="h2" fontFamily={'Play'} fontWeight={'bolder'} mb={2}>
                         {`${user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}'s Courses`}
                     </Typography>
                 </ThemeProvider>
-                <Grid container spacing={3}>
+                <Grid id="profile" container spacing={3}>
                     {courses.results.map(course => {
-                        return course.created_by === user.user_id && (
+                        const [last_updated_day, last_updated_hour] = parseCourseDateTime(course.course_updated);
+                        return (
                             <Grid key={course.id} item xs={12} md={6}>
                                 <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
                                     <Zoom in={true}>
-                                        <Paper square={false}elevation={4} sx={{ padding: 5, cursor: 'pointer' }} >
-                                            <Box display={'flex'} gap={2}>
-                                                <Box width={125} height={150} border="1px dashed black" sx={{
+                                        <Paper square={false} elevation={4} sx={{ padding: 5, cursor: 'pointer', position: 'relative' }} >
+                                            <Box display={'flex'} gap={2} position={'relative'} mb={2}>
+                                                <Box width={200} height={150} p={2} border="1px dashed black" sx={{
                                                     backgroundImage: `url(${course.thumbnail})`,
                                                     backgroundSize: 'cover',
                                                     backgroundPosition: 'center',
-                                                    overflow: 'hidden'
+                                                    boxSizing: 'border-box'
+                                                    
                                                 }}>
                                                     {/* <img src={course.thumbnail} alt="course-thumbnail" style={{maxWidth: '100%', maxHeight: '100%' }} /> */}
                                                 </Box>
-                                                <Box>
+                                                <Box mt={2}>
                                                     <Typography height={'auto'} gutterBottom fontFamily={'Play'} fontSize={'1.5em'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
                                                         {truncateText(course.title, 50)}
                                                     </Typography>
                                                     <Box maxHeight={'2em'} height={'100%'} maxWidth={250} sx={{ wordBreak: 'break-word' }}>
-                                                        {htmlToReactParser.parse(truncateText(course.description, 35))}
+                                                        {htmlToReactParser.parse(truncateText(course.description, 69))}
                                                     </Box>
                                                 </Box>
 
+                                                <Typography variant='small' color="text.secondary" position={'absolute'} right={0}>
+                                                    {course.difficulty_display}
+                                                </Typography>
                                             </Box>
+                                            <Typography fontSize={'small'}>
+                                                <b>Enrollees:</b> {course.enrollee_count}
+                                            </Typography>
+                                            <Typography fontSize={'small'}>
+                                                <b>Created:</b> {course.course_created}
+                                            </Typography>
+                                            <Typography fontSize={'small'}>
+                                                <b>Last Modified: </b>{last_updated_day === 0 || last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
+                                            </Typography>
+                                            <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />
                                         </Paper>
                                     </Zoom>
 
@@ -126,6 +150,18 @@ export default function Profile() {
 
                 </Grid>
             </Box>
+            <Form>
+                <Box display={'flex'} justifyContent={'center'} mt={4}>
+                    <Pagination size="large" count={counter} onChange={(event, page) => {
+                        submit(`page=${page}`);
+                        const element = document.getElementById('profile');
+                        window.scrollTo({
+                            top: element.offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }} />
+                </Box>
+            </Form>
         </Container>
     )
 }

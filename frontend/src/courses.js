@@ -43,8 +43,8 @@ async function sendRequest(url, options) {
   }
 }
 
-export async function getCourses(paginate = false, page = 1, status = 'A') {
-  return sendRequest(`${import.meta.env.VITE_API_URL}courses?page=${page}&paginate=${paginate}&status=${status}`, {
+export async function getCourses(paginate = false, page = 1, status = 'A', scope = 'all') {
+  return sendRequest(`${import.meta.env.VITE_API_URL}courses?page=${page}&paginate=${paginate}&status=${status}&scope=${scope}`, {
   });
 }
 
@@ -302,7 +302,7 @@ export async function createUserCourseProgress(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
     method: 'POST'
   })
-} 
+}
 
 export async function updateUserCourseProgress(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
@@ -317,7 +317,7 @@ export async function deleteUserCourseProgress(id) {
 }
 
 export async function getUserSection(id) {
-  
+
   return sendRequest(`${import.meta.env.VITE_API_URL}user/section/${id}`, {
 
   })
@@ -327,7 +327,13 @@ export async function updateUserSection(id, formData) {
   // btw, this interaction between the user and section primarily checks whether this section is completed or uncompleted.
   return sendRequest(`${import.meta.env.VITE_API_URL}user/section/${id}`, {
     method: 'PATCH',
-    body: formData 
+    body: formData
   })
 
+}
+
+export async function getUserEnrolledCourses(page = 1) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/enrollments?page=${page}`, {
+    
+  })
 }

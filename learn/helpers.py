@@ -67,7 +67,7 @@ def user_authentication(request):
 
 def get_auth_user(request):
     """
-    User-look-up function. returns the user instance based on the JWT payload
+    User-look-up function. returns the user instance based on the request.user's JWT payload
     """
     token = request.COOKIES.get("access")
 
