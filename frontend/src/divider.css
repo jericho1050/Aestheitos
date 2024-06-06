@@ -1,28 +1,31 @@
 @media (max-width: 575.98px) {
-    .divider {
-      position:absolute;
-      background: linear-gradient(rgba(128, 128, 128, 0.2), white);
-      width: 100%;
-      height: 69px;
-      top: 50vh;
-    }
+  .divider {
+    position: absolute;
+    background: linear-gradient(rgba(128, 128, 128, 0.2), white);
+    width: 100%;
+    height: 69px;
+    top: 50vh;
   }
-    @media (min-width: 575.98px) and (max-width: 1200px) {
-      .divider {
-        position:absolute;
-        background: linear-gradient(rgba(128, 128, 128, 0.2), white);
-        width: 100%;
-        height: 69px;
-        top: 69vh;
-      }
-    }
-    
-    @media (min-width: 1200px) {
-      .divider {
-        position:absolute;
-        background: linear-gradient(rgba(128, 128, 128, 0.188), white);
-        width: 100%;
-        height: 69px;
-        top: 90vh;
-      }
-    }
+}
+
+@media (min-width: 575.98px) and (max-width: 1200px) {
+  .divider {
+    position: absolute;
+    background: linear-gradient(rgba(128, 128, 128, 0.2), white);
+    width: 100%;
+    height: 69px;
+    top: 69vh;
+  }
+}
+
+@media (min-width: 1200px) {
+  .divider {
+    position: absolute;
+    background: linear-gradient(rgba(128, 128, 128, 0.188), white);
+    width: 100%;
+    height: 69px;
+    top: 90vh;
+  }
+}
+
+

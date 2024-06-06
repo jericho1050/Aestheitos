@@ -1,27 +1,32 @@
-import { Avatar, Badge, Box, Container, Grid, IconButton, Paper, ThemeProvider, Typography, responsiveFontSizes, styled, useTheme } from "@mui/material";
-import { getUser, updateUser } from "../courses";
-import { useFetcher, useLoaderData } from "react-router-dom";
+import { Avatar, Badge, Box, Container, Divider, Grid, IconButton, Paper, ThemeProvider, Typography, Zoom, responsiveFontSizes, styled, useTheme } from "@mui/material";
+import { getCourses, getUser, updateUser } from "../courses";
+import { Link, useLoaderData, } from "react-router-dom";
 import { parseUserDateTime } from "../helper/parseDateTime";
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import { BorderColor } from "@mui/icons-material";
 import { VisuallyHiddenInput } from "../components/InputFileUpload";
 import { useState } from "react";
+import truncateText from "../helper/truncateText";
+import { Parser } from "html-to-react";
 
-export async function loader({ params }) {
+
+export async function loader({ request }) {
     const user = await getUser();
-    return { user };
+    const url = new URL(request.url);
+    const page = url.searchParams.get('page');
+    const courses = await getCourses(true, page || 1, 'A');
+    return { user, courses };
 
 }
 
 
+
 export default function Profile() {
-    const { user } = useLoaderData();
+    const { user, courses } = useLoaderData();
     const [profilePic, setProfilePic] = useState('');
     let theme = useTheme();
     theme = responsiveFontSizes(theme);
     const [date_joined_day, date_joined_month, date_joined_year] = parseUserDateTime(user.date_joined);
-    const fetcher = useFetcher();
-
+    const htmlToReactParser = new Parser();
     function handleChangeProfile(e) {
         const file = e.target.files[0]; // file object
         const formData = new FormData();
@@ -51,9 +56,10 @@ export default function Profile() {
 
         }
     }
+
     return (
         <Container maxWidth="large" component={"main"} sx={{ p: '2em' }} >
-            <Paper square={false} sx={{ width: 'max-content', p: '1.5em 3em', ml: 'auto', mr: 'auto' }} position="relative" >
+            <Paper square={false} sx={{ width: 'max-content', p: '1.5em 3em', m: '0 auto 0 auto', borderRadius: 10 }} position="relative" >
                 <Box className="profile-bg"></Box>
                 <Box display={'flex'} alignItems={'center'} justifyContent={"center"} flexDirection={'column'} gap={2} >
                     <IconButton component="label" role={undefined}>
@@ -70,7 +76,7 @@ export default function Profile() {
                 </Box>
                 <Box display={"flex"} alignItems={"flex-start"} flexDirection={"column"} mt={2}>
                     <ThemeProvider theme={theme}>
-                        <Typography fontWeight="bolder" fontSize="4em" variant="h1">
+                        <Typography fontWeight="bolder" fontSize="3em" variant="h1">
                             {user.first_name || ''} {user.last_name || ''}
                         </Typography>
                         <Typography color="grey">Username: {user.username}</Typography>
@@ -78,14 +84,46 @@ export default function Profile() {
                     </ThemeProvider>
                 </Box>
             </Paper>
-            <Box mt={6}>
+            <Box mt={5}>
                 <ThemeProvider theme={theme}>
-                    <Typography variant="h2" fontWeight={'bolder'}>
-                    {`${user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}'s Courses`}
+                    <Typography variant="h2" fontWeight={'bolder'} mb={2}>
+                        {`${user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}'s Courses`}
                     </Typography>
                 </ThemeProvider>
-                <Grid container>
-                    
+                <Grid container spacing={3}>
+                    {courses.results.map(course => {
+                        return course.created_by === user.user_id && (
+                            <Grid key={course.id} item xs={12} md={6}>
+                                <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
+                                    <Zoom in={true}>
+                                        <Paper square={false}elevation={4} sx={{ padding: 5, cursor: 'pointer' }} >
+                                            <Box display={'flex'} gap={2}>
+                                                <Box width={125} height={150} border="1px dashed black" sx={{
+                                                    backgroundImage: `url(${course.thumbnail})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    {/* <img src={course.thumbnail} alt="course-thumbnail" style={{maxWidth: '100%', maxHeight: '100%' }} /> */}
+                                                </Box>
+                                                <Box>
+                                                    <Typography height={'auto'} gutterBottom fontFamily={'Play'} fontSize={'1.5em'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
+                                                        {truncateText(course.title, 50)}
+                                                    </Typography>
+                                                    <Box maxHeight={'2em'} height={'100%'} maxWidth={250} sx={{ wordBreak: 'break-word' }}>
+                                                        {htmlToReactParser.parse(truncateText(course.description, 35))}
+                                                    </Box>
+                                                </Box>
+
+                                            </Box>
+                                        </Paper>
+                                    </Zoom>
+
+                                </Link>
+                            </Grid>
+                        )
+                    })}
+
                 </Grid>
             </Box>
         </Container>
