@@ -1,5 +1,5 @@
 import { Link, useLoaderData } from "react-router-dom";
-import { getCourses, getUser, getUserEnrolledCourses } from "../courses";
+import { getCourses, getUser, getUserCoursesProgress, getUserEnrolledCourses } from "../courses";
 import { Parser } from "html-to-react";
 import { Box, Container, Grid, Paper, Rating, ThemeProvider, Typography, Zoom, responsiveFontSizes, useTheme } from "@mui/material";
 import parseCourseDateTime from "../helper/parseDateTime";
@@ -10,18 +10,25 @@ import { BorderLinearProgress } from "../components/CustomLinearProgress";
 export async function loader({ request }) {
     const user = await getUser();
     const courses = await getUserEnrolledCourses();
+    const userCoursesProgress = await getUserCoursesProgress();
     const url = new URL(request.url);
     const page = url.searchParams.get('page');
-    return { user, courses };
+    return { user, courses, userCoursesProgress };
 }
 
 
 export default function Enrolled() {
-    const { user, courses } = useLoaderData();
+    const { user, courses, userCoursesProgress } = useLoaderData();
     let theme = useTheme();
     theme = responsiveFontSizes(theme);
     const htmlToReactParser = new Parser();
-
+    const enrollCourses = courses.results.map(obj => {
+        const userProgress = userCoursesProgress.find(p => p.course === obj.course.id);
+        obj.course.sections_completed = userProgress?.sections_completed;
+        obj.course.date_enrolled = obj.date_enrolled;
+        obj.course.total_sections = obj.total_sections
+        return { ...obj };
+    })
 
     return (
         <Container maxWidth="large" component={"main"} sx={{ p: '2em' }}>
@@ -33,8 +40,10 @@ export default function Enrolled() {
                 </ThemeProvider>
             </Box>
             <Grid id="profile" container spacing={3}>
-                {courses.results.map(({course}) => {
-                    const [last_updated_day, last_updated_hour] = parseCourseDateTime(course.course_updated);
+                {enrollCourses.map(({ course }) => {
+                    const [last_updated_day_course, last_updated_hour_course] = parseCourseDateTime(course.course_updated);
+                    const [last_updated_day_enrolled, last_updated_hour_enrolled] = parseCourseDateTime(course.date_enrolled);
+
                     return (
                         <Grid key={course.id} item xs={12} md={6}>
                             <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
@@ -64,16 +73,19 @@ export default function Enrolled() {
                                             </Typography>
                                         </Box>
                                         <Typography fontSize={'small'}>
+                                            <b>Enrolled:</b> {last_updated_day_enrolled === 0 || last_updated_hour_enrolled <= 24 ? `${last_updated_hour_enrolled} hours ago` : `${last_updated_day} days ago`}
+                                        </Typography>
+                                        <Typography fontSize={'small'}>
                                             <b>Enrollees:</b> {course.enrollee_count}
                                         </Typography>
                                         <Typography fontSize={'small'}>
                                             <b>Created:</b> {course.course_created}
                                         </Typography>
                                         <Typography fontSize={'small'}>
-                                            <b>Last Modified: </b>{last_updated_day === 0 || last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
+                                            <b>Last Modified: </b>{last_updated_day_course === 0 || last_updated_hour_course <= 24 ? `${last_updated_hour_course} hours ago` : `${last_updated_day} days ago`}
                                         </Typography>
                                         <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />
-                                        <BorderLinearProgress variant="determinate" value={50} className="user-course-progress-bar"/>
+                                        <BorderLinearProgress variant="determinate" value={(course.sections_completed * 100) / course.total_sections} className="user-course-progress-bar" />
                                     </Paper>
                                 </Zoom>
 

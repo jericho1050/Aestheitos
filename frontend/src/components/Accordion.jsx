@@ -140,7 +140,7 @@ export function AccordionSectionCreate({ actionData, eventHandlers, onClickDelet
 
 export function AccordionSection({ handleChange, expanded, accordion }) {
     const { user, course, enrollees } = useLoaderData();
-    const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course === course.id);
+    const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course.id === course.id);
     const isInstructor = user.user_id === course.created_by;
     const label = { inputProps: { 'aria-label': 'Checkbox' } };
     const [anchorEl, setAnchorEl] = useState(null);
@@ -165,7 +165,7 @@ export function AccordionSection({ handleChange, expanded, accordion }) {
     };
 
     function handleClickCheckbox(event, accordion) {
-        fetcher.submit({ intent: 'updateUserSection', sectionId: accordion.id, is_clicked: !accordion.is_clicked }, { method: 'PATCH' })
+        fetcher.submit({ intent: 'updateUserSection', sectionId: accordion.id, is_clicked: event.target.checked }, { method: 'PATCH' })
         event.stopPropagation();
     }
 

@@ -264,6 +264,14 @@ export async function getUser() {
 
   });
 }
+
+export async function getUserByItsId(id) {
+
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/${id}`, {
+
+  });
+}
+
 export async function updateUser(formData) {
   // this only handles Profile Picture
   return sendRequest(`${import.meta.env.VITE_API_URL}user-detail`, {
@@ -292,7 +300,11 @@ export async function deleteCourseComment(id) {
     method: 'DELETE'
   })
 }
+export async function getUserCoursesProgress() {
+  return sendRequest(`${import.meta.env.VITE_API_URL}user/courses/progress`, {
 
+  });
+}
 export async function getUserCourseProgress(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}/user/course/${id}/progress`, {
 
@@ -334,6 +346,6 @@ export async function updateUserSection(id, formData) {
 
 export async function getUserEnrolledCourses(page = 1) {
   return sendRequest(`${import.meta.env.VITE_API_URL}user/enrollments?page=${page}`, {
-    
+
   })
 }

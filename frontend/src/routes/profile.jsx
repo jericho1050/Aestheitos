@@ -1,5 +1,5 @@
 import { Avatar, Badge, Box, Container, Divider, Grid, IconButton, Pagination, Paper, Rating, ThemeProvider, Typography, Zoom, responsiveFontSizes, styled, useTheme } from "@mui/material";
-import { getCourses, getUser, updateUser } from "../courses";
+import { getCourses, getUser, getUserByItsId, updateUser } from "../courses";
 import { Form, Link, useLoaderData, useSubmit, } from "react-router-dom";
 import parseCourseDateTime, { parseUserDateTime } from "../helper/parseDateTime";
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -9,8 +9,12 @@ import truncateText from "../helper/truncateText";
 import { Parser } from "html-to-react";
 
 
-export async function loader({ request }) {
-    const user = await getUser();
+export async function loader({ request, params }) {
+    let user = await getUser();
+    if (user.statusCode != 200) {
+        user = await getUserByItsId(params.userId);
+    }
+    
     const url = new URL(request.url);
     const page = url.searchParams.get('page');
     const courses = await getCourses(true, page || 1, 'A', user.user_id);

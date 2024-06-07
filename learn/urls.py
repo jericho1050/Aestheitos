@@ -8,10 +8,12 @@ urlpatterns = [
 
     # User 
     path("register", RegisterView.as_view(), name="register"),
-    path('login', LoginView.as_view(), name='login'), # token_obtain_pair returns access and refresh token
+    path('login', LoginView.as_view(), name='login'), 
+    # token_obtain_pair returns access and refresh token
     path('token/refresh', MyTokenRefreshView.as_view(), name='token_refresh'),
     
     path("user", UserView.as_view(), name="user"),
+    path("user/<int:pk>", UserRetrieveView.as_view()),
     path("user-detail", UserDetail.as_view(), name="user-detail"),
     # path("users", UserList.as_view(), name="users"),
     path("logout", LogoutView.as_view(), name="logout"),

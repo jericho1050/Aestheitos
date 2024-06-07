@@ -692,7 +692,7 @@ export default function Course() {
     // const accessTokenDecoded = React.useContext(AccessTokenDecodedContext);
     const isInstructor = user.user_id === course.created_by;
     const isAdmin = user.is_superuser || user.is_staff;
-    const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course === course.id);
+    const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course.id === course.id);
     const fetcher = useFetcher();
     const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
     const submit = useSubmit();
@@ -745,8 +745,6 @@ export default function Course() {
         submit({ intent: 'rejectCourse', status: 'R' }, { method: 'patch' });
 
     }
-
-
     return (
         <>
             <CustomizedSnackbar />
@@ -809,7 +807,7 @@ export default function Course() {
 
                                     (isInstructor && !enrollment) || (isAdmin) ? // Don't render the enroll buttonn for instructors or admins
                                         null
-                                        : (user.user_id !== course.created_by && !enrollment ?
+                                        : (!isInstructor && !enrollment ?
                                             <Box display='flex' justifyContent={'center'} mt={2}>
                                                 <Button size="large" sx={{ borderRadius: '2em', fontWeight: 800 }} fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
                                                     Enroll now!
