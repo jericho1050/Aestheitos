@@ -14,7 +14,7 @@ urlpatterns = [
     
     path("user", UserView.as_view(), name="user"),
     path("user/<int:pk>", UserRetrieveView.as_view()),
-    path("user-detail", UserDetail.as_view(), name="user-detail"),
+    path("user-detail", UserMyDetailsView.as_view(), name="user-detail"),
     # path("users", UserList.as_view(), name="users"),
     path("logout", LogoutView.as_view(), name="logout"),
     path("user/courses/progress", UserProgressList.as_view(), name="progress-list"),

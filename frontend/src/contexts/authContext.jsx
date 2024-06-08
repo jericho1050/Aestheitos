@@ -44,7 +44,9 @@ export function authReducer(state, action) {
     }
 }
 
-
+export function useDecodedAccessToken() {
+    return { accessTokenDecoded: useContext(AccessTokenDecodedContext)}
+}
 
 export function useAuthToken() {
     return {token: useContext(AuthContext), dispatch: useContext(AuthDispatchContext)}

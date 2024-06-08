@@ -354,10 +354,16 @@ function Comment({ comment }) {
                         :
                         (<>
                             <ListItemAvatar>
-                                <Avatar alt={comment.username} src={comment.profile_pic} />
+                                <Link to={`/profile/user/${comment.user_id}`} style={{ textDecoration: 'none', color: 'initial' }}>
+                                    <Avatar alt={comment.username} src={comment.profile_pic} />
+                                </Link>
                             </ListItemAvatar>
                             <ListItemText
-                                primary={`${comment.first_name || comment.username} ${comment.last_name || ''}`}
+                                primary={
+                                    <Link to={`/profile/user/${comment.user_id}`} style={{ textDecoration: 'none', color: 'initial' }}>
+                                        {`${comment.first_name || comment.username} ${comment.last_name || ''}`}
+                                    </Link>
+                                }
                                 secondary={
                                     comment.comment
                                 }
@@ -689,7 +695,6 @@ export default function Course() {
     const { token } = useAuthToken();
     const isAuthenticated = token['access'] !== null;
     const navigate = useNavigate();
-    // const accessTokenDecoded = React.useContext(AccessTokenDecodedContext);
     const isInstructor = user.user_id === course.created_by;
     const isAdmin = user.is_superuser || user.is_staff;
     const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course.id === course.id);
@@ -777,7 +782,7 @@ export default function Course() {
                     }
 
                     <Box className="clearfix" component={'div'}>
-                        <Paper id="enroll" elevation={4} sx={{
+                        <Paper id="enroll" elevation={3} sx={{
                             padding: { xs: '7%', md: '3%' },
                             float: 'left',
                             margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' }
@@ -785,10 +790,12 @@ export default function Course() {
                             <ThemeProvider theme={theme}>
 
                                 <Container disableGutters sx={{ maxWidth: { xs: 700, md: 500 }, }} component="div">
-                                    <img src={course.thumbnail} className="course-thumbnail" onError={(e) => {
+                                    <img src={course.thumbnail || image} alt="Course's image thumbnail" className="course-thumbnail"
+                                    /* onError={(e) => {
                                         e.target.onerror = null;
                                         e.target.src = image;
-                                    }} />
+                                    }} */
+                                    />
                                 </Container>
 
 

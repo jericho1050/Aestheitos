@@ -41,7 +41,7 @@ class CustomPagination(PageNumberPagination):
     page_size = 15
 
 
-class UserDetail(APIView):
+class UserMyDetailsView(APIView):
     """
     Retrieve and update a user instance
     """

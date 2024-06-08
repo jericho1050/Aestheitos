@@ -43,8 +43,9 @@ const MysteriousText = ({ children, ...props }) => {
                     ...animation(index),
                     fontFamily: index >= startIndex && index <= endIndex ? 'Passion One' : 'Archivo Black',
                     fontSize: index >= startIndex && index <= endIndex ? '1.8em' : 'inherit',
+                    fontWeight: index >= startIndex && index <= endIndex ? 'bolder' : 'inherit',
                     color: index >= startIndex && index <= endIndex ? theme.palette.primary.main : 'inherit',
-                    lineHeight: '1.3em'
+                    lineHeight: index >= startIndex && index <= endIndex ? '0.9em' : '1.3em'
                 }}>
                     {item}
                 </animated.span>
@@ -134,7 +135,7 @@ export function Index() {
                         </Grid>
                     </Grid>
                     <ScrollToHashElement />
-                    <Grid id="courses" container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12, lg: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
+                    <Grid id="courses" container rowSpacing={2} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12 }} columnSpacing={{ xs: 2, md: 3 }}>
                         {/* Load lists of Courses that are approved only */}
                         {courses.results?.map(course => {
                             return (

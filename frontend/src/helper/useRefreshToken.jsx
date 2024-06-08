@@ -1,12 +1,13 @@
 import { useContext, useEffect, useState } from "react";
-import { AccessTokenDecodedContext, useAuthToken } from "../contexts/authContext";
+import { AccessTokenDecodedContext, useAuthToken, useDecodedAccessToken } from "../contexts/authContext";
 
 
 //ACCESS/REFRESH LOGIC here
 export default function useRefreshToken() {
     const { token, dispatch } = useAuthToken();
     const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000))
-    const accessTokenExp = useContext(AccessTokenDecodedContext);
+    // const accessTokenExp = useContext(AccessTokenDecodedContext);
+    const { accessTokenDecoded } = useDecodedAccessToken();
     const refreshBuffer = 30;
 
     useEffect(() => {
@@ -25,7 +26,7 @@ export default function useRefreshToken() {
             if (hasToken) {
                 // console.log(`current time: ${currentTime}`);
                 // console.log(`expiration: ${accessTokenExp.exp}`);
-                if (currentTime > accessTokenExp?.exp - refreshBuffer) { // Refresh 30 seconds before token expires
+                if (currentTime > accessTokenDecoded?.exp - refreshBuffer) { // Refresh 30 seconds before token expires
                     // console.log("expires!");
                     const accessToken = await refreshAccessToken(token['refresh'])
                     // console.log(`this is the ACCESS TOKEN RETURNED ${accessToken}`);

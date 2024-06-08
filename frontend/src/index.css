@@ -404,3 +404,14 @@ html  {
   right: 0;
 }
 
+
+.profile-course-focusHighlight:hover {
+  filter: brightness(97%);
+  border-bottom: 6px solid #FFC55C;
+
+}
+
+.enrolled-course-focusHighlight:hover {
+  filter: brightness(97%);
+
+}

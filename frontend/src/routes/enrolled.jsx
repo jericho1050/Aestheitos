@@ -48,8 +48,8 @@ export default function Enrolled() {
                         <Grid key={course.id} item xs={12} md={6}>
                             <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
                                 <Zoom in={true}>
-                                    <Paper square={false} elevation={4} sx={{ padding: 5, cursor: 'pointer', position: 'relative' }} >
-                                        <Box display={'flex'} gap={2} position={'relative'} mb={2}>
+                                    <Paper square={false} elevation={2} sx={{ padding: 5, cursor: 'pointer', position: 'relative' }} className="enrolled-course-focusHighlight">
+                                        <Box display={'flex'} gap={2} position={'relative'} mb={2} height={170}>
                                             <Box width={200} height={150} p={2} border="1px dashed black" sx={{
                                                 backgroundImage: `url(${course.thumbnail})`,
                                                 backgroundSize: 'cover',

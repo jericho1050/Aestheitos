@@ -131,8 +131,11 @@ class CourseSerializer(ModelSerializer):
             if "status" in self.validated_data and not user.is_staff:
                 raise AuthenticationFailed("Only staff can change the status")
 
-            if (not (user.is_superuser or not user.is_staff) or self.instance.created_by != user
-            ):
+            if user.is_superuser or user.is_staff:
+                self.save()
+            elif self.instance.created_by == user:
+                self.save()
+            else:
                 raise AuthenticationFailed("Not allowed to modify")
 
             self.save()

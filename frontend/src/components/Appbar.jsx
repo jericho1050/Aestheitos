@@ -26,7 +26,8 @@ import SearchBar from './SearchBar';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import parseCourseDateTime from '../helper/parseDateTime';
-
+import { useAtom, useAtomValue } from 'jotai';
+import { profilePictureAtom } from '../atoms/profilePictureAtom';
 const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Enrolled', 'Logout'];
 // 'Account',
@@ -54,7 +55,7 @@ function ResponsiveAppBar() {
   const navigate = useNavigate();
   const { user, courses } = useLoaderData(); // loader is in root.jsx
   const userCourses = courses.filter(course => course.created_by === user.user_id && course.status !== 'P'); // just return THE user's or instructor's courses for notifcation purposes.
-
+  const profilePic = useAtomValue(profilePictureAtom || '');
   const [firstClick, setFirstClick] = React.useState(true);
   const didRun = React.useRef(false);
   const fetcher = useFetcher();
@@ -225,7 +226,7 @@ function ResponsiveAppBar() {
                   <Grid item xs>
                     <Tooltip data-cy="Tool tip" title="Open settings">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar data-cy="Avatar" alt="myPP" src={`${import.meta.env.VITE_API_URL}${user.profile_pic}`} />
+                        <Avatar data-cy="Avatar" alt="myPP" src={profilePic || `${import.meta.env.VITE_API_URL}${user.profile_pic}`} />
                       </IconButton>
                     </Tooltip>
                   </Grid>
