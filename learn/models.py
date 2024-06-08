@@ -57,6 +57,7 @@ class UserSection(models.Model):
         unique_together = ("user", "section")
 
 
+
 class CourseRating(models.Model):
     """
     Represents a course's rating

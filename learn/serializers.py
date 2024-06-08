@@ -74,6 +74,19 @@ class UserSectionSerializer(ModelSerializer):
         fields= "__all__"
         read_only_fields = ["user", "section"]
 
+
+    def save_with_auth_user(self, user, pk, update = False,):
+        self.save() # save immediately so that the UserSection instance's sections, when filtered, are up to date.
+        if update:
+            section  = get_object_or_404(Section, id=pk)
+            user_progress = UserProgress.objects.get(
+                user=user, course=section.course_content.course.id
+            )
+            user_progress.sections_completed = UserSection.objects.filter(
+                user=user, section__course_content=section.course_content, is_clicked=True
+            ).count()
+            user_progress.save()
+
 class CourseRatingSerializer(ModelSerializer):
     class Meta:
         model = CourseRating
@@ -118,8 +131,11 @@ class CourseSerializer(ModelSerializer):
             if "status" in self.validated_data and not user.is_staff:
                 raise AuthenticationFailed("Only staff can change the status")
 
-            if (not (user.is_superuser or not user.is_staff) or self.instance.created_by != user
-            ):
+            if user.is_superuser or user.is_staff:
+                self.save()
+            elif self.instance.created_by == user:
+                self.save()
+            else:
                 raise AuthenticationFailed("Not allowed to modify")
 
             self.save()
@@ -235,6 +251,7 @@ class CourseCommentsSerializer(ModelSerializer):
 
 class EnrollmentSerializer(ModelSerializer):
     course = CourseSerializer(read_only=True)
+    total_sections = serializers.SerializerMethodField()
     class Meta:
         model = Enrollment
         fields = "__all__"
@@ -252,7 +269,10 @@ class EnrollmentSerializer(ModelSerializer):
 
         self.save(user=user, course=course)
 
-
+    def get_total_sections(self, obj):
+        sections = Section.objects.filter(course_content__course=obj.course).count()
+        return sections
+    
 class WorkoutsSerializer(ModelSerializer):
     class Meta:
         model = Workouts

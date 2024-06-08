@@ -41,11 +41,11 @@ class CustomPagination(PageNumberPagination):
     page_size = 15
 
 
-class UserDetail(APIView):
+class UserMyDetailsView(APIView):
     """
     Retrieve and update a user instance
     """
-
+    # retrieves the User by it's JWT
     def get(self, request):
         try:
             access = request.COOKIES.get("refresh")
@@ -183,7 +183,7 @@ class UserProgressDetail(
         obj = get_object_or_404(queryset, course=self.kwargs["pk"], user=user)
         return obj
 
-class UserSectionView(generics.RetrieveUpdateAPIView):
+class UserSectionView(UpdateAPIMixin, generics.RetrieveUpdateAPIView):
     """
     Retrieve and Update a user's clicked or unclicked 'Section or Accordion checkbox'
     """
@@ -545,6 +545,14 @@ class UserView(APIView):
         refresh = request.COOKIES.get("refresh")
         response.data = {"refresh": refresh, "access": access}
         return response
+    
+class UserRetrieveView(generics.RetrieveAPIView):
+    """
+    Retrieve the user instance
+    """
+     # retrieves the User by it's ID 
+    serializer_class = UserDetailSerializer
+    queryset = User.objects.all()
 
 
 # Not used anymore, lately realized that DRF-simplejwt exists
