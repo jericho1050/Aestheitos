@@ -25,7 +25,8 @@ urlpatterns = [
 
     # Course 
     path('courses', CourseList.as_view(), name='course-list'),
-    path('course/<int:pk>/rate', CourseRatingView.as_view(), name="course-rating"),
+    path('course/<int:pk>/rate', CourseRatingCreate.as_view(), name="course-rating"),
+    path('course/rate/<int:pk>', CourseRatingDetail.as_view(), name="course-rating-detail"),
     path('course/<int:pk>', CourseDetail.as_view(), name='course-detail'),
     path('course/<int:pk>/course-content', CourseContentDetail.as_view(), name='course-content'),
 

@@ -8,6 +8,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.pagination import PageNumberPagination
+from rest_framework_simplejwt.serializers import TokenVerifySerializer
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 # from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 # from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -502,7 +504,7 @@ class BlogDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyA
 
 class BlogCommentList(CreateAPIMixin, generics.ListCreateAPIView):
     """
-    List all comments or create a new commnet for a blog instance
+    List all comments or create a new comment for a blog instance
     """
 
     queryset = BlogComments.objects.all()
@@ -523,27 +525,47 @@ class BlogCommentDetail(
     serializer_class = BlogCommentsSerializer
 
 
-class CourseRatingView(CreateAPIMixin, generics.CreateAPIView):
+class CourseRatingCreate(CreateAPIMixin, generics.ListCreateAPIView):
     """
-    Create a new course's rating
+    List course ratings (only retrieve the course rating for the user's rating on a particular course) or create a new course's rating (i.e., the user's course rating).
     """
-
+    # Even though it's ListCreateAPIView, the queryset would only return one item from the list.
     queryset = CourseRating.objects.all()
     serializer_class = CourseRatingSerializer
 
+    def get_queryset(self):
+        user = user_authentication(self.request)
+        return CourseRating.objects.filter(user=user, course=self.kwargs['pk'])
 
+class CourseRatingDetail(UpdateAPIMixin, generics.RetrieveUpdateAPIView):
+    """
+    Update a course's rating instance
+    """
+    queryset = CourseRating.objects.all()
+    serializer_class = CourseRatingSerializer
+
+        
 class UserView(APIView):
     """
-    Verfies the access/refresh token and returns it
+    Verifies the refresh token and returns the pair jwt.
     """
 
     def get(self, request):
-
-        user_authentication(request)
         response = Response()
         access = request.COOKIES.get("access")
         refresh = request.COOKIES.get("refresh")
-        response.data = {"refresh": refresh, "access": access}
+        if not access and not refresh:
+            raise AuthenticationFailed("Unauthenticated!")
+        
+        # Verify the refresh token only
+        serializer = TokenVerifySerializer(data={"token": refresh })
+        try:
+            # validate the token
+            serializer.is_valid(raise_exception=True)
+            response.data = {"refresh": refresh, "access": access}
+        except InvalidToken:
+            raise AuthenticationFailed("Invalid Refresh token!")
+        
         return response
     
 class UserRetrieveView(generics.RetrieveAPIView):

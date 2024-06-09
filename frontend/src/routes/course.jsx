@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, CircularProgress, Collapse, Container, Divider, Fab, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Popover, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
+import { Avatar, Box, Button, ButtonGroup, Card, CardActionArea, CardActions, CardContent, CardMedia, CircularProgress, Collapse, Container, Divider, Fab, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, Popover, Rating, Stack, TextField, ThemeProvider, Typography, createTheme, responsiveFontSizes } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
@@ -12,7 +12,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { createCourseComment, createCourseEnrollment, createUserCourseProgress, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, deleteUserCourseProgress, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getSectionItems, getSections, getUser, getUserCourseProgress, getUserSection, getWorkouts, getWrongExercises, updateCourse, updateCourseComment, updateSection, updateUserCourseProgress, updateUserSection } from "../courses";
+import { createCourseComment, createCourseEnrollment, createCourseRating, createUserCourseProgress, deleteCourse, deleteCourseComment, deleteCourseUnenrollment, deleteUserCourseProgress, getCorrectExercises, getCourse, getCourseComments, getCourseContent, getCourseEnrollees, getCourseRating, getSectionItems, getSections, getUser, getUserCourseProgress, getUserSection, getWorkouts, getWrongExercises, updateCourse, updateCourseComment, updateCourseRating, updateSection, updateUserCourseProgress, updateUserSection } from "../courses";
 import { Form, Link, redirect, useFetcher, useLoaderData, useNavigate, useRevalidator, useSubmit } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AccordionSection } from "../components/Accordion";
@@ -36,6 +36,7 @@ import AuthenticationWall from "../components/AuthenticationWall";
 import parseCourseDateTime from "../helper/parseDateTime";
 import Plyr from "plyr-react"
 import "plyr-react/plyr.css"
+import { method } from "lodash";
 
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
@@ -48,7 +49,7 @@ export async function loader({ params }) {
     // now we have a nice classic example of "callback hell" or "pyramid of doom"
     const user = await getUser();
     const course = await getCourse(params.courseId);
-    let progress;
+    let progress, userRating;
     if (!course) {
         throw new Response("", {
             status: course.status,
@@ -63,13 +64,21 @@ export async function loader({ params }) {
             statusText: courseContent.message
         });
     }
+
     const comments = await getCourseComments(course.id);
     try {
-        progress = await getUserCourseProgress(course.id);
-    }
-    catch (error) {
-        console.error('Error getting course progress', error);
-        progress = {};
+        [userRating, progress] = await Promise.all([
+            getCourseRating(course.id).catch(error => {
+                console.error('Error getting course rating', error);
+                return {};
+            }),
+            getUserCourseProgress(course.id).catch(error => {
+                console.error('Error getting course progress', error);
+                return {};
+            }),
+        ]);
+    } catch (error) {
+        console.error("Error getting user's data", error);
     }
     try {
         const sections = await getSections(courseContent.id);
@@ -107,17 +116,18 @@ export async function loader({ params }) {
             }
         }));
 
-        return { user, course, courseContent, accordion, enrollees, comments, progress };
+        return { user, course, courseContent, accordion, enrollees, comments, progress, userRating };
     } catch (error) {
         console.error('Error getting sections:', error);
-        return { user, course, courseContent, enrollees, comments, progress };
+        return { user, course, courseContent, enrollees, comments, progress, userRating };
 
     }
 }
 
 export async function action({ request, params }) {
     const formData = await request.formData();
-    let enrollment, progress, unenrollment, userSection, comment;
+    let enrollment, progress, unenrollment, userSection, comment, rating;
+    console.log(`is this even called the ${formData.get('intent')}`);
 
     switch (formData.get('intent')) {
         case 'enroll':
@@ -128,6 +138,11 @@ export async function action({ request, params }) {
             unenrollment = await deleteCourseUnenrollment(formData.get('enrollmentId'));
             progress = await deleteUserCourseProgress(params.courseId);
             break;
+        case 'createRating':
+            rating = await createCourseRating(params.courseId, formData);
+            break;
+        case 'updateRating':
+            rating = await updateCourseRating(formData.get('ratingId'), formData);
         case 'updateUserSection':
             userSection = await updateUserSection(formData.get('sectionId'), formData);
             break;
@@ -152,7 +167,7 @@ export async function action({ request, params }) {
 
     }
 
-    return { enrollment, progress, unenrollment, userSection, comment };
+    return { enrollment, progress, unenrollment, userSection, comment, rating };
 }
 
 function CommentReply({ reply, level }) {
@@ -690,7 +705,7 @@ export function ControlledAccordions() {
 export default function Course() {
     const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
     const isMediumScreen = useMediaQuery(theme => theme.breakpoints.up('md'));
-    const { user, course, courseContent, enrollees } = useLoaderData();
+    const { user, course, courseContent, enrollees, userRating } = useLoaderData();
     const htmlToReactParser = new Parser();
     const { token } = useAuthToken();
     const isAuthenticated = token['access'] !== null;
@@ -698,6 +713,7 @@ export default function Course() {
     const isInstructor = user.user_id === course.created_by;
     const isAdmin = user.is_superuser || user.is_staff;
     const enrollment = enrollees.find(enrollee => enrollee.user === user.user_id && enrollee.course.id === course.id);
+    const [rating, setRating] = React.useState(userRating[0]?.rating || 0);
     const fetcher = useFetcher();
     const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
     const submit = useSubmit();
@@ -785,7 +801,8 @@ export default function Course() {
                         <Paper id="enroll" elevation={2} sx={{
                             padding: { xs: '7%', md: '3%' },
                             float: 'left',
-                            margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' }
+                            margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' },
+                            maxWidth: { md: 450 }
                         }}>
                             <ThemeProvider theme={theme}>
 
@@ -814,7 +831,7 @@ export default function Course() {
 
                                     (isInstructor && !enrollment) || (isAdmin) ? // Don't render the enroll buttonn for instructors or admins
                                         null
-                                        : (!isInstructor && !enrollment ?
+                                        : (!isInstructor && !enrollment || !isAuthenticated ?
                                             <Box display='flex' justifyContent={'center'} mt={2}>
                                                 <Button size="large" sx={{ borderRadius: '2em', fontWeight: 800 }} fullWidth={isSmallScreen ? true : false} variant="contained" onClick={handleClickEnroll}>
                                                     Enroll now!
@@ -840,11 +857,25 @@ export default function Course() {
 
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={3} md={6}>
-                                        <Typography fontSize="small" variant="small" color={'text.secondary'}>
-                                            <b>Rating:</b> {course.average_rating}
-                                        </Typography>
-                                    </Grid>
+                                    {enrollment && (<Grid item xs={3} md={6}>
+                                        <Box display={'flex'} alignItems={'center'}>
+                                            <Typography fontSize="small" variant="small" color={'text.secondary'}>
+                                                <b>Your Rating:</b>
+                                            </Typography>
+                                            <Rating value={rating} onChange={(event, newRating) => {
+                                                setRating(newRating);
+                                                // if user has not yet rated this course then it's a post method else it's a patch
+                                                if (userRating[0]?.rating) {
+                                                    console.log('patch method is being called')
+                                                    fetcher.submit({ rating: newRating, intent: 'updateRating', ratingId: userRating[0].id }, { method: 'patch' });
+                                                } else {
+                                                    console.log('post method called')
+                                                    fetcher.submit({ rating: newRating, intent: 'createRating'}, { method: 'post' });
+                                                }
+
+                                            }} />
+                                        </Box>
+                                    </Grid>)}
                                     <Grid item xs={3} md={6}>
                                         <Typography fontSize="small" variant="small" color={'text.secondary'}>
                                             <b>Weeks:</b> {course.weeks}

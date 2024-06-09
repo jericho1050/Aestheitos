@@ -6,7 +6,7 @@ import { SetIsLoadingContext } from "../contexts/IsLoadingContext";
  
  // handle jwt in state  when user refreshes page.
   // for PRESERVATION OF STATE (because state doesn't survive a refresh of page)
-// token is initialized to null when page loads, so this will run after a refresh.
+// token is initialized to null when page loads, so this will run or mounts after a refresh.
 export default function persistJWT() {
   const setIsLoading = useContext(SetIsLoadingContext);
 
