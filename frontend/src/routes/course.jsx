@@ -782,7 +782,7 @@ export default function Course() {
                     }
 
                     <Box className="clearfix" component={'div'}>
-                        <Paper id="enroll" elevation={3} sx={{
+                        <Paper id="enroll" elevation={2} sx={{
                             padding: { xs: '7%', md: '3%' },
                             float: 'left',
                             margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' }
@@ -801,7 +801,7 @@ export default function Course() {
 
 
                                 <Typography sx={{ maxWidth: { md: 250, xs: 300, sm: 400 }, mt: 2 }} noWrap>
-                                    Instructor: <b>{course.created_by_name} </b></Typography>
+                                    Instructor: <Link to={`/profile/user/${course.created_by}`} className="courses-link"><b>{course.created_by_name} </b></Link></Typography>
 
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
                                     {course.price != 0 && <AttachMoneyIcon fontSize="large" />}

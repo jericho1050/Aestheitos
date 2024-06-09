@@ -94,7 +94,7 @@ function SearchInput() {
                         const { key, ...otherProps } = props;
 
                         return (
-                            <Link key={key} to={`/course/${option.id}`} style={{ textDecoration: 'none', color: 'initial' }}>
+                            <Link key={key} to={`/course/${option.id}`} className="courses-link">
                                 <ListItem {...otherProps} sx={{ display: 'flex' }}>
                                     <Box maxWidth={isMediumScreen || isSmallScreen ? '85%' : '125px'}>
                                         <ListItemText className="text-overflow"

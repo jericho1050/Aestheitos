@@ -132,7 +132,7 @@ function ResponsiveAppBar() {
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <Avatar alt="logo" src={logo} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: 40, width: 40 }} />
-            <Link to='/' style={{ color: 'inherit', textDecoration: 'none' }}>
+            <Link to='/' className='courses-link'>
               <Typography
                 variant="h6"
                 noWrap

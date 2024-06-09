@@ -18,13 +18,13 @@ export default function CourseCard(props) {
   const htmlToReactParser = new Parser();
 
   return (
-    <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: 645, height: '100%' }} elevation={3}>
+    <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: 645, height: '100%' }} elevation={2}>
       <ThemeProvider theme={theme}>
 
         <CardActionArea disableRipple disableTouchRipple className="course-card" sx={{
           flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
         }}>
-          <Link to={`/course/${props.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+          <Link to={`/course/${props.id}`} className='courses-link'>
             <CardMedia
               component="img"
               sx={{ aspectRatio: 16 / 9, objectFit: 'cover' }}
