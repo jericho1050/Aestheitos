@@ -16,7 +16,7 @@ theme = responsiveFontSizes(theme);
 export default function CourseCard(props) {
   // const description = removeTags(props.description);
   const htmlToReactParser = new Parser();
-
+  const rating = props.average_rating?.toFixed(2);
   return (
     <Card sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 500, sm: 400 }, maxHeight: 645, height: '100%' }} elevation={2}>
       <ThemeProvider theme={theme}>
@@ -59,13 +59,15 @@ export default function CourseCard(props) {
                 </Grid>
                 <Grid item container justifyContent={'space-between'}>
                   <Grid item>
-                    <Typography noWrap fontSize="x-small" variant='small' color="text.secondary">
-                      {props.enrollee_count === 0 ? 'No enrollees' : `${props.enrollee_count} enrolled`}
-                    </Typography>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography fontSize={'small'} fontWeight={'bold'}>{rating}</Typography>
+                      <Rating name="half-rating-read" size="small" value={parseFloat(rating)} precision={0.5} readOnly />
+                    </Box>
                   </Grid>
                   <Grid item>
                     <Typography noWrap fontSize="x-small" variant='small' color="text.secondary">
-                       Created: {props.course_created}
+                      Created: {props.course_created}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -77,9 +79,9 @@ export default function CourseCard(props) {
                     </Box>
                   </Grid>
                   <Grid item>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Rating name="half-rating-read" size="small" defaultValue={props.average_rating} precision={0.5} readOnly />
-                    </Box>
+                    <Typography noWrap fontSize="x-small" variant='small' color="text.secondary">
+                      {props.enrollee_count === 0 ? 'No enrollees' : `${props.enrollee_count} enrolled`}
+                    </Typography>
                   </Grid>
                 </Grid>
               </Grid>

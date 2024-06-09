@@ -349,3 +349,25 @@ export async function getUserEnrolledCourses(page = 1) {
 
   })
 }
+
+
+// Don't be confused about this. This is the course rating instance itself (so this returns a list with a single item only), not the course's rating.
+export async function getCourseRating(id){
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/rate`, {
+
+  })
+}
+export async function createCourseRating(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/rate`, {
+    method: 'POST',
+    body: formData
+  })
+}
+
+
+export async function updateCourseRating(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}course/rate/${id}`, {
+    method: 'PATCH',
+    body: formData
+  })
+}

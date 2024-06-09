@@ -94,14 +94,19 @@ class CourseRatingSerializer(ModelSerializer):
         read_only_fields = ["user", "course"]
 
     def save_with_auth_user(self, user, pk, update=False):
+        if update:
+            self.save()
+            return
+        
         course = get_object_or_404(Course, id=pk)
         is_enrolled = Enrollment.objects.filter(user=user, course=course).exists()
         is_rated = CourseRating.objects.filter(user=user, course=course).exists()
+        
         if not is_enrolled:
-            raise AuthenticationFailed("not allowed to create")
+            raise AuthenticationFailed("not allowed to create rating")
 
         if is_rated:
-            raise AuthenticationFailed("not allowed to create")
+            raise AuthenticationFailed("has already been rated!")
 
         self.save(user=user, course=course)
 
@@ -272,7 +277,7 @@ class EnrollmentSerializer(ModelSerializer):
     def get_total_sections(self, obj):
         sections = Section.objects.filter(course_content__course=obj.course).count()
         return sections
-    
+
 class WorkoutsSerializer(ModelSerializer):
     class Meta:
         model = Workouts
