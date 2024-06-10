@@ -14,8 +14,8 @@ import SignIn from './routes/signin';
 import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
 import Course, { loader as courseLoader } from './routes/course';
-import CreateCourse from './routes/create';
-import { action as createAction } from './routes/create';
+import CreateCourse from './routes/create-course';
+import { action as createAction } from './routes/create-course';
 import { action as courseAction } from './routes/course';
 import ProectedRoute from './components/protectedRoute';
 import { IsLoadingProvider } from './contexts/IsLoadingContext';
@@ -26,6 +26,7 @@ import { loader as pendingCoursesLoader } from './routes/pending';
 import Profile from './routes/profile';
 import { loader as profileLoader } from './routes/profile';
 import Enrolled, {loader as enrolledLoader} from './routes/enrolled';
+import CreateBlog from './routes/create-blog';
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -93,11 +94,14 @@ const router = createBrowserRouter([
             element: <Pending />,
             loader: pendingCoursesLoader
           },
-
           {
             path: "enrolled/user/:userId",
             element: <Enrolled />,
             loader: enrolledLoader
+          },
+          {
+            path: "blog/create",
+            element: <CreateBlog />
           }
         ]
       }

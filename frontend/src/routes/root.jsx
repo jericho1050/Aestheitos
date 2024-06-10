@@ -12,6 +12,7 @@ import { getCourses, getUser, updateCourse } from "../courses";
 export async function loader() {
   const user = await getUser();
   let courses = await getCourses();
+  console.log(courses);
   return { user, courses };
 }
 
