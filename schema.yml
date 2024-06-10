@@ -6,6 +6,33 @@ info:
     It provides endpoints for managing and accessing courses, lessons, user profiles,
     and progress tracking in the field of fitness and calisthenics.
 paths:
+  /api/token/verify:
+    post:
+      operationId: api_token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVerify'
+          description: ''
   /blog/{id}:
     get:
       operationId: blog_retrieve
@@ -380,7 +407,7 @@ paths:
   /comments/blog/{id}:
     get:
       operationId: comments_blog_list
-      description: List all comments or create a new commnet for a blog instance
+      description: List all comments or create a new comment for a blog instance
       parameters:
       - in: path
         name: id
@@ -404,7 +431,7 @@ paths:
           description: ''
     post:
       operationId: comments_blog_create
-      description: List all comments or create a new commnet for a blog instance
+      description: List all comments or create a new comment for a blog instance
       parameters:
       - in: path
         name: id
@@ -897,9 +924,37 @@ paths:
                 $ref: '#/components/schemas/CourseContent'
           description: ''
   /course/{id}/rate:
+    get:
+      operationId: course_rate_list
+      description: List course ratings (only retrieve the course rating for the user's
+        rating on a particular course) or create a new course's rating (i.e., the
+        user's course rating).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - course
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseRating'
+          description: ''
     post:
       operationId: course_rate_create
-      description: Create a new course's rating
+      description: List course ratings (only retrieve the course rating for the user's
+        rating on a particular course) or create a new course's rating (i.e., the
+        user's course rating).
       parameters:
       - in: path
         name: id
@@ -931,10 +986,107 @@ paths:
               schema:
                 $ref: '#/components/schemas/CourseRating'
           description: ''
+  /course/rate/{id}:
+    get:
+      operationId: course_rate_retrieve
+      description: Update a course's rating instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - course
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseRating'
+          description: ''
+    put:
+      operationId: course_rate_update
+      description: Update a course's rating instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - course
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseRating'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseRating'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseRating'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseRating'
+          description: ''
+    patch:
+      operationId: course_rate_partial_update
+      description: Update a course's rating instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - course
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseRating'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseRating'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseRating'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseRating'
+          description: ''
   /courses:
     get:
       operationId: courses_list
       description: List all courses, or create a new course.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
       tags:
       - courses
       security:
@@ -946,9 +1098,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Course'
+                $ref: '#/components/schemas/PaginatedCourseList'
           description: ''
     post:
       operationId: courses_create
@@ -981,7 +1131,8 @@ paths:
   /enrollment/course/{id}:
     get:
       operationId: enrollment_course_list
-      description: List all course's enrollee or create a new enrollment instance
+      description: List all course's enrollee or create a new enrollment ( i.e user
+        enrolls a course )
       parameters:
       - in: path
         name: id
@@ -1005,7 +1156,8 @@ paths:
           description: ''
     post:
       operationId: enrollment_course_create
-      description: List all course's enrollee or create a new enrollment instance
+      description: List all course's enrollee or create a new enrollment ( i.e user
+        enrolls a course )
       parameters:
       - in: path
         name: id
@@ -1058,18 +1210,7 @@ paths:
   /login:
     post:
       operationId: login_create
-      description: Log in and User validation then returns a JWT
-      parameters:
-      - in: query
-        name: password
-        schema:
-          type: string
-        description: Password
-      - in: query
-        name: username
-        schema:
-          type: string
-        description: Username
+      description: Authentication of the User and returns an access and refresh token
       tags:
       - login
       requestBody:
@@ -1084,26 +1225,23 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginCustom'
         required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/LoginCustom'
               examples:
                 ExampleResponse:
                   value:
-                    jwt: your_token_here
+                    access: your_access_token_here
+                    refresh: your_refresh_token_here
                   summary: Example response
           description: ''
   /logout:
     post:
       operationId: logout_create
+      description: Delete cookie in client's browser
       tags:
       - logout
       security:
@@ -1112,14 +1250,11 @@ paths:
       - {}
       responses:
         '200':
-          content:
-            application/json:
-              schema: null
-          description: ''
+          description: No response body
   /register:
     post:
       operationId: register_create
-      description: Creates a newly Account
+      description: Creates a newly Account and return an access and refresh token
       tags:
       - register
       requestBody:
@@ -1143,12 +1278,452 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                additionalProperties: {}
+              examples:
+                ExampleResponse:
+                  value:
+                    access: your_access_token_here
+                    refresh: your_refresh_token_here
+                  summary: Example response
+          description: ''
+  /section-item/{id}/section:
+    get:
+      operationId: section_item_section_retrieve
+      description: Retrieve, update or delete a section item instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section-item
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionItem'
+          description: ''
+    put:
+      operationId: section_item_section_update
+      description: Retrieve, update or delete a section item instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section-item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SectionItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SectionItem'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionItem'
+          description: ''
+    patch:
+      operationId: section_item_section_partial_update
+      description: Retrieve, update or delete a section item instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section-item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSectionItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSectionItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSectionItem'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionItem'
+          description: ''
+    delete:
+      operationId: section_item_section_destroy
+      description: Retrieve, update or delete a section item instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section-item
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /section-items/section/{id}:
+    get:
+      operationId: section_items_section_list
+      description: List all section items or create a new section item for a section
+        instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section-items
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectionItem'
+          description: ''
+    post:
+      operationId: section_items_section_create
+      description: List all section items or create a new section item for a section
+        instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section-items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SectionItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SectionItem'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionItem'
+          description: ''
+  /section/{id}/course-content:
+    get:
+      operationId: section_course_content_retrieve
+      description: Retrieve, update or delete a section instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+          description: ''
+    put:
+      operationId: section_course_content_update
+      description: Retrieve, update or delete a section instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Section'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Section'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Section'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+          description: ''
+    patch:
+      operationId: section_course_content_partial_update
+      description: Retrieve, update or delete a section instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSection'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSection'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+          description: ''
+    delete:
+      operationId: section_course_content_destroy
+      description: Retrieve, update or delete a section instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - section
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /sections/course-content/{id}:
+    get:
+      operationId: sections_course_content_list
+      description: List all sections or create a new section
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - sections
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+          description: ''
+    post:
+      operationId: sections_course_content_create
+      description: List all sections or create a new section
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - sections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Section'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Section'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Section'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+          description: ''
+  /token/refresh:
+    post:
+      operationId: token_refresh_create
+      description: Refreshes the access token and returns a new one
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /user:
+    get:
+      operationId: user_retrieve
+      description: Verifies the refresh token and returns the pair jwt.
+      tags:
+      - user
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                ExampleResponse:
+                  value:
+                    access: your_access_token_here
+                    refresh: your_refresh_token_here
+                  summary: Example response
+          description: ''
+  /user-detail:
+    get:
+      operationId: user_detail_retrieve
+      description: Retrieve and update a user instance
+      tags:
+      - user-detail
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: user_detail_partial_update
+      description: Retrieve and update a user instance
+      tags:
+      - user-detail
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /user/{id}:
+    get:
+      operationId: user_retrieve_2
+      description: Retrieve the user instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
           description: ''
   /user/course/{id}/progress:
     get:
       operationId: user_course_progress_retrieve
-      description: Retrieve and update a user's progress instance
+      description: Retrieve and update a user's course progress instance
       parameters:
       - in: path
         name: id
@@ -1170,7 +1745,7 @@ paths:
           description: ''
     post:
       operationId: user_course_progress_create
-      description: Retrieve and update a user's progress instance
+      description: Retrieve and update a user's course progress instance
       parameters:
       - in: path
         name: id
@@ -1203,7 +1778,7 @@ paths:
           description: ''
     put:
       operationId: user_course_progress_update
-      description: Retrieve and update a user's progress instance
+      description: Retrieve and update a user's course progress instance
       parameters:
       - in: path
         name: id
@@ -1236,7 +1811,7 @@ paths:
           description: ''
     patch:
       operationId: user_course_progress_partial_update
-      description: Retrieve and update a user's progress instance
+      description: Retrieve and update a user's course progress instance
       parameters:
       - in: path
         name: id
@@ -1267,10 +1842,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserProgress'
           description: ''
+    delete:
+      operationId: user_course_progress_destroy
+      description: Retrieve and update a user's course progress instance
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
   /user/courses/progress:
     get:
       operationId: user_courses_progress_list
-      description: List all user's course progress.
+      description: List all user's course progress
       tags:
       - user
       security:
@@ -1290,6 +1883,13 @@ paths:
     get:
       operationId: user_enrollments_list
       description: List all a user's enrollment
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
       tags:
       - user
       security:
@@ -1301,13 +1901,103 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Enrollment'
+                $ref: '#/components/schemas/PaginatedEnrollmentList'
           description: ''
-  /workout/{id}/course:
+  /user/section/{id}:
     get:
-      operationId: workout_course_retrieve
+      operationId: user_section_retrieve
+      description: Retrieve and Update a user's clicked or unclicked 'Section or Accordion
+        checkbox'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSection'
+          description: ''
+    put:
+      operationId: user_section_update
+      description: Retrieve and Update a user's clicked or unclicked 'Section or Accordion
+        checkbox'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSection'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSection'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSection'
+          description: ''
+    patch:
+      operationId: user_section_partial_update
+      description: Retrieve and Update a user's clicked or unclicked 'Section or Accordion
+        checkbox'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSection'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSection'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSection'
+          description: ''
+  /workout/{id}/section-item:
+    get:
+      operationId: workout_section_item_retrieve
       description: Retrieve, update or delete a workout instance
       parameters:
       - in: path
@@ -1329,7 +2019,7 @@ paths:
                 $ref: '#/components/schemas/Workouts'
           description: ''
     put:
-      operationId: workout_course_update
+      operationId: workout_section_item_update
       description: Retrieve, update or delete a workout instance
       parameters:
       - in: path
@@ -1363,7 +2053,7 @@ paths:
                 $ref: '#/components/schemas/Workouts'
           description: ''
     patch:
-      operationId: workout_course_partial_update
+      operationId: workout_section_item_partial_update
       description: Retrieve, update or delete a workout instance
       parameters:
       - in: path
@@ -1396,7 +2086,7 @@ paths:
                 $ref: '#/components/schemas/Workouts'
           description: ''
     delete:
-      operationId: workout_course_destroy
+      operationId: workout_section_item_destroy
       description: Retrieve, update or delete a workout instance
       parameters:
       - in: path
@@ -1413,9 +2103,9 @@ paths:
       responses:
         '204':
           description: No response body
-  /workouts/course/{id}:
+  /workouts/section-item/{id}:
     get:
-      operationId: workouts_course_list
+      operationId: workouts_section_item_list
       description: Lists all workouts or create a new workout for a course instance.
       parameters:
       - in: path
@@ -1439,7 +2129,7 @@ paths:
                   $ref: '#/components/schemas/Workouts'
           description: ''
     post:
-      operationId: workouts_course_create
+      operationId: workouts_section_item_create
       description: Lists all workouts or create a new workout for a course instance.
       parameters:
       - in: path
@@ -1656,7 +2346,7 @@ components:
           type: string
         title:
           type: string
-          maxLength: 50
+          maxLength: 200
         blog_created:
           type: string
           format: date-time
@@ -1711,16 +2401,14 @@ components:
         demo:
           type: string
           format: uri
-          maxLength: 200
         description:
           type: string
-          maxLength: 69
+          nullable: true
         workout:
           type: integer
           readOnly: true
       required:
       - demo
-      - description
       - id
       - workout
     Course:
@@ -1733,9 +2421,18 @@ components:
           type: number
           format: double
           readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        difficulty_display:
+          type: string
+          readOnly: true
+        enrollee_count:
+          type: string
+          readOnly: true
         title:
           type: string
-          maxLength: 100
+          maxLength: 200
         description:
           type: string
         thumbnail:
@@ -1746,31 +2443,54 @@ components:
           $ref: '#/components/schemas/DifficultyEnum'
         course_created:
           type: string
-          format: date-time
-          readOnly: true
+          format: date
+          nullable: true
         course_updated:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         status:
           $ref: '#/components/schemas/StatusEnum'
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        weeks:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        is_draft:
+          type: boolean
+        read:
+          type: boolean
         created_by:
           type: integer
           readOnly: true
       required:
       - average_rating
-      - course_created
       - course_updated
       - created_by
+      - created_by_name
       - description
       - difficulty
+      - difficulty_display
+      - enrollee_count
       - id
       - title
+      - weeks
     CourseComments:
       type: object
       properties:
         id:
           type: integer
+          readOnly: true
+        replies:
+          type: string
+          readOnly: true
+        comment_by:
+          allOf:
+          - $ref: '#/components/schemas/UserDetail'
           readOnly: true
         comment:
           type: string
@@ -1779,9 +2499,6 @@ components:
           format: date-time
           readOnly: true
         course:
-          type: integer
-          readOnly: true
-        comment_by:
           type: integer
           readOnly: true
         parent_comment:
@@ -1793,32 +2510,27 @@ components:
       - comment_date
       - course
       - id
+      - replies
     CourseContent:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        lecture:
+        preview:
           type: string
           format: uri
           maxLength: 200
         overview:
           type: string
-        weeks:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
         course:
           type: integer
           readOnly: true
       required:
       - course
       - id
-      - lecture
       - overview
-      - weeks
+      - preview
     CourseRating:
       type: object
       properties:
@@ -1856,6 +2568,13 @@ components:
         id:
           type: integer
           readOnly: true
+        course:
+          allOf:
+          - $ref: '#/components/schemas/Course'
+          readOnly: true
+        total_sections:
+          type: string
+          readOnly: true
         date_enrolled:
           type: string
           format: date-time
@@ -1863,13 +2582,11 @@ components:
         user:
           type: integer
           readOnly: true
-        course:
-          type: integer
-          readOnly: true
       required:
       - course
       - date_enrolled
       - id
+      - total_sections
       - user
     ExcertionEnum:
       enum:
@@ -1923,6 +2640,46 @@ components:
     NullEnum:
       enum:
       - null
+    PaginatedCourseList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+    PaginatedEnrollmentList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Enrollment'
     PatchedBlog:
       type: object
       properties:
@@ -1933,7 +2690,7 @@ components:
           type: string
         title:
           type: string
-          maxLength: 50
+          maxLength: 200
         blog_created:
           type: string
           format: date-time
@@ -1975,10 +2732,9 @@ components:
         demo:
           type: string
           format: uri
-          maxLength: 200
         description:
           type: string
-          maxLength: 69
+          nullable: true
         workout:
           type: integer
           readOnly: true
@@ -1992,9 +2748,18 @@ components:
           type: number
           format: double
           readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        difficulty_display:
+          type: string
+          readOnly: true
+        enrollee_count:
+          type: string
+          readOnly: true
         title:
           type: string
-          maxLength: 100
+          maxLength: 200
         description:
           type: string
         thumbnail:
@@ -2005,14 +2770,27 @@ components:
           $ref: '#/components/schemas/DifficultyEnum'
         course_created:
           type: string
-          format: date-time
-          readOnly: true
+          format: date
+          nullable: true
         course_updated:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         status:
           $ref: '#/components/schemas/StatusEnum'
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        weeks:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        is_draft:
+          type: boolean
+        read:
+          type: boolean
         created_by:
           type: integer
           readOnly: true
@@ -2022,6 +2800,13 @@ components:
         id:
           type: integer
           readOnly: true
+        replies:
+          type: string
+          readOnly: true
+        comment_by:
+          allOf:
+          - $ref: '#/components/schemas/UserDetail'
+          readOnly: true
         comment:
           type: string
         comment_date:
@@ -2029,9 +2814,6 @@ components:
           format: date-time
           readOnly: true
         course:
-          type: integer
-          readOnly: true
-        comment_by:
           type: integer
           readOnly: true
         parent_comment:
@@ -2043,18 +2825,65 @@ components:
         id:
           type: integer
           readOnly: true
-        lecture:
+        preview:
           type: string
           format: uri
           maxLength: 200
         overview:
           type: string
-        weeks:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
         course:
+          type: integer
+          readOnly: true
+    PatchedCourseRating:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        user:
+          type: integer
+          readOnly: true
+        course:
+          type: integer
+          readOnly: true
+    PatchedSection:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        heading:
+          type: string
+          maxLength: 200
+        course_content:
+          type: integer
+          readOnly: true
+    PatchedSectionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        lecture:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+        description_image:
+          type: string
+          format: uri
+          nullable: true
+        heading:
+          type: string
+          maxLength: 200
+        section:
           type: integer
           readOnly: true
     PatchedUserProgress:
@@ -2063,16 +2892,29 @@ components:
         id:
           type: integer
           readOnly: true
-        weeks_completed:
+        sections_completed:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         user:
           type: integer
           readOnly: true
         course:
+          type: integer
+          readOnly: true
+    PatchedUserSection:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        is_clicked:
+          type: boolean
+        user:
+          type: integer
+          readOnly: true
+        section:
           type: integer
           readOnly: true
     PatchedWorkouts:
@@ -2083,11 +2925,10 @@ components:
           readOnly: true
         exercise:
           type: string
-          maxLength: 50
+          nullable: true
         demo:
           type: string
           format: uri
-          maxLength: 200
         intensity:
           nullable: true
           oneOf:
@@ -2096,30 +2937,27 @@ components:
           - $ref: '#/components/schemas/NullEnum'
         rest_time:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         sets:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         reps:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         excertion:
           nullable: true
-          minimum: -9223372036854775808
-          maximum: 9223372036854775807
+          minimum: -2147483648
+          maximum: 2147483647
           oneOf:
           - $ref: '#/components/schemas/ExcertionEnum'
           - $ref: '#/components/schemas/NullEnum'
-        course:
+        section_item:
           type: integer
           readOnly: true
     PatchedWrongExerciseForm:
@@ -2131,13 +2969,56 @@ components:
         demo:
           type: string
           format: uri
-          maxLength: 200
         description:
           type: string
-          maxLength: 69
+          nullable: true
         workout:
           type: integer
           readOnly: true
+    Section:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        heading:
+          type: string
+          maxLength: 200
+        course_content:
+          type: integer
+          readOnly: true
+      required:
+      - course_content
+      - heading
+      - id
+    SectionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        lecture:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+        description_image:
+          type: string
+          format: uri
+          nullable: true
+        heading:
+          type: string
+          maxLength: 200
+        section:
+          type: integer
+          readOnly: true
+      required:
+      - heading
+      - id
+      - section
     StatusEnum:
       enum:
       - P
@@ -2148,6 +3029,26 @@ components:
         * `P` - Pending
         * `A` - Approved
         * `R` - Rejected
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    TokenVerify:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+      required:
+      - token
     User:
       type: object
       properties:
@@ -2217,17 +3118,52 @@ components:
       - id
       - password
       - username
+    UserDetail:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        profile_pic:
+          type: string
+          format: uri
+          nullable: true
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        date_joined:
+          type: string
+          format: date-time
+      required:
+      - user_id
+      - username
     UserProgress:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        weeks_completed:
+        sections_completed:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         user:
           type: integer
@@ -2239,6 +3175,24 @@ components:
       - course
       - id
       - user
+    UserSection:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        is_clicked:
+          type: boolean
+        user:
+          type: integer
+          readOnly: true
+        section:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - section
+      - user
     Workouts:
       type: object
       properties:
@@ -2247,11 +3201,10 @@ components:
           readOnly: true
         exercise:
           type: string
-          maxLength: 50
+          nullable: true
         demo:
           type: string
           format: uri
-          maxLength: 200
         intensity:
           nullable: true
           oneOf:
@@ -2260,37 +3213,33 @@ components:
           - $ref: '#/components/schemas/NullEnum'
         rest_time:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         sets:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         reps:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
         excertion:
           nullable: true
-          minimum: -9223372036854775808
-          maximum: 9223372036854775807
+          minimum: -2147483648
+          maximum: 2147483647
           oneOf:
           - $ref: '#/components/schemas/ExcertionEnum'
           - $ref: '#/components/schemas/NullEnum'
-        course:
+        section_item:
           type: integer
           readOnly: true
       required:
-      - course
       - demo
-      - exercise
       - id
+      - section_item
     WrongExerciseForm:
       type: object
       properties:
@@ -2300,16 +3249,14 @@ components:
         demo:
           type: string
           format: uri
-          maxLength: 200
         description:
           type: string
-          maxLength: 69
+          nullable: true
         workout:
           type: integer
           readOnly: true
       required:
       - demo
-      - description
       - id
       - workout
   securitySchemes:
