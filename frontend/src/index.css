@@ -415,3 +415,19 @@ html  {
   filter: brightness(97%);
 
 }
+
+.editor { 
+  padding: 1.5em;
+}
+
+@media (max-width: 650px) {
+  .ck-content {
+    min-height: 350px;
+  }
+}
+
+@media (min-width: 650px) { 
+  .ck-content {
+    min-height: 500px;
+  }
+}
