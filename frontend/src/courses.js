@@ -371,9 +371,14 @@ export async function updateCourseRating(id, formData) {
     body: formData
   })
 }
+export async function getBlogs() {
+  return sendRequest(`${import.meta.env.VITE_API_URL}blogs`, {
+
+  })
+}
 
 export async function createBlog(formData) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}/blogs`, {
+  return sendRequest(`${import.meta.env.VITE_API_URL}blogs`, {
     method: 'POST',
     body: formData
   })

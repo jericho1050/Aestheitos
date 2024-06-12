@@ -1,5 +1,11 @@
 import { Box, Button, Container } from "@mui/material";
+import { getBlogs } from "../courses";
 
+export async function loader() { 
+    const blogs = await getBlogs();
+    return { blogs };
+    
+}
 export default function Blogs() {
 
     return (
