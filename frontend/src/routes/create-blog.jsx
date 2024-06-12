@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
@@ -35,115 +35,127 @@ import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformatio
 import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
 import Undo from '@ckeditor/ckeditor5-undo/src/undo';
 import { Box, Button, Container, TextField } from '@mui/material';
+import { Form, redirect } from 'react-router-dom';
+import { createBlog } from '../courses';
 
 
+export async function action({ request }) {
+    const formData = await request.formData();
+    const blog = await createBlog(formData);
 
+    return redirect("/blogs")
+
+}
 // Yeah, I know the dependency for this Krazy, but because the Vite integration for CkEditor5 doesn't seem to work, I've already wasted more than 5 hours trying to get it to work!
 export default function CreateBlog() {
+    const [blogContent, setBlogContent] = useState("Hello, Write Your blog here");
     return (
         <Container maxWidth="xl">
-            <Box className="editor">
-                <TextField fullWidth id="outlined-basic" name="title" label="Title" variant="outlined" sx={{ mb: 2 }} />
-                <CKEditor
-                    editor={ClassicEditor}
-                    config={{
-                        plugins: [
-                            Alignment,
-                            AutoImage,
-                            AutoLink,
-                            Autoformat,
-                            Base64UploadAdapter,
-                            BlockQuote,
-                            Bold,
-                            CloudServices,
-                            Essentials,
-                            FontFamily,
-                            FontSize,
-                            Heading,
-                            Highlight,
-                            Image,
-                            ImageCaption,
-                            ImageInsert,
-                            ImageResize,
-                            ImageStyle,
-                            ImageToolbar,
-                            ImageUpload,
-                            Indent,
-                            Italic,
-                            Link,
-                            List,
-                            MediaEmbed,
-                            Paragraph,
-                            PasteFromOffice,
-                            Table,
-                            TableColumnResize,
-                            TableToolbar,
-                            TextTransformation,
-                            Underline,
-                            Undo
-                        ],
-                        toolbar: [
-                            'undo',
-                            'redo',
-                            '|',
-                            'heading',
-                            'fontFamily',
-                            'fontSize',
-                            '|',
-                            'bold',
-                            'italic',
-                            'highlight',
-                            'link',
-                            'bulletedList',
-                            'numberedList',
-                            'underline',
-                            '|',
-                            'outdent',
-                            'indent',
-                            'alignment',
-                            '|',
-                            'imageInsert',
-                            'blockQuote',
-                            'insertTable',
-                            'mediaEmbed'
-                        ],
-                        language: 'en',
-                        image: {
+            <Form method="post">
+                <Box className="editor">
+                    <TextField fullWidth id="outlined-basic" name="title" label="Title" variant="outlined" sx={{ mb: 2 }} />
+                    <TextField type="hidden" name="content" value={blogContent} />
+                    <CKEditor
+                        editor={ClassicEditor}
+                        config={{
+                            plugins: [
+                                Alignment,
+                                AutoImage,
+                                AutoLink,
+                                Autoformat,
+                                Base64UploadAdapter,
+                                BlockQuote,
+                                Bold,
+                                CloudServices,
+                                Essentials,
+                                FontFamily,
+                                FontSize,
+                                Heading,
+                                Highlight,
+                                Image,
+                                ImageCaption,
+                                ImageInsert,
+                                ImageResize,
+                                ImageStyle,
+                                ImageToolbar,
+                                ImageUpload,
+                                Indent,
+                                Italic,
+                                Link,
+                                List,
+                                MediaEmbed,
+                                Paragraph,
+                                PasteFromOffice,
+                                Table,
+                                TableColumnResize,
+                                TableToolbar,
+                                TextTransformation,
+                                Underline,
+                                Undo
+                            ],
                             toolbar: [
-                                'imageTextAlternative',
-                                'toggleImageCaption',
-                                'imageStyle:inline',
-                                'imageStyle:block',
-                                'imageStyle:side'
-                            ]
-                        },
-                        table: {
-                            contentToolbar: [
-                                'tableColumn',
-                                'tableRow',
-                                'mergeTableCells'
-                            ]
-                        }
-                    }}
-                    onReady={editor => {
-                        console.log('Editor is ready to use!', editor);
-                    }}
-                    data={"Hello, Write Your blog here"}
-                    onChange={(event, editor) => {
-                        const data = editor.getData();
-                        console.log(data);
-                    }}
-                    onBlur={(event, editor) => {
-                        console.log('Blur.', editor);
-                    }}
-                    onFocus={(event, editor) => {
-                        console.log('Focus.', editor);
-                    }}
-                />
-            </Box>
-            <Box pl={'1.5em'}>
-                <Button variant="contained" sx={{ padding: '0.6em 1.8em', fontWeight: 'bolder' }} >Post</Button>
-            </Box>
+                                'undo',
+                                'redo',
+                                '|',
+                                'heading',
+                                'fontFamily',
+                                'fontSize',
+                                '|',
+                                'bold',
+                                'italic',
+                                'highlight',
+                                'link',
+                                'bulletedList',
+                                'numberedList',
+                                'underline',
+                                '|',
+                                'outdent',
+                                'indent',
+                                'alignment',
+                                '|',
+                                'imageInsert',
+                                'blockQuote',
+                                'insertTable',
+                                'mediaEmbed'
+                            ],
+                            language: 'en',
+                            image: {
+                                toolbar: [
+                                    'imageTextAlternative',
+                                    'toggleImageCaption',
+                                    'imageStyle:inline',
+                                    'imageStyle:block',
+                                    'imageStyle:side'
+                                ]
+                            },
+                            table: {
+                                contentToolbar: [
+                                    'tableColumn',
+                                    'tableRow',
+                                    'mergeTableCells'
+                                ]
+                            }
+                        }}
+                        onReady={editor => {
+                            console.log('Editor is ready to use!', editor);
+                        }}
+                        data={blogContent}
+                        onChange={(event, editor) => {
+                            const data = editor.getData();
+                            setBlogContent(data);
+                        }}
+                        onBlur={(event, editor) => {
+                            console.log('Blur.', editor);
+                        }}
+                        onFocus={(event, editor) => {
+                            console.log('Focus.', editor);
+                        }}
+                    />
+                </Box>
+                <Box pl={'1.5em'}>
+                    <Button type="submit" variant="contained" sx={{ padding: '0.6em 1.8em', fontWeight: 'bolder' }} >Post</Button>
+                </Box>
+            </Form>
         </Container>
     )
 }

@@ -15,7 +15,7 @@ import SignUp from './routes/signup';
 import { Index, loader as indexLoader } from './routes/index';
 import Course, { loader as courseLoader } from './routes/course';
 import CreateCourse from './routes/create-course';
-import { action as createAction } from './routes/create-course';
+import { action as createCourseAction } from './routes/create-course';
 import { action as courseAction } from './routes/course';
 import ProectedRoute from './components/protectedRoute';
 import { IsLoadingProvider } from './contexts/IsLoadingContext';
@@ -26,7 +26,9 @@ import { loader as pendingCoursesLoader } from './routes/pending';
 import Profile from './routes/profile';
 import { loader as profileLoader } from './routes/profile';
 import Enrolled, {loader as enrolledLoader} from './routes/enrolled';
-import CreateBlog from './routes/create-blog';
+import CreateBlog, {action as createBlogAction} from './routes/create-blog';
+import Blogs from './routes/blogs';
+
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -69,6 +71,10 @@ const router = createBrowserRouter([
           loader: profileLoader
 
         },
+        {
+          path: "blogs",
+          element: <Blogs />,
+        }
       ]
 
       },
@@ -80,7 +86,7 @@ const router = createBrowserRouter([
           {
             path: "course/create",
             element: <CreateCourse />,
-            action: createAction
+            action: createCourseAction
           },
           {
             path: "course/:courseId/edit",
@@ -101,7 +107,9 @@ const router = createBrowserRouter([
           },
           {
             path: "blog/create",
-            element: <CreateBlog />
+            element: <CreateBlog />,
+            action: createBlogAction
+
           }
         ]
       }

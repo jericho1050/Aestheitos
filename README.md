@@ -10,7 +10,7 @@ I myself, who have trained and also made some mistakes for almost 4 years, wante
 
 ## Distinctiveness and Complexity
 
-This project is an online learning platform dedicated to fitness and calisthenics. It allows users to enroll in training programs and courses created by verified users. Creating a course is never easy without a nice user interface.Each course includes a lecture, a training plan with workout demonstrations and a discussion or comment where users can interact with each other. The platform emphasizes community learning and engagement, making fitness education accessible and enjoyable for everyone. In addition, I've also implemented a blog where users can create and post their own and let other users read their very own published blog. Of course, it should be easy to create a blog, in which I've integrated a WYSIWYG (What You See Is What You Get) for a nice UI/UX, which, in my opinion, is the reason why it is ***distinct*** from other apps.
+This project is an online learning platform dedicated to fitness and calisthenics. It allows users to enroll in training programs and courses created by verified users. Creating a course is never easy without a nice user interface.Each course includes a lecture, a training plan with workout demonstrations and a discussion or comment where users can interact with each other. The platform emphasizes community learning and engagement, making fitness education accessible and enjoyable for everyone. In addition, I've also implemented a blog where the admin or staff can create and post their own and let other users read the published blog. Of course, it should be easy to create a blog, in which I've integrated a WYSIWYG (What You See Is What You Get) for a nice UI/UX, which, in my opinion, is the reason why it is ***distinct*** from other apps.
 
 Before I've started the implementation or coding of this project, I've first created my pseudocode, an outline, a class diagram for my models, watch some tutorials and read Django's Rest Framework (DRF), React and React-router documentation, etc.The main reason is that I wanted it to be interactive.React serves as the frontend, which is SSR (server-side rendering) of our user interface via communicating through the backend server, which is Django.
 
@@ -29,7 +29,7 @@ In my outline i have my own **specifications** for my project, as follows:
 - *optional* **Animation**: Use ReactSpring for the home page implemented it yourself through trial and error
 - **Enrollment**: Users who are authenticated should be able to enroll in a course.
 - **Comments**: Allows users to comment on course material and on a blog post.
-- **Create Blog**: An authenticated user who is signed in should be able to write a new blog in an editor and then click the submit post button.
+- **Create Blog**: Staff or superusers who are signed in should be able to write a new blog in an editor via its route and then click the submit post button.
 - **Blogs**: Users should be able to see all Blog posts from users, with the most recent posts first
 - **Pagination**: On the page that display courses and blogs, for courses there should be only be 15 cards and 10 blog post on a page. If there are more than that, A “Next” button should appear to take the user to the next page of courses or blog posts (which should be older than the current page of courses and blog posts). if not on the first page, a “Previous” button should appear to take the user to the previous page as well
 

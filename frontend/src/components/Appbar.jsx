@@ -82,7 +82,7 @@ function ResponsiveAppBar() {
   // attach event listener to each page in navbar
   const pageHandlers = {
     // 'Courses': <Link to="/#courses" />,
-    'Blog': () => { },
+    'Blog': () => navigate('/blogs'),
     'Create': () => navigate('/course/create'),
     'Pending': () => navigate('/pending')
   }

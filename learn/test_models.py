@@ -645,7 +645,7 @@ class BlogTestCase(TestCase):
         self.assertEqual(self.blog.content, new_content)
 
     def test_blog_creation_with_too_long_title(self):
-        long_title = "a" * 256
+        long_title = "a" * 350
         blog = Blog.objects.create(
             author=self.user, content="Too long title test", title=long_title
         )
