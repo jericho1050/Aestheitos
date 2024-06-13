@@ -39,8 +39,6 @@ from .custom_serializer import *
 # API calls (Class based functions)
 
 
-class CustomPagination(PageNumberPagination):
-    page_size = 15
 
 
 class UserMyDetailsView(APIView):
@@ -208,7 +206,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
 
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
-    pagination_class = CustomPagination
+    pagination_class = CourseResultsPagination
 
     def get_queryset(self):
 
@@ -468,7 +466,7 @@ class EnrollmentUserList(generics.ListAPIView):
 
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
-    pagination_class = CustomPagination
+    pagination_class = CourseResultsPagination
 
     def get_queryset(self):
         user = user_authentication(self.request)
@@ -491,6 +489,7 @@ class BlogList(CreateAPIMixin, generics.ListCreateAPIView):
 
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    pagination_class = BlogResultsPagination    
 
 
 class BlogDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):

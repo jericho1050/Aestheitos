@@ -22,12 +22,12 @@ import { IsLoadingProvider } from './contexts/IsLoadingContext';
 import EditCourse from './routes/edit';
 import { loader as editCourseLoader, action as editAction } from './routes/edit';
 import { Pending } from './routes/pending';
-import { loader as pendingCoursesLoader } from './routes/pending';
+import { loader as pendingLoader } from './routes/pending';
 import Profile from './routes/profile';
 import { loader as profileLoader } from './routes/profile';
 import Enrolled, {loader as enrolledLoader} from './routes/enrolled';
 import CreateBlog, {action as createBlogAction} from './routes/create-blog';
-import Blogs from './routes/blogs';
+import Blogs, {loader as BlogsLoader } from './routes/blogs';
 
 const theme = createTheme({
   palette: {
@@ -74,6 +74,7 @@ const router = createBrowserRouter([
         {
           path: "blogs",
           element: <Blogs />,
+          loader: BlogsLoader,
         }
       ]
 
@@ -93,12 +94,11 @@ const router = createBrowserRouter([
             element: <EditCourse />,
             loader: editCourseLoader,
             action: editAction
-
           },
           {
             path: "pending",
             element: <Pending />,
-            loader: pendingCoursesLoader
+            loader: pendingLoader
           },
           {
             path: "enrolled/user/:userId",
@@ -109,7 +109,6 @@ const router = createBrowserRouter([
             path: "blog/create",
             element: <CreateBlog />,
             action: createBlogAction
-
           }
         ]
       }

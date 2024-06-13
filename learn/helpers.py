@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
+from rest_framework.pagination import PageNumberPagination
 from .models import User, Course
 from .serializers import *
 from Aestheitos import settings
@@ -159,3 +160,9 @@ class CourseLookupMixin:
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, course=self.kwargs["pk"])
         return obj
+
+class CourseResultsPagination(PageNumberPagination):
+    page_size = 15
+
+class BlogResultsPagination(PageNumberPagination):
+    page_size = 10

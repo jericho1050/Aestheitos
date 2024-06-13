@@ -351,6 +351,7 @@ class WrongExerciseFormSerializer(ModelSerializer):
 
 
 class BlogSerializer(ModelSerializer):
+    author = UserDetailSerializer(read_only=True)
     class Meta:
         model = Blog
         fields = "__all__"

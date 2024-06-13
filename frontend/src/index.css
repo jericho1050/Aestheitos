@@ -134,12 +134,12 @@ html  {
 }
 
 
-.courses-link {
+.courses-link, .blogs-link {
   text-decoration: none;
   color: inherit;
 }
 
-.courses-link:active {
+.courses-link:active, .blogs-link:active {
   color: inherit;
 }
 

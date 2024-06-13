@@ -17,3 +17,15 @@ export function parseUserDateTime(date) {
 
     return [date_joined_day, date_joined_month, date_joined_year];
 }
+
+export function parseBlogDateTime(date) {
+    const blog_date = new Date(date);
+    const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    const blog_day_name = days[blog_date.getDay()];
+    const blog_month_name = months[blog_date.getMonth()];
+    const blog_year = blog_date.getFullYear();
+    const blog_day = blog_date.getDate();
+
+    return [blog_day_name, blog_month_name, blog_day, blog_year];
+}

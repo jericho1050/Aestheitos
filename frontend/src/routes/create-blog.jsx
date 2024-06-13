@@ -34,26 +34,56 @@ import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
 import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
 import Undo from '@ckeditor/ckeditor5-undo/src/undo';
-import { Box, Button, Container, TextField } from '@mui/material';
-import { Form, redirect } from 'react-router-dom';
+import { Box, Button, Container, TextField, Typography } from '@mui/material';
+import { Form, redirect, useActionData, useNavigation } from 'react-router-dom';
 import { createBlog } from '../courses';
 
 
 export async function action({ request }) {
     const formData = await request.formData();
     const blog = await createBlog(formData);
-
+    const errors = {}
+    if (blog.statusCode != 201) {
+        const errorMessage = JSON.parse(blog.message);
+        errors.message = errorMessage;
+        errors.statusCode = blog.statusCode
+        return errors;
+    }
     return redirect("/blogs")
 
 }
 // Yeah, I know the dependency for this Krazy, but because the Vite integration for CkEditor5 doesn't seem to work, I've already wasted more than 5 hours trying to get it to work!
 export default function CreateBlog() {
-    const [blogContent, setBlogContent] = useState("Hello, Write Your blog here");
+    const [blogContent, setBlogContent] = useState('Hi there, start writing your own blog now');
+    const navigation = useNavigation();
+    const errors = useActionData();
+
     return (
         <Container maxWidth="xl">
             <Form method="post">
                 <Box className="editor">
-                    <TextField fullWidth id="outlined-basic" name="title" label="Title" variant="outlined" sx={{ mb: 2 }} />
+                    <TextField error={Boolean(errors?.message.title)} required multiline fullWidth id="outlined-basic" name="title"
+                        label={errors?.message ? (Object.entries(errors.message).map(([key, value]) =>
+                            key === 'title' && (<Typography key={key}>
+                                {`${key}: ${value}`}
+                            </Typography>)
+                        ))
+                            :
+                            "Title"
+                        }
+                        variant="outlined"
+                        sx={{ mb: 2 }} />
+                    <TextField error={Boolean(errors?.message.summary)} required multiline fullWidth id="outlined-basic" name="summary"
+                        label={errors?.message ? (Object.entries(errors.message).map(([key, value]) =>
+                            key === 'summary' && (<Typography key={key}>
+                                {`${key}: ${value}`}
+                            </Typography>)
+                        ))
+                            :
+                            "Summary"
+                        }
+                        variant="outlined"
+                        sx={{ mb: 2 }} />
                     <TextField type="hidden" name="content" value={blogContent} />
                     <CKEditor
                         editor={ClassicEditor}
@@ -144,16 +174,21 @@ export default function CreateBlog() {
                             const data = editor.getData();
                             setBlogContent(data);
                         }}
-                        onBlur={(event, editor) => {
-                            console.log('Blur.', editor);
-                        }}
-                        onFocus={(event, editor) => {
-                            console.log('Focus.', editor);
-                        }}
+                        // onBlur={(event, editor) => {
+                        //     console.log('Blur.', editor);
+                        // }}
+                        // onFocus={(event, editor) => {
+                        //     console.log('Focus.', editor);
+                        // }}
                     />
                 </Box>
+                {errors?.message && (Object.entries(errors.message).map(([key, value]) =>
+                    key === 'content' && (<Typography p={'1em 1.5em'}  color={'red'} key={key}>
+                        {`${key}: ${value}`}
+                    </Typography>)
+                ))}
                 <Box pl={'1.5em'}>
-                    <Button type="submit" variant="contained" sx={{ padding: '0.6em 1.8em', fontWeight: 'bolder' }} >Post</Button>
+                    <Button disabled={navigation.state === 'submitting'} type="submit" variant="contained" sx={{ padding: '0.6em 1.8em', fontWeight: 'bolder' }} >Post</Button>
                 </Box>
             </Form>
         </Container>

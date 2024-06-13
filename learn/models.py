@@ -310,10 +310,11 @@ class Blog(models.Model):
     """
 
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="author")
-    content = models.TextField()
     title = models.CharField(max_length=300)
+    summary = models.CharField(max_length=150)
+    content = models.TextField()
     blog_created = models.DateTimeField(auto_now_add=True)
-    blog_updated = models.DateTimeField(auto_now_add=True)
+    blog_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f" ( pk: { self.pk } ) Title: {self.title}. By {self.author}"
