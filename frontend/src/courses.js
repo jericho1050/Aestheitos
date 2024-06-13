@@ -284,7 +284,7 @@ export async function createCourseComment(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}comments/course/${id}`, {
     method: 'POST',
     body: formData
-  })
+  });
 }
 
 
@@ -292,13 +292,13 @@ export async function updateCourseComment(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}comment/${id}/course`, {
     method: 'PUT',
     body: formData
-  })
+  });
 }
 
 export async function deleteCourseComment(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}comment/${id}/course`, {
     method: 'DELETE'
-  })
+  });
 }
 export async function getUserCoursesProgress() {
   return sendRequest(`${import.meta.env.VITE_API_URL}user/courses/progress`, {
@@ -308,31 +308,31 @@ export async function getUserCoursesProgress() {
 export async function getUserCourseProgress(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}/user/course/${id}/progress`, {
 
-  })
+  });
 }
 export async function createUserCourseProgress(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
     method: 'POST'
-  })
+  });
 }
 
 export async function updateUserCourseProgress(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
     method: 'PATCH'
-  })
+  });
 }
 
 export async function deleteUserCourseProgress(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}user/course/${id}/progress`, {
     method: 'DELETE'
-  })
+  });
 }
 
 export async function getUserSection(id) {
 
   return sendRequest(`${import.meta.env.VITE_API_URL}user/section/${id}`, {
 
-  })
+  });
 }
 
 export async function updateUserSection(id, formData) {
@@ -352,16 +352,16 @@ export async function getUserEnrolledCourses(page = 1) {
 
 
 // Don't be confused about this. This is the course rating instance itself (so this returns a list with a single item only), not the course's rating.
-export async function getCourseRating(id){
+export async function getCourseRating(id) {
   return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/rate`, {
 
-  })
+  });
 }
 export async function createCourseRating(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}course/${id}/rate`, {
     method: 'POST',
     body: formData
-  })
+  });
 }
 
 
@@ -369,17 +369,23 @@ export async function updateCourseRating(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}course/rate/${id}`, {
     method: 'PATCH',
     body: formData
-  })
+  });
 }
 export async function getBlogs() {
   return sendRequest(`${import.meta.env.VITE_API_URL}blogs`, {
 
-  })
+  });
 }
 
 export async function createBlog(formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}blogs`, {
     method: 'POST',
     body: formData
-  })
+  });
+}
+
+export async function getBlog(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}blog/${id}`, {
+
+  });
 }

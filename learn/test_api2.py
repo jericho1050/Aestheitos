@@ -715,6 +715,7 @@ class BlogListAPITestCase(APITestCase):
 
         Blog.objects.create(
             title="test blog",
+            summary="summary of blog the summary is empty actually hehe",
             content="idk there's no content yet lorem ipsum blah blah blah blah blah blah",
             author=self.user,
         )
@@ -753,8 +754,8 @@ class BlogListAPITestCase(APITestCase):
         response = client.get(reverse("learn:blog-list"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertIn("test", response.data[0]["title"])
+        self.assertEqual(response.data['count'], 1)
+        self.assertIn("test", response.data['results'][0]["title"])
 
     def test_create_blog(self):
         """
@@ -764,12 +765,12 @@ class BlogListAPITestCase(APITestCase):
         # test create blog with an authenticated client
         response = self.authenticated_client.post(
             reverse("learn:blog-list"),
-            {"title": "testing post", "content": "creating content"},
+            {"title": "testing post", "content": "creating content", "summary": "idk"},
         )
 
         # test create blog with an invalid data type
         response_2 = self.authenticated_client.post(
-            reverse("learn:blog-list"), {"title": 123, "content": 123}, format="json"
+            reverse("learn:blog-list"), {"title": 123, "content": 123, "summary": "empty"}, format="json"
         )
 
         # test create blog with an empty field / data
@@ -780,16 +781,18 @@ class BlogListAPITestCase(APITestCase):
         # test create blog with unauthenticated client
         response_4 = self.unauthenticated_client.post(
             reverse("learn:blog-list"),
-            {"title": "im probably not authenticated", "content": "idk"},
+            {"title": "im probably not authenticated", "content": "idk", "summary": "idk"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn("testing", response.data["title"])
-        self.assertEqual(response.data["author"], self.user.id)
+        self.assertIn("testing", response.data["title"]) 
+        self.assertEqual(response.data["author"]["user_id"], self.user.id)
+
         self.assertIsNotNone(response.data["content"])
         self.assertEqual(response_2.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_2.data["title"], "123")
         self.assertEqual(response_2.data["content"], "123")
+        self.assertEqual(response_2.data["summary"], "empty")
         self.assertEqual(response_3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_4.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -802,6 +805,7 @@ class BlogDetailAPITestCase(APITestCase):
         Blog.objects.create(
             title="test blog",
             content="idk there's no content yet lorem ipsum blah blah blah blah blah blah",
+            summary="nothing here",
             author=self.user,
         )
 
@@ -849,7 +853,7 @@ class BlogDetailAPITestCase(APITestCase):
         # test update instance with an authenticated client
         response = self.authenticated_client.put(
             reverse("learn:blog-detail", args=[1]),
-            {"title": "updated by me", "content": "there's now a content"},
+            {"title": "updated by me", "content": "there's now a content", "summary": "no summary"},
         )
 
         # test update instance with an empty field / data
@@ -863,30 +867,31 @@ class BlogDetailAPITestCase(APITestCase):
                 "learn:blog-detail",
                 args=[1],
             ),
-            {"wow": "amazing", "anamzing": "invalid"},
+            {"wow": "amazing", "anamzing": "invalid", "idk": 'lol'},
         )
 
         # test update instance with an authenticated client != author
         response_4 = self.authenticated_client_2.put(
             reverse("learn:blog-detail", args=[1]),
-            {"title": "it's my title", "content": "just testing."},
+            {"title": "it's my title", "content": "just testing.", "summary": "testing"},
         )
 
         # test update instance with an unathenticated client
         response_5 = self.unauthenticated_client.put(
             reverse("learn:blog-detail", args=[1]),
-            {"title": "idk", "content": "testing nothing"},
+            {"title": "idk", "content": "testing nothing", "summary": "testing"},
         )
 
         # test update instance that doesn't exist
         response_6 = self.authenticated_client.put(
             reverse("learn:blog-detail", args=[6]),
-            {"title": "...", "content": "..."},
+            {"title": "...", "content": "...", "summary": "..."},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("updated", response.data["title"])
-        self.assertEqual(response.data["author"], self.user.id)
+        self.assertEqual(response.data["author"]["user_id"], self.user.id)
         self.assertIsNotNone(response.data["content"])
+        self.assertIsNotNone(response.data["summary"])
 
         self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_3.status_code, status.HTTP_400_BAD_REQUEST)

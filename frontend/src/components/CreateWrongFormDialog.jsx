@@ -29,7 +29,6 @@ function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChang
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const [description, setDescription] = React.useState(wrongForm.description || '');
-    console.log(isError);
     React.useEffect(() => {
         const handler = setTimeout(() => {
             onChange(description, 'wrongForm', workoutId, wrongForm.id);
