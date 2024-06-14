@@ -510,7 +510,7 @@ class BlogCommentList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = BlogCommentsSerializer
 
     def get_queryset(self):
-        return BlogComments.objects.filter(blog=self.kwargs["pk"])
+        return BlogComments.objects.filter(blog=self.kwargs["pk"], parent_comment=None).order_by("-comment_date")
 
 
 class BlogCommentDetail(

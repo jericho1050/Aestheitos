@@ -31,7 +31,10 @@ import { loader as profileLoader } from "./routes/profile";
 import Enrolled, { loader as enrolledLoader } from "./routes/enrolled";
 import CreateBlog, { action as createBlogAction } from "./routes/create-blog";
 import Blogs, { loader as blogsLoader } from "./routes/blogs";
-import Blog, { loader as blogLoader } from "./routes/blog";
+import Blog, {
+  loader as blogLoader,
+  action as blogAction,
+} from "./routes/blog";
 
 const theme = createTheme({
   palette: {
@@ -84,6 +87,7 @@ const router = createBrowserRouter([
             path: "blog/:blogId",
             element: <Blog />,
             loader: blogLoader,
+            action: blogAction,
           },
         ],
       },

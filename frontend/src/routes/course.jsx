@@ -103,7 +103,6 @@ import AuthenticationWall from "../components/AuthenticationWall";
 import parseCourseDateTime from "../helper/parseDateTime";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
-import { method } from "lodash";
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
@@ -571,6 +570,7 @@ function Comment({ comment }) {
 function CourseComments() {
   const { comments } = useLoaderData();
   const [parent] = useAutoAnimate();
+  console.log(comments);
   return (
     <List
       ref={parent}
@@ -628,7 +628,7 @@ function CommentTextField({
           <ListItemAvatar>
             <Avatar
               alt="myPP"
-              src={`${import.meta.env.VITE_API_URL}${user.profile_pic}`}
+              src={`${import.meta.env.VITE_API_URL}${user?.profile_pic}`}
             />
           </ListItemAvatar>
           <Grid item xs>

@@ -328,7 +328,7 @@ class Blog(models.Model):
 class BlogComments(models.Model):
     blog = models.ForeignKey("Blog", on_delete=models.CASCADE, related_name="blog")
     comment = models.TextField()
-    comment_date = models.DateField(auto_now_add=True)
+    comment_date = models.DateTimeField(auto_now_add=True)
     comment_by = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="commented_by"
     )
