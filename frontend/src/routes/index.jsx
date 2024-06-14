@@ -75,7 +75,7 @@ export function Index() {
     }));
     const [snackbar,] = useAtom(snackbarReducerAtom);
     const submit = useSubmit();
-    let counter = 1;
+    let counter = 0;
     let count = courses.count;
 
     while (count >= 15) {

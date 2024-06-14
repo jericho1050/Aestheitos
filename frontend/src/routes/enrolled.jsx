@@ -72,7 +72,7 @@ export default function Enrolled() {
                                             </Typography>
                                         </Box>
                                         <Typography fontSize={'small'}>
-                                            <b>Enrolled:</b> {last_updated_day_enrolled === 0 || last_updated_hour_enrolled <= 24 ? `${last_updated_hour_enrolled} hours ago` : `${last_updated_day} days ago`}
+                                            <b>Enrolled:</b> {last_updated_day_enrolled === 0 && last_updated_hour_enrolled <= 24 ? `${last_updated_hour_enrolled} hours ago` : `${last_updated_day} days ago`}
                                         </Typography>
                                         <Typography fontSize={'small'}>
                                             <b>Enrollees:</b> {course.enrollee_count}
@@ -81,7 +81,7 @@ export default function Enrolled() {
                                             <b>Created:</b> {course.course_created}
                                         </Typography>
                                         <Typography fontSize={'small'}>
-                                            <b>Last Modified: </b>{last_updated_day_course === 0 || last_updated_hour_course <= 24 ? `${last_updated_hour_course} hours ago` : `${last_updated_day} days ago`}
+                                            <b>Last Modified: </b>{last_updated_day_course === 0 && last_updated_hour_course <= 24 ? `${last_updated_hour_course} hours ago` : `${last_updated_day} days ago`}
                                         </Typography>
                                         <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />
                                         <BorderLinearProgress variant="determinate" value={(course.sections_completed * 100) / course.total_sections} className="user-course-progress-bar" />

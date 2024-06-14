@@ -35,7 +35,7 @@ export default function Profile() {
     const htmlToReactParser = new Parser();
     const { accessTokenDecoded } = useDecodedAccessToken();
     const submit = useSubmit();
-    let counter = 1;
+    let counter = 0;
     let count = courses.count;
     const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'));
     while (count >= 15) {
@@ -142,7 +142,7 @@ export default function Profile() {
                                                 <b>Created:</b> {course.course_created}
                                             </Typography>
                                             <Typography fontSize={'small'} >
-                                                <b>Last Modified: </b>{last_updated_day === 0 || last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
+                                                <b>Last Modified: </b>{last_updated_day === 0 && last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
                                             </Typography>
                                             <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em'}} />
                                         </Paper>

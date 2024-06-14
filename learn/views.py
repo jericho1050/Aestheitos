@@ -216,7 +216,8 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
         ):
             # If the pagination argument is true in Stirng and Course status is acccepted, then return the paginated queryset.
             scope = self.request.query_params.get("scope")
-
+            
+            # NOTE: Don't forget the scope parameter, as it will determine whether to get all or the user's courses.
             if scope == "all":
                 queryset = (
                     super()

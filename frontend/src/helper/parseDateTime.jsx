@@ -4,9 +4,11 @@ export default function parseCourseDateTime(course_updated) {
     const now = new Date();
     const course_day_updated = course_date.getDay();
     const course_hour_updated = course_date.getHours();
+    const course_minute_updated = course_date.getMinutes();
     const last_updated_day = Math.abs(course_day_updated - now.getDay());
     const last_updated_hour = Math.abs(course_hour_updated - now.getHours());
-    return [last_updated_day, last_updated_hour]
+    const last_updated_minute = Math.abs(course_minute_updated - now.getMinutes());
+    return [last_updated_day, last_updated_hour, last_updated_minute]
 }
 
 export function parseUserDateTime(date) {
@@ -28,4 +30,17 @@ export function parseBlogDateTime(date) {
     const blog_day = blog_date.getDate();
 
     return [blog_day_name, blog_month_name, blog_day, blog_year];
+}
+
+export function parseCommentDate(date) {
+    const comment_Date = new Date(date);
+    const now = new Date();
+    const comment_day_created = comment_Date.getDay();
+    const comment_hour_created = comment_Date.getHours();
+    const comment_minute_created = comment_Date.getMinutes();
+    const last_created_day = Math.abs(comment_day_created - now.getDay());
+    const last_created_hour = Math.abs(comment_hour_created - now.getHours());
+    const last_created_minute = Math.abs(comment_minute_created - now.getMinutes());
+    
+    return [last_created_day, last_created_hour, last_created_minute]
 }

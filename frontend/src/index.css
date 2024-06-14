@@ -134,6 +134,12 @@ html {
 }
 
 
+.username-link {
+  text-decoration: none;
+  color: initial;
+  font-weight: bolder;
+}
+
 .courses-link,
 .blogs-link {
   text-decoration: none;

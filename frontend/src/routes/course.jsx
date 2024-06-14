@@ -100,7 +100,7 @@ import AlertDialog from "../components/AreYouSureDialog";
 import image from "../static/images/noimg.png";
 import CustomizedSnackbar from "../components/Snackbar";
 import AuthenticationWall from "../components/AuthenticationWall";
-import parseCourseDateTime from "../helper/parseDateTime";
+import parseCourseDateTime, { parseCommentDate } from "../helper/parseDateTime";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 
@@ -275,6 +275,8 @@ function CommentReply({ reply, level }) {
   const isAuthenticated = token["access"] !== null;
   const { user } = useLoaderData();
 
+  const [last_created_day, last_created_hour, last_created_minute] = parseCommentDate(reply.comment_date); // using this to parse comment date time
+
   function handleClick(e) {
     setAnchorEl(e.currentTarget);
   }
@@ -360,9 +362,27 @@ function CommentReply({ reply, level }) {
               <Avatar alt={reply.username} src={reply.profile_pic} />
             </ListItemAvatar>
             <ListItemText
-              primary={`${reply.first_name || reply.username} ${
-                reply.last_name || ""
-              }`}
+              primary={
+                <Link
+                  to={`/profile/user/${reply.user_id}`}
+                  className="username-link"
+                >
+                  {`${reply.first_name || reply.username} ${reply.last_name || ""
+                    }`}
+                  <Typography
+                    ml={1}
+                    component="span"
+                    fontSize="smaller"
+                    color="text.secondary"
+                  >
+                    {last_created_day === 0 && last_created_hour <= 1
+                      ? `${last_created_minute} minutes ago`
+                      : last_created_day === 0 && last_created_hour <= 24
+                        ? `${last_created_hour} hours ago`
+                        : `${last_created_day} days ago`}
+                  </Typography>
+                </Link>
+              }
               secondary={reply.comment}
             />
           </>
@@ -370,7 +390,7 @@ function CommentReply({ reply, level }) {
       </ListItem>
       <ListItemText
         inset={true}
-        style={{ paddingLeft: `${(level + 1) * 20}px` }}
+      // style={{ paddingLeft: `${(level + 1) * 20}px` }}
       >
         <IconButton
           onClick={() => setStatus("replying")}
@@ -383,13 +403,12 @@ function CommentReply({ reply, level }) {
         </IconButton>
       </ListItemText>
       {status === "replying" && (
-        <Box pl={`${(level + 1) * 20}px`}>
+        <Box pl={`20px`}>
           <CommentTextField
             setStatus={setStatus}
             parentComment={reply.id}
-            username={`@${reply.first_name || reply.username} ${
-              reply.last_name || ""
-            }`}
+            username={`@${reply.first_name || reply.username} ${reply.last_name || ""
+              }`}
           />
         </Box>
       )}
@@ -401,6 +420,7 @@ function CommentReply({ reply, level }) {
 function CourseCommentReplies({ comment, level = 0 }) {
   const [open, setOpen] = React.useState(false);
   const totalReplies = comment.replies.length;
+  const [parent] = useAutoAnimate();
 
   return (
     <Grid container>
@@ -413,7 +433,7 @@ function CourseCommentReplies({ comment, level = 0 }) {
       )}
       <Grid item xs>
         <Collapse in={open || level !== 0} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
+          <List ref={parent} component="div" disablePadding>
             {comment.replies.map((reply) => (
               <CommentReply key={reply.id} reply={reply} level={level} />
             ))}
@@ -431,7 +451,7 @@ function Comment({ comment }) {
   const { token } = useAuthToken();
   const isAuthenticated = token["access"] !== null;
   const { user } = useLoaderData();
-
+  const [last_created_day, last_created_hour, last_created_minute] = parseCommentDate(comment.comment_date); // using this to parse comment date time
   function handleClick(e) {
     setAnchorEl(e.currentTarget);
   }
@@ -526,11 +546,22 @@ function Comment({ comment }) {
               primary={
                 <Link
                   to={`/profile/user/${comment.user_id}`}
-                  style={{ textDecoration: "none", color: "initial" }}
+                  className="username-link"
                 >
-                  {`${comment.first_name || comment.username} ${
-                    comment.last_name || ""
-                  }`}
+                  {`${comment.first_name || comment.username} ${comment.last_name || ""
+                    }`}
+                  <Typography
+                    ml={1}
+                    component="span"
+                    fontSize="smaller"
+                    color="text.secondary"
+                  >
+                    {last_created_day === 0 && last_created_hour <= 1
+                      ? `${last_created_minute} minutes ago`
+                      : last_created_day === 0 && last_created_hour <= 24
+                        ? `${last_created_hour} hours ago`
+                        : `${last_created_day} days ago`}
+                  </Typography>
                 </Link>
               }
               secondary={comment.comment}
@@ -669,8 +700,8 @@ function CommentTextField({
                     {status === "replying"
                       ? "Reply"
                       : status === "editing"
-                      ? "Save"
-                      : "Comment"}
+                        ? "Save"
+                        : "Comment"}
                   </Button>
                 </Grid>
                 {parentComment && (
@@ -931,11 +962,11 @@ export function ResponsiveDialog({ accordionItem, children }) {
                         ></iframe>
                       </Box>
                     ) : // <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                    //     <Typography variant="body">
-                    //         No video
-                    //     </Typography>
-                    // </Box>
-                    null}
+                      //     <Typography variant="body">
+                      //         No video
+                      //     </Typography>
+                      // </Box>
+                      null}
                   </Grid>
                   <Grid item mt={4} container xs={10}>
                     <Grid item>
@@ -1064,6 +1095,18 @@ export default function Course() {
       <Container component="main" maxWidth="lg">
         <Box sx={{ marginLeft: "4vw", marginRight: "4vw" }}>
           {
+            // if user is the admin or staff show the primary actions and secondary actions (i.e., approve or reject btns)
+            isAdmin && course.status === "P" && (
+              <>
+                <AlertDialog
+                  intent="change course's status"
+                  onClickApprove={handleClickApprove}
+                  onClickReject={handleClickReject}
+                />
+              </>
+            )
+          }
+          {
             // if user is the instructor show the primary actions and secondary actions (i.e., edit and delete btns)
             isInstructor && (
               <>
@@ -1083,18 +1126,6 @@ export default function Course() {
                     </Fab>
                   </Form>
                 </Box>
-              </>
-            )
-          }
-          {
-            // if user is the admin or staff show the primary actions and secondary actions (i.e., approve or reject btns)
-            isAdmin && course.status === "P" && (
-              <>
-                <AlertDialog
-                  intent="change course's status"
-                  onClickApprove={handleClickApprove}
-                  onClickReject={handleClickReject}
-                />
               </>
             )
           }
@@ -1120,10 +1151,10 @@ export default function Course() {
                     src={course.thumbnail || image}
                     alt="Course's image thumbnail"
                     className="course-thumbnail"
-                    /* onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = image;
-                                    }} */
+                  /* onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = image;
+                                }} */
                   />
                 </Container>
 
@@ -1131,12 +1162,12 @@ export default function Course() {
                   sx={{ maxWidth: { md: 250, xs: 300, sm: 400 }, mt: 2 }}
                   noWrap
                 >
-                  Instructor:{" "}
+                  <b>Instructor:</b>{" "}
                   <Link
                     to={`/profile/user/${course.created_by}`}
                     className="courses-link"
                   >
-                    <b>{course.created_by_name} </b>
+                    {course.created_by_name}
                   </Link>
                 </Typography>
 
@@ -1158,8 +1189,8 @@ export default function Course() {
                   </Typography>
                 </Box>
                 {(isInstructor && !enrollment) ||
-                isAdmin ? null : (!isInstructor && !enrollment) || // Don't render the enroll buttonn for instructors or admins
-                  !isAuthenticated ? (
+                  isAdmin ? null : (!isInstructor && !enrollment) || // Don't render the enroll buttonn for instructors or admins
+                    !isAuthenticated ? (
                   <Box display="flex" justifyContent={"center"} mt={2}>
                     <Button
                       size="large"
@@ -1186,8 +1217,8 @@ export default function Course() {
                   </Box>
                 )}
 
-                <Grid container columns={{ xs: 6, md: 12 }} mt={2}>
-                  <Grid item xs={3} md={6}>
+                <Grid container columns={{ xs: 6, md: 12 }} mt={2} >
+                  <Grid item xs={3} md={6} >
                     <Typography
                       fontSize="small"
                       variant="small"
@@ -1203,7 +1234,7 @@ export default function Course() {
                       color={"text.secondary"}
                     >
                       <b>Last updated:</b>{" "}
-                      {last_updated_day === 0 || last_updated_hour <= 24
+                      {last_updated_day === 0 && last_updated_hour <= 24
                         ? `${last_updated_hour} hours ago`
                         : `${last_updated_day} days ago`}
                     </Typography>
@@ -1224,7 +1255,6 @@ export default function Course() {
                             setRating(newRating);
                             // if user has not yet rated this course then it's a post method else it's a patch
                             if (userRating[0]?.rating) {
-                              console.log("patch method is being called");
                               fetcher.submit(
                                 {
                                   rating: newRating,
@@ -1234,7 +1264,6 @@ export default function Course() {
                                 { method: "patch" }
                               );
                             } else {
-                              console.log("post method called");
                               fetcher.submit(
                                 { rating: newRating, intent: "createRating" },
                                 { method: "post" }

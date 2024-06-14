@@ -18,7 +18,7 @@ export function Pending() {
     let theme = createTheme();
     theme = responsiveFontSizes(theme);
     const submit = useSubmit();
-    let counter = 1;
+    let counter = 0;
     let count = courses.count;
 
     while (count >= 15) {

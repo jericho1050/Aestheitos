@@ -36,7 +36,7 @@ import {
   useRevalidator,
 } from "react-router-dom";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { parseBlogDateTime } from "../helper/parseDateTime";
+import parseCourseDateTime, { parseBlogDateTime, parseCommentDate } from "../helper/parseDateTime";
 import { useTheme } from "@emotion/react";
 import { Parser } from "html-to-react";
 import { useEffect, useState } from "react";
@@ -97,7 +97,7 @@ function CommentReply({ reply, level }) {
   const { token } = useAuthToken();
   const isAuthenticated = token["access"] !== null;
   const { user } = useLoaderData();
-
+  const [last_created_day, last_created_hour, last_created_minute] = parseCommentDate(reply.comment_date); // using this to parse comment date time
   function handleClick(e) {
     setAnchorEl(e.currentTarget);
   }
@@ -183,9 +183,28 @@ function CommentReply({ reply, level }) {
               <Avatar alt={reply.username} src={reply.profile_pic} />
             </ListItemAvatar>
             <ListItemText
-              primary={`${reply.first_name || reply.username} ${
-                reply.last_name || ""
-              }`}
+              primary={
+                <Link
+                  to={`/profile/user/${reply.user_id}`}
+                  className="username-link"
+                >
+                  {`${reply.first_name || reply.username} ${
+                    reply.last_name || ""
+                  }`}
+                  <Typography
+                    ml={1}
+                    component="span"
+                    fontSize="smaller"
+                    color="text.secondary"
+                  >
+                    {last_created_day === 0 && last_created_hour <= 1
+                      ? `${last_created_minute} minutes ago`
+                      : last_created_day === 0 && last_created_hour <= 24
+                      ? `${last_created_hour} hours ago`
+                      : `${last_created_day} days ago`}
+                  </Typography>
+                </Link>
+              }
               secondary={reply.comment}
             />
           </>
@@ -193,7 +212,7 @@ function CommentReply({ reply, level }) {
       </ListItem>
       <ListItemText
         inset={true}
-        style={{ paddingLeft: `${(level + 1) * 20}px` }}
+        // style={{ paddingLeft: `${(level + 1) * 20}px` }}
       >
         <IconButton
           onClick={() => setStatus("replying")}
@@ -206,13 +225,12 @@ function CommentReply({ reply, level }) {
         </IconButton>
       </ListItemText>
       {status === "replying" && (
-        <Box pl={`${(level + 1) * 20}px`}>
+        <Box pl={`20px`}>
           <CommentTextField
             setStatus={setStatus}
             parentComment={reply.id}
-            username={`@${reply.first_name || reply.username} ${
-              reply.last_name || ""
-            }`}
+            username={`@${reply.first_name || reply.username} ${reply.last_name || ""
+              }`}
           />
         </Box>
       )}
@@ -254,6 +272,7 @@ function Comment({ comment }) {
   const { token } = useAuthToken();
   const isAuthenticated = token["access"] !== null;
   const { user } = useLoaderData();
+  const [last_created_day, last_created_hour, last_created_minute] = parseCommentDate(comment.comment_date); // using this to parse comment date time
 
   function handleClick(e) {
     setAnchorEl(e.currentTarget);
@@ -349,11 +368,22 @@ function Comment({ comment }) {
               primary={
                 <Link
                   to={`/profile/user/${comment.user_id}`}
-                  style={{ textDecoration: "none", color: "initial" }}
+                  className="username-link"
                 >
-                  {`${comment.first_name || comment.username} ${
-                    comment.last_name || ""
-                  }`}
+                  {`${comment.first_name || comment.username} ${comment.last_name || ""
+                    }`}
+                  <Typography
+                    ml={1}
+                    component="span"
+                    fontSize="smaller"
+                    color="text.secondary"
+                  >
+                    {last_created_day === 0 && last_created_hour <= 1
+                      ? `${last_created_minute} minutes ago`
+                      : last_created_day === 0 && last_created_hour <= 24
+                      ? `${last_created_hour} hours ago`
+                      : `${last_created_day} days ago`}
+                  </Typography>
                 </Link>
               }
               secondary={comment.comment}
@@ -493,8 +523,8 @@ function CommentTextField({
                     {status === "replying"
                       ? "Reply"
                       : status === "editing"
-                      ? "Save"
-                      : "Comment"}
+                        ? "Save"
+                        : "Comment"}
                   </Button>
                 </Grid>
                 {parentComment && (
@@ -568,20 +598,19 @@ export default function Blog() {
               <Link
                 to={`profile/${blog.author.user_id}`}
                 className="blogs-link"
-              >{`${
-                blog.author.first_name && blog.author.last_name
-                  ? `${blog.author.first_name} ${blog.author.last_name}`
-                  : blog.author.username
-              }`}</Link>
+              >{`${blog.author.first_name && blog.author.last_name
+                ? `${blog.author.first_name} ${blog.author.last_name}`
+                : blog.author.username
+                }`}</Link>
             </Typography>
           </Box>
         </ThemeProvider>
         <Divider />
-        <Box className="html-content" lineHeight={"1.4em"} overflow={"auto"}>
+        <Box className="html-content" lineHeight={"1.4em"} overflow={"auto"} mt={2}>
           {htmlToReactParser.parse(blog.content)}
         </Box>
         <ThemeProvider theme={theme}>
-          <Typography variant="h5" fontWeight={"bold"} mt={4}>
+          <Typography variant="h5" fontWeight={"bold"} mt={10}>
             Leave a comment
           </Typography>
         </ThemeProvider>

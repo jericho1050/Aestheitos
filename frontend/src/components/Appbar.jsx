@@ -255,35 +255,37 @@ function ResponsiveAppBar() {
                         <Typography sx={{ mt: 4, mb: 2 }} variant="h5" fontWeight={'bold'} component="div">
                           Notifications
                         </Typography>
-                        {userCourses.map(course => {
-                          const [last_updated_day, last_updated_hour] = parseCourseDateTime(course.course_updated);
-                          return (<Grid key={course.id} item xs={10} sm={12}>
+                        {userCourses
+                          .sort((a, b) => new Date(b.course_updated) - new Date(a.course_updated))
+                          .map(course => {
+                            const [last_updated_day, last_updated_hour, last_updated_minute] = parseCourseDateTime(course.course_updated);
+                            return (<Grid key={course.id} item xs={10} sm={12}>
 
-                            <List>
-                              <ListItem>
-                                <ListItemIcon>
-                                  {(course.status === 'A' && <CheckIcon color='success' />) || (course.status === 'R' && <ClearIcon color='error' />)}
-                                </ListItemIcon>
-                                <ListItemText
-                                  className='text-overflow'
-                                  primary={course.title}
-                                  secondary={
-                                    <>
-                                      {`Your Course has been ${course.status === 'A' ? 'Approved' : 'Rejected'}`}
-                                      <br />
-                                      {last_updated_day === 0 || last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
-                                    </>
-                                  }
-                                  sx={{ width: 350, mr: 2 }}
-                                />
-                                <Box>
-                                  <img src={course.thumbnail} style={{ width: '60px', height: '59px', objectFit: 'cover' }} />
-                                </Box>
-                              </ListItem>
-                            </List>
-                          </Grid>)
-                        }
-                        )}
+                              <List>
+                                <ListItem>
+                                  <ListItemIcon>
+                                    {(course.status === 'A' && <CheckIcon color='success' />) || (course.status === 'R' && <ClearIcon color='error' />)}
+                                  </ListItemIcon>
+                                  <ListItemText
+                                    className='text-overflow'
+                                    primary={course.title}
+                                    secondary={
+                                      <>
+                                        {`Your Course has been ${course.status === 'A' ? 'Approved' : 'Rejected'}`}
+                                        <br />
+                                        {last_updated_day === 0 && last_updated_hour <= 1 ? `${last_updated_minute} minutes ago` : last_updated_day === 0 && last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
+                                      </>
+                                    }
+                                    sx={{ width: 350, mr: 2 }}
+                                  />
+                                  <Box>
+                                    <img src={course.thumbnail} style={{ width: '60px', height: '59px', objectFit: 'cover' }} />
+                                  </Box>
+                                </ListItem>
+                              </List>
+                            </Grid>)
+                          }
+                          )}
                       </Grid>
                     </Popover>
 
