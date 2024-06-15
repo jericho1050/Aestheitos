@@ -39,8 +39,6 @@ from .custom_serializer import *
 # API calls (Class based functions)
 
 
-class CustomPagination(PageNumberPagination):
-    page_size = 15
 
 
 class UserMyDetailsView(APIView):
@@ -208,7 +206,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
 
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
-    pagination_class = CustomPagination
+    pagination_class = CourseResultsPagination
 
     def get_queryset(self):
 
@@ -218,7 +216,8 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
         ):
             # If the pagination argument is true in Stirng and Course status is acccepted, then return the paginated queryset.
             scope = self.request.query_params.get("scope")
-
+            
+            # NOTE: Don't forget the scope parameter, as it will determine whether to get all or the user's courses.
             if scope == "all":
                 queryset = (
                     super()
@@ -468,7 +467,7 @@ class EnrollmentUserList(generics.ListAPIView):
 
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
-    pagination_class = CustomPagination
+    pagination_class = CourseResultsPagination
 
     def get_queryset(self):
         user = user_authentication(self.request)
@@ -491,6 +490,10 @@ class BlogList(CreateAPIMixin, generics.ListCreateAPIView):
 
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    pagination_class = BlogResultsPagination
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('-blog_created')   
 
 
 class BlogDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):
@@ -511,7 +514,7 @@ class BlogCommentList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = BlogCommentsSerializer
 
     def get_queryset(self):
-        return BlogComments.objects.filter(blog=self.kwargs["pk"])
+        return BlogComments.objects.filter(blog=self.kwargs["pk"], parent_comment=None).order_by("-comment_date")
 
 
 class BlogCommentDetail(

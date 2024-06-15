@@ -37,7 +37,7 @@ class UserDetailSerializer(ModelSerializer):
             "profile_pic",
             "is_staff",
             "is_superuser",
-            "date_joined"
+            "date_joined",
         ]
 
 
@@ -71,21 +71,28 @@ class UserProgressSerializer(ModelSerializer):
 class UserSectionSerializer(ModelSerializer):
     class Meta:
         model = UserSection
-        fields= "__all__"
+        fields = "__all__"
         read_only_fields = ["user", "section"]
 
-
-    def save_with_auth_user(self, user, pk, update = False,):
-        self.save() # save immediately so that the UserSection instance's sections, when filtered, are up to date.
+    def save_with_auth_user(
+        self,
+        user,
+        pk,
+        update=False,
+    ):
+        self.save()  # save immediately so that the UserSection instance's sections, when filtered, are up to date.
         if update:
-            section  = get_object_or_404(Section, id=pk)
+            section = get_object_or_404(Section, id=pk)
             user_progress = UserProgress.objects.get(
                 user=user, course=section.course_content.course.id
             )
             user_progress.sections_completed = UserSection.objects.filter(
-                user=user, section__course_content=section.course_content, is_clicked=True
+                user=user,
+                section__course_content=section.course_content,
+                is_clicked=True,
             ).count()
             user_progress.save()
+
 
 class CourseRatingSerializer(ModelSerializer):
     class Meta:
@@ -97,11 +104,11 @@ class CourseRatingSerializer(ModelSerializer):
         if update:
             self.save()
             return
-        
+
         course = get_object_or_404(Course, id=pk)
         is_enrolled = Enrollment.objects.filter(user=user, course=course).exists()
         is_rated = CourseRating.objects.filter(user=user, course=course).exists()
-        
+
         if not is_enrolled:
             raise AuthenticationFailed("not allowed to create rating")
 
@@ -257,11 +264,11 @@ class CourseCommentsSerializer(ModelSerializer):
 class EnrollmentSerializer(ModelSerializer):
     course = CourseSerializer(read_only=True)
     total_sections = serializers.SerializerMethodField()
+
     class Meta:
         model = Enrollment
         fields = "__all__"
         read_only_fields = ["user", "course"]
-    
 
     def save_with_auth_user(self, user, pk):
         course = get_object_or_404(Course, id=pk)
@@ -277,6 +284,7 @@ class EnrollmentSerializer(ModelSerializer):
     def get_total_sections(self, obj):
         sections = Section.objects.filter(course_content__course=obj.course).count()
         return sections
+
 
 class WorkoutsSerializer(ModelSerializer):
     class Meta:
@@ -351,6 +359,8 @@ class WrongExerciseFormSerializer(ModelSerializer):
 
 
 class BlogSerializer(ModelSerializer):
+    author = UserDetailSerializer(read_only=True)
+
     class Meta:
         model = Blog
         fields = "__all__"
@@ -368,10 +378,17 @@ class BlogSerializer(ModelSerializer):
 
 
 class BlogCommentsSerializer(ModelSerializer):
+    replies = serializers.SerializerMethodField()
+    comment_by = UserDetailSerializer(read_only=True)
+
     class Meta:
         model = BlogComments
         fields = "__all__"
         read_only_fields = ["blog", "comment_by"]
+
+    def get_replies(self, obj):
+        replies = BlogComments.objects.filter(parent_comment=obj)
+        return BlogCommentsSerializer(replies, many=True).data
 
     def save_with_auth_user(self, user, pk, update=False):
 
@@ -382,3 +399,10 @@ class BlogCommentsSerializer(ModelSerializer):
 
         blog = get_object_or_404(Blog, id=pk)
         self.save(blog=blog, comment_by=user)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        comment_by_representation = representation.pop("comment_by")
+        for key in comment_by_representation:
+            representation[key] = comment_by_representation[key]
+        return representation

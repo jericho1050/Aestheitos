@@ -361,6 +361,7 @@ export default function CreateCourse() {
     
 
     // Yes, I kind of admit this use effect is bad and will probably revise it. should've gone with an imperative submission with fetcher.submit().
+    // However, there's also seems to be a problem with fetcher.submit(); it can't handle the image.
     React.useEffect(() => {
         // continuously update real time 'IDs' of our state variables
         // !resonse.ok then there's a message

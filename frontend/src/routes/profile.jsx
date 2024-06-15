@@ -1,4 +1,4 @@
-import { Avatar, Badge, Box, Container, Divider, Grid, IconButton, Pagination, Paper, Rating, ThemeProvider, Typography, Zoom, responsiveFontSizes, styled, useTheme } from "@mui/material";
+import { Avatar, Badge, Box, Container, Divider, Grid, IconButton, Pagination, Paper, Rating, ThemeProvider, Typography, Zoom, responsiveFontSizes, styled, useMediaQuery, useTheme } from "@mui/material";
 import { getCourses, getUser, getUserByItsId, updateUser } from "../courses";
 import { Form, Link, useLoaderData, useSubmit, } from "react-router-dom";
 import parseCourseDateTime, { parseUserDateTime } from "../helper/parseDateTime";
@@ -35,9 +35,9 @@ export default function Profile() {
     const htmlToReactParser = new Parser();
     const { accessTokenDecoded } = useDecodedAccessToken();
     const submit = useSubmit();
-    let counter = 1;
+    let counter = 0;
     let count = courses.count;
-
+    const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'));
     while (count >= 15) {
         counter++;
         count -= 15;
@@ -74,8 +74,8 @@ export default function Profile() {
     }
 
     return (
-        <Container maxWidth="large" component={"main"} sx={{ p: '2em' }} >
-            <Paper square={false} sx={{ width: 'max-content', p: '1.5em 3em', m: '0 auto 0 auto', borderRadius: 10 }} position="relative" >
+        <Container maxWidth="xl" component={"main"} sx={{ p: '2em', display: !isLargeScreen ? 'block' : 'inline-flex' }}>
+            <Paper square={false} sx={{ width: { xs: 'auto', sm: 400, }, height: 'min-content', p: '1.5em 3em', m: isLargeScreen ? '5em auto 0 auto' : '0 auto 0 auto', borderRadius: 10, }} position="relative" >
                 <Box className="profile-bg"></Box>
                 <Box display={'flex'} alignItems={'center'} justifyContent={"center"} flexDirection={'column'} gap={2} >
                     <IconButton disabled={accessTokenDecoded?.user_id !== user.user_id} component="label" role={undefined}>
@@ -91,16 +91,14 @@ export default function Profile() {
                     </IconButton>
                 </Box>
                 <Box display={"flex"} alignItems={"flex-start"} flexDirection={"column"} mt={2}>
-                    <ThemeProvider theme={theme}>
-                        <Typography fontWeight="bolder" fontSize="3em" variant="h1">
-                            {user.first_name || ''} {user.last_name || ''}
-                        </Typography>
-                        <Typography color="grey">Username: {user.username}</Typography>
-                        <Typography color="grey">Date joined: {date_joined_day}/{date_joined_month}/{date_joined_year}</Typography>
-                    </ThemeProvider>
+                    <Typography fontWeight="bolder" fontSize={isLargeScreen ? '1em' : '2em'} variant={isLargeScreen ? 'h4' : 'h2'} gutterBottom >
+                        {user.first_name || ''} {user.last_name || ''}
+                    </Typography>
+                    <Typography color="grey">Username: {user.username}</Typography>
+                    <Typography color="grey">Date joined: {date_joined_day}/{date_joined_month}/{date_joined_year}</Typography>
                 </Box>
             </Paper>
-            <Box mt={5}>
+            <Box mt={isLargeScreen ? 0 : 2} ml={2}>
                 <ThemeProvider theme={theme}>
                     <Typography variant="h2" fontFamily={'Play'} fontWeight={'bolder'} mb={2}>
                         {`${user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}'s Courses`}
@@ -124,12 +122,12 @@ export default function Profile() {
                                                 }}>
                                                     {/* <img src={course.thumbnail} alt="course-thumbnail" style={{maxWidth: '100%', maxHeight: '100%' }} /> */}
                                                 </Box>
-                                                <Box mt={2}>
-                                                    <Typography height={'auto'} gutterBottom fontFamily={'Play'} fontSize={'1.5em'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
-                                                        {truncateText(course.title, 50)}
+                                                <Box mt={2} width={'100%'}>
+                                                    <Typography height={'auto'} gutterBottom fontFamily={'Play'} fontSize={'1.4em'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
+                                                        {truncateText(course.title, 40)}
                                                     </Typography>
-                                                    <Box maxHeight={'2em'} height={'100%'} maxWidth={250} sx={{ wordBreak: 'break-word' }}>
-                                                        {htmlToReactParser.parse(truncateText(course.description, 69))}
+                                                    <Box maxHeight={'2em'} maxWidth={250} sx={{ wordBreak: 'break-word' }}>
+                                                        {htmlToReactParser.parse(truncateText(course.description, 60))}
                                                     </Box>
                                                 </Box>
 
@@ -143,10 +141,10 @@ export default function Profile() {
                                             <Typography fontSize={'small'}>
                                                 <b>Created:</b> {course.course_created}
                                             </Typography>
-                                            <Typography fontSize={'small'}>
-                                                <b>Last Modified: </b>{last_updated_day === 0 || last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
+                                            <Typography fontSize={'small'} >
+                                                <b>Last Modified: </b>{last_updated_day === 0 && last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
                                             </Typography>
-                                            <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />
+                                            <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em'}} />
                                         </Paper>
                                     </Zoom>
 
@@ -154,21 +152,20 @@ export default function Profile() {
                             </Grid>
                         )
                     })}
-
                 </Grid>
+                <Form>
+                    <Box display={'flex'} justifyContent={'center'} mt={4}>
+                        <Pagination size="large" count={counter} onChange={(event, page) => {
+                            submit(`page=${page}`);
+                            const element = document.getElementById('profile');
+                            window.scrollTo({
+                                top: element.offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }} />
+                    </Box>
+                </Form>
             </Box>
-            <Form>
-                <Box display={'flex'} justifyContent={'center'} mt={4}>
-                    <Pagination size="large" count={counter} onChange={(event, page) => {
-                        submit(`page=${page}`);
-                        const element = document.getElementById('profile');
-                        window.scrollTo({
-                            top: element.offsetTop,
-                            behavior: 'smooth'
-                        });
-                    }} />
-                </Box>
-            </Form>
         </Container>
     )
 }

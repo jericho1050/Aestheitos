@@ -8,17 +8,16 @@ import { BorderLinearProgress } from "../components/CustomLinearProgress";
 
 
 export async function loader({ request }) {
-    const user = await getUser();
     const courses = await getUserEnrolledCourses();
     const userCoursesProgress = await getUserCoursesProgress();
     const url = new URL(request.url);
     const page = url.searchParams.get('page');
-    return { user, courses, userCoursesProgress };
+    return {courses, userCoursesProgress };
 }
 
 
 export default function Enrolled() {
-    const { user, courses, userCoursesProgress } = useLoaderData();
+    const { courses, userCoursesProgress } = useLoaderData();
     let theme = useTheme();
     theme = responsiveFontSizes(theme);
     const htmlToReactParser = new Parser();
@@ -31,15 +30,15 @@ export default function Enrolled() {
     })
 
     return (
-        <Container maxWidth="large" component={"main"} sx={{ p: '2em' }}>
-            <Box mt={5}>
+        <Container maxWidth="xl" component={"main"} sx={{ p: '2em' }}>
+            <Box mt={5} pl={4}>
                 <ThemeProvider theme={theme}>
                     <Typography variant="h2" fontFamily={'Play'} fontWeight={'bolder'} mb={2}>
                         Enrolled Courses
                     </Typography>
                 </ThemeProvider>
             </Box>
-            <Grid id="profile" container spacing={3}>
+            <Grid id="profile" container spacing={3} p={4}>
                 {enrollCourses.map(({ course }) => {
                     const [last_updated_day_course, last_updated_hour_course] = parseCourseDateTime(course.course_updated);
                     const [last_updated_day_enrolled, last_updated_hour_enrolled] = parseCourseDateTime(course.date_enrolled);
@@ -73,7 +72,7 @@ export default function Enrolled() {
                                             </Typography>
                                         </Box>
                                         <Typography fontSize={'small'}>
-                                            <b>Enrolled:</b> {last_updated_day_enrolled === 0 || last_updated_hour_enrolled <= 24 ? `${last_updated_hour_enrolled} hours ago` : `${last_updated_day} days ago`}
+                                            <b>Enrolled:</b> {last_updated_day_enrolled === 0 && last_updated_hour_enrolled <= 24 ? `${last_updated_hour_enrolled} hours ago` : `${last_updated_day_course} days ago`}
                                         </Typography>
                                         <Typography fontSize={'small'}>
                                             <b>Enrollees:</b> {course.enrollee_count}
@@ -82,7 +81,7 @@ export default function Enrolled() {
                                             <b>Created:</b> {course.course_created}
                                         </Typography>
                                         <Typography fontSize={'small'}>
-                                            <b>Last Modified: </b>{last_updated_day_course === 0 || last_updated_hour_course <= 24 ? `${last_updated_hour_course} hours ago` : `${last_updated_day} days ago`}
+                                            <b>Last Modified: </b>{last_updated_day_course === 0 && last_updated_hour_course <= 24 ? `${last_updated_hour_course} hours ago` : `${last_updated_day_course} days ago`}
                                         </Typography>
                                         <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />
                                         <BorderLinearProgress variant="determinate" value={(course.sections_completed * 100) / course.total_sections} className="user-course-progress-bar" />
