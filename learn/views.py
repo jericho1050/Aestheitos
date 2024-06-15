@@ -490,7 +490,10 @@ class BlogList(CreateAPIMixin, generics.ListCreateAPIView):
 
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
-    pagination_class = BlogResultsPagination    
+    pagination_class = BlogResultsPagination
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('-blog_created')   
 
 
 class BlogDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):

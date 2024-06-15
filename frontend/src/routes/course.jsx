@@ -239,21 +239,13 @@ export async function action({ request, params }) {
       break;
     case "updateRating":
       rating = await updateCourseRating(formData.get("ratingId"), formData);
+      break;
     case "updateUserSection":
       userSection = await updateUserSection(
         formData.get("sectionId"),
         formData
       );
       break;
-    case "deleteCourse":
-      await deleteCourse(params.courseId);
-      return redirect("/");
-    case "approveCourse":
-      await updateCourse(params.courseId, formData);
-      return redirect("/pending");
-    case "rejectCourse":
-      await updateCourse(params.courseId, formData);
-      return redirect("/pending");
     case "editing": // i.e., for the comment
       comment = await updateCourseComment(formData.get("commentId"), formData);
       break;
@@ -607,7 +599,7 @@ function CourseComments() {
       ref={parent}
       sx={{ width: "100%", maxWidth: "inherit", bgcolor: "background.paper" }}
     >
-      <ListItem>
+      <ListItem sx={{ pl: 0, pr: 0 }}>
         <CommentTextField />
       </ListItem>
       {comments.map((comment) => (
@@ -1070,7 +1062,7 @@ export default function Course() {
       type: "deleted",
       text: "Course Deleted!",
     });
-    submit({ intent: "deleteCourse" }, { method: "delete" });
+    submit(null, { method: "delete", action: "destroy" });
   }
 
   function handleClickApprove() {
@@ -1078,7 +1070,7 @@ export default function Course() {
       type: "approved",
       text: `Course #${course.id} Approved!`,
     });
-    submit({ intent: "approveCourse", status: "A" }, { method: "patch" });
+    submit({ status: "A" }, { method: "patch", action: "approve" });
   }
 
   function handleClickReject() {
@@ -1086,7 +1078,7 @@ export default function Course() {
       type: "rejected",
       text: `Course #${course.id} Rejected!`,
     });
-    submit({ intent: "rejectCourse", status: "R" }, { method: "patch" });
+    submit({ status: "R" }, { method: "patch", action: "reject" });
   }
   return (
     <>
@@ -1108,7 +1100,7 @@ export default function Course() {
           }
           {
             // if user is the instructor show the primary actions and secondary actions (i.e., edit and delete btns)
-            isInstructor && (
+            (isAdmin || isInstructor) && (
               <>
                 <AlertDialog
                   onClickDelete={handleClickDelete}

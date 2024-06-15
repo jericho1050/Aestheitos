@@ -436,6 +436,10 @@ export async function getBlogs() {
   return sendRequest(`${import.meta.env.VITE_API_URL}blogs`, {});
 }
 
+export async function getBlog(id) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}blog/${id}`, {});
+}
+
 export async function createBlog(formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}blogs`, {
     method: 'POST',
@@ -443,8 +447,17 @@ export async function createBlog(formData) {
   });
 }
 
-export async function getBlog(id) {
-  return sendRequest(`${import.meta.env.VITE_API_URL}blog/${id}`, {});
+export async function updateBlog(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}blog/${id}`, {
+    method: 'PATCH',
+    body: formData
+  })
+}
+
+export async function deleteBlog(id, formData) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}blog/${id}`, {
+    method: 'DELETE'
+  })
 }
 
 export async function getBlogComments(id) {

@@ -19,11 +19,12 @@ import { action as createCourseAction } from "./routes/create-course";
 import { action as courseAction } from "./routes/course";
 import ProectedRoute from "./components/protectedRoute";
 import { IsLoadingProvider } from "./contexts/IsLoadingContext";
-import EditCourse from "./routes/edit";
+import EditCourse from "./routes/edit-course";
 import {
   loader as editCourseLoader,
-  action as editAction,
-} from "./routes/edit";
+  action as editCourseAction,
+} from "./routes/edit-course";
+import { action as deleteCourseAction } from "./routes/destroy-course";
 import { Pending } from "./routes/pending";
 import { loader as pendingLoader } from "./routes/pending";
 import Profile from "./routes/profile";
@@ -35,7 +36,10 @@ import Blog, {
   loader as blogLoader,
   action as blogAction,
 } from "./routes/blog";
-
+import { action as approveCourseAction } from "./routes/approve-course";
+import { action as rejectCourseAction } from "./routes/reject-course";
+import EditBlog, { action as editBlogAction, loader as editBlogLoader } from "./routes/edit-blog";
+import { action as deleteBlogAction } from "./routes/destroy-blog";
 const theme = createTheme({
   palette: {
     mode: "light",
@@ -104,7 +108,19 @@ const router = createBrowserRouter([
             path: "course/:courseId/edit",
             element: <EditCourse />,
             loader: editCourseLoader,
-            action: editAction,
+            action: editCourseAction,
+          },
+          {
+            path: "course/:courseId/destroy",
+            action: deleteCourseAction
+          },
+          {
+            path: "course/:courseId/approve",
+            action: approveCourseAction
+          },
+          {
+            path: "course/:courseId/reject",
+            action: rejectCourseAction
           },
           {
             path: "pending",
@@ -121,6 +137,16 @@ const router = createBrowserRouter([
             element: <CreateBlog />,
             action: createBlogAction,
           },
+          {
+            path: "blog/:blogId/edit",
+            element: <EditBlog />,
+            loader: editBlogLoader,
+            action: editBlogAction
+          },
+          {
+            path: "blog/:blogId/destroy",
+            action: deleteBlogAction
+          }
         ],
       },
     ],

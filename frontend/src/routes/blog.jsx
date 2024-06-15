@@ -34,6 +34,7 @@ import {
   useLoaderData,
   useNavigate,
   useRevalidator,
+  useSubmit,
 } from "react-router-dom";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import parseCourseDateTime, { parseBlogDateTime, parseCommentDate } from "../helper/parseDateTime";
@@ -188,9 +189,8 @@ function CommentReply({ reply, level }) {
                   to={`/profile/user/${reply.user_id}`}
                   className="username-link"
                 >
-                  {`${reply.first_name || reply.username} ${
-                    reply.last_name || ""
-                  }`}
+                  {`${reply.first_name || reply.username} ${reply.last_name || ""
+                    }`}
                   <Typography
                     ml={1}
                     component="span"
@@ -200,8 +200,8 @@ function CommentReply({ reply, level }) {
                     {last_created_day === 0 && last_created_hour <= 1
                       ? `${last_created_minute} minutes ago`
                       : last_created_day === 0 && last_created_hour <= 24
-                      ? `${last_created_hour} hours ago`
-                      : `${last_created_day} days ago`}
+                        ? `${last_created_hour} hours ago`
+                        : `${last_created_day} days ago`}
                   </Typography>
                 </Link>
               }
@@ -212,7 +212,7 @@ function CommentReply({ reply, level }) {
       </ListItem>
       <ListItemText
         inset={true}
-        // style={{ paddingLeft: `${(level + 1) * 20}px` }}
+      // style={{ paddingLeft: `${(level + 1) * 20}px` }}
       >
         <IconButton
           onClick={() => setStatus("replying")}
@@ -242,7 +242,7 @@ function CommentReply({ reply, level }) {
 function BlogCommentReplies({ comment, level = 0 }) {
   const [open, setOpen] = useState(false);
   const totalReplies = comment.replies.length;
-
+  const [parent] = useAutoAnimate();
   return (
     <Grid container>
       {totalReplies !== 0 && level === 0 && (
@@ -254,7 +254,7 @@ function BlogCommentReplies({ comment, level = 0 }) {
       )}
       <Grid item xs>
         <Collapse in={open || level !== 0} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
+          <List ref={parent} component="div" disablePadding>
             {comment.replies.map((reply) => (
               <CommentReply key={reply.id} reply={reply} level={level} />
             ))}
@@ -381,8 +381,8 @@ function Comment({ comment }) {
                     {last_created_day === 0 && last_created_hour <= 1
                       ? `${last_created_minute} minutes ago`
                       : last_created_day === 0 && last_created_hour <= 24
-                      ? `${last_created_hour} hours ago`
-                      : `${last_created_day} days ago`}
+                        ? `${last_created_hour} hours ago`
+                        : `${last_created_day} days ago`}
                   </Typography>
                 </Link>
               }
@@ -429,7 +429,7 @@ function BlogComments() {
       ref={parent}
       sx={{ width: "100%", maxWidth: "inherit", bgcolor: "background.paper" }}
     >
-      <ListItem>
+      <ListItem sx={{ pl: 0, pr: 0 }}>
         <CommentTextField />
       </ListItem>
       {comments.map((comment) => (
@@ -562,16 +562,30 @@ function CommentTextField({
 }
 
 export default function Blog() {
-  const { blog } = useLoaderData();
+  const { user, blog } = useLoaderData();
   let theme = useTheme();
   theme = responsiveFontSizes(theme);
-  const [blog_day_name, blog_month_name, blog_day, blog_year] =
-    parseBlogDateTime(blog.blog_created);
+  const [blog_day_name, blog_month_name, blog_day, blog_year] = parseBlogDateTime(blog.blog_created);
   const htmlToReactParser = new Parser();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const navigate = useNavigate();
+  const submit = useSubmit();
+
+  function handleClick(e) {
+    setAnchorEl(e.currentTarget);
+  }
+  function handleClose() {
+    setAnchorEl(null);
+  }
+
+
+
+
+  const open = Boolean(anchorEl);
 
   return (
     <Container maxWidth="md" component={"main"}>
-      <Box padding={"2em"}>
+      <Box padding={"2em"} position={'relative'}>
         <Button startIcon={<ArrowBackIosIcon />}>
           <Link to={`/blogs`} className="blogs-link">
             Back to blog
@@ -585,39 +599,84 @@ export default function Blog() {
         >
           {`${blog_day_name}, ${blog_month_name} ${blog_day} ${blog_year}`}
         </Typography>
-        <ThemeProvider theme={theme}>
-          <Typography variant="h2" fontWeight={"bolder"}>
-            {blog.title}
+        {user.user_id === blog.author.user_id &&
+          (<>
+            <IconButton
+              id="ellipsis"
+              edge="end"
+              aria-label="ellipsis"
+              sx={{ p: "0.3em 0.5em", position: 'absolute', right: 27, top: 69 }}
+              onClick={handleClick}
+            >
+              <FontAwesomeIcon icon={faEllipsisV} fontSize="large" />
+            </IconButton>
+            <Popover
+              open={open}
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              onClose={handleClose}
+            >
+              <Stack alignItems={"flex-start"} p={"0.4em 0.2em"}>
+                <Button
+                  fullWidth
+                  sx={{ color: "rgba(0, 0, 0, 0.6)", pr: 2 }}
+                  onClick={() => navigate('edit')}
+                >
+                  <Box ml={-3} pl={2} pr={2}>
+                    <EditIcon fontSize="smaller" />
+                  </Box>
+                  Edit
+                </Button>
+                <Divider />
+                <Button
+                  fullWidth
+                  sx={{ color: "rgba(0, 0, 0, 0.6)", pr: 2 }}
+                  onClick={() => submit(null, { method: "DELETE", action: "destroy" })}
+                >
+                <Box pl={2} pr={2}>
+                  <DeleteIcon fontSize="smaller" />
+                </Box>
+                Delete
+              </Button>
+            </Stack>
+          </Popover>
+      </>)}
+      <ThemeProvider theme={theme}>
+        <Typography variant="h2" fontWeight={"bolder"}>
+          {blog.title}
+        </Typography>
+        <Typography color={"text.secondary"} gutterBottom>
+          {blog.summary}
+        </Typography>
+        <Box display={"flex"} gap={1} mb={2} mt={2}>
+          <Avatar src={blog.author.profile_pic || ""} alt="Avatar" />
+          <Typography mt={1} fontWeight={"bold"}>
+            <Link
+              to={`profile/${blog.author.user_id}`}
+              className="blogs-link"
+            >{`${blog.author.first_name && blog.author.last_name
+              ? `${blog.author.first_name} ${blog.author.last_name}`
+              : blog.author.username
+              }`}</Link>
           </Typography>
-          <Typography color={"text.secondary"} gutterBottom>
-            {blog.summary}
-          </Typography>
-          <Box display={"flex"} gap={1} mb={2} mt={2}>
-            <Avatar src={blog.author.profile_pic || ""} alt="Avatar" />
-            <Typography mt={1} fontWeight={"bold"}>
-              <Link
-                to={`profile/${blog.author.user_id}`}
-                className="blogs-link"
-              >{`${blog.author.first_name && blog.author.last_name
-                ? `${blog.author.first_name} ${blog.author.last_name}`
-                : blog.author.username
-                }`}</Link>
-            </Typography>
-          </Box>
-        </ThemeProvider>
-        <Divider />
-        <Box className="html-content" lineHeight={"1.4em"} overflow={"auto"} mt={2}>
-          {htmlToReactParser.parse(blog.content)}
         </Box>
-        <ThemeProvider theme={theme}>
-          <Typography variant="h5" fontWeight={"bold"} mt={10}>
-            Leave a comment
-          </Typography>
-        </ThemeProvider>
-        <Box>
-          <BlogComments />
-        </Box>
+      </ThemeProvider>
+      <Divider />
+      <Box className="html-content" lineHeight={"1.4em"} overflow={"auto"} mt={2}>
+        {htmlToReactParser.parse(blog.content)}
       </Box>
-    </Container>
+      <ThemeProvider theme={theme}>
+        <Typography variant="h5" fontWeight={"bold"} mt={10}>
+          Leave a comment
+        </Typography>
+      </ThemeProvider>
+      <Box>
+        <BlogComments />
+      </Box>
+    </Box>
+    </Container >
   );
 }
