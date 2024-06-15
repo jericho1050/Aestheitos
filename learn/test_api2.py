@@ -983,7 +983,7 @@ class BlogCommentListAPITestCase(APITestCase):
         response = client.get(reverse("learn:blog-comments", args=[1]))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]["comment_by"], self.user_2.id)
+        self.assertEqual(response.data[0]["user_id"], self.user_2.id)
         self.assertIsNotNone(response.data)
 
     def test_blog_create_comment(self):
@@ -1033,9 +1033,9 @@ class BlogCommentListAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIsNotNone(response.data)
-        self.assertEqual(response.data["comment_by"], self.user.id)
+        self.assertEqual(response.data["user_id"], self.user.id)
         self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response_1.data["comment_by"], self.user_2.id)
+        self.assertEqual(response_1.data["user_id"], self.user_2.id)
         self.assertEqual(response_1.data["parent_comment"], response.data["id"])
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_3.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1098,7 +1098,7 @@ class BlogCommentDetailAPITestCase(APITestCase):
         response_2 = client.get(reverse("learn:blog-comment", args=[6]))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["comment_by"], self.user_2.id)
+        self.assertEqual(response.data["user_id"], self.user_2.id)
         self.assertIsNotNone(response.data["comment"])
         self.assertEqual(response_2.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -1136,7 +1136,7 @@ class BlogCommentDetailAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.data["comment"])
-        self.assertEqual(response.data["comment_by"], self.user_2.id)
+        self.assertEqual(response.data["user_id"], self.user_2.id)
         self.assertEqual(response_2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_3.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response_4.status_code, status.HTTP_400_BAD_REQUEST)
