@@ -1,7 +1,7 @@
 import { Link, useLoaderData } from "react-router-dom";
 import { getCourses, getUser, getUserCoursesProgress, getUserEnrolledCourses } from "../courses";
 import { Parser } from "html-to-react";
-import { Box, Container, Grid, Paper, Rating, ThemeProvider, Typography, Zoom, responsiveFontSizes, useTheme } from "@mui/material";
+import { Box, Container, Grid, Paper, Rating, ThemeProvider, Typography, Zoom, responsiveFontSizes, useMediaQuery, useTheme } from "@mui/material";
 import parseCourseDateTime from "../helper/parseDateTime";
 import truncateText from "../helper/truncateText";
 import { BorderLinearProgress } from "../components/CustomLinearProgress";
@@ -20,6 +20,8 @@ export default function Enrolled() {
     const { courses, userCoursesProgress } = useLoaderData();
     let theme = useTheme();
     theme = responsiveFontSizes(theme);
+    const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
+    const isXsmallScreen = useMediaQuery(theme => theme.breakpoints.only('xs'));
     const htmlToReactParser = new Parser();
     const enrollCourses = courses.results.map(obj => {
         const userProgress = userCoursesProgress.find(p => p.course === obj.course.id);
@@ -28,7 +30,7 @@ export default function Enrolled() {
         obj.course.total_sections = obj.total_sections
         return { ...obj };
     })
-
+    console.log(isXsmallScreen);
     return (
         <Container maxWidth="xl" component={"main"} sx={{ p: '2em' }}>
             <Box mt={5} pl={4}>
@@ -58,14 +60,17 @@ export default function Enrolled() {
                                             }}>
                                                 {/* <img src={course.thumbnail} alt="course-thumbnail" style={{maxWidth: '100%', maxHeight: '100%' }} /> */}
                                             </Box>
-                                            <Box mt={2}>
+                                            {!isXsmallScreen &&
+(                                            <Box mt={2}>
                                                 <Typography height={'auto'} gutterBottom fontFamily={'Play'} fontSize={'1.5em'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
                                                     {truncateText(course.title, 50)}
                                                 </Typography>
                                                 <Box maxHeight={'2em'} height={'100%'} maxWidth={250} sx={{ wordBreak: 'break-word' }}>
                                                     {htmlToReactParser.parse(truncateText(course.description, 69))}
                                                 </Box>
-                                            </Box>
+                                            </Box>)
+
+                                            }
 
                                             <Typography variant='small' color="text.secondary" position={'absolute'} right={0}>
                                                 {course.difficulty_display}
@@ -83,7 +88,7 @@ export default function Enrolled() {
                                         <Typography fontSize={'small'}>
                                             <b>Last Modified: </b>{last_updated_day_course === 0 && last_updated_hour_course <= 24 ? `${last_updated_hour_course} hours ago` : `${last_updated_day_course} days ago`}
                                         </Typography>
-                                        <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />
+                                        {!isSmallScreen && <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />}
                                         <BorderLinearProgress variant="determinate" value={(course.sections_completed * 100) / course.total_sections} className="user-course-progress-bar" />
                                     </Paper>
                                 </Zoom>

@@ -130,7 +130,7 @@ export function Index() {
                 <Grid container mb={4} mt={'10vh'}>
                     <Grid item>
                         <ThemeProvider theme={theme}>
-                            <Typography variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'}>
+                            <Typography variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'} noWrap>
                                 Explore Courses
                             </Typography>
                         </ThemeProvider>

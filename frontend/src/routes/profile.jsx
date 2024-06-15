@@ -38,6 +38,9 @@ export default function Profile() {
     let counter = 0;
     let count = courses.count;
     const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'));
+    const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
+    const isXsmallScreen = useMediaQuery(theme => theme.breakpoints.only('xs'));
+
     while (count >= 15) {
         counter++;
         count -= 15;
@@ -122,14 +125,15 @@ export default function Profile() {
                                                 }}>
                                                     {/* <img src={course.thumbnail} alt="course-thumbnail" style={{maxWidth: '100%', maxHeight: '100%' }} /> */}
                                                 </Box>
-                                                <Box mt={2} width={'100%'}>
+                                                {!isXsmallScreen && 
+                                                (<Box mt={2} width={'100%'}>
                                                     <Typography height={'auto'} gutterBottom fontFamily={'Play'} fontSize={'1.4em'} fontWeight={'bolder'} sx={{ wordBreak: 'break-word' }}>
                                                         {truncateText(course.title, 40)}
                                                     </Typography>
                                                     <Box maxHeight={'2em'} maxWidth={250} sx={{ wordBreak: 'break-word' }}>
                                                         {htmlToReactParser.parse(truncateText(course.description, 60))}
                                                     </Box>
-                                                </Box>
+                                                </Box>)}
 
                                                 <Typography variant='small' color="text.secondary" position={'absolute'} right={0}>
                                                     {course.difficulty_display}
@@ -144,8 +148,7 @@ export default function Profile() {
                                             <Typography fontSize={'small'} >
                                                 <b>Last Modified: </b>{last_updated_day === 0 && last_updated_hour <= 24 ? `${last_updated_hour} hours ago` : `${last_updated_day} days ago`}
                                             </Typography>
-                                            <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em'}} />
-                                        </Paper>
+                                            {!isSmallScreen && <Rating name="half-rating-read" size="medium" defaultValue={course.average_rating} precision={0.5} readOnly sx={{ position: 'absolute', bottom: '1.8em', right: '1.5em' }} />}                                        </Paper>
                                     </Zoom>
 
                                 </Link>

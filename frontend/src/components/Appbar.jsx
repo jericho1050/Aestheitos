@@ -187,9 +187,8 @@ function ResponsiveAppBar() {
               component="a"
               href="/"
               sx={{
-                ml: 4,
                 mr: 0,
-                display: { xs: 'flex', md: 'none' },
+                display: { sm: 'flex', md: 'none' },
                 flexGrow: 1,
                 fontFamily: 'monospace',
                 fontWeight: 700,
@@ -221,16 +220,16 @@ function ResponsiveAppBar() {
               )}
             </Box>
             {isAuthenticated ?
-              <Box sx={{ flexGrow: 0 }}>
+              <Box sx={{ flexGrow: 0, }}>
                 <Grid direction="row-reverse" container alignItems={'center'} spacing={1}>
-                  <Grid item xs>
+                  <Grid item xs={4} sm>
                     <Tooltip data-cy="Tool tip" title="Open settings">
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                         <Avatar data-cy="Avatar" alt="myPP" src={profilePic || `${import.meta.env.VITE_API_URL}${user.profile_pic}`} />
                       </IconButton>
                     </Tooltip>
                   </Grid>
-                  <Grid item xs>
+                  <Grid item xs={4} sm>
                     <IconButton aria-label='notification' sx={{ color: 'white' }} onClick={handleClickBadge}>
                       <Badge badgeContent={userCourses.filter(course => !course.read).length}>
                         <NotificationsOutlinedIcon />
@@ -317,10 +316,10 @@ function ResponsiveAppBar() {
               </Box>
               :
               <Box sx={{ flexGrow: 0 }}>
-                <Grid container spacing={{ xs: 0, sm: 1, md: 2 }} alignItems={'center'}>
+                <Grid container spacing={{ xs: 3, sm: 1, md: 2 }} alignItems={'center'}>
                   <SearchBar isOpen={isOpen} setIsOpen={setIsOpen} />
-                  <Grid item ml={1}>
-                    <Link to={`/signin`} id="sign-in">Sign in</Link>
+                  <Grid item ml={1} mr={{xs: 0, sm: 0}} xs>
+                    <Link to={`/signin`} id="sign-in" style={{ whiteSpace: 'nowrap'}}>Sign in</Link>
                   </Grid>
                 </Grid>
               </Box>

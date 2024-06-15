@@ -17,7 +17,7 @@ export default function SearchBar({ isOpen, setIsOpen }) {
     return (
         isSmallScreen ?
             (<>
-                <Grid item xs>
+                <Grid item xs={4} sm>
                     <IconButton onClick={() => {
                         setIsOpen(true);
                     }} size="large" aria-label="search" color="inherit">

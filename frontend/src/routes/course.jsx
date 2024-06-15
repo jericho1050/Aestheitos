@@ -1209,30 +1209,30 @@ export default function Course() {
                   </Box>
                 )}
 
-                <Grid container columns={{ xs: 6, md: 12 }} mt={2} >
-                  <Grid item xs={3} md={6} >
+                <Grid container columns={{ xs: 6, sm: 6, md: 12 }} mt={2} >
+                  <Grid item xs={6} sm={3} md={6} >
                     <Typography
                       fontSize="small"
                       variant="small"
                       color={"text.secondary"}
                     >
-                      <b>Created on:</b> {course.course_created}
+                      <b>Created:</b> {course.course_created}
                     </Typography>
                   </Grid>
-                  <Grid item xs={3} md={6}>
+                  <Grid item xs={6} sm={3} md={6}>
                     <Typography
                       fontSize="small"
                       variant="small"
                       color={"text.secondary"}
                     >
-                      <b>Last updated:</b>{" "}
+                      <b>Modified:</b>{" "}
                       {last_updated_day === 0 && last_updated_hour <= 24
                         ? `${last_updated_hour} hours ago`
                         : `${last_updated_day} days ago`}
                     </Typography>
                   </Grid>
                   {enrollment && (
-                    <Grid item xs={3} md={6}>
+                    <Grid item xs={6} sm={3} md={6}>
                       <Box display={"flex"} alignItems={"center"}>
                         <Typography
                           fontSize="small"
@@ -1266,7 +1266,7 @@ export default function Course() {
                       </Box>
                     </Grid>
                   )}
-                  <Grid item xs={3} md={6}>
+                  <Grid item xs={6} sm={3} md={6}>
                     <Typography
                       fontSize="small"
                       variant="small"
