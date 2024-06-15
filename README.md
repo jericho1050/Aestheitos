@@ -12,7 +12,7 @@ I myself, who have trained and also made some mistakes for almost 4 years, wante
 
 This project is an online learning platform dedicated to fitness and calisthenics. It allows users to enroll in training programs and courses created by verified users. Creating a course is never easy without a nice user interface.Each course includes a lecture, a training plan with workout demonstrations and a discussion or comment where users can interact with each other. The platform emphasizes community learning and engagement, making fitness education accessible and enjoyable for everyone. In addition, I've also implemented a blog where the admin or staff can create and post their own and let other users read the published blog. Of course, it should be easy to create a blog, in which I've integrated a WYSIWYG (What You See Is What You Get) for a nice UI/UX, which, in my opinion, is the reason why it is ***distinct*** from other apps.
 
-Before I've started the implementation or coding of this project, I've first created my pseudocode, an outline, a class diagram for my models, watch some tutorials and read Django's Rest Framework (DRF), React and React-router documentation, etc.The main reason is that I wanted it to be interactive.React serves as the frontend, which is SSR (server-side rendering) of our user interface via communicating through the backend server, which is Django.
+Before I've started the implementation or coding of this project, I've first created my pseudocode, an outline, a class diagram for my models, watched some tutorials, read Django's Rest Framework (DRF), React and React-router documentation, etc. The main reason is that I wanted it to be interactive. Vite + React serves as the frontend, making this web app an SPA model. via communicating through the backend server with its rest endpoints, which is Django.
 
 In my outline i have my own **specifications** for my project, as follows:
 
@@ -33,16 +33,19 @@ In my outline i have my own **specifications** for my project, as follows:
 - **Blogs**: Users should be able to see all Blog posts from users, with the most recent posts first
 - **Pagination**: On the page that display courses and blogs, for courses there should be only be 15 cards and 10 blog post on a page. If there are more than that, A “Next” button should appear to take the user to the next page of courses or blog posts (which should be older than the current page of courses and blog posts). if not on the first page, a “Previous” button should appear to take the user to the previous page as well
 
-This is my Class Diagram for my models:
+This is my class diagram or database schema for my models. However, my models are changing often, so this is not updated or reflected to my django models.
 
-![Class diagram of my Django model that i've created in lucidchart](/images/images/Capstone.jpeg)
+![Class diagram of my Django model that i've created in lucidchart](/images/images/Capstone-2.jpeg)
   
-Here's also my rough idea  or flowchart of how a user might interact with my system :
+Here's also my rough idea or flowchart of how a user might interact with my system, and this is just my plan, so everything might not be accurate and apply to the system itself:
 
 ![Flowchart of my LMS that i've created in lucidchart](/images/images/APP%20FLOW%20-%20UI%20FLOW.jpeg)
 ![Flowchart of my LMS that i've created in lucidchart](/images/images/APP%20FLOW%20-%20UI%20FLOW-2.jpeg)
 
-Lastly, this is my **NOT** final of my UI tree:
+So to simplify the scribble above, it's actually just an MVC pattern. DRF is the controlller and the model, while our React app is the view in this case.
+
+![MVC ARCHITECTURE PATTERN IMAGE](images/images/1700972779305.png)
+Lastly, this is the **NOT** final of my UI tree. This is just a plan that I had in mind; however, it changed when I read the documentation for the React router. My real implementation is very far from this:
 
 ![UI TREE of my Frontend that i've created in lucidchart](/images/images/Capstone%20UI%20TREE%20-%20hiearchy%20(React).jpeg)
 
@@ -103,21 +106,6 @@ admin.site.register(Course)
 admin.site.register(CourseContent)
 admin.site.register(CourseRating)
 admin.site.register(CourseComments)
-
-# existing code
-```
-
-### `custom_serializer.py`
-
-A mock or custom serializer that is only for documentation purposes ( django spectacular ).
-
-```python
-# existing code
-
-class LoginCustomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username", "password"]
 
 # existing code
 ```
@@ -256,8 +244,6 @@ def save_with_auth_user(self, user, pk, update=False):
     self.save()
 ```
 
-An example is that before saving the data, the function will first check if this instance belongs to the user and raise an authentication failure if not.
-
 ```python
 # existing code
 
@@ -288,21 +274,51 @@ class CourseSerializer(ModelSerializer):
     def save_with_auth_user(self, user, pk, update=False):
 
         if update:
+            # Check if 'read' is the only field being updated
+            if set(self.validated_data.keys()) == {"read"}:
+                self.instance.read = self.validated_data.get("read")
+                self.instance.save(update_fields=["read"])
+                return
 
             if "status" in self.validated_data and not user.is_staff:
                 raise AuthenticationFailed("Only staff can change the status")
 
-            if not user.is_superuser and self.instance.created_by != user:
+            if user.is_superuser or user.is_staff:
+                self.save()
+            elif self.instance.created_by == user:
+                self.save()
+            else:
                 raise AuthenticationFailed("Not allowed to modify")
 
             self.save()
             return
         self.save(created_by=user)
 
-    def get_average_rating(self, obj) -> float:
-        return obj.course_rating_average()
-
 # existing code
+```
+
+An example of this is that before saving the instance's data, the function will first check if this instance belongs to the user and raise an authentication failure if not.
+
+```cURL
+curl --location --request PATCH 'http://127.0.0.1:8000/course/55' \
+--header 'Cookie: jwt=someJWTToken; access=someAccessToken; refresh=someRefreshToken' \
+--header 'Content-Type: application/json' \
+--data '{
+    "title": "test for a change",
+    "description": "test change",
+    "thumbnail": null,
+    "difficulty": "IN",
+    "price": "123.00",
+    "weeks": 123,
+    "is_draft": false,
+    "read": true
+}'
+```
+
+```JSON
+{
+    "detail": "Not allowed to modify"
+}
 ```
 
 ### `test_api.py`
@@ -310,141 +326,13 @@ class CourseSerializer(ModelSerializer):
 Client testing is an important part of ensuring clients are able to perform certain operations.
 This file contains test cases. utilizing the [DRF's API test cases](https://www.django-rest-framework.org/api-guide/testing/#api-test-cases)
 
-```python
-# existing code
-
-class RegisterAPITestCase(APITestCase):
-    def test_create_account(self):
-        """
-        Ensure we can create a new account object.
-        """
-
-# other code
-
-class CourseDetailAPITestCase(APITestCase):
-
-    def setUp(self):
-        user = User.objects.create_user(username="testuser", password="secret")
-        Course.objects.create(
-            title="set up",
-            description="nothing",
-            difficulty="BG",
-            thumbnail="images/images/skillz.jpg",
-            created_by=user,
-        )
-        # exisitng code...
-
-     def test_retrieve_course(self):
-        """
-        Ensure we can retreive a course instance
-        """
-
-        client = APIClient(enforce_csrf_checks=True)
-        response1 = client.get(reverse("learn:course-detail", args=[1]))
-        response2 = client.get(reverse("learn:course-detail", args=[2]))
-        response3 = client.get(reverse("learn:course-detail", args=[3]))
-        self.assertEqual(response1.status_code, status.HTTP_200_OK)
-        self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(response3.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_update_course(self):
-        """
-        Ensure we can update a course instance
-        """
-
-        # test update instance with unauthenticated client
-        response = self.unauthenticated_client.put(
-            reverse("learn:course-detail", args=[1]),
-            {
-                "title": "test unauth",
-                "description": "test unauth",
-                "difficulty": "AD",
-            },
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    
-    # existing code
-```
-
 ### `test_api2.py`
 
 This is just an extension for ```test_api.py```, which continues the remaining API testing.
 
-```python
-# exisiting code
-
-class BlogListAPITestCase(APITestCase):
-
-    def setUp(self):
-        self.user = User.objects.create_user(username="testuser", password="secret")
-        self.user_2 = User.objects.create_user(username="testuser2", password="secret")
-
-        Blog.objects.create(
-            title="test blog",
-            content="idk there's no content yet lorem ipsum blah blah blah blah blah blah",
-            author=self.user,
-        )
-
-        self.authenticated_client = APIClient(enforce_csrf_checks=True)
-        self.authenticated_client_2 = APIClient(enforce_csrf_checks=True)
-        self.unauthenticated_client = APIClient(enforce_csrf_checks=True)
-
-        # existing code....
-
-    def test_retrieve_blog_list(self):
-    """
-    Ensure we can retrieve list of blogs
-    """
-    client = APIClient(enforce_csrf_checks=True)
-
-    response = client.get(reverse("learn:blog-list"))
-
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertEqual(len(response.data), 1)
-    self.assertIn("test", response.data[0]["title"])
-
-# existing code
-```
-
 ### `test_models.py`
 
 Django Testing: Ensure that Django models or databases work correctly as intended using assertions.
-
-```python
-# other code
-
-class EnrollmentTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(username="testuser")
-        self.user2 = User.objects.create(username="testuser123")
-
-        self.course = Course.objects.create(title="Test Course", created_by=self.user)
-        self.enrollment = Enrollment.objects.create(user=self.user2, course=self.course)
-
-    def test_user_enrollment(self):
-        self.assertEqual(self.enrollment.user, self.user2)
-
-    def test_course_enrollment(self):
-        self.assertEqual(self.enrollment.course, self.course)
-
-    def test_date_enrolled(self):
-        self.assertIsInstance(self.enrollment.date_enrolled, datetime)
-
-    def test_related_names(self):
-        self.assertIn(self.enrollment, self.user2.enrollee.all())
-        self.assertIn(self.enrollment, self.course.enrolled.all())
-
-    def test_enrollment_without_user(self):
-        with self.assertRaises(IntegrityError):
-            Enrollment.objects.create(user=None, course=self.course)
-
-    def test_enrollment_without_course(self):
-        with self.assertRaises(IntegrityError):
-            Enrollment.objects.create(user=self.user2, course=None)
-
-# existing code
-```
 
 ### `urls.py`
 
@@ -490,7 +378,7 @@ class RegisterView(APIView):
     """
     Creates a newly Account
     """
-    @extend_schema(request=UserSerializer, responses=UserSerializer)
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -506,6 +394,9 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
 
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    pagination_class = CustomPagination
+
+    # existing code
 
 
 class CourseDetail(
@@ -519,6 +410,57 @@ class CourseDetail(
     serializer_class = CourseSerializer
 
 # existing code
+```
+
+Depending on the view if it's a suffix is List then often it's HTTP methods are GET and CREATE,
+if it ends with Detail then often it has GET, PATCH OR PUT, and DELETE for that instance.
+
+The pagination is only applied to CourseList (if there's a pagination = true argument) Or Enrollment views.
+
+example:
+
+```cURL
+
+curl --location --request GET 'http://localhost:8000/courses?page=1&paginate=true' \
+--header 'Cookie: jwt=someJWT.eyJpZCI6MTksImV4cCI6MTcwODY5OTQyNCwiaWF0IjoxNzA4MDk0NjI0fQ.WZ08AW0UHZ59TzVSHnp2wxX7z4IUhMn5FUZS_0Qxayc' \
+--form 'title="testing testing is_Draft 2 123 "' \
+--form 'description="fields hmmasdfafds"' \
+--form 'difficulty="BG"' \
+--form 'price="1"' \
+--form 'weeks="3"' \
+--form 'is_draft="false"'
+
+```
+
+```JSON
+[
+    {
+        "id": 56,
+        "average_rating": 1.0,
+        "created_by_name": "jericho1050",
+        "difficulty_display": "Beginner",
+        "enrollee_count": 0,
+        "title": "TEST",
+        "description": "<p>TEST</p>",
+        "thumbnail": null,
+        "difficulty": "BG",
+        "course_created": "2024-06-09",
+        "course_updated": "2024-06-09T14:24:46.431690Z",
+        "status": "A",
+        "price": "0.00",
+        "weeks": 3,
+        "is_draft": false,
+        "read": false,
+        "created_by": 1
+    },
+    {
+        //...course
+    }
+    {
+        //...course
+    }
+    //etc
+]
 ```
 
 </details>
