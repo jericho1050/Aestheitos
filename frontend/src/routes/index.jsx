@@ -78,7 +78,7 @@ export function Index() {
     let counter = 0;
     let count = courses.count;
 
-    while (count >= 15) {
+    while (count > 0) {
         counter++;
         count -= 15;
     }
@@ -154,7 +154,7 @@ export function Index() {
             </Box>
             <Form>
                 <Box display={'flex'} justifyContent={'center'} mt={4}>
-                    <Pagination size="large" count={counter} onChange={(event, page) => {
+                    <Pagination color="primary" size="large" count={counter} onChange={(event, page) => {
                         submit(`page=${page}`);
                         const element = document.getElementById('courses');
                         window.scrollTo({

@@ -432,8 +432,8 @@ export async function updateCourseRating(id, formData) {
     body: formData,
   });
 }
-export async function getBlogs() {
-  return sendRequest(`${import.meta.env.VITE_API_URL}blogs`, {});
+export async function getBlogs(page = 1) {
+  return sendRequest(`${import.meta.env.VITE_API_URL}blogs?page=${page}`, {});
 }
 
 export async function getBlog(id) {

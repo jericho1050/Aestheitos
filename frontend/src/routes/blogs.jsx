@@ -1,12 +1,14 @@
-import { Avatar, Box, Button, Card, CardActions, CardContent, Container, Divider, ThemeProvider, Typography, responsiveFontSizes } from "@mui/material";
+import { Avatar, Box, Button, Card, CardActions, CardContent, Container, Divider, Pagination, ThemeProvider, Typography, responsiveFontSizes } from "@mui/material";
 import { getBlogs, getUser } from "../courses";
-import { Link, useLoaderData } from "react-router-dom";
+import { Form, Link, useLoaderData, useSubmit } from "react-router-dom";
 import { useTheme } from "@emotion/react";
 import { parseBlogDateTime } from "../helper/parseDateTime";
 
-export async function loader() {
+export async function loader({ request }) {
+    const url = new URL(request.url);
+    const page = url.searchParams.get('page');
     const user = await getUser();
-    const blogs = await getBlogs();
+    const blogs = await getBlogs(page || 1);
     return { user, blogs };
 
 }
@@ -15,6 +17,14 @@ export default function Blogs() {
     const { user, blogs } = useLoaderData();
     let theme = useTheme();
     theme = responsiveFontSizes(theme);
+    const submit = useSubmit();
+    let counter = 0;
+    let count = blogs.count;
+    console.log(blogs);
+    while (count > 0) {
+        counter++;
+        count -= 10;
+    }
     return (
         <Container maxWidth="md" component={'main'}>
             <Box m={4}>
@@ -26,7 +36,7 @@ export default function Blogs() {
                         Posts
                     </Typography>
                 </ThemeProvider>
-                <Box>
+                <Box id="blogs">
                     {blogs.results
                         .sort((a, b) => new Date(b.blog_created) - new Date(a.blog_created))
                         .map(blog => {
@@ -62,6 +72,19 @@ export default function Blogs() {
                             )
                         })}
                 </Box>
+                <Form>
+                    <Box display={'flex'} justifyContent={'center'} mt={4}>
+                        <Pagination color="primary" size="large" count={counter} onChange={(event, page) => {
+                            submit(`page=${page}`);
+                            const element = document.getElementById('blogs');
+                            window.scrollTo({
+                                top: element.offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }} />
+                    </Box>
+                </Form>
+
             </Box>
         </Container>
     )

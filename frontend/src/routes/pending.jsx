@@ -21,7 +21,7 @@ export function Pending() {
     let counter = 0;
     let count = courses.count;
 
-    while (count >= 15) {
+    while (count > 15) {
         counter++;
         count -= 15;
     }
