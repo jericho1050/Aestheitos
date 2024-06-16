@@ -444,3 +444,18 @@ html {
     min-height: 500px;
   }
 }
+
+blockquote p {
+  padding: 15px;
+  background: #eee;
+  border-radius: 5px;
+}
+
+blockquote p::before {
+  content: '❝ ';
+}
+
+blockquote p::after {
+  content: ' ❞';
+}
+

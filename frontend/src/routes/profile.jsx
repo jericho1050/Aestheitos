@@ -103,7 +103,7 @@ export default function Profile() {
             </Paper>
             <Box mt={isLargeScreen ? 0 : 2} ml={2}>
                 <ThemeProvider theme={theme}>
-                    <Typography variant="h2" fontFamily={'Play'} fontWeight={'bolder'} mb={2}>
+                    <Typography variant="h2" fontFamily={'Play'} fontWeight={'bolder'} mb={2} gutterBottom>
                         {`${user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}'s Courses`}
                     </Typography>
                 </ThemeProvider>

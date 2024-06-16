@@ -35,7 +35,7 @@ export default function Enrolled() {
         <Container maxWidth="xl" component={"main"} sx={{ p: '2em' }}>
             <Box mt={5} pl={4}>
                 <ThemeProvider theme={theme}>
-                    <Typography variant="h2" fontFamily={'Play'} fontWeight={'bolder'} mb={2}>
+                    <Typography variant="h2" fontFamily={'Play'} fontWeight={'bolder'}>
                         Enrolled Courses
                     </Typography>
                 </ThemeProvider>
