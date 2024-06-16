@@ -41,7 +41,7 @@ export default function Profile() {
     const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
     const isXsmallScreen = useMediaQuery(theme => theme.breakpoints.only('xs'));
 
-    while (count >= 15) {
+    while (count > 15) {
         counter++;
         count -= 15;
     }
