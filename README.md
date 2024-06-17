@@ -7,8 +7,9 @@ I myself, who have trained and also made some mistakes for almost 4 years, wante
 > Motivation gets you going, But discipline keeps you growing
 
 ---
-
-## Distinctiveness and Complexity
+<!-- markdownlint-disable MD033 -->
+<details>
+<summary style="font-size: 2em; font-weight: bold"> Distinctiveness and Complexity </summary>
 
 This project is an online learning platform dedicated to fitness and calisthenics. It allows users to enroll in training programs and courses created by verified users. Creating a course is never easy without a nice user interface.Each course includes a lecture, a training plan with workout demonstrations and a discussion or comment where users can interact with each other. The platform emphasizes community learning and engagement, making fitness education accessible and enjoyable for everyone. In addition, I've also implemented a blog where the admin or staff can create and post their own and let other users read the published blog. Of course, it should be easy to create a blog, in which I've integrated a WYSIWYG (What You See Is What You Get) for a nice UI/UX, which, in my opinion, is the reason why it is ***distinct*** from other apps.
 
@@ -16,22 +17,57 @@ Before I've started the implementation or coding of this project, I've first cre
 
 In my outline i have my own **specifications** for my project, as follows:
 
-> I'll just keep it short, I swear
+> I'll just keep it short, :D
 
-- **Models**: User, Blog, BlogComments Course, CourseComments, UserProgress, CourseContent, Workouts, WrongExerciseForm, CorrectExerciseForm and Enrollment.
+- **Models**: User, Blog, BlogComments Course, CourseComments, UserProgress, CourseContent,Section, SectionItem, Workouts, WrongExerciseForm, CorrectExerciseForm and Enrollment.
 - **Register**: allows users to create or register for an account.
 - **Create Course**: Users that are signed should be able to create their own training program or course by visiting the Create page.
-- **Pending Courses**: Admins and staff should be able to visit a Pending page.displays all courses with the status pending
+  - Instructors should be able to provide a title, description, price, thumbnail, and difficulty level (beginner, intermediate, and advanced) for this course.
+  - provide an overview structure (e.g., specify how many weeks or how long this course is, or provide valuable information and education) via a video or a lecture.
+  - Instructors can create a section or accordion / modal specifying its frequency, i.e., how many times per week or how often it should be done from range (x, y), or their own heading / description
+    - should provide details of the workout from top to bottom inside of our modal.
+    - Should be able to add an accordion item or section item with its content either the workout routine or a readme / lecture
+  - The User should be presented with a submit for review button.
+  - Wysiwyg textfields? (optional feature).
+- **Pending Courses**: Admins and staff should be able to visit a Pending page.displays all courses with the status pending.
+  - Admins or staff should be able to review whether to approve a course or reject it.
+  - Accepted and reviewed courses must notify the creator or instructor of that particular course.
 - **Course Catalog**: Index page, where a list of available courses created by instructors is displayed. Each course must include a title, description, thumbnail, difficulty level, number of enrollees, rating, and posted time. All users can see this.
+  - display the average course’s rating i.e the no. stars.
+  - Sorted by Popularity and Recent.
 - **Search**: :  Allow the user to type a query into the search box for a course.
+  - if query similarly matches a course , display the course results.
+  - clicking on any result course should redirect the user.
 - **Course**: Clicking a course should redirect the user to a page where they can view the course’s details.
-- **Edit**: The admins or the authenticated Users should be able to edit their own Courses or Blogs.
+  - The user that is signed in and enrolled should be able to see the content where its elements (title, images, description, sections/modals, etc.) should be displayed; if not, don’t show the remaining content and ask the user to create an account or have them sign in ‘IF NOT AUTHENTICATED’, or if they are not enrolled,  ask the user to enroll.
+  - Users that are signed in should also be able to track and manage their progress by marking the section / week as complete or checked (if enrolled).
+  - User that are authenticated or signed and enrolled should be able to rate the program/course (from 1-5 scale).
+  - If enrolled, display a checkbox per section in course content for progress tracking.
+  - Instructors (creators of the course) and admins and staff should be able to remove or delete the course by displaying a delete button form.
+  - Instructors (creator of the course) and admin and staff should be able to edit or modify the course, displaying a edit button form that causes them to redirect to another route.
+- **Edit**: The admins or the authenticated Users should be able to edit the Courses or Blogs via redirecting them.
+  - Instructor (creator of the course) or Author (creator of the blog)  should be able to edit by clicking **EDIT** button in the course content page and modify their work.
+- **Delete**: Instructor (creator of the course) or Author (creator of the blog) should be able to delete by clicking **DELETE** button in the course content page or blog and delete their work
+  - Only the creator of the course and staff can delete the course instance.
+  - Only the staff can delete the blog instance
 - *optional* **Animation**: Use ReactSpring for the home page implemented it yourself through trial and error
 - **Enrollment**: Users who are authenticated should be able to enroll in a course.
+  - Instructors shouldn’t be able to enroll in their own course ( but can enroll in other’s course)
+- **Enrolled page**: Users who are signed should be able to visit an enrolled page and track their progress.
+  - Users can remove it by unenrolling the course.
+  - Display each course’s progress bar.
 - **Comments**: Allows users to comment on course material and on a blog post.
+  - Users who are authenticated should be able to comment on course material or blog post if not redirected to log in.
+  - Users can reply to each other (replies should be indented).
+  - Users should be able to click a edit button and modify their comment
+  - They should be able to click a delete button and delete their comment
 - **Create Blog**: Staff or superusers who are signed in should be able to write a new blog in an editor via its route and then click the submit post button.
+  - Allows Staffs or Superuser to post a blog, which, if logged in, should be displayed with an editor and so that they can create their own blog.
+  - Implement a wysiwyg editor using Quill for User experience and functionality
 - **Blogs**: Users should be able to see all Blog posts from users, with the most recent posts first
 - **Pagination**: On the page that display courses and blogs, for courses there should be only be 15 cards and 10 blog post on a page. If there are more than that, A “Next” button should appear to take the user to the next page of courses or blog posts (which should be older than the current page of courses and blog posts). if not on the first page, a “Previous” button should appear to take the user to the previous page as well
+
+Well, besides all these, I've probably forgotten to document some other features. and went beyond the scope of my specification or outline.
 
 This is my class diagram or database schema for my models. However, my models are changing often, so this is not updated or reflected to my django models.
 
@@ -50,6 +86,8 @@ Lastly, this is the **NOT** final of my UI tree. This is just a plan that I had 
 ![UI TREE of my Frontend that i've created in lucidchart](/images/images/Capstone%20UI%20TREE%20-%20hiearchy%20(React).jpeg)
 
 Based on my explanations and everything that I've included, I would say that my project is fairly complex, if not much more complex than the given project that I've done in CS50W.
+
+</details>
 
 ---
 
