@@ -9,6 +9,7 @@ import CustomizedSnackbar from "../components/Snackbar";
 import { useAtom } from "jotai";
 import { snackbarReducerAtom } from "../atoms/snackbarAtom";
 import ScrollToHashElement from "../helper/scrollToHashElement";
+import Results from "../components/Carousel";
 
 
 
@@ -124,46 +125,53 @@ export function Index() {
             </Grid>
         </Box>
 
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" component={"main"}>
+            <ThemeProvider theme={theme}>
 
-            <Box ml={4} mr={4}>
-                <Grid container mb={4} mt={'10vh'}>
-                    <Grid item>
-                        <ThemeProvider theme={theme}>
-                            <Typography variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'} noWrap>
+                <Box ml={4} mr={4}>
+                    <Grid container mb={2} mt={'10vh'}>
+                        <Grid item>
+                            <Typography variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'} noWrap gutterBottom>
                                 Explore Courses
                             </Typography>
-                        </ThemeProvider>
+                        </Grid>
                     </Grid>
-                </Grid>
-                <ScrollToHashElement />
-                <Grid id="courses" container rowSpacing={4} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12 }} columnSpacing={{ xs: 2, md: 3, }}>
-                    {/* Load lists of Courses that are approved only */}
-                    {courses.results?.map(course => {
-                        return (
-                            course.status === 'A' ?
-                                <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
-                                    <CourseCard  {...course} />
-                                </Grid>
-                                : null
-                        )
-                    }
+                    <ScrollToHashElement />
+                    <Grid id="courses" container rowSpacing={4} justifyContent={"flex-start"} columns={{ xs: 4, sm: 8, md: 12 }} columnSpacing={{ xs: 2, md: 3, }}>
+                        {/* Load lists of Courses that are approved only */}
+                        {courses.results?.map(course => {
+                            return (
+                                course.status === 'A' ?
+                                    <Grid key={course.id} item xs={4} sm={4} md={4} lg={3}>
+                                        <CourseCard  {...course} />
+                                    </Grid>
+                                    : null
+                            )
+                        }
 
-                    )}
-                </Grid>
-            </Box>
-            <Form>
-                <Box display={'flex'} justifyContent={'center'} mt={4}>
-                    <Pagination color="primary" size="large" count={counter} onChange={(event, page) => {
-                        submit(`page=${page}`);
-                        const element = document.getElementById('courses');
-                        window.scrollTo({
-                            top: element.offsetTop,
-                            behavior: 'smooth'
-                        });
-                    }} />
+                        )}
+                    </Grid>
                 </Box>
-            </Form>
+                <Form>
+                    <Box display={'flex'} justifyContent={'center'} mt={4}>
+                        <Pagination color="primary" size="large" count={counter} onChange={(event, page) => {
+                            submit(`page=${page}`);
+                            const element = document.getElementById('courses');
+                            window.scrollTo({
+                                top: element.offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }} />
+                    </Box>
+                </Form>
+                <Box component={"section"} m={4}>
+                    <Typography mb={2} align="center" variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'} noWrap gutterBottom>
+                        The Results
+                    </Typography>
+                    <Results />
+                </Box>
+            </ThemeProvider>
+
         </Container>
 
     </>)
