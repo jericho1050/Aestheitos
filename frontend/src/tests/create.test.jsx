@@ -26,6 +26,7 @@ import { IsLoadingProvider } from '../helper/IsLoadingContext';
 // THIS WON'T EVEN RUN LOL
 // I actually wanted to do some unit/component testing but
 // nah im tired already.
+// Ill go with e2e testing instead.
 const routesArray = [
     {
       path: "/",

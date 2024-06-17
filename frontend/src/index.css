@@ -1,6 +1,9 @@
 html {
   box-sizing: border-box;
+}
 
+body {
+  margin: 0;
 }
 
 #error-page {
@@ -141,13 +144,15 @@ html {
 }
 
 .courses-link,
-.blogs-link {
+.blogs-link,
+.footer-link {
   text-decoration: none;
   color: inherit;
 }
 
 .courses-link:active,
-.blogs-link:active {
+.blogs-link:active,
+.footer-link:active {
   color: inherit;
 }
 
@@ -459,3 +464,9 @@ blockquote p::after {
   content: ' ❞';
 }
 
+.privacy section, .terms section {
+  line-height: 1.5em;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: justify;
+  margin-top: 1.5em;
+}

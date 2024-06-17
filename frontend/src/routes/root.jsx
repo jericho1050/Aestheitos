@@ -7,6 +7,7 @@ import { useContext } from "react";
 import { IsLoadingContext } from "../contexts/IsLoadingContext";
 import Box from '@mui/material/Box';
 import { getCourses, getUser, updateCourse } from "../courses";
+import Footer from "../components/Footer";
 
 
 export async function loader() {
@@ -32,25 +33,23 @@ export default function Root() {
 
   return (
     <>
-      <ResponsiveAppBar></ResponsiveAppBar>
-      <>
+      <ResponsiveAppBar />
 
-        {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-          <progress value={null} />
-          <p>Loading...</p>
-        </Box>)
-          :
-          <Box id="detail"
-            className={
-              navigation.state === "loading" ? "loading" : ""
-            }
-          >
-            <Outlet />
-          </Box>
+      {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+        <progress value={null} />
+        <p>Loading...</p>
+      </Box>)
+        :
+        <Box id="detail"
+          className={
+            navigation.state === "loading" ? "loading" : ""
+          }
+        >
+          <Outlet />
+        </Box>
 
-        }
-      </>
-
+      }
+    <Footer />
     </>
   )
 }
