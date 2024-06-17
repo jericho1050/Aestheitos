@@ -95,7 +95,7 @@ export function Index() {
 
     return (<>
         <CustomizedSnackbar />
-        <Box sx={{ margin: -1, padding: 0, position: 'relative' }}>
+        <Box sx={{ margin: 0, padding: 0, position: 'relative' }}>
             <Box display={'flex'}>
                 {/* staggering effect */}
                 {springs.map((props, index) => {
@@ -164,12 +164,17 @@ export function Index() {
                         }} />
                     </Box>
                 </Form>
+
                 <Box component={"section"} m={4}>
-                    <Typography mb={2} align="center" variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'} noWrap gutterBottom>
+                    <Typography align="center" variant={'h2'} fontFamily={'Play'} fontWeight={'bolder'} noWrap gutterBottom>
                         The Results
+                    </Typography>
+                    <Typography mb={2} variant="h6" fontSize={'smaller'} textAlign={'center'} align="center">
+                        (satire for now)
                     </Typography>
                     <Results />
                 </Box>
+
             </ThemeProvider>
 
         </Container>

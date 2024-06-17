@@ -157,15 +157,22 @@ const data = [
     },
     {
         name: "Kenichi Shirahama",
-        beforeImg: "https://static.wikia.nocookie.net/awesomeheroes/images/9/91/Kenichi_Shirahama.png/revision/latest?cb=20150509122916",
+        beforeImg: "https://pbs.twimg.com/media/E1W13KnX0AEJeIb.jpg",
         afterImg: "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12932351-e251-42ae-85e8-4c2633af08b4/d33fgxc-e4b6c6db-a6f7-4ac5-979a-37c1d0d9c64a.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzEyOTMyMzUxLWUyNTEtNDJhZS04NWU4LTRjMjYzM2FmMDhiNFwvZDMzZmd4Yy1lNGI2YzZkYi1hNmY3LTRhYzUtOTc5YS0zN2MxZDBkOWM2NGEucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.r3AzYP9ccAZitnDlutiB_hCjoKGB-QLSoLceqzwl3KI",
         quote: "I became the mightest disciple"
     },
     {
         name: "Izuku Midoriya",
-        beforeImg: "https://static.wikia.nocookie.net/grand-world-war-fan-fiction-series/images/1/1c/Izuku_Midoriya.png/revision/latest/scale-to-width-down/250?cb=20180130225119",
+        beforeImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW_tACve_cswZD83AOOFPZPH_3RGwIax-MfA&s",
         afterImg: "https://i.pinimg.com/originals/9c/19/f7/9c19f7bbc0a84fccb2054f5c789e1554.jpg",
         quote: "Calisthenics Changed my life!"
-
+    },
+    {
+        name: "Rudues Greyrat",
+        beforeImg: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5db6d8e-568b-4aa7-8d20-d8d3f7fcd3e6/dg4jmmo-fe1829ab-bd7c-43fe-8d76-eb153950eb8d.png/v1/fill/w_203,h_463,q_80,strp/rudeus_greyrat__25_by_selma11_dg4jmmo-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NDYzIiwicGF0aCI6IlwvZlwvYzVkYjZkOGUtNTY4Yi00YWE3LThkMjAtZDhkM2Y3ZmNkM2U2XC9kZzRqbW1vLWZlMTgyOWFiLWJkN2MtNDNmZS04ZDc2LWViMTUzOTUwZWI4ZC5wbmciLCJ3aWR0aCI6Ijw9MjAzIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.MP8RwRO8zHZIUXPTdVTAop5GNQq-5bDIwjlNVVct3c8',
+        afterImg: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5db6d8e-568b-4aa7-8d20-d8d3f7fcd3e6/dg4jm4x-1846923e-e911-45f0-abef-4938a90ae42c.png/v1/fill/w_313,h_398,q_80,strp/rudeus_greyrat__23_by_selma11_dg4jm4x-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9Mzk4IiwicGF0aCI6IlwvZlwvYzVkYjZkOGUtNTY4Yi00YWE3LThkMjAtZDhkM2Y3ZmNkM2U2XC9kZzRqbTR4LTE4NDY5MjNlLWU5MTEtNDVmMC1hYmVmLTQ5MzhhOTBhZTQyYy5wbmciLCJ3aWR0aCI6Ijw9MzEzIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.nAc-TLgz06N_X4o-O5mNZFN_Y3oiZaE8FssCn1B33Ko',
+        quote: "I was depressed before I started doing any workouts and lost my confidence. Now I've become a better person thanks to this app."
     }
 ]
+
+

@@ -40,6 +40,8 @@ import { action as approveCourseAction } from "./routes/approve-course";
 import { action as rejectCourseAction } from "./routes/reject-course";
 import EditBlog, { action as editBlogAction, loader as editBlogLoader } from "./routes/edit-blog";
 import { action as deleteBlogAction } from "./routes/destroy-blog";
+import Privacy from "./routes/privacy";
+import Terms from "./routes/terms";
 const theme = createTheme({
   palette: {
     mode: "light",
@@ -93,6 +95,14 @@ const router = createBrowserRouter([
             loader: blogLoader,
             action: blogAction,
           },
+          {
+            path: "privacy",
+            element: <Privacy />
+          },
+          {
+            path: "terms",
+            element: <Terms />
+          }
         ],
       },
       {
