@@ -199,7 +199,7 @@ class SectionSerializer(ModelSerializer):
 
     def save_with_auth_user(self, user, pk, update=False):
         if update:
-            if not is_valid_ownership(user, pk):
+            if not is_valid_ownership(user, self.instance.course_content.course.id):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return
@@ -218,9 +218,7 @@ class SectionItemSerializer(ModelSerializer):
 
     def save_with_auth_user(self, user, pk, update=False):
         if update:
-            if not is_valid_ownership(
-                user, self.instance.section.course_content.course.id
-            ):
+            if not is_valid_ownership(user, self.instance.section.course_content.course.id):
                 raise AuthenticationFailed("Not allowed to modify")
             self.save()
             return

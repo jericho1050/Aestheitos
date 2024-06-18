@@ -16,7 +16,7 @@ export default function OverviewTextField({ isError, setIsError, courseContent, 
                     </Typography>
                 </ThemeProvider>
             </Grid>
-            <Grid item width={'100%'}>
+            <Grid item width={'100%'} pt="0 !important">
                 <Container className="ql-editor-container">
                     <fieldset className="quill-fieldset">
                         {isError && actionData?.message ?

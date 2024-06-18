@@ -231,18 +231,25 @@ describe('Create Course Route', () => {
       }
     }).as('add-accordion');
 
+    cy.intercept('GET', `${Cypress.env('REST_API_URL')}section-items/section/941`, {
+      statusCode: 200,
+      body: []
+    }).as('get-accordion-items')
+
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-10 > .MuiFormControl-root > .MuiInputBase-root > #outlined-textarea').should('be.visible');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root > [data-testid="AddIcon"]').should('be.visible');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root > [data-testid="AddIcon"] > path').click();
 
-    cy.wait(500);
+    cy.wait(250);
     cy.wait('@add-accordion').should(({ request, response }) => {
       expect(response.body).to.have.property('heading', 'Add an accordion, e.g., Phase 1');
       expect(response.body).to.have.property('course_content', 814);
     });
+    cy.wait(250);
+    cy.wait('@get-accordion-items');
 
 
-    cy.intercept('GET', `${Cypress.env('REST_API_URL')}/section/941/course-content`, {
+    cy.intercept('GET', `${Cypress.env('REST_API_URL')}section/941/course-content`, {
       statusCode: 200,
       body: {
         "id": 941,
@@ -250,7 +257,7 @@ describe('Create Course Route', () => {
         "course_content": 814
       }
     }).as('get-section-941');
-      cy.intercept('POST', `${Cypress.env('REST_API_URL')}sections/course-content/814`, {
+    cy.intercept('POST', `${Cypress.env('REST_API_URL')}sections/course-content/814`, {
       statusCode: 400,
       body: {
         "heading": [
@@ -277,18 +284,24 @@ describe('Create Course Route', () => {
         "course_content": 814
       }
     }).as('add-accordion-2');
+    cy.intercept('GET', `${Cypress.env('REST_API_URL')}section-items/section/942`, {
+      statusCode: 200,
+      body: []
+    }).as('get-accordion-items-2')
     cy.get('[data-cy="Add Accordion Input"]').type('Testing Inputs for Accordion / Section Heading');
     // // /* ==== Generated with Cypress Studio ==== */
     cy.get('[data-cy="Add Accordion Button"] > [data-testid="AddIcon"]').click();
 
 
-    cy.wait(500);
+    cy.wait(250);
     cy.wait('@add-accordion-2').should(({ request, response }) => {
       expect(response.body).to.have.property('heading');
       expect(response.body).to.have.property('course_content');
     });
+    cy.wait(250);
+    cy.wait('@get-accordion-items-2');
 
-    cy.intercept('PUT', `${Cypress.env('REST_API_URL')}section/941/course-content`, {
+    cy.intercept('PATCH', `${Cypress.env('REST_API_URL')}section/941/course-content`, {
       statusCode: 200,
       body: {
         "id": 941,
@@ -394,6 +407,7 @@ describe('Create Course Route', () => {
       "heading": "Testing PUT method for item 2",
       "section": 941
     }).as('edit-accordion-item-2');
+
     cy.get('[data-cy="accordionItem edit-730"]').click();
     cy.get('#standard-multiline-flexible').click();
     cy.get('#standard-multiline-flexible').clear();
@@ -404,7 +418,6 @@ describe('Create Course Route', () => {
       expect(response.body).to.have.property('heading', 'Testing PUT method for item 2');
       expect(response.body).to.have.property('description');
       expect(response.body).to.have.property('section');
-
     })
 
 
@@ -427,6 +440,11 @@ describe('Create Course Route', () => {
           "course_content": 814
         }
       }).as('add-accordion-spam');
+      cy.intercept('GET', `${Cypress.env('REST_API_URL')}section-items/section/${943 + i}`, {
+        statusCode: 200,
+        body: []
+      }).as(`get-accordion-items-${i}`)
+
 
       cy.get('[data-cy="Add Accordion Input"]').type(`Accordion, Phase ${i}`);
       // // /* ==== Generated with Cypress Studio ==== */
@@ -434,7 +452,8 @@ describe('Create Course Route', () => {
 
       cy.wait('@add-accordion-spam').should(({ request, response }) => {
         expect(response.body).to.have.property('heading', `Accordion, Phase ${i}`);
-      })
+      });
+      cy.wait(`@get-accordion-items-${i}`)
 
     }
 
@@ -447,6 +466,15 @@ describe('Create Course Route', () => {
       cy.get(`:nth-child(${j}) > :nth-child(1) > :nth-child(1) > .MuiPaper-root > #panel1bh-header > .MuiAccordionSummary-expandIconWrapper > .MuiBox-root > :nth-child(2) > .MuiButton-icon > [data-testid="DeleteIcon"] > path`).click();
       j--;
     }
+    /* ==== Generated with Cypress Studio ==== */
+    cy.get('.css-517uf5 > .MuiBox-root > .MuiButtonBase-root').should('be.visible');
+    cy.get('.css-517uf5 > .MuiBox-root > .MuiButtonBase-root').click();
+    cy.get('#alert-dialog-description').should('be.visible');
+    cy.get('.MuiDialogActions-root > :nth-child(2)').should('be.enabled');
+    cy.get('.MuiDialogActions-root > :nth-child(2)').click();
+
+    cy.url().should('include', 'http://localhost:5173/');
+    /* ==== End Cypress Studio ==== */
   });
 
 
@@ -533,12 +561,17 @@ describe('Create Course Route', () => {
         "course_content": 814
       }
     }).as('get-section-941');
+    cy.intercept('GET', `${Cypress.env('REST_API_URL')}section-items/section/941`, {
+      statusCode: 200,
+      body: []
+    }).as('get-accordion-items');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-10 > .MuiFormControl-root > .MuiInputBase-root > #outlined-textarea').should('be.visible');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root > [data-testid="AddIcon"]').should('be.visible');
     cy.get('.css-1yjvs5a > .MuiGrid-container > .MuiGrid-grid-xs-2 > .MuiButtonBase-root > [data-testid="AddIcon"] > path').click();
 
     cy.wait(500);
     cy.wait('@add-accordion');
+    cy.wait('@get-accordion-items')
 
     cy.intercept('POST', `${Cypress.env('REST_API_URL')}sections/course-content/814`, {
       statusCode: 400,
@@ -559,8 +592,8 @@ describe('Create Course Route', () => {
         "heading": "Add an item, e.g., week 1-4: workout routine.",
         "section": 941
       }
-
     }).as('add-accordion-item-1');
+
     cy.get(':nth-child(2) > :nth-child(1) > :nth-child(1) > .MuiPaper-root > #panel1bh-header').click();
     cy.get(':nth-child(2) > :nth-child(1) > :nth-child(1) > .MuiPaper-root > .MuiCollapse-root > .MuiCollapse-wrapper > .MuiCollapse-wrapperInner > #panel1bh-content > .MuiAccordionDetails-root > .MuiBox-root > .MuiGrid-container > .MuiGrid-grid-xs-2 > [data-cy="Add Accordion Item"] > [data-testid="AddIcon"]').click();
 
@@ -572,7 +605,8 @@ describe('Create Course Route', () => {
       expect(response.body).to.have.property('heading');
       expect(response.body).to.have.property('section');
 
-    })
+    });
+
     cy.intercept('POST', `${Cypress.env('REST_API_URL')}section-items/section/941`, {
       statusCode: 201,
       body: {
@@ -584,6 +618,7 @@ describe('Create Course Route', () => {
         "section": 941
       }
     }).as('add-accordion-item-2');
+
 
     cy.get(':nth-child(2) > :nth-child(1) > :nth-child(1) > .MuiPaper-root > .MuiCollapse-root > .MuiCollapse-wrapper > .MuiCollapse-wrapperInner > #panel1bh-content > .MuiAccordionDetails-root > .MuiBox-root > .MuiGrid-container > .MuiGrid-grid-xs-2 > [data-cy="Add Accordion Item"] > [data-testid="AddIcon"]').click();
 
@@ -732,7 +767,7 @@ describe('Create Course Route', () => {
 
     cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"]').click();
     cy.get(':nth-child(3) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(1) > .MuiButtonBase-root').click();
-    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-root > .MuiDialogActions-root > .MuiButtonBase-root').click();
+    cy.get('[data-cy="correct-form-dialog-close"]').click();
     /* ==== End Cypress Studio ==== */
 
     for (let i = 0; i < 6; i++) {
@@ -832,7 +867,7 @@ describe('Create Course Route', () => {
     cy.wait(400);
     cy.wait('@edit-description-correct-form-workout');
     cy.get('.ql-editor > p').should('have.text', 'Okay testing new description for this correct workout form card');
-    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-elevation24 > .MuiDialogActions-root > .MuiButtonBase-root').click();
+    cy.get('[data-cy="correct-form-dialog-close"]').click();
     cy.get('[data-cy="Workout Card"] > .MuiButton-outlinedPrimary').click().selectFile('src/static/images/thirdBG.png', { force: true });
     cy.get('[data-cy="Add icon"] > [data-testid="AddIcon"]').click();
     cy.intercept('PATCH', `${Cypress.env('REST_API_URL')}workout/470/section-item`, {
@@ -858,8 +893,8 @@ describe('Create Course Route', () => {
 
     cy.get(':nth-child(2) > [data-cy="Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').should('have.text', 'TEST NEW WORKOUT');
     cy.get(':nth-child(2) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(1) > .MuiButtonBase-root').click();
-    cy.get(':nth-child(1) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(2) > .MuiButtonBase-root').click({force: true});
-    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-root > .MuiDialogActions-root > .MuiButtonBase-root').click({force: true});
+    cy.get(':nth-child(1) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(2) > .MuiButtonBase-root').click({ force: true });
+    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-root > .MuiDialogActions-root > .MuiButtonBase-root').click({ force: true });
     for (let i = 0; i < 6; i++) {
       cy.intercept('POST', `${Cypress.env('REST_API_URL')}wrong-exercises/course/workout/465`, {
         statusCode: 201,

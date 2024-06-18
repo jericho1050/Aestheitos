@@ -20,7 +20,6 @@ export default function PreviewCourseTextField({ isError, setIsError, courseCont
                     </Typography>
                 </ThemeProvider>
             </Grid>
-            <br />
             <Grid item container justifyContent={'center'} width="100%">
                 <Box className="course-lecture-container" sx={{ width: '100%' }} component={'div'}>
                     {/* course preview textarea input */}

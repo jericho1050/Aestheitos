@@ -136,7 +136,7 @@ export default function CorrectFormDialog({ errorState, eventHandlers, workoutId
                 </Grid>
 
                 <DialogActions>
-                    <Button autoFocus onClick={handleClose}>
+                    <Button data-cy="correct-form-dialog-close" autoFocus onClick={handleClose}>
                         Close
                     </Button>
                     {/* <Button onClick={handleClose} autoFocus>

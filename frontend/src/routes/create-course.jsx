@@ -569,7 +569,7 @@ export default function CreateCourse() {
                                 <Grid mt={'2%'} container direction={'column'} alignItems={'center'} spacing={3} >
                                     <Grid item width={{ xs: '100%', md: '69%' }}>
                                         <ThemeProvider theme={theme} >
-                                            <Typography variant="h3" fontWeight={'bold'}>
+                                            <Typography variant="h4" fontWeight={'bold'}>
                                                 Course content
                                             </Typography>
                                         </ThemeProvider>
