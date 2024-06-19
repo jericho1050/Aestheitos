@@ -41,8 +41,8 @@ function WorkoutMediaCorrectFormCard({ correctForm, open }) {
 }
 
 export default function CorrectFormDialog({ correctFormExercises, open, setOpen }) {
-    const theme2 = useTheme();
-    const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+    // const theme2 = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleClose = () => {
         setOpen(false);

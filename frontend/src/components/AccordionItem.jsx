@@ -29,8 +29,8 @@ export function ResponsiveDialog({ actionData, immerAtom, itemId, onClick, onCha
     const [heading, setHeading] = React.useState(children);
     // The `lecture` and `description` state variable holds the *first* value of `accordionItem.lecture` for lecture and `accordItem.description` for description.
     // Further changes to both `accordionItem` prop are ignored.
-    const [lecture, setLecture] = React.useState(accordionItem.lecture || '');
-    const [description, setDescription] = React.useState(accordionItem.description || '');
+    const [lecture, setLecture] = React.useState(accordionItem?.lecture || '');
+    const [description, setDescription] = React.useState(accordionItem?.description || '');
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
     let accordionItemHeadingContent;

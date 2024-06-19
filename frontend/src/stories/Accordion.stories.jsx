@@ -78,6 +78,7 @@ const meta = {
 
 export default meta;
 
+/** Accordion component in the course route, course content section */
 export const Default = {
   args: {
     handleChange: fn(),
