@@ -154,7 +154,7 @@ export function Index() {
                 </Box>
                 <Form>
                     <Box display={'flex'} justifyContent={'center'} mt={4}>
-                        <Pagination color="primary" size="large" count={counter} onChange={(event, page) => {
+                        <Pagination data-cy="index-pagination" color="primary" size="large" count={counter} onChange={(event, page) => {
                             submit(`page=${page}`);
                             const element = document.getElementById('courses');
                             window.scrollTo({

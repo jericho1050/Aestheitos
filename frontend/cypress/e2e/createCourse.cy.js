@@ -14,7 +14,10 @@ it('Unathenticated user is redirected to sigin route', () => {
 
 describe('Create Course Route', () => {
   beforeEach(() => {
-    cy.setToken(); // intercepts URL
+    cy.setToken().then(()=> {// intercepts URL then sets the cookie with the jwt
+      cy.setCookie('refresh', `${Cypress.env('REFRESH_TOKEN_TEST')}`);
+      cy.setCookie('access', `${Cypress.env('ACCESS_TOKEN_TEST')}`);
+    }); 
     cy.login('test', '123');
     cy.wait('@validateJWTToken')
     cy.get('.css-1t6c9ts > :nth-child(3)').should('be.visible');
