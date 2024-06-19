@@ -211,15 +211,19 @@ function ControlledAccordions({ activeStep, courseContentId }) {
             else if (actionData.section.intent === 'createAccordionItem') {
                 updateAccordions(draft => {
                     const accordion = draft.find(accordion => accordion.id === actionData.section.id);
-                    accordion.items.push(actionData.section.items[0]);
+                    accordion?.items.push(actionData.section.items[0]);
                 });
             }
             else if (actionData.section.intent === 'updateAccordionItem') {
                 updateAccordions(draft => {
                     const accordion = draft.find(accordion => accordion.id === actionData.section.id);
-                    const accordionItemIndex = accordion.items.findIndex(item => item.id === actionData.section.items[0].id);
-                    const nextAccordionItem = actionData.section.items[0];
-                    accordion.items[accordionItemIndex] = nextAccordionItem;
+                    if (accordion) {
+                      const accordionItemIndex = accordion.items.findIndex(
+                        (item) => item.id === actionData.section.items[0].id
+                      );
+                      const nextAccordionItem = actionData.section.items[0];
+                      accordion.items[accordionItemIndex] = nextAccordionItem;
+                    }
                 });
             }
 

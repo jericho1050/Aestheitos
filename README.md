@@ -111,6 +111,9 @@ The Django Rest Framework makes it easier for us to design an API for CRUD (Crea
 ```None
 learn
 ├── __pycache__
+├── management
+|  ├── __pycache
+|  ├── runapscheduler
 ├──  migrations
 ├──  __init__.py 
 ├──  .gitignore 
@@ -499,6 +502,21 @@ curl --location --request GET 'http://localhost:8000/courses?page=1&paginate=tru
     }
     //etc
 ]
+```
+
+</details>
+
+<details>
+<summary style="font-size: 2em;">Frontend</summary>
+
+We use Vite as our bundler for our single-page application.
+
+## React App
+
+Used [tree-cli](https://github.com/MrRaindrop/tree-cli?tab=readme-ov-file)
+
+```None
+ tree -l 3 -o out.txt --ignore 'dist, node_modules'
 ```
 
 </details>

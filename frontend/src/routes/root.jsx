@@ -49,6 +49,7 @@ export default function Root() {
         </Box>
 
       }
+    <Box component={'p'} pb={20} />
     <Footer />
     </>
   )

@@ -938,27 +938,20 @@ export function ResponsiveDialog({ accordionItem, children }) {
                   )}
                 </Grid>
               ) : (
-                <Grid justifyContent={{ xs: "center" }} item container>
+                <Grid justifyContent={'center'} item container>
                   <Grid item xs={10}>
-                    {getEmbedUrl(accordionItem.lecture) ? (
-                      <Box
-                        mt={4}
-                        className="course-lecture-container"
-                        component={"div"}
-                      >
-                        <iframe
-                          className="course-video-lecture"
-                          src={getEmbedUrl(accordionItem.lecture)}
-                          title="vide-lecture here"
-                          allowFullScreen
-                        ></iframe>
+                      <Box mt={4} className="course-preview-container" component={'div'}>
+                        <Plyr source={{
+                          type: 'video',
+                          sources: [
+                            {
+                              src: getEmbedUrl(accordionItem?.lecture) || '',
+                              provider: 'youtube',
+                            },
+                          ],
+                        }}
+                        />
                       </Box>
-                    ) : // <Box mt="5%" component="div" height={200} display={'flex'} justifyContent={'center'} alignItems={'center'} sx={{ border: '2px dotted black' }}>
-                      //     <Typography variant="body">
-                      //         No video
-                      //     </Typography>
-                      // </Box>
-                      null}
                   </Grid>
                   <Grid item mt={4} container xs={10}>
                     <Grid item>
@@ -1295,7 +1288,7 @@ export default function Course() {
           </Box>
           <br></br>
           <Divider />
-          <Container className="course-container">
+          <Container className="course-container" maxWidth={'sm'}>
             <Grid
               mt={"2%"}
               container
