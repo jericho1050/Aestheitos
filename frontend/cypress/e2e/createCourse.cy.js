@@ -894,7 +894,7 @@ describe('Create Course Route', () => {
     cy.get(':nth-child(2) > [data-cy="Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').should('have.text', 'TEST NEW WORKOUT');
     cy.get(':nth-child(2) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(1) > .MuiButtonBase-root').click();
     cy.get(':nth-child(1) > [data-cy="Workout Card"] > .MuiCardActions-root > .MuiGrid-container > :nth-child(2) > .MuiButtonBase-root').click({ force: true });
-    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-root > .MuiDialogActions-root > .MuiButtonBase-root').click({ force: true });
+    // cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-root > .MuiDialogActions-root > .MuiButtonBase-root').click({ force: true });
     for (let i = 0; i < 6; i++) {
       cy.intercept('POST', `${Cypress.env('REST_API_URL')}wrong-exercises/course/workout/465`, {
         statusCode: 201,
@@ -952,7 +952,7 @@ describe('Create Course Route', () => {
     /* ==== Generated with Cypress Studio ==== */
     cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor > p').click();
     cy.get(':nth-child(2) > [data-cy="Wrong Form Workout Card"] > .MuiCardContent-root > .MuiBox-root > .quill > .ql-container > .ql-editor').should('have.text', 'testing the second wrong form workout card\'s textarea');
-    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-elevation24 > .MuiDialogActions-root > .MuiButtonBase-root').click();
+    cy.get(':nth-child(6) > .MuiDialog-container > .MuiPaper-elevation24 > .MuiDialogActions-root > .MuiButtonBase-root').click({ force: true});
     cy.get('.MuiDialogActions-root > .MuiButtonBase-root').click();
     cy.get('.css-517uf5 > .MuiBox-root > .MuiButtonBase-root').should('be.enabled');
     cy.get('.css-517uf5 > .MuiBox-root > .MuiButtonBase-root').click();
