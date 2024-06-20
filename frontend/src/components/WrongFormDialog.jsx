@@ -12,10 +12,6 @@ import DOMPurify from "dompurify";
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-const wrongForm2 = {
-    demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
-    description: "scapula not moving"
-}
 
 function WorkoutMediaWrongFormCard({ wrongForm, open }) {
     return (
@@ -43,8 +39,8 @@ function WorkoutMediaWrongFormCard({ wrongForm, open }) {
 
 
 export default function WrongFormDialog({ wrongFormExercises, open, setOpen }) {
-    const theme2 = useTheme();
-    const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleClose = () => {
         setOpen(false);
