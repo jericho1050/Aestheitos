@@ -11,3 +11,9 @@ services:
             - .:/usr/src/app
         ports:
             - "8000:8000"
+    server:
+        build: ./frontend
+        environment:
+            NODE_ENV: production
+        ports:
+            - 5173:5173            

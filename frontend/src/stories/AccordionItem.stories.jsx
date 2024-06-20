@@ -49,7 +49,7 @@ export const Default = {
 };
 
 
-// This is being rendered in the create-course route, where the accordion item component is visible when the accordion is expanded.
+// This is being rendered in the create-course and edit-course route, where the accordion item component is visible when the accordion is expanded.
 /** When you try to edit the heading you'll get this UI error */
 export const Error = {
   args: {

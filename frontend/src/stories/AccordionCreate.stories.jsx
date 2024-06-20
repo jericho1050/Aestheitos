@@ -11,7 +11,7 @@ const meta = {
 
 export default meta;
 
-/** Accordion component in the create-course route, when creating a course */
+/** Accordion component in the create-course route & edit-course route, when creating or editing a course */
 export const AccordionCreate = {
   render: ({ ...args }) => {
     const accordions = args.accordion;

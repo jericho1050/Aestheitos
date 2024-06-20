@@ -14,12 +14,13 @@ import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import demoGif2 from '../static/images/pushupVecs.gif';
 
+// This workoutMediaCard is for create-course and edit-course 
 export default function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChangeDescription, onClick, workout, open }) {
     const { accordionId, itemId } = ids;
     const [isOpenCorrect, setisOpenCorrect] = React.useState(false);
     const [isOpenWrong, setisOpenWrong] = React.useState(false);
     const theme = useTheme();
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
     const [isError, setIsError] = React.useState(false);
     const [, updateAccordions] = immerAtom
     // The `workoutDescription` state variable is similar to `lecture` and `description` in ResponsiveDialog
@@ -217,7 +218,7 @@ export default function WorkoutMediaCard({ ids, immerAtom, onChangeImage, onChan
     return (
         open &&
         <>
-            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 725 }, height: '100%', borderTop: `4px solid ${theme.palette.secondary.main}` }}>
+            <Card data-cy="Workout Card" sx={{ display: 'flex', flexDirection: 'column', maxWidth: { xs: 350, sm: 400 }, maxHeight: { xs: 700, md: 725 }, height: '100%', borderTop: `4px solid #FFC55C` }}>
                 <CardMedia
                     component="img"
                     sx={{ aspectRatio: 16 / 9 }}

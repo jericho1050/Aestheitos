@@ -11,7 +11,7 @@ const meta = {
 export default meta;
 
 /**  
-This is being rendered in the create-course route in the course content for creating accordions.
+This is being rendered in the create-course & edit-course route in the course content for creating accordions.
 */
 export const Default = {
   args: {

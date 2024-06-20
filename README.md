@@ -15,7 +15,7 @@ This project is an online learning platform dedicated to fitness and calisthenic
 
 Before I've started the implementation or coding of this project, I've first created my pseudocode, an outline, a class diagram for my models, watched some tutorials, read Django's Rest Framework (DRF), React and React-router documentation, etc. The main reason is that I wanted it to be interactive. Vite + React serves as the frontend, making this web app an SPA model. via communicating through the backend server with its rest endpoints, which is Django.
 
-In my outline i have my own **specifications** for my project, as follows:
+In my outline i have my own **specifications** (features) for my project, as follows:
 
 > I'll just keep it short, :D
 
@@ -81,6 +81,7 @@ Here's also my rough idea or flowchart of how a user might interact with my syst
 So to simplify the scribble above, it's actually just an MVC pattern. DRF is the controlller and the model, while our React app is the view in this case.
 
 ![MVC ARCHITECTURE PATTERN IMAGE](images/images/1700972779305.png)
+
 Lastly, this is the **NOT** final of my UI tree. This is just a plan that I had in mind; however, it changed when I read the documentation for the React router. My real implementation is very far from this:
 
 ![UI TREE of my Frontend that i've created in lucidchart](/images/images/Capstone%20UI%20TREE%20-%20hiearchy%20(React).jpeg)
@@ -409,7 +410,7 @@ urlpatterns = [
 
 ### `views.py`
 
-Last but not least, well, it's the main dish of our backend.
+Last but not least, well, it's the main dish of our backend, or what i mean is the controller.
 I've started coding with APIView, but I was repeating myself with the same operation for CRUD, and the code was very verbose, as it was very tedious to do.
 in which I've decided to refactor it and use generic views as they are perfect for the CRUD pattern and applying the DRY (Don't Repeat Yourself) principle. though some exceptions are the register, login, and logout.
 
@@ -519,4 +520,267 @@ Used [tree-cli](https://github.com/MrRaindrop/tree-cli?tab=readme-ov-file)
  tree -l 3 -o out.txt --ignore 'dist, node_modules'
 ```
 
+```None
+/Aestheitos/frontend
+├── README.md
+├── cypress
+|  ├── downloads
+|  ├── e2e
+|  |  ├── appBar.cy.js
+|  |  ├── course.cy.js
+|  |  ├── createCourse.cy.js
+|  |  ├── index.cy.js
+|  |  ├── signIn.cy.js
+|  |  └── signUp.cy.js
+|  ├── fixtures
+|  |  ├── example.json
+|  |  ├── profile.json
+|  |  └── user.json
+|  └── support
+|     ├── commands.js
+|     ├── component-index.html
+|     ├── component.js
+|     └── e2e.js
+├── cypress.config.js
+├── cypress.env.json
+├── index.html
+├── package-lock.json
+├── package.json
+├── src
+|  ├── atoms
+|  |  ├── accordionsAtom.jsx
+|  |  ├── isErrorAtom.jsx
+|  |  ├── profilePictureAtom.jsx
+|  |  ├── snackbarAtom.jsx
+|  |  ├── workoutDescriptionAtom.jsx
+|  |  └── workoutsAtom.jsx
+|  ├── components
+|  |  ├── Accordion.jsx
+|  |  ├── AccordionItem.jsx
+|  |  ├── AddAccordion.jsx
+|  |  ├── AddAccordionItem.jsx
+|  |  ├── Appbar.jsx
+|  |  ├── AreYouSureDialog.jsx
+|  |  ├── AuthenticationWall.jsx
+|  |  ├── Carousel.jsx
+|  |  ├── CorrectFormDialog.jsx
+|  |  ├── CourseCard.jsx
+|  |  ├── CourseTitleTextField.jsx
+|  |  ├── CreateCorrectFormDialog.jsx
+|  |  ├── CreateWrongFormDialog.jsx
+|  |  ├── CustomLinearProgress.jsx
+|  |  ├── DescriptionTextField.jsx
+|  |  ├── DifficultySelectForm.jsx
+|  |  ├── Footer.jsx
+|  |  ├── FormattedInput.jsx
+|  |  ├── InputFileUpload.jsx
+|  |  ├── LectureReadMeTextFields.jsx
+|  |  ├── OverviewTextField.jsx
+|  |  ├── PreviewCourseTextField.jsx
+|  |  ├── ProgressMobileStepper.jsx
+|  |  ├── SearchBar.jsx
+|  |  ├── Snackbar.jsx
+|  |  ├── WeeksTextField.jsx
+|  |  ├── WorkoutCard.jsx
+|  |  ├── WrongFormDialog.jsx
+|  |  ├── csrftoken.jsx
+|  |  └── protectedRoute.jsx
+|  ├── contexts
+|  |  ├── IsLoadingContext.jsx
+|  |  └── authContext.jsx
+|  ├── courses.js
+|  ├── divider.css
+|  ├── error-page.jsx
+|  ├── helper
+|  |  ├── atomFactory.jsx
+|  |  ├── determineIntent.js
+|  |  ├── getEmbedUrl.jsx
+|  |  ├── parseDateTime.jsx
+|  |  ├── persistJWT.jsx
+|  |  ├── quillModule.jsx
+|  |  ├── scrollToHashElement.jsx
+|  |  ├── truncateText.js
+|  |  ├── useRefreshToken.jsx
+|  |  └── verifySignature.js
+|  ├── index.css
+|  ├── main.jsx
+|  ├── routes
+|  |  ├── approve-course.jsx
+|  |  ├── blog.jsx
+|  |  ├── blogs.jsx
+|  |  ├── course.jsx
+|  |  ├── create-blog.jsx
+|  |  ├── create-course.jsx
+|  |  ├── destroy-blog.jsx
+|  |  ├── destroy-course.jsx
+|  |  ├── edit-blog.jsx
+|  |  ├── edit-course.jsx
+|  |  ├── enrolled.jsx
+|  |  ├── index.jsx
+|  |  ├── pending.jsx
+|  |  ├── privacy.jsx
+|  |  ├── profile.jsx
+|  |  ├── reject-course.jsx
+|  |  ├── root.jsx
+|  |  ├── signin.jsx
+|  |  ├── signup.jsx
+|  |  └── terms.jsx
+|  ├── static
+|  |  ├── editor
+|  |  └── images
+|  └── stories
+|     ├── Accordion.stories.jsx
+|     ├── AccordionCreate.stories.jsx
+|     ├── AccordionItem.stories.jsx
+|     ├── AddAccordion.stories.jsx
+|     ├── AddAccordionItem.stories.jsx
+|     ├── AreYouSureDialog.stories.jsx
+|     ├── AuthenticationWall.stories.jsx
+|     ├── Button.jsx
+|     ├── Button.stories.js
+|     ├── Carousel.stories.jsx
+|     ├── Configure.mdx
+|     ├── CorrectFormDialog.stories.jsx
+|     ├── CourseCard.stories.jsx
+|     ├── CourseTitleTextField.stories.jsx
+|     ├── CreateCorrectFormDialog.stories.jsx
+|     ├── CreateWrongFormDialog.stories.jsx
+|     ├── CustomLinearProgress.stories.jsx
+|     ├── DescriptionTextField.stories.jsx
+|     ├── DifficultySelectForm.stories.jsx
+|     ├── Footer.stories.jsx
+|     ├── FormattedInput.stories.jsx
+|     ├── Header.jsx
+|     ├── Header.stories.js
+|     ├── InputFileUpload.stories.jsx
+|     ├── LectureReadMeTextFields.stories.jsx
+|     ├── OverviewTextField.stories.jsx
+|     ├── Page.jsx
+|     ├── Page.stories.js
+|     ├── ProgressMobileStepper.stories.jsx
+|     ├── WeeksTextField.stories.jsx
+|     ├── WorkoutCard.stories.jsx
+|     ├── WrongFormDialog.stories.jsx
+|     ├── assets
+|     ├── button.css
+|     ├── header.css
+|     └── page.css
+└── vite.config.js
+
+directory: 1898 file: 5645
+
+ignored: directory (208)
+```
+
+## Components
+
+If you want a detailed and interactive comprehension of my components, I would recommend opening up the storybook (though I am being lazy about documenting the frontend).
+
+Go  to the frontend directory
+
+```node
+aestheitos % cd frontend
+```
+
+once you're in here
+
+```node
+frontend %
+```
+
+Then run this
+
+```node
+npm run storybook
+```
+
+### Note
+
+Since I'm using ReactQuill (and the package is still using a lower version of React), most of the time in the create-course and edit-course routes. It's kind of broken here in the storybook, so it doesn't look what I would expect.
+
+Some components are unavailable to be auto-docs generated, which is kinda of disappointing also because of some error preventing me to mount them.
+
+`null is not an object (evaluating 'theme.breakpoints')` this is because of the searchbar component
+
+so i would just list them here.
+
+```jsx
+Appbar.jsx
+```
+
+and
+
+```jsx
+SearchBar.jsx
+```
+
+## Routes
+
+### `main.jsx`
+
+In main.jsx, if you already have prior knowledge of how the React router works, then it's pretty much self-explanatory of what's going on.i would recommend reading the [react router's tutorial](https://reactrouter.com/en/main/start/tutorial)
+
+I've based my frontend's routing on React Router's tutorial, which I've pretty much found a nice read and am able to understand how this works.
+
+```jsx
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    loader: rootLoader,
+    action: rootAction,
+    children: [
+      {
+        errorElement: <ErrorPage />,
+        children: [
+          {
+            index: true,
+            element: <Index />,
+            loader: indexLoader,
+          },
+          {
+            path: "course/:courseId",
+            element: <Course />,
+            loader: courseLoader,
+            action: courseAction,
+          },
+          {
+            path: "profile/user/:userId",
+            element: <Profile />,
+            loader: profileLoader,
+          },
+          // existing codes here
+        ],
+      },
+      {
+        element: <ProectedRoute />,
+        errorElement: <ErrorPage />,
+        children: [
+          {
+            path: "course/create",
+            element: <CreateCourse />,
+            action: createCourseAction,
+          },
+          {
+            path: "course/:courseId/edit",
+            element: <EditCourse />,
+            loader: editCourseLoader,
+            action: editCourseAction,
+          },
+          // existing codes here
+        ]
+      }
+]);
+```
+
 </details>
+
+## Installation
+
+### with Docker ( option 1)
+
+
+
+
+

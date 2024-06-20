@@ -18,16 +18,12 @@ import ReactQuill from "react-quill";
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-const correctForm2 = {
-    demo: 'https://www.youtube.com/embed/IZMKe61144w',
-    description: " Aenean leo liguleget."
-}
 
 function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onChange, workoutId, correctForm, open }) {
     const {isError, setIsError} = errorState;
 
     const theme = useTheme();
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const [description, setDescription] = React.useState(correctForm.description || '');
 
     React.useEffect(() => {
@@ -83,8 +79,8 @@ function WorkoutMediaCorrectFormCard({ errorState, onChangeImage, onClick, onCha
 
 export default function CorrectFormDialog({ errorState, eventHandlers, workoutId, correctFormExercises, open, setOpen }) {
     const { handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard: onClick } = eventHandlers;
-    const theme2 = useTheme();
-    const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const [parent, enableAnimations] = useAutoAnimate();
 
 

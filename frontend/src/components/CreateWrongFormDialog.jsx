@@ -18,16 +18,10 @@ import { modulesCard } from "../helper/quillModule";
 let theme = createTheme()
 theme = responsiveFontSizes(theme)
 
-const wrongForm2 = {
-    demo: 'https://www.youtube.com/embed/IODxDxX7oi4',
-    description: "scapula not moving"
-}
-
 function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChange, wrongForm, workoutId, open }) {
     const { isError, setIsError } = errorState;
 
-    const theme = useTheme();
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
     const [description, setDescription] = React.useState(wrongForm.description || '');
     React.useEffect(() => {
         const handler = setTimeout(() => {
@@ -83,8 +77,8 @@ function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChang
 
 export default function WrongFormDialog({ errorState, eventHandlers, workoutId, wrongFormExercises, open, setOpen }) {
     const { handleImageUpload, handleDeleteCard, handleChangeDescription, handleAddCard: onClick } = eventHandlers;
-    const theme2 = useTheme();
-    const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
+
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const [parent, enableAnimations] = useAutoAnimate();
 
     const handleClose = () => {

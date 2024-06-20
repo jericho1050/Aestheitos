@@ -8,7 +8,7 @@ const meta = {
 
 export default meta;
 
-/** This is being rendered in the create-course route where you try to create a course entry.
+/** This is being rendered in the create-course & edit-course route where you try to create a course entry.
  */
 export const Default = {
   args: {
@@ -42,7 +42,7 @@ export const Default = {
     }
   },
 };
-/** This is being rendered in the create-course route, where you try to create a course entry without filling out the text field. and clicking next stepper*/
+/** This is being rendered in the create-course & edit-course route, where you try to create a course entry without filling out the text field. and clicking next stepper*/
 export const Error = {
   args: {
     isError: true,
