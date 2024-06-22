@@ -46,7 +46,7 @@ function WorkoutMediaWrongFormCard({ errorState, onChangeImage, onClick, onChang
             {isError && <Typography variant="small" sx={{ color: 'red', textAlign: 'center', mb: 1, mt: 1 }}>Something Happend.Please try again</Typography>}
 
             <CardContent>
-                <Box maxHeight={{ xs: 200, sm: 250 }} height={{ xs: 200, sm: 250 }} width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
+                <Box width={{ xs: 'inherit', sm: 'inherit' }} component={'div'}>
                     {/* workout description textarea input */}
                     <ReactQuill
                         modules={modulesCard}

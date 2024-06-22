@@ -9,11 +9,11 @@ I myself, who have trained and also made some mistakes for almost 4 years, wante
 ---
 <!-- markdownlint-disable MD033 -->
 <details>
-<summary style="font-size: 2em; font-weight: bold"> Distinctiveness and Complexity </summary>
+<summary style="font-size: 1.7em; font-weight: bold"> Distinctiveness and Complexity </summary>
 
 This project is an online learning platform dedicated to fitness and calisthenics. It allows users to enroll in training programs and courses created by verified users. Creating a course is never easy without a nice user interface.Each course includes a lecture, a training plan with workout demonstrations and a discussion or comment where users can interact with each other. The platform emphasizes community learning and engagement, making fitness education accessible and enjoyable for everyone. In addition, I've also implemented a blog where the admin or staff can create and post their own and let other users read the published blog. Of course, it should be easy to create a blog, in which I've integrated a WYSIWYG (What You See Is What You Get) for a nice UI/UX, which, in my opinion, is the reason why it is ***distinct*** from other apps.
 
-Before I've started the implementation or coding of this project, I've first created my pseudocode, an outline, a class diagram for my models, watched some tutorials, read Django's Rest Framework (DRF), React and React-router documentation, etc. The main reason is that I wanted it to be interactive. Vite + React serves as the frontend, making this web app an SPA model. via communicating through the backend server with its rest endpoints, which is Django.
+Before I've started the implementation or coding of this project, I've first created my pseudocode, an outline, a class diagram for my models, watched some tutorials, read Django's Rest Framework (DRF), React and React-router documentation, etc. The main reason is that I wanted it to be interactive. Vite + React serves as the frontend, making this web app a Single Page. via communicating through the backend server with its rest endpoints, which is Django.
 
 In my outline i have my own **specifications** (features) for my project, as follows:
 
@@ -103,7 +103,7 @@ You can find the [REST API documentation here](https://app.swaggerhub.com/apis-d
 <!-- markdownlint-disable MD033 -->
 <details>
 
-<summary style="font-size: 2em"> Backend </summary>
+<summary style="font-size: 1.7em"> Backend </summary>
 
 The Django Rest Framework makes it easier for us to design an API for CRUD (Create, Read, Update and Delete) operations.
 
@@ -508,9 +508,9 @@ curl --location --request GET 'http://localhost:8000/courses?page=1&paginate=tru
 </details>
 
 <details>
-<summary style="font-size: 2em;">Frontend</summary>
+<summary style="font-size: 1.7em;">Frontend</summary>
 
-We use Vite as our bundler for our single-page application.
+We use Vite as our frontend tool for our single-page application.
 
 ## React App
 
@@ -691,7 +691,7 @@ frontend %
 Then run this
 
 ```node
-npm run storybook
+frontend % npm run storybook
 ```
 
 ### Note
@@ -778,9 +778,231 @@ const router = createBrowserRouter([
 
 ## Installation
 
-### with Docker ( option 1)
+1.Clone the repo with
 
+```bash
+git clone https://github.com/jericho1050/Aestheitos.git
+```
 
+2.Change to the aestheitos directory, then Create Your own Virtual Enviroment
 
+```bash
+aestheitos % venv env
+```
 
+or
 
+```bash
+aestheitos % python -m env
+```
+
+3.Activate env
+
+```bash
+aestheitos %  source env/bin/activate
+```
+
+4.download the dependencies in requirements.txt
+
+```bash
+(env) aestheitos % pip install -r requirements.txt
+```
+
+5.makemigrations and migrate, to apply and create the **sqlite3.db** (if you want postgresql then go to the PostgreSQL section)
+
+```bash
+(env) aestheitos % python manage.py makemigrations learn
+(env) aestheitos % python manage.py migrate
+```
+
+6.Run the django local dev server
+
+```bash
+(env) aestheitos % python manage.py runserver
+```
+
+7.Change to the frontend directory, then create a `.env` file
+
+your file structure should look like this
+
+/Aestheitos/frontend
+├── README.md
+├── cypress
+├── cypress.config.js
+├── cypress.env.json
+├── index.html
+├── package-lock.json
+├── package.json
+├── src
+├── .env
+└── vite.config.js
+
+in `.env` copy this code
+
+```python
+VITE_API_URL = 'http://localhost:8000/' # use this in development to persist the set Cookies i.e JWT 
+
+# VITE_API_URL = 'http://127.0.0.1:8000/' # please use this for testing as localhost cause some CORS error
+```
+
+8.install the necessary dependencies for this React Vite app
+
+```npm
+frontend % npm install --legacy-peer-deps
+```
+
+9.Then you can run the vite local dev server
+
+```npm
+frontend % npm run dev
+```
+
+## PostgreSQL Set Up  (MacOS)
+
+If you want to use PostgreSQL and also run the jobs scheduler (CRON), you need to install it on your local machine and run it on the background or use Docker.
+
+option 2 requires [homebrew](https://brew.sh) (a package manager)
+
+### Option 1 (Docker)
+
+Make sure you have Docker Desktop installed and is opened
+
+```yaml
+(env) aestheitos % docker-compose build
+```
+
+```yaml
+(env) aestheitos % docker-compose up
+```
+
+That's it. Now you can go to step 7 in the installation section.
+
+### Option 2 (Manual)
+
+[reference stackoverflow](https://stackoverflow.com/a/70941627/23952603)
+
+- in your terminal deactivate the virtual enviroment first
+  
+```bash
+(env) aestheitos % deactivate
+```
+
+- in the base directory, create a enviroment variable ( `.env` file )
+
+so it would look like this
+
+├── Aestheitos
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── db.sqlite3
+├── docker-compose.yml
+├── .env
+├── frontend
+├── images
+├── learn
+├── manage.py
+├── requirements.txt
+
+- inside the `.env` file paste this
+
+```python
+POSTGRES_DB="mydatabase"
+POSTGRES_USER="jericho1050"
+POSTGRES_PASSWORD="yourpassword"
+```
+
+- also in `settings.py` in Aestheitos directory. Follow this code here
+  
+```python
+# If you're interested in using PostgreSQL then use this
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv('POSTGRES_DB'),
+        "USER": os.getenv('POSTGRES_USER'),
+        "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    }
+}
+
+# if you're interested in using Sqlite3 then use this
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+```
+
+- Download postgrew with homebrew
+
+```bash
+aestheitos % brew install postgresql@16
+```
+
+- after installation
+  
+```bash
+If you need to have postgresql@16 first in your PATH, run:
+  echo 'export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"' >> ~/.zshrc
+```
+
+- then create first the database
+
+```bash
+aestheitos % createdb mydatabase
+```
+
+- then create a role, i.e., the user.
+
+```bash
+aestheitos % createuser -s youruser 
+```
+
+- then try to restart postgre service
+  
+```bash
+aestheitos % brew services restart postgresql
+```
+
+- you can now activate the virutal enviroment and start the django server
+
+```bash
+(env) aestheitos % python manage.py runserver
+```
+
+- In a new terminal, you can also use the job scheduler (CRON). The purpose of this is to declutter draft courses that the user didn't submit for a reasonable number of days, as well as courses that were rejected. so those will be deleted.
+
+```bash
+(env) aestheitos % python manage.py runapscheduler
+```
+
+---
+
+## Testing
+
+### Django test
+
+```bash
+(env) aestheitos % python manage.py test
+```
+
+### Cypress
+
+Nah, I didn't really test my components, nor did I do any unit testing for frontend. And also, the e2e testing is not complete because I got tired and it's running slowly. It's high fidelity for real
+
+before running the Cypress e2e test use the 127.0.0.1 as host address in `.env` file.
+
+Also, create some mockup lists of courses and fill them up as much as you can.
+
+``` python
+VITE_API_URL = 'http://127.0.0.1:8000/' # please use this for testing as localhost cause some CORS error
+```
+
+then open up the cypress
+
+```bash
+frontend % npm run cypress:open
+```

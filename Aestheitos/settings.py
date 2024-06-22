@@ -107,17 +107,19 @@ WSGI_APPLICATION = "Aestheitos.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# If you're interested in using PostgreSQL then use this
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql",
-#         # "NAME": "mydatabase",
-#         # "USER": "jericho1050",
+#         "NAME": os.getenv('POSTGRES_DB'),
+#         "USER": os.getenv('POSTGRES_USER'),
 #         "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
-#         "HOST": "db",
+#         "HOST": "127.0.0.1",
 #         "PORT": "5432",
 #     }
 # }
 
+# if you're interested in using Sqlite3 then use this
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
