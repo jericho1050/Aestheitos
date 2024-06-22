@@ -224,7 +224,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
                     .get_queryset()
                     .filter(status="A")
                     .annotate(average_rating=Avg("course_rating__rating"))
-                    .order_by("average_rating", "-course_created")
+                    .order_by("-average_rating", "-course_updated", "-course_created")
                 )
             else:
                 # If scope has a user ID, then return the user's created courses as a query set.
@@ -233,7 +233,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
                     .get_queryset()
                     .filter(status="A", created_by=scope)
                     .annotate(average_rating=Avg("course_rating__rating"))
-                    .order_by("average_rating", "-course_created")
+                    .order_by("-average_rating", "-course_updated", "-course_created")
                 )
 
             return queryset

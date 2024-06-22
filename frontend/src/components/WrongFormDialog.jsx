@@ -29,7 +29,7 @@ function WorkoutMediaWrongFormCard({ wrongForm, open }) {
 
             <CardContent sx={{ padding: '1em' }} >
                 <Container sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }} >
-                    <Box className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrongForm.description) }} />
+                    <Box width="100%" className="html-content" component="div" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrongForm.description) }} />
                 </Container>
             </CardContent>
 
