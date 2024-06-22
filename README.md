@@ -778,16 +778,16 @@ const router = createBrowserRouter([
 
 ## Installation
 
-1.Clone the repo with
+1. Clone the repo with
 
 ```bash
 git clone https://github.com/jericho1050/Aestheitos.git
 ```
 
-2.Change to the aestheitos directory, then Create Your own Virtual Enviroment
+2. Change to the aestheitos directory, then Create Your own Virtual Enviroment
 
 ```bash
-aestheitos % venv env
+aestheitos % virtualenv env
 ```
 
 or
@@ -796,32 +796,32 @@ or
 aestheitos % python -m env
 ```
 
-3.Activate env
+3. Activate env
 
 ```bash
 aestheitos %  source env/bin/activate
 ```
 
-4.download the dependencies in requirements.txt
+4. download the dependencies in requirements.txt
 
 ```bash
 (env) aestheitos % pip install -r requirements.txt
 ```
 
-5.makemigrations and migrate, to apply and create the **sqlite3.db** (if you want postgresql then go to the PostgreSQL section)
+5. makemigrations and migrate, to apply and create the **sqlite3.db** (if you want postgresql then go to the PostgreSQL section)
 
 ```bash
 (env) aestheitos % python manage.py makemigrations learn
 (env) aestheitos % python manage.py migrate
 ```
 
-6.Run the django local dev server
+6. Run the django local dev server
 
 ```bash
 (env) aestheitos % python manage.py runserver
 ```
 
-7.Change to the frontend directory, then create a `.env` file
+7. Change to the frontend directory, then create a `.env` file
 
 your file structure should look like this
 
@@ -845,13 +845,13 @@ VITE_API_URL = 'http://localhost:8000/' # use this in development to persist the
 # VITE_API_URL = 'http://127.0.0.1:8000/' # please use this for testing as localhost cause some CORS error
 ```
 
-8.install the necessary dependencies for this React Vite app
+8. install the necessary dependencies for this React Vite app
 
 ```npm
 frontend % npm install --legacy-peer-deps
 ```
 
-9.Then you can run the vite local dev server
+9. Then you can run the vite local dev server
 
 ```npm
 frontend % npm run dev
