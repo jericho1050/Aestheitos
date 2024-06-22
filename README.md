@@ -808,7 +808,7 @@ aestheitos %  source env/bin/activate
 (env) aestheitos % pip install -r requirements.txt
 ```
 
-5.makemigrations and migrate, to apply and create the **sqlite3.db** (if you want postgresql then go to the PostgreSQL section)
+5.makemigrations and migrate, to apply and create the **sqlite3.db** (if you want postgresql and **docker** then go to the PostgreSQL section)
 
 ```bash
 (env) aestheitos % python manage.py makemigrations learn
@@ -891,6 +891,7 @@ That's it. Now you can go to step 7 in the installation section.
 
 so it would look like this
 
+```bash
 ├── Aestheitos
 ├── Dockerfile
 ├── LICENSE
@@ -903,6 +904,7 @@ so it would look like this
 ├── learn
 ├── manage.py
 ├── requirements.txt
+```
 
 - inside the `.env` file paste this
 
