@@ -787,7 +787,7 @@ git clone https://github.com/jericho1050/Aestheitos.git
 2.Change to the aestheitos directory, then Create Your own Virtual Enviroment
 
 ```bash
-aestheitos % venv env
+aestheitos % virtualenv env
 ```
 
 or
