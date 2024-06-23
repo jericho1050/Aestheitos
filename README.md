@@ -825,6 +825,7 @@ aestheitos %  source env/bin/activate
 
 your file structure should look like this
 
+```bash
 /Aestheitos/frontend
 ├── README.md
 ├── cypress
@@ -836,6 +837,7 @@ your file structure should look like this
 ├── src
 ├── .env
 └── vite.config.js
+```
 
 in `.env` copy this code
 
@@ -1006,3 +1008,4 @@ then open up the cypress
 ```bash
 frontend % npm run cypress:open
 ```
+
