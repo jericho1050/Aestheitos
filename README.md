@@ -893,6 +893,7 @@ That's it. Now you can go to step 7 in the installation section.
 
 so it would look like this
 
+``` bash
 ├── Aestheitos
 ├── Dockerfile
 ├── LICENSE
@@ -905,6 +906,8 @@ so it would look like this
 ├── learn
 ├── manage.py
 ├── requirements.txt
+```
+
 
 - inside the `.env` file paste this
 
