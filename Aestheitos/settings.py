@@ -32,9 +32,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-@ttgo7^y1_=7%#-r#u+l*@smxgr=c$x#pb+i%5^jgj+a$5s1k8"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "localhost", "https://aestheitos-735ee07df6a7.herokuapp.com"]
 
 
 # Application definition
@@ -75,8 +75,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 # PROD SETTINGS
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 
 MIDDLEWARE = [
