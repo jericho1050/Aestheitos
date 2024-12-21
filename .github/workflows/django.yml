@@ -9,7 +9,7 @@ jobs:
         image: postgres
         env:
           POSTGRES_USER: jericho1050
-          POSTGRES_PASSWORD: ${{ secrets.PASSWORD }}
+          POSTGRES_PASSWORD: secret
           POSTGRES_DB: mydatabase
         ports:
           - 5432:5432
