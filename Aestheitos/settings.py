@@ -132,15 +132,6 @@ DATABASES = {
 # }
 
 
-# Decided to 'TEST' in sqlite3 because I don't know why my test cases are having assertion errors in postgreSQL.
-if "test" in sys.argv:
-    # Use SQLite for tests
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
 
 
 AUTH_USER_MODEL = "learn.User"
