@@ -80,14 +80,20 @@ function SearchInput() {
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery((theme) => theme.breakpoints.up('md'));
 
-  const { courses } = useLoaderData(); // this is the from the rootLoader
+  const { courses } = useLoaderData();
+
+  // Safe access to courses data
+  const validCourses = courses?.results || [];
+  const approvedCourses = Array.isArray(validCourses)
+    ? validCourses.filter((course) => course.status === 'A')
+    : [];
   return (
     <Search>
       <List sx={{ padding: 0 }}>
         <Autocomplete
           freeSolo
           disableClearable
-          options={courses.filter((course) => course.status === 'A')}
+          options={approvedCourses}
           getOptionLabel={(course) => course.title}
           renderInput={(params) => (
             <StyledTextField
