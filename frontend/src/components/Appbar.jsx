@@ -65,11 +65,28 @@ function ResponsiveAppBar() {
   const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
   const { user, courses } = useLoaderData(); // loader is in root.jsx
-  let userCourses;
+  // Initialize with empty array
+  let userCourses = [];
+
+  // Add debugging logs and safe checks
   if (courses) {
-    userCourses = courses.filter(
-      (course) => course.created_by === user.user_id && course.status !== 'P'
-    ); // just return THE user's or instructor's courses for notifcation purposes.
+    console.log('courses before filter:', courses); // Debug log
+
+    if (Array.isArray(courses)) {
+      try {
+        userCourses = courses.filter(
+          (course) =>
+            course.created_by === user.user_id && course.status !== 'P'
+        );
+        console.log('filtered courses:', userCourses); // Debug log
+      } catch (error) {
+        console.error('Error filtering courses:', error);
+        userCourses = []; // Fallback to empty array
+      }
+    } else {
+      console.error('courses is not an array:', typeof courses);
+      userCourses = [];
+    }
   }
   const profilePic = useAtomValue(profilePictureAtom || '');
   const [firstClick, setFirstClick] = React.useState(true);
