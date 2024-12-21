@@ -55,10 +55,14 @@ INSTALLED_APPS = [
     "django_apscheduler",
 ]
 
-CORS_ORIGIN_WHITELIST = ["http://localhost:5173"]
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:5173",
+    "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
+]
 # CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
 ]
 # CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
 # CSRF_COOKIE_HTTPONLY = True
