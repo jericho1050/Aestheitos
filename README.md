@@ -1004,5 +1004,4 @@ VITE_API_URL = 'http://127.0.0.1:8000/' # please use this for testing as localho
 then open up the cypress
 
 ```bash
-frontend % npm run cypress:open
-```
+frontend % npm run cypress:open```

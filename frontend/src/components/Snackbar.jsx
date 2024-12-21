@@ -8,27 +8,29 @@ import { snackbarReducerAtom } from '../atoms/snackbarAtom';
 export default function CustomizedSnackbar() {
   const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
 
-
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;
     }
     dispatch({
-        type: 'close'
-    })
-
+      type: 'close',
+    });
   };
 
   return (
     <div>
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleClose}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleClose}
+      >
         <Alert
           onClose={handleClose}
-          severity="success"
-          variant="filled"
+          severity='success'
+          variant='filled'
           sx={{ width: '100%' }}
         >
-            {snackbar.message}
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>

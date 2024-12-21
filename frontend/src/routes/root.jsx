@@ -1,14 +1,13 @@
-import { Outlet } from "react-router-dom";
-import ResponsiveAppBar from "../components/Appbar";
-import { useNavigation } from "react-router-dom";
-import persistJWT from "../helper/persistJWT";
-import useRefreshToken from "../helper/useRefreshToken";
-import { useContext } from "react";
-import { IsLoadingContext } from "../contexts/IsLoadingContext";
+import { Outlet } from 'react-router-dom';
+import ResponsiveAppBar from '../components/Appbar';
+import { useNavigation } from 'react-router-dom';
+import persistJWT from '../helper/persistJWT';
+import useRefreshToken from '../helper/useRefreshToken';
+import { useContext } from 'react';
+import { IsLoadingContext } from '../contexts/IsLoadingContext';
 import Box from '@mui/material/Box';
-import { getCourses, getUser, updateCourse } from "../courses";
-import Footer from "../components/Footer";
-
+import { getCourses, getUser, updateCourse } from '../courses';
+import Footer from '../components/Footer';
 
 export async function loader() {
   const user = await getUser();
@@ -21,7 +20,6 @@ export async function action({ request }) {
   const course = await updateCourse(formData.get('courseId'), formData);
 
   return { course };
-
 }
 
 export default function Root() {
@@ -35,22 +33,30 @@ export default function Root() {
     <>
       <ResponsiveAppBar />
 
-      {isLoading ? (<Box sx={{ my: '50vh', display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-        <progress value={null} />
-        <p>Loading...</p>
-      </Box>)
-        :
-        <Box id="detail"
-          className={
-            navigation.state === "loading" ? "loading" : ""
-          }
+      {isLoading ? (
+        <Box
+          sx={{
+            my: '50vh',
+            display: 'flex',
+            gap: 3,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+          }}
+        >
+          <progress value={null} />
+          <p>Loading...</p>
+        </Box>
+      ) : (
+        <Box
+          id='detail'
+          className={navigation.state === 'loading' ? 'loading' : ''}
         >
           <Outlet />
         </Box>
-
-      }
-    <Box component={'p'} pb={20} />
-    <Footer />
+      )}
+      <Box component={'p'} pb={20} />
+      <Footer />
     </>
-  )
+  );
 }

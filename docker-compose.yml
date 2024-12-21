@@ -17,4 +17,4 @@ services:
         ports:
             - "8000:8000"
 
-# local dev for frontend kinda hard to containerize so many errors
+# local dev for frontend kinda hard to containerize so many error

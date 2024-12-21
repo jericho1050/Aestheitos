@@ -23,18 +23,18 @@ import {
   Typography,
   createTheme,
   responsiveFontSizes,
-} from "@mui/material";
-import * as React from "react";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
-import image from "../static/images/noimg.png";
-import FormattedInputs from "../components/FormattedInput";
-import AddAccordion from "../components/AddAccordion";
-import InputFileUpload from "../components/InputFileUpload";
-import { AccordionSectionCreate } from "../components/Accordion";
-import { TransitionGroup } from "react-transition-group";
-import Collapse from "@mui/material/Collapse";
-import ProgressMobileStepper from "../components/ProgressMobileStepper";
+} from '@mui/material';
+import * as React from 'react';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import image from '../static/images/noimg.png';
+import FormattedInputs from '../components/FormattedInput';
+import AddAccordion from '../components/AddAccordion';
+import InputFileUpload from '../components/InputFileUpload';
+import { AccordionSectionCreate } from '../components/Accordion';
+import { TransitionGroup } from 'react-transition-group';
+import Collapse from '@mui/material/Collapse';
+import ProgressMobileStepper from '../components/ProgressMobileStepper';
 import {
   createSection,
   createSectionItem,
@@ -55,27 +55,27 @@ import {
   updateSectionItem,
   updateWorkout,
   updateWrongExerciseForm,
-} from "../courses";
+} from '../courses';
 import {
   Form,
   useFetcher,
   useLoaderData,
   useNavigation,
-} from "react-router-dom";
-import { useAtom } from "jotai";
-import { useImmerAtom } from "jotai-immer";
-import { accordionsAtom } from "../atoms/accordionsAtom";
-import { isErrorAtom } from "../atoms/isErrorAtom";
-import "react-quill/dist/quill.snow.css";
-import { snackbarReducerAtom } from "../atoms/snackbarAtom";
-import { DoneAll } from "@mui/icons-material";
-import CustomizedSnackbar from "../components/Snackbar";
-import DifficultySelectForm from "../components/DifficultySelectForm";
-import WeeksTextField from "../components/WeeksTextField";
-import CourseTitleTextField from "../components/CourseTitleTextField";
-import DescriptionTextField from "../components/DescriptionTextField";
-import OverviewTextField from "../components/OverviewTextField";
-import PreviewCourseTextField from "../components/PreviewCourseTextField";
+} from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { useImmerAtom } from 'jotai-immer';
+import { accordionsAtom } from '../atoms/accordionsAtom';
+import { isErrorAtom } from '../atoms/isErrorAtom';
+import 'react-quill/dist/quill.snow.css';
+import { snackbarReducerAtom } from '../atoms/snackbarAtom';
+import { DoneAll } from '@mui/icons-material';
+import CustomizedSnackbar from '../components/Snackbar';
+import DifficultySelectForm from '../components/DifficultySelectForm';
+import WeeksTextField from '../components/WeeksTextField';
+import CourseTitleTextField from '../components/CourseTitleTextField';
+import DescriptionTextField from '../components/DescriptionTextField';
+import OverviewTextField from '../components/OverviewTextField';
+import PreviewCourseTextField from '../components/PreviewCourseTextField';
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
@@ -86,13 +86,13 @@ export async function action({ request }) {
   let course, courseContent, section, sectionItem, workouts;
   let sectionItems = [];
   let error = {};
-  let intent = formData.get("intent");
+  let intent = formData.get('intent');
 
-  switch (parseInt(formData.get("activeStep"))) {
+  switch (parseInt(formData.get('activeStep'))) {
     case 0:
       // update a course
-      if (intent === "update") {
-        course = await updateCourse(formData.get("courseId"), formData);
+      if (intent === 'update') {
+        course = await updateCourse(formData.get('courseId'), formData);
       }
       // return error if there's an error
       if (course?.statusCode) {
@@ -104,9 +104,9 @@ export async function action({ request }) {
       break;
     case 1:
       // create a course's overview
-      let courseId = formData.get("courseId");
+      let courseId = formData.get('courseId');
       // update a course's overview
-      if (intent === "update") {
+      if (intent === 'update') {
         courseContent = await updateCourseContent(courseId, formData);
       }
       if (courseContent?.statusCode) {
@@ -118,11 +118,11 @@ export async function action({ request }) {
       break;
     case 2:
       // create/update a section / accordion (course's content)
-      let sectionId = formData.get("sectionId");
-      let sectionItemId = formData.get("sectionItemId");
+      let sectionId = formData.get('sectionId');
+      let sectionItemId = formData.get('sectionItemId');
       switch (intent) {
-        case "createAccordion":
-          let courseContentId = formData.get("courseContentId");
+        case 'createAccordion':
+          let courseContentId = formData.get('courseContentId');
           section = await createSection(courseContentId, formData);
           sectionItems = await getSectionItems(section.id);
           if (section?.statusCode) {
@@ -133,7 +133,7 @@ export async function action({ request }) {
             }
           }
           break;
-        case "updateAccordion":
+        case 'updateAccordion':
           section = await updateSection(sectionId, formData);
           sectionItems = await getSectionItems(section.id);
           if (section?.statusCode) {
@@ -143,7 +143,7 @@ export async function action({ request }) {
             }
           }
           break;
-        case "deleteAccordion":
+        case 'deleteAccordion':
           section = await deleteSection(sectionId);
           if (section?.statusCode) {
             if (section.statusCode >= 400) {
@@ -152,7 +152,7 @@ export async function action({ request }) {
             }
           }
           break;
-        case "createAccordionItem":
+        case 'createAccordionItem':
           section = await getSection(sectionId);
           sectionItem = await createSectionItem(sectionId, formData);
           workouts = await getWorkouts(sectionItem.id);
@@ -166,7 +166,7 @@ export async function action({ request }) {
           sectionItem.workouts = workouts;
           sectionItems.push(sectionItem);
           break;
-        case "updateAccordionItem":
+        case 'updateAccordionItem':
           section = await getSection(sectionId);
           sectionItem = await updateSectionItem(sectionItemId, formData);
           workouts = await getWorkouts(sectionItemId);
@@ -179,7 +179,7 @@ export async function action({ request }) {
           sectionItem.workouts = workouts;
           sectionItems.push(sectionItem);
           break;
-        case "deleteAccordionItem":
+        case 'deleteAccordionItem':
           sectionItem = await deleteSectionItem(sectionItemId);
           if (sectionItem?.statusCode) {
             if (sectionItem.statusCode >= 400) {
@@ -204,14 +204,14 @@ export async function loader({ params }) {
   // kind of  partially copy and paste from the route course's loader
   const course = await getCourse(params.courseId);
   if (!course) {
-    throw new Response("", {
+    throw new Response('', {
       status: course.status,
       statusText: course.message,
     });
   }
   const courseContent = await getCourseContent(course.id);
   if (!courseContent) {
-    throw new Response("", {
+    throw new Response('', {
       status: courseContent.status,
       statusText: courseContent.message,
     });
@@ -242,21 +242,21 @@ export async function loader({ params }) {
                         wrongForm: wrongFormExercises,
                       };
                     } catch (error) {
-                      console.error("Error getting exercises:", error);
+                      console.error('Error getting exercises:', error);
                       return workout;
                     }
                   })
                 );
                 return { ...item, workouts: workoutExercises };
               } catch (error) {
-                console.error("Error getting workouts:", error);
+                console.error('Error getting workouts:', error);
                 return item;
               }
             })
           );
           return { ...section, items: itemWorkouts };
         } catch (error) {
-          console.error("Error getting section items:", error);
+          console.error('Error getting section items:', error);
           return section;
         }
       })
@@ -264,7 +264,7 @@ export async function loader({ params }) {
 
     return { course, courseContent, accordion };
   } catch (error) {
-    console.error("Error getting sections:", error);
+    console.error('Error getting sections:', error);
     return { course, courseContent };
   }
 }
@@ -289,12 +289,12 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     // that's why we use a useEffect for this matter.
 
     if (actionData?.section && actionData?.section?.intent) {
-      if (actionData.section.intent === "createAccordion") {
+      if (actionData.section.intent === 'createAccordion') {
         const { intent, ...rest } = actionData.section;
         updateAccordions((draft) => {
           draft.push(rest);
         });
-      } else if (actionData.section.intent === "updateAccordion") {
+      } else if (actionData.section.intent === 'updateAccordion') {
         updateAccordions((draft) => {
           const accordionIndex = draft.findIndex(
             (accordion) => accordion.id === actionData.section.id
@@ -302,14 +302,14 @@ function ControlledAccordions({ activeStep, courseContentId }) {
           const { intent, ...rest } = actionData.section;
           draft[accordionIndex] = rest;
         });
-      } else if (actionData.section.intent === "createAccordionItem") {
+      } else if (actionData.section.intent === 'createAccordionItem') {
         updateAccordions((draft) => {
           const accordion = draft.find(
             (accordion) => accordion.id === actionData.section.id
           );
           accordion.items.push(actionData.section.items[0]);
         });
-      } else if (actionData.section.intent === "updateAccordionItem") {
+      } else if (actionData.section.intent === 'updateAccordionItem') {
         updateAccordions((draft) => {
           const accordion = draft.find(
             (accordion) => accordion.id === actionData.section.id
@@ -335,10 +335,10 @@ function ControlledAccordions({ activeStep, courseContentId }) {
         heading: heading,
         activeStep: activeStep,
         sectionId: accordionId,
-        intent: "createAccordionItem",
+        intent: 'createAccordionItem',
       },
       {
-        method: "post",
+        method: 'post',
       }
     );
   }
@@ -352,17 +352,17 @@ function ControlledAccordions({ activeStep, courseContentId }) {
       activeStep: activeStep,
       sectionItemId: nextAccordionItem.id,
       sectionId: accordionId,
-      intent: "updateAccordionItem",
+      intent: 'updateAccordionItem',
     };
 
     if (nextAccordionItem.lecture) {
       data.lecture = nextAccordionItem.lecture;
     } else {
-      data.lecture = "";
+      data.lecture = '';
     }
 
     fetcher.submit(data, {
-      method: "post",
+      method: 'post',
     });
   }
 
@@ -373,10 +373,10 @@ function ControlledAccordions({ activeStep, courseContentId }) {
       {
         activeStep: activeStep,
         sectionItemId: accordionItemId,
-        intent: "deleteAccordionItem",
+        intent: 'deleteAccordionItem',
       },
       {
-        method: "post",
+        method: 'post',
       }
     );
     updateAccordions((draft) => {
@@ -398,10 +398,10 @@ function ControlledAccordions({ activeStep, courseContentId }) {
         heading: heading,
         activeStep: activeStep,
         courseContentId: courseContentId,
-        intent: "createAccordion",
+        intent: 'createAccordion',
       },
       {
-        method: "post",
+        method: 'post',
       }
     );
   }
@@ -414,10 +414,10 @@ function ControlledAccordions({ activeStep, courseContentId }) {
         heading: nextAccordion.heading,
         activeStep: activeStep,
         sectionId: nextAccordion.id,
-        intent: "updateAccordion",
+        intent: 'updateAccordion',
       },
       {
-        method: "post",
+        method: 'post',
       }
     );
   }
@@ -429,10 +429,10 @@ function ControlledAccordions({ activeStep, courseContentId }) {
       {
         activeStep: activeStep,
         sectionId: accordionId,
-        intent: "deleteAccordion",
+        intent: 'deleteAccordion',
       },
       {
-        method: "post",
+        method: 'post',
       }
     );
     updateAccordions((draft) => draft.filter((a) => a.id !== accordionId));
@@ -441,9 +441,9 @@ function ControlledAccordions({ activeStep, courseContentId }) {
     <>
       {/* Adds a new Accordion / Section  */}
       <AddAccordion actionData={actionData} onClick={handleAddAccordion} />
-      <Box sx={{ display: "block", ml: "auto", mr: "auto" }}>
+      <Box sx={{ display: 'block', ml: 'auto', mr: 'auto' }}>
         <ThemeProvider theme={theme}>
-          <Typography variant="small">
+          <Typography variant='small'>
             Note: The examples here are not part of your content.Please ignore
             them to avoid confusion.
           </Typography>
@@ -482,11 +482,11 @@ export default function EditCourse() {
     loader.courseContent
   );
   const theme2 = useTheme();
-  const isXsmallScreen = useMediaQuery(theme2.breakpoints.only("xs"));
+  const isXsmallScreen = useMediaQuery(theme2.breakpoints.only('xs'));
   const fetcher = useFetcher();
   const actionData = fetcher.data; // The returned data (Obj properties) from the loader or action is stored here. Once the data is set, it persists on the fetcher even through reloads and resubmissions. - ReactRouter
   const [isError, setIsError] = useAtom(isErrorAtom);
-  const [intent, setIntent] = React.useState("update");
+  const [intent, setIntent] = React.useState('update');
   const navigation = useNavigation();
   const [snackbar, dispatch] = useAtom(snackbarReducerAtom);
 
@@ -504,7 +504,7 @@ export default function EditCourse() {
       // im assuming this is somewhere 200 status code so we move on to the next step
       const nextActiveStep = activeStep + 1;
       setActiveStep(nextActiveStep); //  new activeStep is queued for next rerender that's why we use a variable 'nextActiveStep'
-      setIntent("update");
+      setIntent('update');
     } else if (
       actionData?.courseContent?.preview &&
       actionData?.courseContent?.overview &&
@@ -513,7 +513,7 @@ export default function EditCourse() {
       // returned value of previous action.
       // im assuming this is somewhere 200 status code so we move on to the next step
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-      setIntent("create");
+      setIntent('create');
     }
   }, [actionData]);
 
@@ -522,13 +522,13 @@ export default function EditCourse() {
     function checkFields() {
       if (activeStep === 0) {
         for (let key in course) {
-          if (key != "price" && (course[key] === "" || course[key] === null)) {
+          if (key != 'price' && (course[key] === '' || course[key] === null)) {
             return false;
           }
         }
       } else if (activeStep === 1) {
         for (let key in courseContent) {
-          if (courseContent[key] === "") {
+          if (courseContent[key] === '') {
             return false;
           }
         }
@@ -560,10 +560,10 @@ export default function EditCourse() {
   }
 
   React.useEffect(() => {
-    if (fetcher.state === "submitting") {
+    if (fetcher.state === 'submitting') {
       dispatch({
-        type: "submitted",
-        text: "Course Updated!",
+        type: 'submitted',
+        text: 'Course Updated!',
       });
     }
   }, [fetcher]);
@@ -572,10 +572,10 @@ export default function EditCourse() {
     <>
       <br></br>
       {activeStep === 0 ? (
-        <fetcher.Form method="put" encType="multipart/form-data" noValidate>
-          <input type="hidden" value={activeStep} name="activeStep" />
-          <input type="hidden" value={course.id} name="courseId" />
-          <Box m="3vw">
+        <fetcher.Form method='put' encType='multipart/form-data' noValidate>
+          <input type='hidden' value={activeStep} name='activeStep' />
+          <input type='hidden' value={course.id} name='courseId' />
+          <Box m='3vw'>
             <Container>
               <Grid container mb={4}>
                 <Grid item xs>
@@ -589,7 +589,7 @@ export default function EditCourse() {
               </Grid>
               <Grid
                 container
-                sx={{ justifyContent: { xs: "center", md: "flex-start" } }}
+                sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}
                 spacing={2}
               >
                 {/* Paper starts here */}
@@ -597,23 +597,23 @@ export default function EditCourse() {
                   <Paper
                     elevation={4}
                     sx={{
-                      height: { xs: "auto", md: isError ? 630 : 600 },
-                      width: "auto",
+                      height: { xs: 'auto', md: isError ? 630 : 600 },
+                      width: 'auto',
                       maxWidth: { md: 450 },
-                      mb: "5%",
+                      mb: '5%',
                     }}
                   >
-                    <Grid item justifySelf={"center"}>
+                    <Grid item justifySelf={'center'}>
                       <Container
-                        sx={{ padding: "4%", maxWidth: { xs: 700, md: 400 } }}
-                        component="div"
+                        sx={{ padding: '4%', maxWidth: { xs: 700, md: 400 } }}
+                        component='div'
                       >
                         <img
                           src={previewImage}
-                          className="course-thumbnail"
+                          className='course-thumbnail'
                           style={{
-                            objectFit: !course.thumbnail ? "fill" : "cover",
-                            border: "1px dashed black",
+                            objectFit: !course.thumbnail ? 'fill' : 'cover',
+                            border: '1px dashed black',
                           }}
                           onError={(e) => {
                             e.target.onerror = null;
@@ -625,41 +625,41 @@ export default function EditCourse() {
                     <Grid
                       item
                       container
-                      wrap="nowrap"
-                      alignItems={"center"}
-                      direction="column"
+                      wrap='nowrap'
+                      alignItems={'center'}
+                      direction='column'
                       spacing={2}
                     >
                       <Grid item xs>
                         {/* Uploading  image file button  here */}
                         <InputFileUpload
                           thumbnail={course.thumbnail}
-                          name="thumbnail"
-                          text="Image"
+                          name='thumbnail'
+                          text='Image'
                           onChange={handleImageUpload}
                         />
                       </Grid>
-                      <Grid item xs lineHeight={"1.3em"}>
+                      <Grid item xs lineHeight={'1.3em'}>
                         {isError &&
                           actionData?.message && ( // this is equivalent to saying if there's an error and actionData returns an error message
                             <>
                               {Object.entries(
                                 JSON.parse(actionData.message)
                               ).map(([key, value]) => (
-                                <Box key={key} component="div" p={"0 1.5em"}>
+                                <Box key={key} component='div' p={'0 1.5em'}>
                                   <Typography
                                     key={key}
-                                    variant="small"
-                                    sx={{ color: "red", textAlign: "left" }}
+                                    variant='small'
+                                    sx={{ color: 'red', textAlign: 'left' }}
                                   >
-                                    {key === "thumbnail" ||
-                                    key === "difficulty" ||
-                                    key === "price" ||
-                                    key === "weeks"
+                                    {key === 'thumbnail' ||
+                                    key === 'difficulty' ||
+                                    key === 'price' ||
+                                    key === 'weeks'
                                       ? `${key}: ${value[0]}`
-                                      : key === "detail"
-                                      ? `${value}`
-                                      : null}
+                                      : key === 'detail'
+                                        ? `${value}`
+                                        : null}
                                   </Typography>
                                 </Box>
                               ))}
@@ -701,8 +701,8 @@ export default function EditCourse() {
                   sm={12}
                   md
                   container
-                  wrap="nowrap"
-                  direction="column"
+                  wrap='nowrap'
+                  direction='column'
                 >
                   <Grid item xs>
                     {/* Course title textarea input */}
@@ -732,11 +732,11 @@ export default function EditCourse() {
         </fetcher.Form>
       ) : /* title  & description ends here */
       activeStep === 1 ? (
-        <fetcher.Form method="put" encType="multipart/form-data" noValidate>
+        <fetcher.Form method='put' encType='multipart/form-data' noValidate>
           <CustomizedSnackbar />
-          <TextField type="hidden" value={activeStep} name="activeStep" />
-          <TextField type="hidden" value={course.id} name="courseId" />
-          <Box m="3vw">
+          <TextField type='hidden' value={activeStep} name='activeStep' />
+          <TextField type='hidden' value={course.id} name='courseId' />
+          <Box m='3vw'>
             <Container>
               <Grid container mb={4}>
                 <Grid item xs>
@@ -751,15 +751,15 @@ export default function EditCourse() {
             </Container>
           </Box>
           <Box
-            sx={{ marginLeft: "auto", marginRight: "auto" }}
-            maxWidth={{ xs: "85vw", md: "69vw" }}
+            sx={{ marginLeft: 'auto', marginRight: 'auto' }}
+            maxWidth={{ xs: '85vw', md: '69vw' }}
           >
             {/* title  & description ends here */}
             <Grid
-              mt={"2%"}
+              mt={'2%'}
               container
-              direction={"column"}
-              alignItems={"center"}
+              direction={'column'}
+              alignItems={'center'}
               spacing={3}
             >
               {/* course overview textarea input */}
@@ -783,7 +783,7 @@ export default function EditCourse() {
       ) : (
         <>
           <CustomizedSnackbar />
-          <Box m="3vw">
+          <Box m='3vw'>
             <Container>
               <Grid container>
                 <Grid item xs>
@@ -797,22 +797,22 @@ export default function EditCourse() {
               </Grid>
             </Container>
           </Box>
-          <Box sx={{ marginLeft: "3vw", marginRight: "3vw" }}>
+          <Box sx={{ marginLeft: '3vw', marginRight: '3vw' }}>
             <Grid
-              mt={"2%"}
+              mt={'2%'}
               container
-              direction={"column"}
-              alignItems={"center"}
+              direction={'column'}
+              alignItems={'center'}
               spacing={3}
             >
-              <Grid item width={{ xs: "100%", md: "69%" }}>
+              <Grid item width={{ xs: '100%', md: '69%' }}>
                 <ThemeProvider theme={theme}>
-                  <Typography variant="h3" fontWeight={"bold"}>
+                  <Typography variant='h3' fontWeight={'bold'}>
                     Course content
                   </Typography>
                 </ThemeProvider>
               </Grid>
-              <Grid item width={{ xs: "100%", md: "69%" }}>
+              <Grid item width={{ xs: '100%', md: '69%' }}>
                 <ControlledAccordions
                   activeStep={activeStep}
                   courseContentId={courseContent.id}
@@ -821,21 +821,21 @@ export default function EditCourse() {
             </Grid>
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100vh",
-                justifyContent: "space-between",
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                justifyContent: 'space-between',
               }}
             >
               <Form action={`/course/${course.id}`}>
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Button
-                    disabled={navigation.state === "submitting"}
+                    disabled={navigation.state === 'submitting'}
                     sx={{ mt: 3 }}
                     fullWidth={isXsmallScreen}
                     startIcon={<DoneAll />}
-                    variant="contained"
-                    type="submit"
+                    variant='contained'
+                    type='submit'
                   >
                     Done
                   </Button>

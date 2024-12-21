@@ -28,20 +28,20 @@ import {
   Typography,
   createTheme,
   responsiveFontSizes,
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import * as React from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
-import DescriptionIcon from "@mui/icons-material/Description";
-import YouTubeIcon from "@mui/icons-material/YouTube";
-import ClearIcon from "@mui/icons-material/Clear";
-import CheckIcon from "@mui/icons-material/Check";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import * as React from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import DescriptionIcon from '@mui/icons-material/Description';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import ClearIcon from '@mui/icons-material/Clear';
+import CheckIcon from '@mui/icons-material/Check';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import {
   createCourseComment,
   createCourseEnrollment,
@@ -70,7 +70,7 @@ import {
   updateSection,
   updateUserCourseProgress,
   updateUserSection,
-} from "../courses";
+} from '../courses';
 import {
   Form,
   Link,
@@ -80,29 +80,29 @@ import {
   useNavigate,
   useRevalidator,
   useSubmit,
-} from "react-router-dom";
-import DOMPurify from "dompurify";
-import { AccordionSection } from "../components/Accordion";
-import getEmbedUrl from "../helper/getEmbedUrl";
-import CorrectFormDialog from "../components/CorrectFormDialog";
-import WrongFormDialog from "../components/WrongFormDialog";
-import { Parser } from "html-to-react";
-import { useAuthToken } from "../contexts/authContext";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ReplyIcon from "@mui/icons-material/Reply";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV } from "@fortawesome/free-solid-svg-icons/faEllipsisV";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { useAtom } from "jotai";
-import { snackbarReducerAtom } from "../atoms/snackbarAtom";
-import AlertDialog from "../components/AreYouSureDialog";
-import image from "../static/images/noimg.png";
-import CustomizedSnackbar from "../components/Snackbar";
-import AuthenticationWall from "../components/AuthenticationWall";
-import parseCourseDateTime, { parseCommentDate } from "../helper/parseDateTime";
-import Plyr from "plyr-react";
-import "plyr-react/plyr.css";
+} from 'react-router-dom';
+import DOMPurify from 'dompurify';
+import { AccordionSection } from '../components/Accordion';
+import getEmbedUrl from '../helper/getEmbedUrl';
+import CorrectFormDialog from '../components/CorrectFormDialog';
+import WrongFormDialog from '../components/WrongFormDialog';
+import { Parser } from 'html-to-react';
+import { useAuthToken } from '../contexts/authContext';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ReplyIcon from '@mui/icons-material/Reply';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons/faEllipsisV';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useAtom } from 'jotai';
+import { snackbarReducerAtom } from '../atoms/snackbarAtom';
+import AlertDialog from '../components/AreYouSureDialog';
+import image from '../static/images/noimg.png';
+import CustomizedSnackbar from '../components/Snackbar';
+import AuthenticationWall from '../components/AuthenticationWall';
+import parseCourseDateTime, { parseCommentDate } from '../helper/parseDateTime';
+import Plyr from 'plyr-react';
+import 'plyr-react/plyr.css';
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
@@ -116,7 +116,7 @@ export async function loader({ params }) {
   const course = await getCourse(params.courseId);
   let progress, userRating;
   if (!course) {
-    throw new Response("", {
+    throw new Response('', {
       status: course.status,
       statusText: course.message,
     });
@@ -124,7 +124,7 @@ export async function loader({ params }) {
   const enrollees = await getCourseEnrollees(course.id);
   const courseContent = await getCourseContent(course.id);
   if (!courseContent) {
-    throw new Response("", {
+    throw new Response('', {
       status: courseContent.status,
       statusText: courseContent.message,
     });
@@ -134,11 +134,11 @@ export async function loader({ params }) {
   try {
     [userRating, progress] = await Promise.all([
       getCourseRating(course.id).catch((error) => {
-        console.error("Error getting course rating", error);
+        console.error('Error getting course rating', error);
         return {};
       }),
       getUserCourseProgress(course.id).catch((error) => {
-        console.error("Error getting course progress", error);
+        console.error('Error getting course progress', error);
         return {};
       }),
     ]);
@@ -171,14 +171,14 @@ export async function loader({ params }) {
                         wrongForm: wrongFormExercises,
                       };
                     } catch (error) {
-                      console.error("Error getting exercises:", error);
+                      console.error('Error getting exercises:', error);
                       return workout;
                     }
                   })
                 );
                 return { ...item, workouts: workoutExercises };
               } catch (error) {
-                console.error("Error getting workouts:", error);
+                console.error('Error getting workouts:', error);
                 return item;
               }
             })
@@ -189,7 +189,7 @@ export async function loader({ params }) {
             is_clicked: userSection?.is_clicked,
           };
         } catch (error) {
-          console.error("Error getting section items:", error);
+          console.error('Error getting section items:', error);
           return section;
         }
       })
@@ -206,7 +206,7 @@ export async function loader({ params }) {
       userRating,
     };
   } catch (error) {
-    console.error("Error getting sections:", error);
+    console.error('Error getting sections:', error);
     return {
       user,
       course,
@@ -223,34 +223,34 @@ export async function action({ request, params }) {
   const formData = await request.formData();
   let enrollment, progress, unenrollment, userSection, comment, rating;
 
-  switch (formData.get("intent")) {
-    case "enroll":
+  switch (formData.get('intent')) {
+    case 'enroll':
       enrollment = await createCourseEnrollment(params.courseId);
       progress = await createUserCourseProgress(params.courseId);
       break;
-    case "unenroll":
+    case 'unenroll':
       unenrollment = await deleteCourseUnenrollment(
-        formData.get("enrollmentId")
+        formData.get('enrollmentId')
       );
       progress = await deleteUserCourseProgress(params.courseId);
       break;
-    case "createRating":
+    case 'createRating':
       rating = await createCourseRating(params.courseId, formData);
       break;
-    case "updateRating":
-      rating = await updateCourseRating(formData.get("ratingId"), formData);
+    case 'updateRating':
+      rating = await updateCourseRating(formData.get('ratingId'), formData);
       break;
-    case "updateUserSection":
+    case 'updateUserSection':
       userSection = await updateUserSection(
-        formData.get("sectionId"),
+        formData.get('sectionId'),
         formData
       );
       break;
-    case "editing": // i.e., for the comment
-      comment = await updateCourseComment(formData.get("commentId"), formData);
+    case 'editing': // i.e., for the comment
+      comment = await updateCourseComment(formData.get('commentId'), formData);
       break;
-    case "deleting": // i.e., for the comment
-      comment = await deleteCourseComment(formData.get("commentId"));
+    case 'deleting': // i.e., for the comment
+      comment = await deleteCourseComment(formData.get('commentId'));
       break;
     default:
       comment = await createCourseComment(params.courseId, formData);
@@ -261,13 +261,14 @@ export async function action({ request, params }) {
 
 function CommentReply({ reply, level }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [status, setStatus] = React.useState("");
+  const [status, setStatus] = React.useState('');
   const fetcher = useFetcher();
   const { token } = useAuthToken();
-  const isAuthenticated = token["access"] !== null;
+  const isAuthenticated = token['access'] !== null;
   const { user } = useLoaderData();
 
-  const [last_created_day, last_created_hour, last_created_minute] = parseCommentDate(reply.comment_date); // using this to parse comment date time
+  const [last_created_day, last_created_hour, last_created_minute] =
+    parseCommentDate(reply.comment_date); // using this to parse comment date time
 
   function handleClick(e) {
     setAnchorEl(e.currentTarget);
@@ -277,13 +278,13 @@ function CommentReply({ reply, level }) {
   }
 
   function handleClickEdit() {
-    setStatus("editing");
+    setStatus('editing');
   }
   function handleClickDelete() {
-    setStatus("deleting");
+    setStatus('deleting');
     fetcher.submit(
-      { intent: "deleting", commentId: reply.id },
-      { method: "DELETE" }
+      { intent: 'deleting', commentId: reply.id },
+      { method: 'DELETE' }
     );
   }
   const open = Boolean(anchorEl);
@@ -295,13 +296,13 @@ function CommentReply({ reply, level }) {
           <>
             {isAuthenticated && user.user_id === reply.user_id && (
               <IconButton
-                id="ellipsis"
-                edge="end"
-                aria-label="ellipsis"
-                sx={{ p: "0.3em 0.5em" }}
+                id='ellipsis'
+                edge='end'
+                aria-label='ellipsis'
+                sx={{ p: '0.3em 0.5em' }}
                 onClick={handleClick}
               >
-                <FontAwesomeIcon icon={faEllipsisV} fontSize="medium" />
+                <FontAwesomeIcon icon={faEllipsisV} fontSize='medium' />
               </IconButton>
             )}
 
@@ -309,30 +310,30 @@ function CommentReply({ reply, level }) {
               open={open}
               anchorEl={anchorEl}
               anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
+                vertical: 'bottom',
+                horizontal: 'left',
               }}
               onClose={handleClose}
             >
-              <Stack alignItems={"flex-start"} p={"0.4em 0.2em"}>
+              <Stack alignItems={'flex-start'} p={'0.4em 0.2em'}>
                 <Button
                   fullWidth
-                  sx={{ color: "rgba(0, 0, 0, 0.6)", pr: 2 }}
+                  sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }}
                   onClick={handleClickEdit}
                 >
                   <Box ml={-3} pl={2} pr={2}>
-                    <EditIcon fontSize="smaller" />
+                    <EditIcon fontSize='smaller' />
                   </Box>
                   Edit
                 </Button>
                 <Divider />
                 <Button
                   fullWidth
-                  sx={{ color: "rgba(0, 0, 0, 0.6)", pr: 2 }}
+                  sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }}
                   onClick={handleClickDelete}
                 >
                   <Box pl={2} pr={2}>
-                    <DeleteIcon fontSize="smaller" />
+                    <DeleteIcon fontSize='smaller' />
                   </Box>
                   Delete
                 </Button>
@@ -340,9 +341,9 @@ function CommentReply({ reply, level }) {
             </Popover>
           </>
         }
-        alignItems="flex-start"
+        alignItems='flex-start'
       >
-        {status === "editing" ? (
+        {status === 'editing' ? (
           <CommentTextField
             setStatus={setStatus}
             status={status}
@@ -357,15 +358,16 @@ function CommentReply({ reply, level }) {
               primary={
                 <Link
                   to={`/profile/user/${reply.user_id}`}
-                  className="username-link"
+                  className='username-link'
                 >
-                  {`${reply.first_name || reply.username} ${reply.last_name || ""
-                    }`}
+                  {`${reply.first_name || reply.username} ${
+                    reply.last_name || ''
+                  }`}
                   <Typography
                     ml={1}
-                    component="span"
-                    fontSize="smaller"
-                    color="text.secondary"
+                    component='span'
+                    fontSize='smaller'
+                    color='text.secondary'
                   >
                     {last_created_day === 0 && last_created_hour <= 1
                       ? `${last_created_minute} minutes ago`
@@ -382,25 +384,26 @@ function CommentReply({ reply, level }) {
       </ListItem>
       <ListItemText
         inset={true}
-      // style={{ paddingLeft: `${(level + 1) * 20}px` }}
+        // style={{ paddingLeft: `${(level + 1) * 20}px` }}
       >
         <IconButton
-          onClick={() => setStatus("replying")}
+          onClick={() => setStatus('replying')}
           sx={{ borderRadius: 3, mt: -1 }}
         >
-          <ReplyIcon sx={{ fontSize: 19 }} />{" "}
-          <Typography variant="span" sx={{ fontSize: 14 }}>
+          <ReplyIcon sx={{ fontSize: 19 }} />{' '}
+          <Typography variant='span' sx={{ fontSize: 14 }}>
             Reply
           </Typography>
         </IconButton>
       </ListItemText>
-      {status === "replying" && (
+      {status === 'replying' && (
         <Box pl={`20px`}>
           <CommentTextField
             setStatus={setStatus}
             parentComment={reply.id}
-            username={`@${reply.first_name || reply.username} ${reply.last_name || ""
-              }`}
+            username={`@${reply.first_name || reply.username} ${
+              reply.last_name || ''
+            }`}
           />
         </Box>
       )}
@@ -419,13 +422,13 @@ function CourseCommentReplies({ comment, level = 0 }) {
       {totalReplies !== 0 && level === 0 && (
         <Grid item xs={12} style={{ paddingLeft: `${level * 20}px` }}>
           <Button startIcon={<ExpandMoreIcon />} onClick={() => setOpen(!open)}>
-            {totalReplies} {totalReplies === 1 ? "reply" : "replies"}
+            {totalReplies} {totalReplies === 1 ? 'reply' : 'replies'}
           </Button>
         </Grid>
       )}
       <Grid item xs>
-        <Collapse in={open || level !== 0} timeout="auto" unmountOnExit>
-          <List ref={parent} component="div" disablePadding>
+        <Collapse in={open || level !== 0} timeout='auto' unmountOnExit>
+          <List ref={parent} component='div' disablePadding>
             {comment.replies.map((reply) => (
               <CommentReply key={reply.id} reply={reply} level={level} />
             ))}
@@ -438,12 +441,13 @@ function CourseCommentReplies({ comment, level = 0 }) {
 
 function Comment({ comment }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [status, setStatus] = React.useState("");
+  const [status, setStatus] = React.useState('');
   const fetcher = useFetcher();
   const { token } = useAuthToken();
-  const isAuthenticated = token["access"] !== null;
+  const isAuthenticated = token['access'] !== null;
   const { user } = useLoaderData();
-  const [last_created_day, last_created_hour, last_created_minute] = parseCommentDate(comment.comment_date); // using this to parse comment date time
+  const [last_created_day, last_created_hour, last_created_minute] =
+    parseCommentDate(comment.comment_date); // using this to parse comment date time
   function handleClick(e) {
     setAnchorEl(e.currentTarget);
   }
@@ -452,13 +456,13 @@ function Comment({ comment }) {
   }
 
   function handleClickEdit() {
-    setStatus("editing");
+    setStatus('editing');
   }
   function handleClickDelete() {
-    setStatus("deleting");
+    setStatus('deleting');
     fetcher.submit(
-      { intent: "deleting", commentId: comment.id },
-      { method: "DELETE" }
+      { intent: 'deleting', commentId: comment.id },
+      { method: 'DELETE' }
     );
   }
 
@@ -471,13 +475,13 @@ function Comment({ comment }) {
           <>
             {isAuthenticated && user.user_id === comment.user_id && (
               <IconButton
-                id="ellipsis"
-                edge="end"
-                aria-label="ellipsis"
-                sx={{ p: "0.3em 0.5em" }}
+                id='ellipsis'
+                edge='end'
+                aria-label='ellipsis'
+                sx={{ p: '0.3em 0.5em' }}
                 onClick={handleClick}
               >
-                <FontAwesomeIcon icon={faEllipsisV} fontSize="medium" />
+                <FontAwesomeIcon icon={faEllipsisV} fontSize='medium' />
               </IconButton>
             )}
 
@@ -485,30 +489,30 @@ function Comment({ comment }) {
               open={open}
               anchorEl={anchorEl}
               anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
+                vertical: 'bottom',
+                horizontal: 'left',
               }}
               onClose={handleClose}
             >
-              <Stack alignItems={"flex-start"} p={"0.4em 0.2em"}>
+              <Stack alignItems={'flex-start'} p={'0.4em 0.2em'}>
                 <Button
                   fullWidth
-                  sx={{ color: "rgba(0, 0, 0, 0.6)", pr: 2 }}
+                  sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }}
                   onClick={handleClickEdit}
                 >
                   <Box ml={-3} pl={2} pr={2}>
-                    <EditIcon fontSize="smaller" />
+                    <EditIcon fontSize='smaller' />
                   </Box>
                   Edit
                 </Button>
                 <Divider />
                 <Button
                   fullWidth
-                  sx={{ color: "rgba(0, 0, 0, 0.6)", pr: 2 }}
+                  sx={{ color: 'rgba(0, 0, 0, 0.6)', pr: 2 }}
                   onClick={handleClickDelete}
                 >
                   <Box pl={2} pr={2}>
-                    <DeleteIcon fontSize="smaller" />
+                    <DeleteIcon fontSize='smaller' />
                   </Box>
                   Delete
                 </Button>
@@ -516,9 +520,9 @@ function Comment({ comment }) {
             </Popover>
           </>
         }
-        alignItems="flex-start"
+        alignItems='flex-start'
       >
-        {status === "editing" ? (
+        {status === 'editing' ? (
           <CommentTextField
             status={status}
             setStatus={setStatus}
@@ -529,7 +533,7 @@ function Comment({ comment }) {
             <ListItemAvatar>
               <Link
                 to={`/profile/user/${comment.user_id}`}
-                style={{ textDecoration: "none", color: "initial" }}
+                style={{ textDecoration: 'none', color: 'initial' }}
               >
                 <Avatar alt={comment.username} src={comment.profile_pic} />
               </Link>
@@ -538,15 +542,16 @@ function Comment({ comment }) {
               primary={
                 <Link
                   to={`/profile/user/${comment.user_id}`}
-                  className="username-link"
+                  className='username-link'
                 >
-                  {`${comment.first_name || comment.username} ${comment.last_name || ""
-                    }`}
+                  {`${comment.first_name || comment.username} ${
+                    comment.last_name || ''
+                  }`}
                   <Typography
                     ml={1}
-                    component="span"
-                    fontSize="smaller"
-                    color="text.secondary"
+                    component='span'
+                    fontSize='smaller'
+                    color='text.secondary'
                   >
                     {last_created_day === 0 && last_created_hour <= 1
                       ? `${last_created_minute} minutes ago`
@@ -563,17 +568,17 @@ function Comment({ comment }) {
       </ListItem>
       <ListItemText inset={true}>
         <IconButton
-          onClick={() => setStatus("replying")}
+          onClick={() => setStatus('replying')}
           sx={{ borderRadius: 3, mt: -1 }}
         >
-          <ReplyIcon sx={{ fontSize: 19 }} />{" "}
-          <Typography variant="span" sx={{ fontSize: 14 }}>
+          <ReplyIcon sx={{ fontSize: 19 }} />{' '}
+          <Typography variant='span' sx={{ fontSize: 14 }}>
             Reply
           </Typography>
         </IconButton>
       </ListItemText>
-      {status === "replying" && (
-        <Box pl={"56px"}>
+      {status === 'replying' && (
+        <Box pl={'56px'}>
           <CommentTextField
             status={status}
             setStatus={setStatus}
@@ -581,11 +586,11 @@ function Comment({ comment }) {
           />
         </Box>
       )}
-      <Box pl={"56px"}>
+      <Box pl={'56px'}>
         <CourseCommentReplies comment={comment} />
       </Box>
 
-      <Divider variant="inset" component="li" />
+      <Divider variant='inset' component='li' />
     </Box>
   );
 }
@@ -597,7 +602,7 @@ function CourseComments() {
   return (
     <List
       ref={parent}
-      sx={{ width: "100%", maxWidth: "inherit", bgcolor: "background.paper" }}
+      sx={{ width: '100%', maxWidth: 'inherit', bgcolor: 'background.paper' }}
     >
       <ListItem sx={{ pl: 0, pr: 0 }}>
         <CommentTextField />
@@ -612,22 +617,22 @@ function CourseComments() {
 function CommentTextField({
   status,
   setStatus,
-  comment = "",
+  comment = '',
   parentComment,
   username,
 }) {
   const [isTyping, setIsTyping] = React.useState(false);
-  const [text, setText] = React.useState(username || "");
+  const [text, setText] = React.useState(username || '');
   const { user } = useLoaderData();
   const { token } = useAuthToken();
-  const isAuthenticated = token["access"] !== null;
+  const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
 
   function handleFocus() {
     if (!isAuthenticated) {
-      navigate("/signin");
+      navigate('/signin');
     } else {
       setIsTyping(true);
     }
@@ -637,80 +642,80 @@ function CommentTextField({
     setText(e.target.value);
   }
   React.useEffect(() => {
-    if (fetcher.state === "submitting") {
-      setText("");
+    if (fetcher.state === 'submitting') {
+      setText('');
       setIsTyping(!isTyping);
-      setStatus && setStatus("");
+      setStatus && setStatus('');
       revalidator.revalidate(); // this will & should cause a re-render so that the comment useLoaderData in CourseComments (parent component) is updated.
     }
   }, [fetcher]);
   return (
     <>
-      {fetcher.state === "idle" ? (
-        <Grid container justifyContent={"flex-start"}>
+      {fetcher.state === 'idle' ? (
+        <Grid container justifyContent={'flex-start'}>
           <ListItemAvatar>
             <Avatar
-              alt="myPP"
+              alt='myPP'
               src={`${import.meta.env.VITE_API_URL}${user?.profile_pic}`}
             />
           </ListItemAvatar>
           <Grid item xs>
             <TextField
-              id="standard-multiline-static"
+              id='standard-multiline-static'
               multiline
-              placeholder="Add a comment.."
-              variant="standard"
+              placeholder='Add a comment..'
+              variant='standard'
               fullWidth
               onFocus={handleFocus}
               onChange={handleChange}
               value={text || comment.comment}
             />
           </Grid>
-          {(isTyping || status === "editing") && (
-            <Grid item container justifyContent={"flex-end"}>
+          {(isTyping || status === 'editing') && (
+            <Grid item container justifyContent={'flex-end'}>
               <Grid item>
                 <Button
                   sx={{ borderRadius: 3 }}
                   onClick={() => {
                     setIsTyping(!isTyping);
-                    setStatus && setStatus("");
+                    setStatus && setStatus('');
                   }}
                 >
                   Cancel
                 </Button>
               </Grid>
-              <fetcher.Form method="post">
+              <fetcher.Form method='post'>
                 <Grid item>
                   <Button
-                    variant="contained"
+                    variant='contained'
                     sx={{ borderRadius: 3 }}
-                    name="comment"
+                    name='comment'
                     value={text}
-                    type="submit"
+                    type='submit'
                     disabled={!text}
                   >
-                    {status === "replying"
-                      ? "Reply"
-                      : status === "editing"
-                        ? "Save"
-                        : "Comment"}
+                    {status === 'replying'
+                      ? 'Reply'
+                      : status === 'editing'
+                        ? 'Save'
+                        : 'Comment'}
                   </Button>
                 </Grid>
                 {parentComment && (
                   <TextField
-                    type="hidden"
-                    name="parent_comment"
+                    type='hidden'
+                    name='parent_comment'
                     value={parentComment}
                   />
-                )}{" "}
+                )}{' '}
                 {/* if user is replying to a comment render this hidden Textfield */}
                 {comment.id && (
                   <>
                     {/* if user is editing his own comment render this two hidden TextFields */}
-                    <TextField type="hidden" name="intent" value={status} />
+                    <TextField type='hidden' name='intent' value={status} />
                     <TextField
-                      type="hidden"
-                      name="commentId"
+                      type='hidden'
+                      name='commentId'
                       value={comment.id}
                     />
                   </>
@@ -720,7 +725,7 @@ function CommentTextField({
           )}
         </Grid>
       ) : (
-        <Grid container justifyContent={"center"}>
+        <Grid container justifyContent={'center'}>
           <Grid item>
             <CircularProgress />
           </Grid>
@@ -736,7 +741,7 @@ function WorkoutMediaCard({ workout, open }) {
   const [isOpenWrong, setisOpenWrong] = React.useState(false);
   const myTheme = useTheme();
   const handleClickOpen = (btn) => {
-    if (btn === "correct") {
+    if (btn === 'correct') {
       setisOpenCorrect(true);
     } else {
       setisOpenWrong(true);
@@ -747,53 +752,53 @@ function WorkoutMediaCard({ workout, open }) {
     open && (
       <>
         <Card
-          data-cy="Workout Card"
+          data-cy='Workout Card'
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            width: { xs: "401.921875px", sm: "100%" },
+            display: 'flex',
+            flexDirection: 'column',
+            width: { xs: '401.921875px', sm: '100%' },
             maxWidth: 400,
             maxHeight: { xs: 700, md: 725 },
-            height: "100%",
+            height: '100%',
             borderTop: `4px solid ${myTheme.palette.secondary.main}`,
           }}
         >
           <CardMedia
-            component="img"
+            component='img'
             sx={{ aspectRatio: 16 / 9 }}
             src={workout.demo}
-            alt="workout demo"
+            alt='workout demo'
           />
-          <CardContent sx={{ padding: "10px 0 10px 10px" }}>
+          <CardContent sx={{ padding: '10px 0 10px 10px' }}>
             <Container
-              width="inherit"
-              sx={{ height: { xs: 300, md: 350 }, overflow: "auto" }}
+              width='inherit'
+              sx={{ height: { xs: 300, md: 350 }, overflow: 'auto' }}
             >
               <Box
-                className="html-content"
-                component="div"
+                className='html-content'
+                component='div'
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(workout.exercise),
                 }}
               />
             </Container>
           </CardContent>
-          <CardActions sx={{ marginTop: "auto" }}>
+          <CardActions sx={{ marginTop: 'auto' }}>
             <Grid
               container
-              justifyContent={"center"}
+              justifyContent={'center'}
               columns={{ xs: 4, sm: 8 }}
               spacing={2}
               paddingBottom={2}
             >
               <Grid item xs={4} sm={4}>
                 <Button
-                  onClick={() => handleClickOpen("correct")}
-                  startIcon={<CheckIcon color="success" />}
-                  color="success"
+                  onClick={() => handleClickOpen('correct')}
+                  startIcon={<CheckIcon color='success' />}
+                  color='success'
                   fullWidth={true}
-                  variant="outlined"
-                  size="large"
+                  variant='outlined'
+                  size='large'
                 >
                   Form
                 </Button>
@@ -805,12 +810,12 @@ function WorkoutMediaCard({ workout, open }) {
               </Grid>
               <Grid item xs={4} sm={4}>
                 <Button
-                  onClick={() => handleClickOpen("wrong")}
-                  startIcon={<ClearIcon color="error" />}
-                  color="error"
+                  onClick={() => handleClickOpen('wrong')}
+                  startIcon={<ClearIcon color='error' />}
+                  color='error'
                   fullWidth={true}
-                  variant="outlined"
-                  size="large"
+                  variant='outlined'
+                  size='large'
                 >
                   Form
                 </Button>
@@ -834,7 +839,7 @@ export function ResponsiveDialog({ accordionItem, children }) {
     accordionItem?.workouts?.length > 0
   );
   const theme2 = useTheme();
-  const fullScreen = useMediaQuery(theme2.breakpoints.down("sm"));
+  const fullScreen = useMediaQuery(theme2.breakpoints.down('sm'));
   const htmlToReactParser = new Parser();
   const handleClickOpen = () => {
     setOpen(true);
@@ -848,20 +853,20 @@ export function ResponsiveDialog({ accordionItem, children }) {
     <React.Fragment>
       <ThemeProvider theme={theme}>
         {/* <YouTubeIcon theme={theme2} sx={{ position: 'absolute', left: 10 }} fontSize="x-small"></YouTubeIcon> */}
-        <Box display="flex" alignItems={"center"}>
+        <Box display='flex' alignItems={'center'}>
           <DescriptionIcon
             sx={{ marginRight: 2 }}
-            fontSize="x-small"
+            fontSize='x-small'
           ></DescriptionIcon>
           <Typography
-            align="justify"
-            variant="body"
+            align='justify'
+            variant='body'
             onClick={handleClickOpen}
             sx={{
-              width: "100%",
-              wordBreak: "break-word",
-              cursor: "pointer",
-              "&:hover": { color: "lightgray" },
+              width: '100%',
+              wordBreak: 'break-word',
+              cursor: 'pointer',
+              '&:hover': { color: 'lightgray' },
             }}
           >
             {children}
@@ -873,29 +878,29 @@ export function ResponsiveDialog({ accordionItem, children }) {
         fullScreen={fullScreen}
         open={open}
         onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
+        aria-labelledby='responsive-dialog-title'
         fullWidth={true}
-        maxWidth={"md"}
+        maxWidth={'md'}
       >
         <Grid container>
           <Grid
             item
             container
-            justifyContent={"center"}
+            justifyContent={'center'}
             marginLeft={{ md: 2 }}
             marginRight={{ md: 2 }}
           >
-            <DialogTitle id="responsive-dialog-title">
-              <ButtonGroup disableElevation aria-label="button group">
+            <DialogTitle id='responsive-dialog-title'>
+              <ButtonGroup disableElevation aria-label='button group'>
                 <Button
                   onClick={() => setIsWorkoutRoutine(true)}
-                  variant={isWorkoutRoutine ? "contained" : "outlined"}
+                  variant={isWorkoutRoutine ? 'contained' : 'outlined'}
                 >
                   Workout Routine
                 </Button>
                 <Button
                   onClick={() => setIsWorkoutRoutine(false)}
-                  variant={isWorkoutRoutine ? "outlined" : "contained"}
+                  variant={isWorkoutRoutine ? 'outlined' : 'contained'}
                 >
                   Video Lecture / Readme
                 </Button>
@@ -905,14 +910,14 @@ export function ResponsiveDialog({ accordionItem, children }) {
           <Grid
             item
             container
-            justifyContent={"center"}
+            justifyContent={'center'}
             marginLeft={{ md: 2 }}
             marginRight={{ md: 2 }}
           >
             <DialogContent>
               {isWorkoutRoutine ? (
                 <Grid
-                  justifyContent={{ xs: "center", sm: "flex-start" }}
+                  justifyContent={{ xs: 'center', sm: 'flex-start' }}
                   item
                   container
                   rowSpacing={2}
@@ -923,14 +928,14 @@ export function ResponsiveDialog({ accordionItem, children }) {
                     accordionItem.workouts.map((workout) => (
                       <Grid key={workout.id} item sm={6}>
                         <WorkoutMediaCard workout={workout} open={open}>
-                          {" "}
+                          {' '}
                         </WorkoutMediaCard>
                       </Grid>
                     ))
                   ) : (
                     <Grid item>
                       <ThemeProvider theme={theme}>
-                        <Typography variant="body1" height={350}>
+                        <Typography variant='body1' height={350}>
                           No Workouts To Show
                         </Typography>
                       </ThemeProvider>
@@ -940,8 +945,13 @@ export function ResponsiveDialog({ accordionItem, children }) {
               ) : (
                 <Grid justifyContent={'center'} item container>
                   <Grid item xs={10}>
-                      <Box mt={4} className="course-preview-container" component={'div'}>
-                        <Plyr source={{
+                    <Box
+                      mt={4}
+                      className='course-preview-container'
+                      component={'div'}
+                    >
+                      <Plyr
+                        source={{
                           type: 'video',
                           sources: [
                             {
@@ -950,19 +960,19 @@ export function ResponsiveDialog({ accordionItem, children }) {
                             },
                           ],
                         }}
-                        />
-                      </Box>
+                      />
+                    </Box>
                   </Grid>
                   <Grid item mt={4} container xs={10}>
                     <Grid item>
                       <ThemeProvider theme={theme}>
-                        <Typography variant="h4" fontWeight={"bold"}>
+                        <Typography variant='h4' fontWeight={'bold'}>
                           Description
                         </Typography>
                       </ThemeProvider>
                     </Grid>
                   </Grid>
-                  <Grid className="html-content" item mt={4} xs={10}>
+                  <Grid className='html-content' item mt={4} xs={10}>
                     {htmlToReactParser.parse(accordionItem.description)}
                   </Grid>
                 </Grid>
@@ -1003,13 +1013,13 @@ export function ControlledAccordions() {
 }
 
 export default function Course() {
-  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const isMediumScreen = useMediaQuery((theme) => theme.breakpoints.up("md"));
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isMediumScreen = useMediaQuery((theme) => theme.breakpoints.up('md'));
   const { user, course, courseContent, enrollees, userRating } =
     useLoaderData();
   const htmlToReactParser = new Parser();
   const { token } = useAuthToken();
-  const isAuthenticated = token["access"] !== null;
+  const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
   const isInstructor = user.user_id === course.created_by;
   const isAdmin = user.is_superuser || user.is_staff;
@@ -1026,62 +1036,62 @@ export default function Course() {
   );
   function handleClickEnroll() {
     if (!isAuthenticated) {
-      navigate("/signin");
+      navigate('/signin');
     } else {
       dispatch({
-        type: "enrolled",
-        text: "You are now enrolled!",
+        type: 'enrolled',
+        text: 'You are now enrolled!',
       });
-      fetcher.submit({ intent: "enroll" }, { method: "post" });
+      fetcher.submit({ intent: 'enroll' }, { method: 'post' });
     }
   }
   function handleClickUnenroll() {
     dispatch({
-      type: "unenrolled",
-      text: "You are unenrolled!",
+      type: 'unenrolled',
+      text: 'You are unenrolled!',
     });
     fetcher.submit(
-      { intent: "unenroll", enrollmentId: enrollment.id },
-      { method: "delete" }
+      { intent: 'unenroll', enrollmentId: enrollment.id },
+      { method: 'delete' }
     );
   }
 
   function handleClickSignUp() {
-    navigate("/signup");
+    navigate('/signup');
   }
 
   function handleClickDelete() {
     dispatch({
-      type: "deleted",
-      text: "Course Deleted!",
+      type: 'deleted',
+      text: 'Course Deleted!',
     });
-    submit(null, { method: "delete", action: "destroy" });
+    submit(null, { method: 'delete', action: 'destroy' });
   }
 
   function handleClickApprove() {
     dispatch({
-      type: "approved",
+      type: 'approved',
       text: `Course #${course.id} Approved!`,
     });
-    submit({ status: "A" }, { method: "patch", action: "approve" });
+    submit({ status: 'A' }, { method: 'patch', action: 'approve' });
   }
 
   function handleClickReject() {
     dispatch({
-      type: "rejected",
+      type: 'rejected',
       text: `Course #${course.id} Rejected!`,
     });
-    submit({ status: "R" }, { method: "patch", action: "reject" });
+    submit({ status: 'R' }, { method: 'patch', action: 'reject' });
   }
   return (
     <>
       <CustomizedSnackbar />
       <br></br>
-      <Container component="main" maxWidth="lg">
-        <Box sx={{ marginLeft: "4vw", marginRight: "4vw" }}>
+      <Container component='main' maxWidth='lg'>
+        <Box sx={{ marginLeft: '4vw', marginRight: '4vw' }}>
           {
             // if user is the admin or staff show the primary actions and secondary actions (i.e., approve or reject btns)
-            isAdmin && course.status === "P" && (
+            isAdmin && course.status === 'P' && (
               <>
                 <AlertDialog
                   intent="change course's status"
@@ -1097,15 +1107,15 @@ export default function Course() {
               <>
                 <AlertDialog
                   onClickDelete={handleClickDelete}
-                  intent="deleting course"
+                  intent='deleting course'
                 />
-                <Box position="fixed" bottom="20px" right="20px" zIndex={999}>
-                  <Form action="edit">
+                <Box position='fixed' bottom='20px' right='20px' zIndex={999}>
+                  <Form action='edit'>
                     <Fab
-                      color="primary"
-                      size={isSmallScreen ? "medium" : "large"}
-                      aria-label="edit"
-                      type="submit"
+                      color='primary'
+                      size={isSmallScreen ? 'medium' : 'large'}
+                      aria-label='edit'
+                      type='submit'
                     >
                       <EditIcon />
                     </Fab>
@@ -1115,14 +1125,14 @@ export default function Course() {
             )
           }
 
-          <Box className="clearfix" component={"div"}>
+          <Box className='clearfix' component={'div'}>
             <Paper
-              id="enroll"
+              id='enroll'
               elevation={2}
               sx={{
-                padding: { xs: "7%", md: "3%" },
-                float: "left",
-                margin: { xs: "0 0 40px 0", md: "0 30px 20px 0" },
+                padding: { xs: '7%', md: '3%' },
+                float: 'left',
+                margin: { xs: '0 0 40px 0', md: '0 30px 20px 0' },
                 maxWidth: { md: 450 },
               }}
             >
@@ -1130,13 +1140,13 @@ export default function Course() {
                 <Container
                   disableGutters
                   sx={{ maxWidth: { xs: 700, md: 500 } }}
-                  component="div"
+                  component='div'
                 >
                   <img
                     src={course.thumbnail || image}
                     alt="Course's image thumbnail"
-                    className="course-thumbnail"
-                  /* onError={(e) => {
+                    className='course-thumbnail'
+                    /* onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = image;
                                 }} */
@@ -1147,10 +1157,10 @@ export default function Course() {
                   sx={{ maxWidth: { md: 250, xs: 300, sm: 400 }, mt: 2 }}
                   noWrap
                 >
-                  <b>Instructor:</b>{" "}
+                  <b>Instructor:</b>{' '}
                   <Link
                     to={`/profile/user/${course.created_by}`}
-                    className="courses-link"
+                    className='courses-link'
                   >
                     {course.created_by_name}
                   </Link>
@@ -1158,43 +1168,43 @@ export default function Course() {
 
                 <Box
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     mt: 2,
                   }}
                 >
-                  {course.price != 0 && <AttachMoneyIcon fontSize="large" />}
+                  {course.price != 0 && <AttachMoneyIcon fontSize='large' />}
                   <Typography
                     fontWeight={800}
-                    sx={{ fontSize: "2em" }}
-                    className="price-tag"
+                    sx={{ fontSize: '2em' }}
+                    className='price-tag'
                   >
-                    {course.price == 0 ? "FREE" : course.price}
+                    {course.price == 0 ? 'FREE' : course.price}
                   </Typography>
                 </Box>
                 {(isInstructor && !enrollment) ||
-                  isAdmin ? null : (!isInstructor && !enrollment) || // Don't render the enroll buttonn for instructors or admins
-                    !isAuthenticated ? (
-                  <Box display="flex" justifyContent={"center"} mt={2}>
+                isAdmin ? null : (!isInstructor && !enrollment) || // Don't render the enroll buttonn for instructors or admins
+                  !isAuthenticated ? (
+                  <Box display='flex' justifyContent={'center'} mt={2}>
                     <Button
-                      size="large"
-                      sx={{ borderRadius: "2em", fontWeight: 800 }}
+                      size='large'
+                      sx={{ borderRadius: '2em', fontWeight: 800 }}
                       fullWidth={isSmallScreen ? true : false}
-                      variant="contained"
+                      variant='contained'
                       onClick={handleClickEnroll}
                     >
                       Enroll now!
                     </Button>
                   </Box>
                 ) : (
-                  <Box display="flex" justifyContent={"center"} mt={2}>
+                  <Box display='flex' justifyContent={'center'} mt={2}>
                     <Button
-                      size="large"
-                      sx={{ borderRadius: "2em", fontWeight: 800 }}
+                      size='large'
+                      sx={{ borderRadius: '2em', fontWeight: 800 }}
                       fullWidth={isSmallScreen ? true : false}
-                      variant="contained"
-                      color="error"
+                      variant='contained'
+                      color='error'
                       onClick={handleClickUnenroll}
                     >
                       Unenroll
@@ -1202,23 +1212,23 @@ export default function Course() {
                   </Box>
                 )}
 
-                <Grid container columns={{ xs: 6, sm: 6, md: 12 }} mt={2} >
-                  <Grid item xs={6} sm={3} md={6} >
+                <Grid container columns={{ xs: 6, sm: 6, md: 12 }} mt={2}>
+                  <Grid item xs={6} sm={3} md={6}>
                     <Typography
-                      fontSize="small"
-                      variant="small"
-                      color={"text.secondary"}
+                      fontSize='small'
+                      variant='small'
+                      color={'text.secondary'}
                     >
                       <b>Created:</b> {course.course_created}
                     </Typography>
                   </Grid>
                   <Grid item xs={6} sm={3} md={6}>
                     <Typography
-                      fontSize="small"
-                      variant="small"
-                      color={"text.secondary"}
+                      fontSize='small'
+                      variant='small'
+                      color={'text.secondary'}
                     >
-                      <b>Modified:</b>{" "}
+                      <b>Modified:</b>{' '}
                       {last_updated_day === 0 && last_updated_hour <= 24
                         ? `${last_updated_hour} hours ago`
                         : `${last_updated_day} days ago`}
@@ -1226,11 +1236,11 @@ export default function Course() {
                   </Grid>
                   {enrollment && (
                     <Grid item xs={6} sm={3} md={6}>
-                      <Box display={"flex"} alignItems={"center"}>
+                      <Box display={'flex'} alignItems={'center'}>
                         <Typography
-                          fontSize="small"
-                          variant="small"
-                          color={"text.secondary"}
+                          fontSize='small'
+                          variant='small'
+                          color={'text.secondary'}
                         >
                           <b>Your Rating:</b>
                         </Typography>
@@ -1243,15 +1253,15 @@ export default function Course() {
                               fetcher.submit(
                                 {
                                   rating: newRating,
-                                  intent: "updateRating",
+                                  intent: 'updateRating',
                                   ratingId: userRating[0].id,
                                 },
-                                { method: "patch" }
+                                { method: 'patch' }
                               );
                             } else {
                               fetcher.submit(
-                                { rating: newRating, intent: "createRating" },
-                                { method: "post" }
+                                { rating: newRating, intent: 'createRating' },
+                                { method: 'post' }
                               );
                             }
                           }}
@@ -1261,9 +1271,9 @@ export default function Course() {
                   )}
                   <Grid item xs={6} sm={3} md={6}>
                     <Typography
-                      fontSize="small"
-                      variant="small"
-                      color={"text.secondary"}
+                      fontSize='small'
+                      variant='small'
+                      color={'text.secondary'}
                     >
                       <b>Weeks:</b> {course.weeks}
                     </Typography>
@@ -1273,65 +1283,65 @@ export default function Course() {
             </Paper>
             <ThemeProvider theme={theme}>
               <Typography
-                fontWeight="bold"
-                variant="h2"
-                sx={{ wordBreak: isMediumScreen ? "break-word" : "normal" }}
+                fontWeight='bold'
+                variant='h2'
+                sx={{ wordBreak: isMediumScreen ? 'break-word' : 'normal' }}
               >
                 {course.title}
               </Typography>
             </ThemeProvider>
 
             {/* <Box className="html-content" component={'div'} dangerouslySetInnerHTML={{ __html: DOMPurify(course.description) }} /> */}
-            <Box className="html-content" lineHeight={"1.4em"}>
+            <Box className='html-content' lineHeight={'1.4em'}>
               {htmlToReactParser.parse(course.description)}
             </Box>
           </Box>
           <br></br>
           <Divider />
-          <Container className="course-container" maxWidth={'sm'}>
+          <Container className='course-container' maxWidth={'sm'}>
             <Grid
-              mt={"2%"}
+              mt={'2%'}
               container
-              direction={"column"}
-              alignItems={"center"}
+              direction={'column'}
+              alignItems={'center'}
               spacing={3}
             >
-              <Grid item alignSelf={"flex-start"}>
+              <Grid item alignSelf={'flex-start'}>
                 <ThemeProvider theme={theme}>
-                  <Typography variant="h4" fontWeight={"bold"}>
+                  <Typography variant='h4' fontWeight={'bold'}>
                     Overview
                   </Typography>
                 </ThemeProvider>
               </Grid>
-              <Grid item alignSelf={"flex-start"}>
+              <Grid item alignSelf={'flex-start'}>
                 <Box
-                  lineHeight={"1.4em"}
-                  className="html-content"
-                  component="div"
+                  lineHeight={'1.4em'}
+                  className='html-content'
+                  component='div'
                   dangerouslySetInnerHTML={{
                     __html: DOMPurify.sanitize(courseContent.overview),
                   }}
                 />
               </Grid>
-              <Grid item xs width={"100%"}>
+              <Grid item xs width={'100%'}>
                 <Typography
-                  sx={{ textAlign: "left" }}
-                  variant="caption"
-                  fontSize={"1em"}
+                  sx={{ textAlign: 'left' }}
+                  variant='caption'
+                  fontSize={'1em'}
                 >
                   Preview this course
                 </Typography>
                 <br />
                 {getEmbedUrl(courseContent.preview) ? (
-                  <Box className="course-preview-container" component={"div"}>
+                  <Box className='course-preview-container' component={'div'}>
                     {/* <iframe className="course-preview" src={getEmbedUrl(courseContent.preview)} title="vide-lecture here" allowFullScreen></iframe> */}
                     <Plyr
                       source={{
-                        type: "video",
+                        type: 'video',
                         sources: [
                           {
                             src: getEmbedUrl(courseContent.preview),
-                            provider: "youtube",
+                            provider: 'youtube',
                           },
                         ],
                       }}
@@ -1339,16 +1349,16 @@ export default function Course() {
                   </Box>
                 ) : (
                   <Box
-                    mb="5%"
-                    mt="5%"
+                    mb='5%'
+                    mt='5%'
                     height={200}
-                    display="flex"
-                    className="course-lecture-container"
-                    justifyContent="center"
-                    alignItems={"center"}
-                    sx={{ border: "2px dotted black" }}
+                    display='flex'
+                    className='course-lecture-container'
+                    justifyContent='center'
+                    alignItems={'center'}
+                    sx={{ border: '2px dotted black' }}
                   >
-                    <Typography variant="body" align={"center"}>
+                    <Typography variant='body' align={'center'}>
                       No preview :/
                     </Typography>
                   </Box>
@@ -1366,54 +1376,54 @@ export default function Course() {
                       <Grid
                         item
                         container
-                        position={"relative"}
-                        justifyContent={"flex-start"}
+                        position={'relative'}
+                        justifyContent={'flex-start'}
                       >
                         <Grid item mb={2}>
                           <ThemeProvider theme={theme}>
-                            <Typography variant="h4" fontWeight={"bold"}>
+                            <Typography variant='h4' fontWeight={'bold'}>
                               Course content
                             </Typography>
                           </ThemeProvider>
                         </Grid>
                         <Grid
                           item
-                          width={"100%"}
-                          sx={{ pointerEvents: "none" }}
+                          width={'100%'}
+                          sx={{ pointerEvents: 'none' }}
                         >
                           <ControlledAccordions />
                         </Grid>
-                        <Grid item width={"100%"}>
-                          <Stack className="non-modal-dialog">
+                        <Grid item width={'100%'}>
+                          <Stack className='non-modal-dialog'>
                             <Grid
                               container
-                              justifyContent={"center"}
+                              justifyContent={'center'}
                               spacing={3}
-                              mt={"auto"}
+                              mt={'auto'}
                             >
                               <ThemeProvider theme={theme}>
                                 <Typography
-                                  align="center"
+                                  align='center'
                                   gutterBottom
-                                  variant="h5"
-                                  fontWeight={"bold"}
+                                  variant='h5'
+                                  fontWeight={'bold'}
                                 >
                                   Enroll to view content
                                 </Typography>
                               </ThemeProvider>
                               <Grid item xs={12}>
                                 <Button
-                                  variant="outlined"
-                                  size="large"
+                                  variant='outlined'
+                                  size='large'
                                   disableRipple
                                   sx={{
                                     borderRadius: 10,
-                                    fontWeight: "bolder",
+                                    fontWeight: 'bolder',
                                   }}
                                   onClick={() =>
                                     document
-                                      .getElementById("enroll")
-                                      .scrollIntoView({ behavior: "smooth" })
+                                      .getElementById('enroll')
+                                      .scrollIntoView({ behavior: 'smooth' })
                                   }
                                   fullWidth
                                 >
@@ -1427,10 +1437,10 @@ export default function Course() {
                     </>
                   ) : (
                     <>
-                      <Grid item container alignSelf={"flex-start"}>
+                      <Grid item container alignSelf={'flex-start'}>
                         <Grid item mb={2}>
                           <ThemeProvider theme={theme}>
-                            <Typography variant="h4" fontWeight={"bold"}>
+                            <Typography variant='h4' fontWeight={'bold'}>
                               Course content
                             </Typography>
                           </ThemeProvider>
@@ -1446,16 +1456,16 @@ export default function Course() {
               <Grid
                 item
                 container
-                alignSelf={"flex-start"}
+                alignSelf={'flex-start'}
                 mt={
                   !isAuthenticated || (!enrollment && !isInstructor && !isAdmin)
-                    ? "30vh"
-                    : "initial"
+                    ? '30vh'
+                    : 'initial'
                 }
               >
                 <Grid item xs={12}>
                   <ThemeProvider theme={theme}>
-                    <Typography variant="h5" fontWeight={"bold"}>
+                    <Typography variant='h5' fontWeight={'bold'}>
                       Comments
                     </Typography>
                   </ThemeProvider>
