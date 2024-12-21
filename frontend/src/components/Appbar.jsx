@@ -65,9 +65,11 @@ function ResponsiveAppBar() {
   const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
   const { user, courses } = useLoaderData(); // loader is in root.jsx
-  const userCourses = courses?.filter(
-    (course) => course.created_by === user.user_id && course.status !== 'P'
-  ); // just return THE user's or instructor's courses for notifcation purposes.
+  if (courses) {
+    const userCourses = courses.filter(
+      (course) => course.created_by === user.user_id && course.status !== 'P'
+    ); // just return THE user's or instructor's courses for notifcation purposes.
+  }
   const profilePic = useAtomValue(profilePictureAtom || '');
   const [firstClick, setFirstClick] = React.useState(true);
   const didRun = React.useRef(false);
