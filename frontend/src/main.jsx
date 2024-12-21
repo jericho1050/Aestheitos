@@ -10,8 +10,8 @@ import Root, {
   loader as rootLoader,
 } from './routes/root';
 import ErrorPage from './error-page';
-import SignIn from './routes/signin';
-import SignUp from './routes/signup';
+import SignIn from './routes/SignIn';
+import SignUp from './routes/SignUp';
 import { Index, loader as indexLoader } from './routes/index';
 import Course, { loader as courseLoader } from './routes/course';
 import CreateCourse from './routes/create-course';
