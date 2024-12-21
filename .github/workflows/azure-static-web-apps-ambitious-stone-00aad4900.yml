@@ -49,7 +49,6 @@ jobs:
           app_location: "./frontend" # App source code path
           output_location: "dist"
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          skip_app_build: true
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
