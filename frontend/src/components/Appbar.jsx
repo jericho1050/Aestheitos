@@ -68,23 +68,25 @@ function ResponsiveAppBar() {
   // Initialize with empty array
   let userCourses = [];
 
-  // Add debugging logs and safe checks
-  if (courses) {
-    console.log('courses before filter:', courses); // Debug log
+  if (courses && courses.results) {
+    // Check for courses.results instead of just courses
+    console.log('courses before filter:', courses);
 
-    if (Array.isArray(courses)) {
+    if (Array.isArray(courses.results)) {
+      // Check courses.results instead of courses
       try {
-        userCourses = courses.filter(
+        userCourses = courses.results.filter(
+          // Filter on courses.results
           (course) =>
             course.created_by === user.user_id && course.status !== 'P'
         );
-        console.log('filtered courses:', userCourses); // Debug log
+        console.log('filtered courses:', userCourses);
       } catch (error) {
         console.error('Error filtering courses:', error);
-        userCourses = []; // Fallback to empty array
+        userCourses = [];
       }
     } else {
-      console.error('courses is not an array:', typeof courses);
+      console.error('courses.results is not an array:', typeof courses.results);
       userCourses = [];
     }
   }
