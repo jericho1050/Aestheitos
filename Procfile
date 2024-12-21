@@ -1,0 +1,1 @@
+web gunicorn Aestheitos.wsgi:application --log-file -

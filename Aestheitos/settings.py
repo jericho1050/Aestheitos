@@ -15,6 +15,9 @@ from pathlib import Path
 from datetime import timedelta
 import sys
 from dotenv import load_dotenv
+import django_heroku
+import dj_database_url
+
 
 load_dotenv()  # take environment variables from .env
 
@@ -108,24 +111,24 @@ WSGI_APPLICATION = "Aestheitos.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # If you're interested in using PostgreSQL then use this
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.getenv('POSTGRES_DB'),
-#         "USER": os.getenv('POSTGRES_USER'),
-#         "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
-#         "HOST": "127.0.0.1",
-#         "PORT": "5432",
-#     }
-# }
-
-# if you're interested in using Sqlite3 then use this
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("PGDATABASE"),
+        "USER": os.getenv("PGUSER"),
+        "PASSWORD": os.getenv("PGPASSWORD"),
+        "HOST": os.getenv("PGHOST"),
+        "PORT": os.getenv("PGPORT"),
     }
 }
+
+# if you're interested in using Sqlite3 then use this
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # Decided to 'TEST' in sqlite3 because I don't know why my test cases are having assertion errors in postgreSQL.
@@ -176,6 +179,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+django_heroku.settings(locals())
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
