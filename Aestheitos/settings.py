@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "django_apscheduler",
+    "storages",
 ]
 
 CORS_ORIGIN_WHITELIST = [
@@ -79,7 +80,7 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
-    "https://stingray-app-24qhl.ondigitalocean.app"
+    "https://stingray-app-24qhl.ondigitalocean.app",
 ]
 # CSRF_COOKIE_HTTPONLY = True
 # CSRF_COOKIE_SECURE = False
@@ -212,10 +213,6 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-MEDIA_ROOT = os.path.join(BASE_DIR, "images")
-MEDIA_URL = "/images/"
-
 # CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 # CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
@@ -237,3 +234,23 @@ SIMPLE_JWT = {
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, g:i a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 40
+
+
+# Local development settings
+if DEBUG:
+    MEDIA_ROOT = os.path.join(BASE_DIR, "images")
+    MEDIA_URL = "/images/"
+else:
+    # Production settings for DigitalOcean Spaces
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    AWS_ACCESS_KEY_ID = os.environ.get("DO_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("DO_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = "aestheitos-media"
+    AWS_S3_ENDPOINT_URL = "https://sgp1.digitaloceanspaces.com"
+    AWS_S3_CUSTOM_DOMAIN = "aestheitos-media.sgp1.cdn.digitaloceanspaces.com"
+    AWS_S3_REGION_NAME = "sgp1"
+    AWS_LOCATION = "media"
+    AWS_DEFAULT_ACL = "public-read"
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
