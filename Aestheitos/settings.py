@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-@ttgo7^y1_=7%#-r#u+l*@smxgr=c$x#pb+i%5^jgj+a$5s1k8"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "0.0.0.0",
@@ -64,7 +64,6 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
-    "*"
 ]
 CORS_EXPOSE_HEADERS = [
     "Content-Type",
@@ -76,13 +75,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
-    "*"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
-    "https://stingray-app-24qhl.ondigitalocean.app",
-    "*"
+    "https://stingray-app-24qhl.ondigitalocean.app"
 ]
 # CSRF_COOKIE_HTTPONLY = True
 # CSRF_COOKIE_SECURE = False
