@@ -16,7 +16,7 @@ export default defineConfig(({ command, mode }) => {
     ],
     define: {
       'import.meta.env.VITE_API_URL': JSON.stringify(
-        process.env.VITE_API_URL || env.VITE_API_URL
+        process.env.VITE_API_URL || env.VITE_API_URL || "https://aestheitos-735ee07df6a7.herokuapp.com/"
       ),
     },
     test: {
