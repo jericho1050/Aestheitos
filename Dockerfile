@@ -14,9 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 FROM python:3.11-slim
 WORKDIR /app
 
-RUN mkdir -p /app/staticfiles
-
-
 # Install runtime dependencies and Python packages
 COPY requirements.txt .
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -26,11 +23,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
+# Create the directory at the container root
+RUN mkdir /staticfiles
 
-
-# Collect static files
+# Set Django to place static files at /staticfiles
 ENV DJANGO_SETTINGS_MODULE=Aestheitos.settings
-RUN python manage.py collectstatic --noinput
+ENV STATIC_ROOT=/staticfiles
 
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "Aestheitos.wsgi:application"]
