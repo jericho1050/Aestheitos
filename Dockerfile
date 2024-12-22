@@ -1,8 +1,10 @@
 FROM python:3.11-slim as builder
 
-# Install Rust (Cargo) for rpds-py or other packages needing rust
+# Install Rust (Cargo) for rpds-py, plus dependencies for psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cargo \
+    build-essential \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
