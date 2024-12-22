@@ -1,6 +1,6 @@
 FROM python:3.11-slim as builder
 
-# Install Rust (Cargo) for rpds-py, plus dependencies for psycopg2
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cargo \
     build-essential \
@@ -13,7 +13,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 FROM python:3.11-slim
 WORKDIR /app
-COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+
+# Install runtime dependencies and Python packages
+COPY requirements.txt .
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir -r requirements.txt
+
 COPY . .
 
 EXPOSE 8000
