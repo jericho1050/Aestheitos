@@ -38,9 +38,9 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "127.0.0.1",
     "localhost",
-    "aestheitos-735ee07df6a7.herokuapp.com",
     "ambitious-stone-00aad4900.4.azurestaticapps.net",
     "aestheitos.vercel.app",
+    ".ondigitalocean.app",  # Allow all subdomains on ondigitalocean.app
 ]
 
 
