@@ -67,13 +67,21 @@ CORS_ORIGIN_WHITELIST = [
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
 ]
-# CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_EXPOSE_HEADERS = [
+    "Content-Type",
+    "X-CSRFToken",
+    "X-Total-Count",
+    "Access-Control-Expose-Headers",
+]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
 ]
-# CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
+    "https://aestheitos.vercel.app",
+]
 # CSRF_COOKIE_HTTPONLY = True
 # CSRF_COOKIE_SECURE = False
 # SESSION_COOKIE_SECURE = False
