@@ -38,7 +38,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "ambitious-stone-00aad4900.4.azurestaticapps.net",
     "aestheitos.vercel.app",
-    ".ondigitalocean.app",  # Allow all subdomains on ondigitalocean.app,
+    "stingray-app-24qhl.ondigitalocean.app",
 ]
 
 
@@ -96,7 +96,7 @@ SESSION_COOKIE_SECURE = True
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',    
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -204,7 +204,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.environ.get("STATIC_ROOT", "/staticfiles")
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
