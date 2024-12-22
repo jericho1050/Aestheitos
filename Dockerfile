@@ -14,7 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 FROM python:3.11-slim
 WORKDIR /app
 
-RUN 
+RUN mkdir -p /app/staticfiles
+
 
 # Install runtime dependencies and Python packages
 COPY requirements.txt .
@@ -22,12 +23,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -r requirements.txt
-    
-# Collect static files
-RUN python manage.py collectstatic --noinput
 
 COPY . .
 
+
+
+# Collect static files
+ENV DJANGO_SETTINGS_MODULE=Aestheitos.settings
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "Aestheitos.wsgi:application"]
