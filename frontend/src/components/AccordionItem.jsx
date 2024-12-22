@@ -28,7 +28,7 @@ import WorkoutMediaCard from './WorkoutCard';
 import getEmbedUrl from '../helper/getEmbedUrl';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import demoGif from '../static/images/chinupVecs.gif';
+import demoGif from '/images/chinupVecs.gif';
 import InputFileUpload from './InputFileUpload';
 import Plyr from 'plyr-react';
 import 'plyr-react/plyr.css';

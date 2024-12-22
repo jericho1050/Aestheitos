@@ -97,7 +97,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useAtom } from 'jotai';
 import { snackbarReducerAtom } from '../atoms/snackbarAtom';
 import AlertDialog from '../components/AreYouSureDialog';
-import image from '../static/images/noimg.png';
+import image from '/images/noimg.png';
 import CustomizedSnackbar from '../components/Snackbar';
 import AuthenticationWall from '../components/AuthenticationWall';
 import parseCourseDateTime, { parseCommentDate } from '../helper/parseDateTime';

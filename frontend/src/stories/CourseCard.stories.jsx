@@ -1,6 +1,6 @@
 import { reactRouterParameters } from 'storybook-addon-remix-react-router';
 import CourseCard from '../components/CourseCard';
-import thumbnail from '../static/images/what.jpg'
+import thumbnail from '/images/what.jpg'
 const meta = {
   component: CourseCard,
   tags: ['autodocs'],

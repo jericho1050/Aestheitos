@@ -30,7 +30,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import logo from '../static/images/aestheitoslogo.png';
+import logo from '/images/aestheitoslogo.png';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import SearchBar from './SearchBar';
 import CheckIcon from '@mui/icons-material/Check';
@@ -65,31 +65,10 @@ function ResponsiveAppBar() {
   const isAuthenticated = token['access'] !== null;
   const navigate = useNavigate();
   const { user, courses } = useLoaderData(); // loader is in root.jsx
-  // Initialize with empty array
-  let userCourses = [];
+  const userCourses = courses.filter(
+    (course) => course.created_by === user.user_id && course.status !== 'P'
+  ); // just return THE user's or instructor's courses for notifcation purposes.
 
-  if (courses && courses.results) {
-    // Check for courses.results instead of just courses
-    console.log('courses before filter:', courses);
-
-    if (Array.isArray(courses.results)) {
-      // Check courses.results instead of courses
-      try {
-        userCourses = courses.results.filter(
-          // Filter on courses.results
-          (course) =>
-            course.created_by === user.user_id && course.status !== 'P'
-        );
-        console.log('filtered courses:', userCourses);
-      } catch (error) {
-        console.error('Error filtering courses:', error);
-        userCourses = [];
-      }
-    } else {
-      console.error('courses.results is not an array:', typeof courses.results);
-      userCourses = [];
-    }
-  }
   const profilePic = useAtomValue(profilePictureAtom || '');
   const [firstClick, setFirstClick] = React.useState(true);
   const didRun = React.useRef(false);

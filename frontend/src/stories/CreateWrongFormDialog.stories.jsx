@@ -1,7 +1,7 @@
 import { fn } from '@storybook/test';
 import CreateWrongFormDialog from '../components/CreateWrongFormDialog';
 import { action } from '@storybook/addon-actions';
-import pushup from '../static/images/pushupVecs.gif'
+import pushup from '/images/pushupVecs.gif'
 const meta = {
   component: CreateWrongFormDialog,
   tags: ['autodocs']

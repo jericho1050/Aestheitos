@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import demoGif from '../static/images/chinupVecs.gif';
+import demoGif from '/images/chinupVecs.gif';
 import { correctForm, wrongForm } from './workoutsAtom';
 
 const section1 = {

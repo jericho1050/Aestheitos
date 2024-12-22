@@ -18,4 +18,6 @@ export default defineConfig({
     setupFiles: './src/tests/setup.js',
     css: true,
   },
+  publicDir: 'public' // use standard 'public' directory
+
 })

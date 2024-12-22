@@ -34,7 +34,14 @@ SECRET_KEY = "django-insecure-@ttgo7^y1_=7%#-r#u+l*@smxgr=c$x#pb+i%5^jgj+a$5s1k8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "localhost", "aestheitos-735ee07df6a7.herokuapp.com"]
+ALLOWED_HOSTS = [
+    "0.0.0.0",
+    "127.0.0.1",
+    "localhost",
+    "aestheitos-735ee07df6a7.herokuapp.com",
+    "ambitious-stone-00aad4900.4.azurestaticapps.net",
+    "aestheitos.vercel.app",
+]
 
 
 # Application definition
@@ -58,11 +65,13 @@ INSTALLED_APPS = [
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
+    "https://aestheitos.vercel.app",
 ]
 # CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
+    "https://aestheitos.vercel.app",
 ]
 # CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
 # CSRF_COOKIE_HTTPONLY = True

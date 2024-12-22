@@ -1,6 +1,6 @@
 import { fn } from '@storybook/test';
 import WorkoutCard from '../components/WorkoutCard';
-import demo from '../static/images/chinupVecs.gif'
+import demo from '/images/chinupVecs.gif'
 
 const meta = {
   component: WorkoutCard,

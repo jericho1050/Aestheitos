@@ -27,7 +27,7 @@ import {
 import * as React from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import image from '../static/images/noimg.png';
+import image from '/images/noimg.png';
 import FormattedInputs from '../components/FormattedInput';
 import AddAccordion from '../components/AddAccordion';
 import InputFileUpload from '../components/InputFileUpload';

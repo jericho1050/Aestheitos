@@ -25,7 +25,7 @@ import {
   responsiveFontSizes,
 } from '@mui/material';
 import * as React from 'react';
-import image from '../static/images/noimg.png';
+import image from '/images/noimg.png';
 import { styled } from '@mui/material/styles';
 import { useImmer } from 'use-immer';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -35,8 +35,8 @@ import AddAccordion from '../components/AddAccordion';
 import InputFileUpload from '../components/InputFileUpload';
 import { AccordionSectionCreate } from '../components/Accordion';
 import AddIcon from '@mui/icons-material/Add';
-import demoGif from '../static/images/chinupVecs.gif';
-import demoGif2 from '../static/images/pushupVecs.gif';
+import demoGif from '/images/chinupVecs.gif';
+import demoGif2 from '/images/pushupVecs.gif';
 import { TransitionGroup } from 'react-transition-group';
 import Collapse from '@mui/material/Collapse';
 import { useAutoAnimate } from '@formkit/auto-animate/react';

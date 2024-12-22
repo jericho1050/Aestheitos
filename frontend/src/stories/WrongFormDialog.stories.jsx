@@ -1,7 +1,7 @@
 import { fn } from '@storybook/test';
 import WrongFormDialog from '../components/WrongFormDialog';
-import pullup from '../static/images/chinupVecs.gif'
-import pushup from '../static/images/pushupVecs.gif'
+import pullup from '/images/chinupVecs.gif'
+import pushup from '/images/pushupVecs.gif'
 
 const meta = {
   component: WrongFormDialog,

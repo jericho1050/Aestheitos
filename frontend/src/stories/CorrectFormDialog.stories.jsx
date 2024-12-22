@@ -1,7 +1,7 @@
 import { fn } from '@storybook/test';
 import CorrectFormDialog from '../components/CorrectFormDialog';
-import pushup from '../static/images/pushupVecs.gif'
-import pullup from '../static/images/chinupVecs.gif'
+import pushup from '/images/pushupVecs.gif'
+import pullup from '/images/chinupVecs.gif'
 const meta = {
   component: CorrectFormDialog,
   tags: ['autodocs']

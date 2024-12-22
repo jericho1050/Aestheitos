@@ -14,7 +14,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import defaultImage from '../static/images/noimg.png';
+import defaultImage from '/images/noimg.png';
 import { Link } from 'react-router-dom';
 import { Parser } from 'html-to-react';
 import truncateText from '../helper/truncateText';

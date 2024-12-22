@@ -23,12 +23,12 @@ import { modules, modulesCard } from '../helper/quillModule';
 import CorrectFormDialog from '../components/CreateCorrectFormDialog';
 import WrongFormDialog from '../components/CreateWrongFormDialog';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import demoGif from '../static/images/chinupVecs.gif';
+import demoGif from '/images/chinupVecs.gif';
 import InputFileUpload from './InputFileUpload';
 import ClearIcon from '@mui/icons-material/Clear';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
-import demoGif2 from '../static/images/pushupVecs.gif';
+import demoGif2 from '/images/pushupVecs.gif';
 
 // This workoutMediaCard is for create-course and edit-course
 export default function WorkoutMediaCard({

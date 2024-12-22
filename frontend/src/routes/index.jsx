@@ -30,9 +30,9 @@ import Results from '../components/Carousel';
 // By imhuyqn
 
 const images = [
-  'src/static/images/firstBG.png',
-  'src/static/images/secondBG copy.png',
-  'src/static/images/thirdBG.png',
+  '/images/firstBG.png',
+  '/images/secondBG copy.png',
+  '/images/thirdBG.png',
 ];
 export async function loader({ request }) {
   const url = new URL(request.url);

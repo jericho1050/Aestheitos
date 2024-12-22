@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
-import demoGif2 from '../static/images/pushupVecs.gif';
-import demoGif from '../static/images/chinupVecs.gif';
+import demoGif2 from '/images/pushupVecs.gif';
+import demoGif from '/images/chinupVecs.gif';
 
 // Initial data for workouts state
 export const correctForm = {
