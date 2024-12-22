@@ -4,7 +4,7 @@
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
       "Access-Control-Allow-Origin": "https://stingray-app-24qhl.ondigitalocean.app",
-      "Access-Control-Expose-Headers": "Set-Cookie"
+      "Access-Control-Expose-Headers": "Set-Cookie, *"
     },
     "navigationFallback": {
       "rewrite": "/index.html",

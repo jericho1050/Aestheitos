@@ -159,6 +159,7 @@ function signIn(data) {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
+    mode: 'cors',
     body: JSON.stringify({
       username: data.get('username'),
       password: data.get('password'),

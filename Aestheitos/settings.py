@@ -71,6 +71,7 @@ CORS_EXPOSE_HEADERS = [
     "X-CSRFToken",
     "X-Total-Count",
     "Access-Control-Expose-Headers",
+    "Set-Cookie",
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
