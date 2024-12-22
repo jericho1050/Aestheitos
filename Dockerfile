@@ -23,12 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-# Create the directory at the container root
-RUN mkdir /staticfiles
 
-# Set Django to place static files at /staticfiles
-ENV DJANGO_SETTINGS_MODULE=Aestheitos.settings
-ENV STATIC_ROOT=/staticfiles
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "Aestheitos.wsgi:application"]
