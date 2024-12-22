@@ -79,6 +79,7 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
+    "https://stingray-app-24qhl.ondigitalocean.app"
 ]
 # CSRF_COOKIE_HTTPONLY = True
 # CSRF_COOKIE_SECURE = False
