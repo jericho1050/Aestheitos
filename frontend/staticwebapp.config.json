@@ -2,17 +2,12 @@
     "globalHeaders": {
       "Access-Control-Allow-Credentials": "true",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Set-Cookie": "Path=/; SameSite=None; Secure"
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+      "Access-Control-Allow-Origin": "https://stingray-app-24qhl.ondigitalocean.app",
+      "Access-Control-Expose-Headers": "Set-Cookie"
     },
     "navigationFallback": {
       "rewrite": "/index.html",
       "exclude": ["/static/*", "/images/*"]
-    },
-    "responseOverrides": {
-      "401": {
-        "redirect": "/index.html",
-        "statusCode": 200
-      }
     }
-  }
+}

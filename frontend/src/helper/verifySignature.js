@@ -5,6 +5,8 @@ export default async function validateJWTToken() {
     const response = await fetch(`${import.meta.env.VITE_API_URL}user`, {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
+      mode: 'cors'
+
     });
 
     if (!response.ok) {
