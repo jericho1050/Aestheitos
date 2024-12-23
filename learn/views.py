@@ -84,7 +84,11 @@ class RegisterView(APIView):
         token = RefreshToken.for_user(user)
         # print(token)
         response = Response()
-
+        response["Access-Control-Allow-Credentials"] = "true"
+        response["Access-Control-Allow-Origin"] = (
+            "https://ambitious-stone-00aad4900.4.azurestaticapps.net"
+        )
+        response["Access-Control-Expose-Headers"] = "Set-Cookie"
         response.data = {
             "refresh": str(token),
             "access": str(token.access_token),
@@ -109,6 +113,11 @@ class LoginView(TokenObtainPairView):
     @extend_schema(request=LoginCustomSerializer, responses=LoginCustomSerializer)
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
+        response["Access-Control-Allow-Credentials"] = "true"
+        response["Access-Control-Allow-Origin"] = (
+            "https://ambitious-stone-00aad4900.4.azurestaticapps.net"
+        )
+        response["Access-Control-Expose-Headers"] = "Set-Cookie"
         response.set_cookie(
             key="refresh",
             value=response.data["refresh"],
