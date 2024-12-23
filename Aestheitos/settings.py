@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-@ttgo7^y1_=7%#-r#u+l*@smxgr=c$x#pb+i%5^jgj+a$5s1k8"
+SECRET_KEY = os.getenv('SECRET_KEY', "IDON'TWANNASETTHECOOKIEANYMORE")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -39,7 +39,6 @@ ALLOWED_HOSTS = [
     "ambitious-stone-00aad4900.4.azurestaticapps.net",
     "aestheitos.vercel.app",
     "stingray-app-24qhl.ondigitalocean.app",
-    "seashell-app-lfqfa.ondigitalocean.app",
 ]
 
 
@@ -66,7 +65,6 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
-    "https://seashell-app-lfqfa.ondigitalocean.app",
 ]
 CORS_EXPOSE_HEADERS = [
     "Content-Type",
@@ -74,19 +72,17 @@ CORS_EXPOSE_HEADERS = [
     "X-Total-Count",
     "Access-Control-Expose-Headers",
     "Set-Cookie",
-    "Cookie",
+    "*",
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
-    "https://seashell-app-lfqfa.ondigitalocean.app",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
     "https://stingray-app-24qhl.ondigitalocean.app",
-    "https://seashell-app-lfqfa.ondigitalocean.app",
 ]
 # CSRF_COOKIE_HTTPONLY = True
 # CSRF_COOKIE_SECURE = False
