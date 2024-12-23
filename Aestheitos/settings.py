@@ -39,6 +39,7 @@ ALLOWED_HOSTS = [
     "ambitious-stone-00aad4900.4.azurestaticapps.net",
     "aestheitos.vercel.app",
     "stingray-app-24qhl.ondigitalocean.app",
+    "seashell-app-lfqfa.ondigitalocean.app"
 ]
 
 
@@ -65,6 +66,7 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
+    "https://seashell-app-lfqfa.ondigitalocean.app"
 ]
 CORS_EXPOSE_HEADERS = [
     "Content-Type",
@@ -77,11 +79,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
+    "https://seashell-app-lfqfa.ondigitalocean.app"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
     "https://stingray-app-24qhl.ondigitalocean.app",
+    "https://seashell-app-lfqfa.ondigitalocean.app"
 ]
 # CSRF_COOKIE_HTTPONLY = True
 # CSRF_COOKIE_SECURE = False
