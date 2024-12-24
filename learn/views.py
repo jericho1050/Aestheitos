@@ -39,12 +39,11 @@ from .custom_serializer import *
 # API calls (Class based functions)
 
 
-
-
 class UserMyDetailsView(APIView):
     """
     Retrieve and update a user instance
     """
+
     # retrieves the User by it's JWT
     def get(self, request):
         try:
@@ -58,14 +57,15 @@ class UserMyDetailsView(APIView):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return Response(UserDetailSerializer(user).data)
-    
+
     def patch(self, request):
         user = user_authentication(request)
         serializer = UserSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        
+
         return Response(status=status.HTTP_200_OK)
+
 
 class RegisterView(APIView):
     """
@@ -90,9 +90,24 @@ class RegisterView(APIView):
             "access": str(token.access_token),
         }
         response.set_cookie(
-            key="refresh", value=response.data["refresh"], httponly=True
+            "access",
+            response.data["access"],
+            max_age=240,  # 4 minutes
+            domain=".aestheitos.pro",
+            secure=True,
+            httponly=True,
+            samesite="None",
         )
-        response.set_cookie(key="access", value=response.data["access"], httponly=True)
+
+        response.set_cookie(
+            "refresh",
+            response.data["refresh"],
+            max_age=86400,  # 1 day
+            domain=".aestheitos.pro",
+            secure=True,
+            httponly=True,
+            samesite="None",
+        )
         return response
 
 
@@ -104,10 +119,27 @@ class LoginView(TokenObtainPairView):
     @extend_schema(request=LoginCustomSerializer, responses=LoginCustomSerializer)
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
+
         response.set_cookie(
-            key="refresh", value=response.data["refresh"], httponly=True
+            "access",
+            response.data["access"],
+            max_age=240,  # 4 minutes
+            domain=".aestheitos.pro",
+            secure=True,
+            httponly=True,
+            samesite="None",
         )
-        response.set_cookie(key="access", value=response.data["access"], httponly=True)
+
+        response.set_cookie(
+            "refresh",
+            response.data["refresh"],
+            max_age=86400,  # 1 day
+            domain=".aestheitos.pro",
+            secure=True,
+            httponly=True,
+            samesite="None",
+        )
+
         return response
 
 
@@ -118,7 +150,15 @@ class MyTokenRefreshView(TokenRefreshView):
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        response.set_cookie(key="access", value=response.data["access"], httponly=True)
+        response.set_cookie(
+            "access",
+            response.data["access"],
+            max_age=240,  # 4 minutes
+            domain=".aestheitos.pro",
+            secure=True,
+            httponly=True,
+            samesite="None",
+        )
         return response
 
 
@@ -183,17 +223,19 @@ class UserProgressDetail(
         obj = get_object_or_404(queryset, course=self.kwargs["pk"], user=user)
         return obj
 
+
 class UserSectionView(UpdateAPIMixin, generics.RetrieveUpdateAPIView):
     """
     Retrieve and Update a user's clicked or unclicked 'Section or Accordion checkbox'
     """
+
     serializer_class = UserSectionSerializer
     queryset = UserSection.objects.all()
 
     def get_object(self):
         user = user_authentication(self.request)
         try:
-            user_section = UserSection.objects.get(user=user, section=self.kwargs['pk'])
+            user_section = UserSection.objects.get(user=user, section=self.kwargs["pk"])
         except UserSection.DoesNotExist:
             return Response(status=404)
         return user_section
@@ -216,7 +258,7 @@ class CourseList(CreateAPIMixin, generics.ListCreateAPIView):
         ):
             # If the pagination argument is true in Stirng and Course status is acccepted, then return the paginated queryset.
             scope = self.request.query_params.get("scope")
-            
+
             # NOTE: Don't forget the scope parameter, as it will determine whether to get all or the user's courses.
             if scope == "all":
                 queryset = (
@@ -307,17 +349,22 @@ class SectionList(CreateAPIMixin, generics.ListCreateAPIView):
 
     def get_queryset(self):
         sections = Section.objects.filter(course_content=self.kwargs["pk"])
-        user = get_auth_user(self.request) # retrieve the user
-        course = CourseContent.objects.get(id=self.kwargs["pk"]).course.id # retrieve the course
-        user_existing_sections = UserSection.objects.filter(user=user).values_list('section', flat=True)
+        user = get_auth_user(self.request)  # retrieve the user
+        course = CourseContent.objects.get(
+            id=self.kwargs["pk"]
+        ).course.id  # retrieve the course
+        user_existing_sections = UserSection.objects.filter(user=user).values_list(
+            "section", flat=True
+        )
         if user and Enrollment.objects.filter(course=course, user=user).exists():
             # This would create a checkbox or be clicked for a section.
             for section in sections:
-                if section.id in user_existing_sections: 
+                if section.id in user_existing_sections:
                     continue
                 UserSection.objects.create(user=user, section=section)
 
-        return sections 
+        return sections
+
 
 class SectionDetail(
     DeleteAPIMixin, UpdateAPIMixin, generics.RetrieveUpdateDestroyAPIView
@@ -493,7 +540,7 @@ class BlogList(CreateAPIMixin, generics.ListCreateAPIView):
     pagination_class = BlogResultsPagination
 
     def get_queryset(self):
-        return super().get_queryset().order_by('-blog_created')   
+        return super().get_queryset().order_by("-blog_created")
 
 
 class BlogDetail(UpdateAPIMixin, DeleteAPIMixin, generics.RetrieveUpdateDestroyAPIView):
@@ -514,7 +561,9 @@ class BlogCommentList(CreateAPIMixin, generics.ListCreateAPIView):
     serializer_class = BlogCommentsSerializer
 
     def get_queryset(self):
-        return BlogComments.objects.filter(blog=self.kwargs["pk"], parent_comment=None).order_by("-comment_date")
+        return BlogComments.objects.filter(
+            blog=self.kwargs["pk"], parent_comment=None
+        ).order_by("-comment_date")
 
 
 class BlogCommentDetail(
@@ -532,22 +581,25 @@ class CourseRatingCreate(CreateAPIMixin, generics.ListCreateAPIView):
     """
     List course ratings (only retrieve the course rating for the user's rating on a particular course) or create a new course's rating (i.e., the user's course rating).
     """
+
     # Even though it's ListCreateAPIView, the queryset would only return one item from the list.
     queryset = CourseRating.objects.all()
     serializer_class = CourseRatingSerializer
 
     def get_queryset(self):
         user = user_authentication(self.request)
-        return CourseRating.objects.filter(user=user, course=self.kwargs['pk'])
+        return CourseRating.objects.filter(user=user, course=self.kwargs["pk"])
+
 
 class CourseRatingDetail(UpdateAPIMixin, generics.RetrieveUpdateAPIView):
     """
     Update a course's rating instance
     """
+
     queryset = CourseRating.objects.all()
     serializer_class = CourseRatingSerializer
 
-        
+
 class UserView(APIView):
     """
     Verifies the refresh token and returns the pair jwt.
@@ -559,23 +611,25 @@ class UserView(APIView):
         refresh = request.COOKIES.get("refresh")
         if not access and not refresh:
             raise AuthenticationFailed("Unauthenticated!")
-        
+
         # Verify the refresh token only
-        serializer = TokenVerifySerializer(data={"token": refresh })
+        serializer = TokenVerifySerializer(data={"token": refresh})
         try:
             # validate the token
             serializer.is_valid(raise_exception=True)
             response.data = {"refresh": refresh, "access": access}
         except InvalidToken:
             raise AuthenticationFailed("Invalid Refresh token!")
-        
+
         return response
-    
+
+
 class UserRetrieveView(generics.RetrieveAPIView):
     """
     Retrieve the user instance
     """
-     # retrieves the User by it's ID 
+
+    # retrieves the User by it's ID
     serializer_class = UserDetailSerializer
     queryset = User.objects.all()
 
