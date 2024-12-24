@@ -92,7 +92,8 @@ CORS_ALLOW_CREDENTIALS = True
 # PROD SETTINGS
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
-
+SESSION_COOKIE_DOMAIN = ".aestheitos.pro"  # Allows sharing between frontend and API
+CSRF_COOKIE_DOMAIN = ".aestheitos.pro"  # Same for CSRF tokens
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
