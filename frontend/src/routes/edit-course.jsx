@@ -44,6 +44,8 @@ import {
   deleteWrongExerciseForm,
   getCourse,
   getCourseContent,
+  getCorrectExercises,
+  getWrongExercises,
   getSection,
   getSectionItems,
   getSections,
