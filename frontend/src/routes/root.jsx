@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import ResponsiveAppBar from '../components/Appbar';
 import { useNavigation } from 'react-router-dom';
-import persistJWT from '../helper/persistJWT';
+import persistAuth from '../helper/persistAuth';
 import useRefreshToken from '../helper/useRefreshToken';
 import { useContext } from 'react';
 import { IsLoadingContext } from '../contexts/IsLoadingContext';
@@ -26,7 +26,7 @@ export default function Root() {
   const navigation = useNavigation();
   const isLoading = useContext(IsLoadingContext);
 
-  persistJWT(); // here we are persisting log in state
+  persistAuth(); // here we are persisting log in state
   useRefreshToken(); // refreshing access token when it's due if the user has a refresh token in storage.
 
   return (

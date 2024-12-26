@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
   const [token, dispatch] = useReducer(authReducer, {
     access: null,
     refresh: null,
+    isAuthenticated: false,
   });
   const access = token['access'];
   let decoded;
@@ -25,7 +26,12 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={token}>
+    <AuthContext.Provider
+      value={{
+        ...token,
+        isAuthenticated: Boolean(token.access || token.isAuthenticated),
+      }}
+    >
       <AuthDispatchContext.Provider value={dispatch}>
         <AccessTokenDecodedContext.Provider value={decoded}>
           {children}
@@ -39,10 +45,24 @@ export function AuthProvider({ children }) {
 export function authReducer(state, action) {
   switch (action.type) {
     case 'setToken':
-      return { ...state, access: action.access, refresh: action.refresh };
+      return {
+        ...state,
+        access: action.access || null,
+        refresh: action.refresh || null,
+        isAuthenticated: action.isAuthenticated || Boolean(action.access),
+      };
+    case 'setSession':
+      localStorage.setItem('sessionId', action.sessionId);
+      return {
+        ...state,
+        isAuthenticated: action.isAuthenticated,
+      };
     case 'removeToken':
       // eslint-disable-next-line no-case-declarations, no-unused-vars
       return {};
+    case 'removeSession':
+      localStorage.removeItem('sessionId');
+      return;
   }
 }
 

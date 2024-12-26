@@ -1,4 +1,3 @@
-
 class HttpError extends Error {
   constructor(statusCode, message, ...params) {
     super(...params);
@@ -21,21 +20,34 @@ async function checkResponse(response) {
 
 async function sendRequest(url, options) {
   try {
+    const sessionId = localStorage.getItem('sessionId');
+
+    // If we're sending FormData, don't force JSON Content-Type
+    let defaultHeaders = {};
+    if (!(options.body instanceof FormData)) {
+      defaultHeaders = { 'Content-Type': 'application/json' };
+    }
+
+    const headers = {
+      ...defaultHeaders,
+      ...(sessionId && { 'X-Session-ID': sessionId }),
+      ...options.headers,
+    };
+
     const response = await fetch(url, {
       credentials: 'include',
+      headers,
       ...options,
     });
 
     await checkResponse(response);
 
     if (options.method !== 'DELETE') {
-      const data = await response.json();
-      return data;
-    } else {
-      return response;
+      return await response.json(); // Only parse JSON if the server actually returns JSON
     }
+    return response;
   } catch (err) {
-    console.error('An error occured', err);
+    console.error('An error occurred', err);
     return err;
   }
 }
@@ -47,7 +59,8 @@ export async function getCourses(
   scope = 'all'
 ) {
   return sendRequest(
-    `${import.meta.env.VITE_API_URL
+    `${
+      import.meta.env.VITE_API_URL
     }courses?page=${page}&paginate=${paginate}&status=${status}&scope=${scope}`,
     {}
   );
@@ -450,14 +463,14 @@ export async function createBlog(formData) {
 export async function updateBlog(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}blog/${id}`, {
     method: 'PATCH',
-    body: formData
-  })
+    body: formData,
+  });
 }
 
 export async function deleteBlog(id, formData) {
   return sendRequest(`${import.meta.env.VITE_API_URL}blog/${id}`, {
-    method: 'DELETE'
-  })
+    method: 'DELETE',
+  });
 }
 
 export async function getBlogComments(id) {

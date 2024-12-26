@@ -3,5 +3,5 @@
 schema.yml
 db.sqlite3
 .DS_store
-./images/*
+images/
 staticfiles/

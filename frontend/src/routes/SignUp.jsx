@@ -59,19 +59,29 @@ export default function SignUp() {
     try {
       const data = new FormData(event.currentTarget);
 
-      const token = await signUpAPI(data);
-
-      if (token['invalid']) {
+      const response = await signUp(data);
+      if (response['invalid']) {
         setIsInvalid(true);
-        throw new Error(token);
+        throw new Error(response);
+      }
+      if (!response.access) {
+        // Handle session auth (Chrome/Safari)
+        const sessionId = response.sessionId;
+
+        dispatch({
+          type: 'setSession',
+          sessionId: sessionId,
+          isAuthenticated: true,
+        });
       } else {
+        // handle JWT for Firefox
         dispatch({
           type: 'setToken',
-          access: token['access'],
-          refresh: token['refresh'],
+          access: response['access'],
+          refresh: response['refresh'],
         });
-        navigate('/');
       }
+      navigate('/');
     } catch (error) {
       console.error('An error occured', error);
       setStatus('typing');
@@ -210,7 +220,7 @@ export default function SignUp() {
 }
 
 // sends a POST request to our /signup route
-async function signUpAPI(data) {
+async function signUp(data) {
   return fetch(`${import.meta.env.VITE_API_URL}register`, {
     method: 'POST',
     headers: {
@@ -232,7 +242,11 @@ async function signUpAPI(data) {
         }
         throw new Error(response); // may'be another different error
       }
-      return response.json();
+      return response.json().then((data) => ({
+        ...data,
+        sessionId: data.sessionId,
+        isAuthenticated: true,
+      }));
     })
     .catch((error) => console.error(error));
 }

@@ -81,12 +81,10 @@ function SearchInput() {
   const isMediumScreen = useMediaQuery((theme) => theme.breakpoints.up('md'));
 
   const { courses } = useLoaderData();
-
   // Safe access to courses data
-  const validCourses = courses?.results || [];
-  const approvedCourses = Array.isArray(validCourses)
-    ? validCourses.filter((course) => course.status === 'A')
-    : [];
+  const approvedCourses =
+    Array.isArray(courses) && courses.filter((course) => course.status === 'A');
+  // const validCourses = courses?.results || [];
   return (
     <Search>
       <List sx={{ padding: 0 }}>

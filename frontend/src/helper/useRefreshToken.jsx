@@ -4,9 +4,13 @@ import {
   useAuthToken,
   useDecodedAccessToken,
 } from '../contexts/authContext';
+import isFirefox from '../helper/isFirefox';
 
 //ACCESS/REFRESH LOGIC here
 export default function useRefreshToken() {
+  if (!isFirefox()) {
+    return;
+  }
   const { token, dispatch } = useAuthToken();
   const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
   // const accessTokenExp = useContext(AccessTokenDecodedContext);

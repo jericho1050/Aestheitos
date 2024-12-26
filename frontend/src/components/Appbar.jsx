@@ -38,9 +38,10 @@ import ClearIcon from '@mui/icons-material/Clear';
 import parseCourseDateTime from '../helper/parseDateTime';
 import { useAtom, useAtomValue } from 'jotai';
 import { profilePictureAtom } from '../atoms/profilePictureAtom';
+import isFirefox from '../helper/isFirefox';
 const pages = ['Courses', 'Blog', 'Create'];
 const settings = ['Profile', 'Enrolled', 'Logout'];
-// 'Account',
+
 
 function NavLinks({ pageHandlers }) {
   return pages.map((page) => (
@@ -62,7 +63,7 @@ function ResponsiveAppBar() {
   const [anchorElBadge, setAnchorElBadge] = React.useState(null);
   const [isOpen, setIsOpen] = React.useState(false); // search dialog
   const { token, dispatch } = useAuthToken(); // returns the token state and it's dispatch function
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;
   const navigate = useNavigate();
   const { user, courses } = useLoaderData(); // loader is in root.jsx
   const userCourses = courses.filter(
@@ -127,9 +128,15 @@ function ResponsiveAppBar() {
 
   async function handleLogout(dispatch) {
     await signOut(token['refresh']);
-    await dispatch({
-      type: 'removeToken',
-    });
+    if (isFirefox()) {
+      await dispatch({
+        type: 'removeToken',
+      });
+    } else {
+      await dispatch({
+        type: 'removeSession',
+      });
+    }
     window.location.reload();
   }
 

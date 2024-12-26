@@ -64,7 +64,7 @@ export default function OverviewTextField({
               style={{ border: isError ? '1px solid red' : '' }}
             />
             <label ref={labelRef} className='quill-label'>
-              Your Course's Description*
+              Your Course's Overview*
             </label>
           </fieldset>
           <TextField

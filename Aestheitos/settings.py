@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "IDON'TWANNASETTHECOOKIEANYMORE")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -60,13 +60,24 @@ CORS_ORIGIN_WHITELIST = [
     "https://aestheitos.vercel.app",
 ]
 CORS_EXPOSE_HEADERS = [
+    "X-Session-ID",
     "Content-Type",
     "X-CSRFToken",
-    "X-Total-Count",
-    "Access-Control-Expose-Headers",
-    "Set-Cookie",
-    "*",
 ]
+# Add allowed headers explicitly
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "x-session-id",  # Add this
+]
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
@@ -74,26 +85,28 @@ CORS_ALLOWED_ORIGINS = [
     "https://aestheitos.pro",
 ]
 CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
     "https://ambitious-stone-00aad4900.4.azurestaticapps.net",
     "https://aestheitos.vercel.app",
     "https://stingray-app-24qhl.ondigitalocean.app",
     "https://aestheitos.pro",
     "https://api.aestheitos.pro",
 ]
-# CSRF_COOKIE_HTTPONLY = True
 # CSRF_COOKIE_SECURE = False
 # SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_HTTPONLY = False
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "None"
 CORS_ALLOW_CREDENTIALS = True
+CSRF_USE_SESSIONS = True
 
 
 # PROD SETTINGS
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_DOMAIN = ".aestheitos.pro"  # Allows sharing between frontend and API
-CSRF_COOKIE_DOMAIN = ".aestheitos.pro"  # Same for CSRF tokens
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_DOMAIN = ".aestheitos.pro"  # Allows sharing between frontend and API
+# CSRF_COOKIE_DOMAIN = '.aestheitos.pro'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -217,7 +230,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "learn.authentication.HeaderSessionAuthentication",
+    ],
 }
+
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Aestheitos LMS API",
@@ -229,17 +246,8 @@ SPECTACULAR_SETTINGS = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=4),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "AUTH_COOKIE": "access",
-    "AUTH_COOKIE_REFRESH": "refresh",
-    "AUTH_COOKIE_DOMAIN": ".aestheitos.pro",
-    "AUTH_COOKIE_SECURE": True,
-    "AUTH_COOKIE_HTTP_ONLY": True,
-    "AUTH_COOKIE_PATH": "/",
-    "AUTH_COOKIE_SAMESITE": "None",
 }
+
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, g:i a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 40

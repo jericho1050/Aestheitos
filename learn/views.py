@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
@@ -10,6 +11,8 @@ from drf_spectacular.types import OpenApiTypes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.serializers import TokenVerifySerializer
 from rest_framework_simplejwt.exceptions import InvalidToken
+
+from django.contrib.auth import login, authenticate, logout
 
 # from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 # from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -33,10 +36,11 @@ from .custom_serializer import *
 # https://www.django-rest-framework.org/api-guide/generic-views/#generic-views
 
 # REFERENCE FOR MY documentation tool
-# https://drf-spectacular.readthedocs.io/en/latest/readme.html#license
+# https://drf-spectacular.readdocs.io/en/latest/readme.html#license
 
 
 # API calls (Class based functions)
+logger = logging.getLogger(__name__)
 
 
 class UserMyDetailsView(APIView):
@@ -46,16 +50,25 @@ class UserMyDetailsView(APIView):
 
     # retrieves the User by it's JWT
     def get(self, request):
-        try:
-            access = request.COOKIES.get("refresh")
-            decoded = jwt.decode(access, settings.SECRET_KEY, algorithms=["HS256"])
-            user = User.objects.get(id=decoded["user_id"])
-        except (
-            jwt.exceptions.DecodeError,
-            User.DoesNotExist,
-            jwt.exceptions.ExpiredSignatureError,
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        browser = get_browser(request)
+
+        if browser == "firefox":
+            try:
+                access = request.COOKIES.get("refresh")
+                decoded = jwt.decode(access, settings.SECRET_KEY, algorithms=["HS256"])
+                user = User.objects.get(id=decoded["user_id"])
+            except (
+                jwt.exceptions.DecodeError,
+                User.DoesNotExist,
+                jwt.exceptions.ExpiredSignatureError,
+            ):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            # Session-based auth
+            if not request.user.is_authenticated:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            user = request.user
+
         return Response(UserDetailSerializer(user).data)
 
     def patch(self, request):
@@ -73,6 +86,7 @@ class RegisterView(APIView):
     """
 
     def post(self, request):
+        browser = get_browser(request)
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -81,33 +95,40 @@ class RegisterView(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
 
-        token = RefreshToken.for_user(user)
-        # print(token)
-        response = Response()
+        if browser == "firefox":
+            # JWT auth
+            token = RefreshToken.for_user(user)
+            response = Response()
+            response.data = {
+                "refresh": str(token),
+                "access": str(token.access_token),
+            }
+            response.set_cookie(
+                "access",
+                response.data["access"],
+                max_age=240,
+                secure=True,
+                httponly=True,
+                samesite="None",
+            )
+            response.set_cookie(
+                "refresh",
+                response.data["refresh"],
+                max_age=86400,
+                secure=True,
+                httponly=True,
+                samesite="None",
+            )
+        else:
+            # Session auth for Chrome/Safari
+            login(request, user)
+            response = Response(
+                {
+                    "detail": "Registration successful",
+                    "sessionId": request.session.session_key,
+                }
+            )
 
-        response.data = {
-            "refresh": str(token),
-            "access": str(token.access_token),
-        }
-        response.set_cookie(
-            "access",
-            response.data["access"],
-            max_age=240,  # 4 minutes
-            domain=".aestheitos.pro",
-            secure=True,
-            httponly=True,
-            samesite="None",
-        )
-
-        response.set_cookie(
-            "refresh",
-            response.data["refresh"],
-            max_age=86400,  # 1 day
-            domain=".aestheitos.pro",
-            secure=True,
-            httponly=True,
-            samesite="None",
-        )
         return response
 
 
@@ -118,27 +139,42 @@ class LoginView(TokenObtainPairView):
 
     @extend_schema(request=LoginCustomSerializer, responses=LoginCustomSerializer)
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
+        browser = get_browser(request)
 
-        response.set_cookie(
-            "access",
-            response.data["access"],
-            max_age=240,  # 4 minutes
-            domain=".aestheitos.pro",
-            secure=True,
-            httponly=True,
-            samesite="None",
-        )
+        if browser == "firefox":
+            # JWT auth for Firefox
+            response = super().post(request, *args, **kwargs)
+            response.set_cookie(
+                "access",
+                response.data["access"],
+                max_age=240,
+                secure=True,
+                httponly=True,
+                samesite="None",
+            )
+            response.set_cookie(
+                "refresh",
+                response.data["refresh"],
+                max_age=86400,
+                secure=True,
+                httponly=True,
+                samesite="None",
+            )
+        else:
+            # Session auth for Chrome/Safari
+            user = authenticate(
+                username=request.data["username"], password=request.data["password"]
+            )
+            if not user:
+                return Response({"detail": "Invalid credentials"}, status=401)
 
-        response.set_cookie(
-            "refresh",
-            response.data["refresh"],
-            max_age=86400,  # 1 day
-            domain=".aestheitos.pro",
-            secure=True,
-            httponly=True,
-            samesite="None",
-        )
+            login(request, user)
+            response = Response(
+                data={
+                    "detail": "Login successful",
+                    "sessionId": request.session.session_key,
+                }
+            )
 
         return response
 
@@ -154,7 +190,6 @@ class MyTokenRefreshView(TokenRefreshView):
             "access",
             response.data["access"],
             max_age=240,  # 4 minutes
-            domain=".aestheitos.pro",
             secure=True,
             httponly=True,
             samesite="None",
@@ -163,20 +198,22 @@ class MyTokenRefreshView(TokenRefreshView):
 
 
 class LogoutView(APIView):
-    """
-    Delete cookie in client's browser
-    """
-
     def post(self, request):
-        try:
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-        except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        browser = get_browser(request)
         response = Response()
-        response.delete_cookie("access")
-        response.delete_cookie("refresh")
+
+        if browser == "firefox":
+            try:
+                refresh_token = request.data["refresh"]
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception:
+                pass
+            response.delete_cookie("access")
+            response.delete_cookie("refresh")
+        else:
+            # Session logout
+            logout(request)
         response.data = {"message": "success"}
         return response
 
@@ -601,27 +638,33 @@ class CourseRatingDetail(UpdateAPIMixin, generics.RetrieveUpdateAPIView):
 
 
 class UserView(APIView):
-    """
-    Verifies the refresh token and returns the pair jwt.
-    """
-
     def get(self, request):
-        response = Response()
-        access = request.COOKIES.get("access")
-        refresh = request.COOKIES.get("refresh")
-        if not access and not refresh:
-            raise AuthenticationFailed("Unauthenticated!")
+        browser = get_browser(request)
+        if browser == "firefox":
+            response = Response()
+            access = request.COOKIES.get("access")
+            refresh = request.COOKIES.get("refresh")
+            if not access and not refresh:
+                raise AuthenticationFailed("Unauthenticated!")
 
-        # Verify the refresh token only
-        serializer = TokenVerifySerializer(data={"token": refresh})
-        try:
-            # validate the token
-            serializer.is_valid(raise_exception=True)
-            response.data = {"refresh": refresh, "access": access}
-        except InvalidToken:
-            raise AuthenticationFailed("Invalid Refresh token!")
+            serializer = TokenVerifySerializer(data={"token": refresh})
+            try:
+                serializer.is_valid(raise_exception=True)
+                response.data = {"refresh": refresh, "access": access}
+            except InvalidToken:
+                raise AuthenticationFailed("Invalid Refresh token!")
 
-        return response
+            return response
+        else:
+            if not request.user.is_authenticated:
+                raise AuthenticationFailed("Unauthenticated!")
+            login(request, request.user)
+            return Response(
+                data={
+                    "isAuthenticated": True,
+                    "sessionId": request.session.session_key,
+                }
+            )
 
 
 class UserRetrieveView(generics.RetrieveAPIView):

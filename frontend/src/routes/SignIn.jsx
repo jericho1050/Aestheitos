@@ -44,18 +44,29 @@ export default function SignIn() {
     try {
       setStatus('submitting');
       const data = new FormData(event.currentTarget);
-      const token = await signIn(data);
-      if (token['invalid']) {
+      const response = await signIn(data);
+      if (response['invalid']) {
         setIsInvalidCredentials(true);
-        throw new Error(token);
+        throw new Error(response);
+      }
+      if (!response.access) {
+        // Handle session auth (Chrome/Safari)
+        const sessionId = response.sessionId;
+
+        dispatch({
+          type: 'setSession',
+          sessionId: sessionId,
+          isAuthenticated: true,
+        });
       } else {
+        // handle JWT for Firefox
         dispatch({
           type: 'setToken',
-          access: token['access'],
-          refresh: token['refresh'],
+          access: response['access'],
+          refresh: response['refresh'],
         });
-        navigate('/');
       }
+      navigate('/');
     } catch (error) {
       console.error('An error occured', error);
       setStatus('typing');
@@ -153,28 +164,24 @@ function signIn(data) {
   // User login API authentication
 
   // route "/login"
-  const response = fetch(`${import.meta.env.VITE_API_URL}login`, {
+  return fetch(`${import.meta.env.VITE_API_URL}login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    mode: 'cors',
     body: JSON.stringify({
       username: data.get('username'),
       password: data.get('password'),
     }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 400 || response.status === 401) {
-          return { invalid: 'incorrect username and password' };
-        }
-        throw new Error(response); // may'be another different error
-      }
-      return response.json();
-    })
-    .catch((err) => console.error(err));
-
-  return response;
+  }).then((response) => {
+    if (!response.ok) {
+      return { invalid: true };
+    }
+    return response.json().then((data) => ({
+      ...data,
+      sessionId: data.sessionId,
+      isAuthenticated: true,
+    }));
+  });
 }

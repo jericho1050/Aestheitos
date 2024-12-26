@@ -32,7 +32,6 @@ export default function Blogs() {
   const submit = useSubmit();
   let counter = 0;
   let count = blogs.count;
-  console.log(blogs);
   while (count > 0) {
     counter++;
     count -= 10;

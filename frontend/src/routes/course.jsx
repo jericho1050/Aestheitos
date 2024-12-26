@@ -264,7 +264,7 @@ function CommentReply({ reply, level }) {
   const [status, setStatus] = React.useState('');
   const fetcher = useFetcher();
   const { token } = useAuthToken();
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;;
   const { user } = useLoaderData();
 
   const [last_created_day, last_created_hour, last_created_minute] =
@@ -444,7 +444,7 @@ function Comment({ comment }) {
   const [status, setStatus] = React.useState('');
   const fetcher = useFetcher();
   const { token } = useAuthToken();
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;
   const { user } = useLoaderData();
   const [last_created_day, last_created_hour, last_created_minute] =
     parseCommentDate(comment.comment_date); // using this to parse comment date time
@@ -625,7 +625,7 @@ function CommentTextField({
   const [text, setText] = React.useState(username || '');
   const { user } = useLoaderData();
   const { token } = useAuthToken();
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;
   const navigate = useNavigate();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
@@ -1019,7 +1019,7 @@ export default function Course() {
     useLoaderData();
   const htmlToReactParser = new Parser();
   const { token } = useAuthToken();
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;
   const navigate = useNavigate();
   const isInstructor = user.user_id === course.created_by;
   const isAdmin = user.is_superuser || user.is_staff;

@@ -1,4 +1,5 @@
-import jwt, datetime
+import jwt
+import logging
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
@@ -48,41 +49,54 @@ def user_authentication(request):
 
     return user instance
     """
+    browser: str = get_browser(request)
+    if browser == "firefox":
+        token = request.COOKIES.get("access")
 
-    token = request.COOKIES.get("access")
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
 
-    if not token:
+        try:
+            payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token!")
+
+        user = User.objects.filter(id=payload["user_id"]).first()
+
+        return user
+
+    # probably google chrome or safari, and other browser that are so strict to cookies sigh
+    if not request.user.is_authenticated:
         raise AuthenticationFailed("Unauthenticated!")
-
-    try:
-        payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=["HS256"])
-    except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed("Unauthenticated!")
-    except jwt.InvalidTokenError:
-        raise AuthenticationFailed("Invalid token!")
-
-    user = User.objects.filter(id=payload["user_id"]).first()
-
-    return user
+    return request.user
 
 
 def get_auth_user(request):
     """
     User-look-up function. returns the user instance based on the request.user's JWT payload
     """
-    token = request.COOKIES.get("access")
+    browser: str = get_browser(request)
+    if browser == "firefox":
+        token = request.COOKIES.get("access")
 
-    if not token:
+        if not token:
+            return None
+
+        try:
+            payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=["HS256"])
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            return None
+
+        user = User.objects.filter(id=payload["user_id"]).first()
+
+        return user
+
+    # probably google chrome or safari, and other browser that are so strict to cookies sigh
+    if not request.user.is_authenticated:
         return None
-
-    try:
-        payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=["HS256"])
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        return None
-
-    user = User.objects.filter(id=payload["user_id"]).first()
-
-    return user
+    return request.user
 
 
 def is_valid_ownership(user, course_id):
@@ -161,8 +175,23 @@ class CourseLookupMixin:
         obj = get_object_or_404(queryset, course=self.kwargs["pk"])
         return obj
 
+
 class CourseResultsPagination(PageNumberPagination):
     page_size = 15
 
+
 class BlogResultsPagination(PageNumberPagination):
     page_size = 10
+
+
+logger = logging.getLogger(__name__)
+
+
+def get_browser(request):
+    user_agent = request.META.get("HTTP_USER_AGENT", "").lower()
+    logger.debug(f"User Agent: {user_agent}")
+
+    is_firefox = "firefox" in user_agent
+    logger.debug(f"Is Firefox: {is_firefox}")
+
+    return "firefox" if is_firefox else "other"

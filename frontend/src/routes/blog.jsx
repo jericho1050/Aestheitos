@@ -99,7 +99,7 @@ function CommentReply({ reply, level }) {
   const [status, setStatus] = useState('');
   const fetcher = useFetcher();
   const { token } = useAuthToken();
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;
   const { user } = useLoaderData();
   const [last_created_day, last_created_hour, last_created_minute] =
     parseCommentDate(reply.comment_date); // using this to parse comment date time
@@ -276,7 +276,7 @@ function Comment({ comment }) {
   const [status, setStatus] = useState('');
   const fetcher = useFetcher();
   const { token } = useAuthToken();
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;;
   const { user } = useLoaderData();
   const [last_created_day, last_created_hour, last_created_minute] =
     parseCommentDate(comment.comment_date); // using this to parse comment date time
@@ -431,7 +431,7 @@ function Comment({ comment }) {
 function BlogComments() {
   const { comments } = useLoaderData();
   const [parent] = useAutoAnimate();
-  console.log(comments);
+
   return (
     <List
       ref={parent}
@@ -458,7 +458,7 @@ function CommentTextField({
   const [text, setText] = useState(username || '');
   const { user } = useLoaderData();
   const { token } = useAuthToken();
-  const isAuthenticated = token['access'] !== null;
+  const isAuthenticated = token.isAuthenticated;;
   const navigate = useNavigate();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
