@@ -311,7 +311,7 @@ class Blog(models.Model):
 
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="author")
     title = models.CharField(max_length=300)
-    summary = models.CharField(max_length=150)
+    summary = models.CharField(max_length=300)
     content = models.TextField()
     blog_created = models.DateTimeField(auto_now_add=True)
     blog_updated = models.DateTimeField(auto_now=True)
