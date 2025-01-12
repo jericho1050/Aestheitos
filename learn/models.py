@@ -109,7 +109,7 @@ class Course(models.Model):
         return f"( id: {self.id}) Course: {self.title}. By {self.created_by.username}"
 
     def delete_with_auth_user(self, user):
-        if self.created_by != user:
+        if self.created_by != user and not user.is_superuser:
             raise AuthenticationFailed("Not allowed to delete")
         self.thumbnail.delete(save=False)
         self.delete()

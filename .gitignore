@@ -2,6 +2,6 @@
 .env
 schema.yml
 db.sqlite3
-.DS_store
+.DS_Store
 images/
 staticfiles/
