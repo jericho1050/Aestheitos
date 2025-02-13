@@ -260,14 +260,12 @@ if DEBUG:
 else:
     # Production settings for DigitalOcean Spaces
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    AWS_ACCESS_KEY_ID = os.environ.get("DO_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("DO_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = "aestheitos-media"
-    AWS_S3_ENDPOINT_URL = "https://sgp1.digitaloceanspaces.com"
-    AWS_S3_CUSTOM_DOMAIN = "aestheitos-media.sgp1.cdn.digitaloceanspaces.com"
-    AWS_S3_REGION_NAME = "sgp1"
+    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_CUSTOM_DOMAIN = "d3jg2lxb0biivh.cloudfront.net"
     AWS_LOCATION = "media"
-    AWS_DEFAULT_ACL = "public-read"
+    S_DEFAULT_ACL = "public-read"
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
